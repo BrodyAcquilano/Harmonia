@@ -577,9 +577,9 @@ function dotRadius(M, M1, M2) {
   return 5 + 7 * (M / Math.max(M1, M2))
 }
 
-// Bodies: in-line wobble — the yz plane, looking down the x (λ) axis.
-// Both bodies sit on the line of sight (center x); the wobble Xₙ(t) is drawn
-// vertically along y. They move opposite — when one rises, the other falls —
+// Bodies: in-line wobble — the yz plane, looking down the x (λ) axis, z up.
+// Both bodies sit on the line of sight (center); the wobble Xₙ(t) is drawn
+// vertically along z. They move opposite — when one rises, the other falls —
 // so the smaller (lighter) body visibly crosses in front of the larger one
 // (drawn on top at the crossing).
 function renderInlineWobbleFrame(ctx, canvas, s, tau) {
@@ -619,13 +619,13 @@ function renderInlineWobbleFrame(ctx, canvas, s, tau) {
     ctx.fillStyle = color
     ctx.beginPath(); ctx.arc(midX, py, r, 0, 2 * Math.PI); ctx.fill()
   }
-  // Axes: the yz plane.
+  // Axes: the yz plane, z up.
   ctx.fillStyle = '#715f43'
   ctx.font = '11px "IBM Plex Mono", monospace'
   ctx.textAlign = 'left'
-  ctx.fillText('y', midX + 8, padT + 12)
+  ctx.fillText('z', midX + 8, padT + 12)
   ctx.textAlign = 'right'
-  ctx.fillText('z', padL + pw - 4, midY - 8)
+  ctx.fillText('y', padL + pw - 4, midY - 8)
   ctx.restore()
 }
 
@@ -1384,7 +1384,7 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>In-Line Wobble <span className="eq-note">— plotted · live</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Same wobble, yz plane</span><Tex tex="y_1(t) = X_1(t), \quad y_2(t) = X_2(t) \quad \text{(looking down } x\text{)}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Same wobble, yz plane</span><Tex tex="z_1(t) = X_1(t), \quad z_2(t) = X_2(t) \quad \text{(looking down } x\text{)}" /></div>
                   <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{Bodies superimposed, moving opposite. Lighter crosses in front of heavier.}" /></div>
                 </div>
               </div>

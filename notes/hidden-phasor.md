@@ -1,6 +1,6 @@
 # The Hidden Phasor: Time as Rotation in the Wave Lab
 
-*Companion to "Symmetric Inertia Transfer" and "Lambda Derivation." This note documents the Wave Lab simulation: what the animation means, why there is no time axis, and how each graph is to be read.*
+*Companion to "Symmetric Inertia Transfer" and "Lambda Derivation." This note documents the Wave Lab simulation: what the animation means, where time appears and where it stays hidden, and how each graph is to be read.*
 
 ---
 
@@ -34,11 +34,11 @@ $$
 
 Playing $\tau$ from $0$ to $T$ rotates each phasor through exactly one full cycle: potential to kinetic and back.
 
-## 2. There is no axis for time
+## 2. Where time is — and where it stays hidden
 
-Every graph in the Wave Lab has a spatial horizontal axis ($\lambda_n$). **There is no axis for time.** Time is a hidden dimension — the phasor rotates through it, and we perceive that rotation only as animation: the curves breathing, shifting, exchanging real and imaginary parts frame by frame.
+Most graphs in the Wave Lab have a spatial horizontal axis ($\lambda_n$). On those, time is a hidden dimension — the phasor rotates through it, and we perceive that rotation only as animation: the curves breathing, shifting, exchanging real and imaginary parts frame by frame.
 
-This is deliberate. In the theory, time was never an independent background coordinate. The simulation honors that by refusing to draw it. What we see is the *effect* of time — the phase advancing — without ever plotting time itself.
+The Motion tab adds what the other tabs refuse: graphs with a genuine time axis. "Net Impulse Over Time" and "Wobble Over Time" plot $F_n(t)$ and $X_n(t)$ against $t$ over one full wobble cycle, marked $0$ to $T$. Everywhere else, time stays hidden by design. In the theory, time was never an independent background coordinate; the simulation honors that everywhere except where the point of the graph *is* the trajectory — there, and only there, time gets an axis.
 
 ## 3. Why the spatial part stays fixed
 
@@ -181,27 +181,59 @@ The colors alternate at each crossing, so the graph reads as a ledger: green ban
 
 ### 7.4 Motion — the wobble, in space and time
 
-Seven graphs. The dot diagrams are live (they animate); the time graphs are static snapshots of one full wobble cycle, both directions, with the axis marked in time ($0$ to $T$).
+Seven graphs, in tab order. The dot diagrams are live (they animate); the time graphs are static snapshots of one full wobble cycle, both directions, with the axis marked in time ($0$ to $T$). Two quantities are shared across them — the second integrals of Section 5d:
 
-**"Bodies: Wobble (xy plane)"** — $m_1$ (blue) on the left, $m_2$ (orange) on the right, each sliding up and down as the animation runs. This is the $xy$ plane: $x$ (spatial) runs horizontally between the bodies — it is the $\lambda$ line, the coordinate the rest of the site calls $\lambda_n$ — and the wobble is drawn along $y$, a spatial direction with no special name, just the perpendicular. The horizontal center line is the constant-relative-velocity axis: there is no motion along it, so the wobble is purely perpendicular. The dots move opposite — when one rises, the other falls — and the heavier mass visibly moves less. This is the live instant; the time graphs show the full trajectory it traces.
+$$
+F_n(t) = \int_0^L \big[\mathrm{Im}(\psi_n) - \mathrm{Re}(\psi_n)\big]\,d\lambda_n, \qquad X_n(t) = \int_0^t F_n(t')\,dt'
+$$
 
-**"Bodies: In-Line Wobble (yz plane)"** — the same $X_n(t)$, now looking straight down the $x$ ($\lambda$) axis. Both bodies sit on the line of sight — superimposed at the center — and the wobble is drawn vertically along $y$: when one rises, the other falls. The center cross is the impartial reference point, head-on. Dot size scales with mass, and the lighter body is drawn on top, so at each crossing it visibly passes *in front of* the heavier body, like a transit. The $xy$ view shows the wobble from the side; this one shows it head-on down the line between the bodies.
+$F_n(t)$ is the net released impulse on body $n$ at time $t$ — the whole spatial line collapsed to a single number. $X_n(t)$ is the wobble: body $n$'s displacement from its starting point as a function of time.
 
-Then the wobble is wrapped into circular orbits — two small diagrams side by side, sharing one scale, each footnoted *xy plane* (the orbit is drawn in the same $xy$ plane as the first wobble diagram — the $x$-axis wrapped into a circle):
+**"Bodies: Wobble (xy plane)"** — $m_1$ (blue) on the left, $m_2$ (orange) on the right, each sliding up and down as the animation runs. This is the $xy$ plane: $x$ (spatial) runs horizontally between the bodies — it is the $\lambda$ line, the coordinate the rest of the site calls $\lambda_n$ — and the wobble is drawn along $y$, a spatial direction with no special name, just the perpendicular:
 
-**"Push-Pull Density (spatial)"** — $D(\lambda_n) = [W_1 - J_1] - [W_2 - J_2]$ against the spatial wavelength $\lambda_n$. The local push at each point between the bodies: where body 1's remaining inertia exceeds body 2's, and vice versa. This is the only Motion graph still on the spatial axis.
+$$
+y_1(t) = X_1(t), \qquad y_2(t) = X_2(t)
+$$
+
+The horizontal center line is the constant-relative-velocity axis: there is no motion along it, so the wobble is purely perpendicular. The dots move opposite — when one rises, the other falls — and the heavier mass visibly moves less. This is the live instant; the time graphs show the full trajectory it traces.
+
+**"Bodies: In-Line Wobble (yz plane)"** — the same $X_n(t)$, now looking straight down the $x$ ($\lambda$) axis, $z$ up. Both bodies sit on the line of sight — superimposed at the center — and the wobble is drawn vertically along $z$:
+
+$$
+z_1(t) = X_1(t), \qquad z_2(t) = X_2(t)
+$$
+
+The center cross is the impartial reference point, head-on. Dot size scales with mass, and the lighter body is drawn on top, so at each crossing it visibly passes *in front of* the heavier body, like a transit. The $xy$ view shows the wobble from the side; this one shows it head-on down the line between the bodies.
+
+**"Apparent Relative Motion"** and **"True Motion"** — the wobble wrapped into circular orbits: two small diagrams side by side, sharing one scale, each footnoted *xy plane* (the orbit is drawn in the same $xy$ plane as the first wobble diagram — the $x$-axis wrapped into a circle). The orbital angle runs one full turn per wobble cycle, synced to the same clock as the wobble diagram; radii come from the measured wobble amplitudes:
+
+$$
+\phi(t) = 2\pi t / T, \qquad A_n = \max|X_n(t)|
+$$
+
+$$
+\text{apparent: } \mathbf{r}_1 = 0, \quad \mathbf{r}_2(\phi) = A_2(\cos\phi, \sin\phi)
+$$
+
+$$
+\text{true: } \mathbf{r}_1(\phi) = -A_1(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +A_2(\cos\phi, \sin\phi)
+$$
+
+"Apparent" pins $m_1$ (blue) at the center while $m_2$ (orange) circles it — the naive view, what the Moon's orbit looks like if you assume the Earth doesn't move. We know it is wrong, and it is labeled as such. "True" circles both bodies around the barycenter (marked $+$), on opposite sides: whichever mass is heavier traces the smaller circle — nearer the center, wobbling slightly while the lighter body swings wide. The wobble diagram is the edge-on view of this motion; the orbit diagrams are the face-on view.
+
+A semi-transparent grey line joins the two masses in both orbit diagrams: the direction gravity acts along. In "True Motion" it always passes through the center point, rotating with the bodies — the visual form of the statement that the separation (and hence $\lambda$) does not change: each body moves away fast enough to hold the distance fixed while the line between them turns.
+
+**"Push-Pull Density (spatial)"** — the local push at each point between the bodies, against the spatial wavelength $\lambda_n$:
+
+$$
+D(\lambda_n) = \big[W_1(\lambda_n) - J_1(\lambda_n)\big] - \big[W_2(\lambda_n) - J_2(\lambda_n)\big]
+$$
+
+Where body 1's remaining inertia exceeds body 2's, and vice versa. This is the only Motion graph still on the spatial axis.
 
 **"Net Impulse Over Time"** — $F_1(t)$ (blue) and $F_2(t)$ (orange) against time. The driver: each body's total released impulse as the phasor turns through one cycle.
 
 **"Wobble Over Time"** — $X_1(t)$ (blue) and $X_2(t)$ (orange) against time, same one-cycle window. The trajectories: each body's displacement from its start. Read them against the center line — this is motion relative to the impartial reference point, not merely the relative motion between the bodies.
-
-Then, under the wobble diagram, the wobble is wrapped into circular orbits — two views of the same motion:
-
-**"Apparent Relative Motion"** — $m_2$ (orange) circling a pinned $m_1$ (blue). This is the naive view: what the Moon's orbit looks like if you assume the Earth doesn't move. We know it is wrong, and it is labeled as such.
-
-**"True Motion"** — both bodies circling the barycenter (marked $+$), on opposite sides, with radii taken from the measured wobble amplitudes $A_n = \max|X_n(t)|$. Whichever mass is heavier traces the smaller circle — it sits nearer the center, wobbling slightly while the lighter body swings wide. The orbital angle runs one full turn per wobble cycle, synced to the same clock as the wobble diagram; both diagrams share one scale so they compare directly. The wobble diagram is the edge-on view of this motion; the orbit diagrams are the face-on view.
-
-A semi-transparent grey line joins the two masses in both orbit diagrams: the direction gravity acts along. In "True Motion" it always passes through the center point, rotating with the bodies — the visual form of the statement that the separation (and hence $\lambda$) does not change: each body moves away fast enough to hold the distance fixed while the line between them turns.
 
 ## 8. What this simulation does not show
 
@@ -209,7 +241,7 @@ This note describes the constant-relative-velocity, phasor-rotation simulation o
 
 - The **mass-space view** — the fields plotted directly against $M_1$ and $M_2$ as coordinates, with no $\lambda_n$ and no $\tau$. There the wavenumber varies with the coordinate itself and the waves chirp.
 - The **accelerating case** — relative velocity changing with time, wavelength breathing in and out (the chirp of Section 5b, second half).
-- The **$\Delta X$ readout** — the Motion tab plots $X_1(t)$ and $X_2(t)$ separately, but their difference $\Delta X(t) = X_1 - X_2$ is not yet drawn as its own curve, and the center point is not yet marked as an explicit reference on the graphs.
+- The **$\Delta X$ readout** — the Motion tab plots $X_1(t)$ and $X_2(t)$ separately, but their difference $\Delta X(t) = X_1 - X_2$ is not yet drawn as its own curve.
 - The **$\lambda$-derivation bridge** — the explicit change of variables from $(M_1, M_2)$ to $(\lambda, T)$ via the free-fall construction, which would make the "equivalent but viewed from a different space" claim exact rather than analogical.
 
 Each of these is a future simulation. This one is kept, as is, so the ideas can be revisited as they mature.
