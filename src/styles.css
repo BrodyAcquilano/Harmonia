@@ -263,7 +263,7 @@ input[type="range"]::-moz-range-thumb {
 .note-body h1,
 .note-body h2,
 .note-body h3 {
-  color: var(--text);
+  color: #8db4ff;
   border-bottom: 1px solid var(--border);
   padding-bottom: 6px;
 }
@@ -316,4 +316,77 @@ input[type="range"]::-moz-range-thumb {
 
 .note-body .katex {
   color: var(--text);
+}
+
+/* Display equations: light blue box with border, dark text. */
+.note-body .katex-display {
+  background: #dce9fd;
+  border: 1px solid #9cc3f5;
+  border-radius: 8px;
+  padding: 14px 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.note-body .katex-display > .katex {
+  color: #101828;
+}
+
+/* ---------- wave lab: legend, equations, readout ---------- */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.legend .swatch {
+  display: inline-block;
+  width: 22px;
+  height: 4px;
+  border-radius: 2px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.eq-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0 4px;
+}
+
+.eq-box {
+  background: #dce9fd;
+  border: 1px solid #9cc3f5;
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: #101828;
+  font-size: 15px;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.readout {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+
+.readout > div {
+  display: flex;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.readout dt {
+  color: var(--muted);
+  min-width: 22px;
+}
+
+.readout dd {
+  margin: 0 14px 0 0;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
