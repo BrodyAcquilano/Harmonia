@@ -32,10 +32,11 @@ function frameSetup(ctx, canvas) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   ctx.fillStyle = '#fffdf4'
   ctx.fillRect(0, 0, w, h)
-  const padL = 46
-  const padR = 18
-  const padT = 18
-  const padB = 34
+  const compact = h < 220
+  const padL = 50
+  const padR = 22
+  const padT = compact ? 12 : 20
+  const padB = compact ? 39 : 46
   return { w, h, padL, padR, padT, padB, pw: w - padL - padR, ph: h - padT - padB }
 }
 
@@ -58,13 +59,12 @@ function drawGrid(ctx, g, yMax) {
     ctx.fillText(piLabels[i], X(gx), padT + ph + 16)
   }
   ctx.textAlign = 'right'
-  for (let gy = -Math.ceil(yMax); gy <= Math.ceil(yMax); gy++) {
-    if (gy === 0 || Math.abs(gy) > yMax) continue
+  for (const frac of [-1, -0.5, 0.5, 1]) {
+    const gy = frac * yMax
     ctx.beginPath()
     ctx.moveTo(padL, Y(gy))
     ctx.lineTo(padL + pw, Y(gy))
     ctx.stroke()
-    ctx.fillText(String(gy), padL - 8, Y(gy) + 4)
   }
   ctx.strokeStyle = '#a99760'
   ctx.beginPath()
@@ -517,73 +517,60 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>Trigonometric form <span className="eq-note">— plotted · display units</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide">ψ₁ = A₁e<sup>−βλₙ</sup>cos(k₁λₙ−ω₁M₂τ) + i·A₁e<sup>−βλₙ</sup>sin(k₁λₙ−ω₁M₂τ)</div>
-                  <div className="eq-box wide">ψ₂ = A₂e<sup>−β(L−λₙ)</sup>cos(−k₂λₙ−ω₂M₁τ) + i·A₂e<sup>−β(L−λₙ)</sup>sin(−k₂λₙ−ω₂M₁τ)</div>
-                  <div className="eq-box wide">ψ<sub>s</sub> = ψ₁ + ψ₂</div>
+                  <div className="eq-box wide"><span className="eq-label">ψ₁(M₁,M₂)</span>ψ₁ = A₁e<sup>−βλₙ</sup>cos(k₁λₙ−ω₁M₂τ) + i·A₁e<sup>−βλₙ</sup>sin(k₁λₙ−ω₁M₂τ)</div>
+                  <div className="eq-box wide"><span className="eq-label">ψ₂(M₂,M₁)</span>ψ₂ = A₂e<sup>−β(L−λₙ)</sup>cos(−k₂λₙ−ω₂M₁τ) + i·A₂e<sup>−β(L−λₙ)</sup>sin(−k₂λₙ−ω₂M₁τ)</div>
+                  <div className="eq-box wide"><span className="eq-label">Summed field</span>ψ<sub>s</sub> = ψ₁ + ψ₂</div>
                 </div>
               </div>
 
               <div className="eq-group">
                 <h4>With k, ω, λ substituted <span className="eq-note">— full theory</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide">ψ₁ = √(M₂/(M₁+M₂))·e<sup>−βλₙ</sup>·[cos(2πλₙ/λ₁ − 2πM₁M₂c²τ/h) + i·sin(2πλₙ/λ₁ − 2πM₁M₂c²τ/h)]</div>
-                  <div className="eq-box wide">ψ₂ = √(M₁/(M₁+M₂))·e<sup>−β(L−λₙ)</sup>·[cos(−2πλₙ/λ₂ − 2πM₁M₂c²τ/h) + i·sin(−2πλₙ/λ₂ − 2πM₁M₂c²τ/h)]</div>
+                  <div className="eq-box wide"><span className="eq-label">ψ₁(M₁,M₂)</span>ψ₁ = √(M₂/(M₁+M₂))·e<sup>−βλₙ</sup>·[cos(2πλₙ/λ₁ − 2πM₁M₂c²τ/h) + i·sin(2πλₙ/λ₁ − 2πM₁M₂c²τ/h)]</div>
+                  <div className="eq-box wide"><span className="eq-label">ψ₂(M₂,M₁)</span>ψ₂ = √(M₁/(M₁+M₂))·e<sup>−β(L−λₙ)</sup>·[cos(−2πλₙ/λ₂ − 2πM₁M₂c²τ/h) + i·sin(−2πλₙ/λ₂ − 2πM₁M₂c²τ/h)]</div>
                 </div>
-                <h4 className="eq-sub">With f, T substituted — full theory</h4>
+              </div>
+
+              <div className="eq-group">
+                <h4>With f, T substituted <span className="eq-note">— full theory</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box">f₁ = M₁c²/h, T₁ = 1/f₁</div>
-                  <div className="eq-box">f₂ = M₂c²/h, T₂ = 1/f₂</div>
+                  <div className="eq-box"><span className="eq-label">Body 1</span><span className="eq-line">f₁ = M₁c²/h</span><span className="eq-line">T₁ = 1/f₁</span></div>
+                  <div className="eq-box"><span className="eq-label">Body 2</span><span className="eq-line">f₂ = M₂c²/h</span><span className="eq-line">T₂ = 1/f₂</span></div>
+                  <div className="eq-box wide"><span className="eq-label">ψ₁(M₁,M₂)</span>ψ₁ = √(M₂/(M₁+M₂))·e<sup>−βλₙ</sup>·[cos(2πλₙ/λ₁ − 2πM₂τ/T₁) + i·sin(2πλₙ/λ₁ − 2πM₂τ/T₁)]</div>
+                  <div className="eq-box wide"><span className="eq-label">ψ₂(M₂,M₁)</span>ψ₂ = √(M₁/(M₁+M₂))·e<sup>−β(4π−λₙ)</sup>·[cos(−2πλₙ/λ₂ − 2πM₁τ/T₂) + i·sin(−2πλₙ/λ₂ − 2πM₁τ/T₂)]</div>
                 </div>
-                <div className="eq-list">
-                  <div className="eq-box wide">ψ₁ = √(M₂/(M₁+M₂))·e<sup>−βλₙ</sup>·[cos(2πλₙ/λ₁ − 2πM₂τ/T₁) + i·sin(2πλₙ/λ₁ − 2πM₂τ/T₁)]</div>
-                  <div className="eq-box wide">ψ₂ = √(M₁/(M₁+M₂))·e<sup>−β(4π−λₙ)</sup>·[cos(−2πλₙ/λ₂ − 2πM₁τ/T₂) + i·sin(−2πλₙ/λ₂ − 2πM₁τ/T₂)]</div>
-                </div>
-                <h4 className="eq-sub">Same, with current values — M₁ = {fmt(M1)}, M₂ = {fmt(M2)}</h4>
+                <h4 className="eq-sub">Same, with current values</h4>
                 {T ? (
                   <div className="eq-list">
-                    <div className="eq-box wide">ψ₁ = {fmt(P.A1)}·e<sup>−{fmt(P.beta, 3)}λₙ</sup>·[cos(<CSci z={T.k1} />·λₙ − <Sci v={xTerm} />·τ) + i·sin(<CSci z={T.k1} />·λₙ − <Sci v={xTerm} />·τ)]</div>
-                    <div className="eq-box wide">ψ₂ = {fmt(P.A2)}·e<sup>−{fmt(P.beta, 3)}({X_MAX.toFixed(2)}−λₙ)</sup>·[cos(<CSci z={{ re: -T.k2.re, im: -T.k2.im }} />·λₙ − <Sci v={xTerm} />·τ) + i·sin(<CSci z={{ re: -T.k2.re, im: -T.k2.im }} />·λₙ − <Sci v={xTerm} />·τ)]</div>
+                    <div className="eq-box wide"><span className="eq-label">M₁ = {fmt(M1)} · M₂ = {fmt(M2)}</span>ψ₁ = {fmt(P.A1)}·e<sup>−{fmt(P.beta, 3)}λₙ</sup>·[cos(<CSci z={T.k1} />·λₙ − <Sci v={xTerm} />·τ) + i·sin(<CSci z={T.k1} />·λₙ − <Sci v={xTerm} />·τ)]</div>
+                    <div className="eq-box wide"><span className="eq-label">L = 12.57</span>ψ₂ = {fmt(P.A2)}·e<sup>−{fmt(P.beta, 3)}(12.57−λₙ)</sup>·[cos(<CSci z={{ re: -T.k2.re, im: -T.k2.im }} />·λₙ − <Sci v={xTerm} />·τ) + i·sin(<CSci z={{ re: -T.k2.re, im: -T.k2.im }} />·λₙ − <Sci v={xTerm} />·τ)]</div>
                   </div>
                 ) : (
-                  <p className="hint">λ and k are singular at zero mass — no finite theory values here.</p>
+                  <p className="hint">Singular at zero mass: the full-theory λ and k substitutions are undefined when M₁ or M₂ is 0.</p>
                 )}
               </div>
 
               <div className="eq-group">
                 <h4>Ratios &amp; relationships <span className="eq-note">— paper</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box">ω₂/ω₁ = M₂/M₁</div>
-                  <div className="eq-box">k₂/k₁ = λ₁/λ₂ = −i√(M₂/M₁)</div>
-                  <div className="eq-box">λ₂/λ₁ = i√(M₁/M₂)</div>
-                  <div className="eq-box">M₁λ₁² = −M₂λ₂²</div>
-                </div>
-                <p className="hint">Display-unit consequences of the same structure:</p>
-                <div className="eq-list">
-                  <div className="eq-box">A₁/A₂ = √(M₂/M₁)</div>
-                  <div className="eq-box">A₁² + A₂² = 1</div>
-                  <div className="eq-box">k₁k₂ = ω₁ω₂</div>
-                  <div className="eq-box">k₁A₁ = ω₂A₂</div>
+                  <div className="eq-box wide"><span className="eq-line">ω₂/ω₁ = M₂/M₁</span><span className="eq-line">k₂/k₁ = λ₁/λ₂ = −i√(M₂/M₁)</span><span className="eq-line">λ₂/λ₁ = i√(M₁/M₂)</span><span className="eq-line">M₁λ₁² = −M₂λ₂²</span></div>
+                  <div className="eq-box wide"><span className="eq-label">Display-unit consequences of the same structure</span><span className="eq-line">A₁/A₂ = √(M₂/M₁)</span><span className="eq-line">A₁² + A₂² = 1</span><span className="eq-line">k₁k₂ = ω₁ω₂</span><span className="eq-line">k₁A₁ = ω₂A₂</span></div>
                 </div>
               </div>
 
               <div className="eq-group">
                 <h4>Definitions <span className="eq-note">— paper · β from the display derivation</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box">k₁ = 2π/λ₁</div>
-                  <div className="eq-box">k₂ = 2π/λ₂</div>
-                  <div className="eq-box">ω₁ = 2πf₁ = 2πM₁c²/h</div>
-                  <div className="eq-box">ω₂ = 2πf₂ = 2πM₂c²/h</div>
-                  <div className="eq-box">f₁ = M₁c²/h</div>
-                  <div className="eq-box">f₂ = M₂c²/h</div>
-                  <div className="eq-box">T₁ = 1/f₁ = h/(M₁c²)</div>
-                  <div className="eq-box">T₂ = 1/f₂ = h/(M₂c²)</div>
-                  <div className="eq-box wide">λ₁ = (2Gh²/M₁c⁴)<sup>1/3</sup>·(i√(M₁/M₂) − 1)<sup>−1/3</sup></div>
-                  <div className="eq-box wide">λ₂ = i√(M₁/M₂)·λ₁</div>
-                  <div className="eq-box">β = |M₁−M₂|/(M₁+M₂)</div>
-                  <div className="eq-box">L = 4π <em>(λₙ span)</em></div>
-                  <div className="eq-box">A₁ = √(M₂/(M₁+M₂))</div>
-                  <div className="eq-box">A₂ = √(M₁/(M₁+M₂))</div>
-                  <div className="eq-box wide">λ* = L·M₂/(M₁+M₂) <em>(inversion point — dashed grey line)</em></div>
+                  <div className="eq-box"><span className="eq-label">Wavenumbers</span><span className="eq-line">k₁ = 2π/λ₁</span><span className="eq-line">k₂ = 2π/λ₂</span></div>
+                  <div className="eq-box"><span className="eq-label">Angular frequencies</span><span className="eq-line">ω₁ = 2πf₁ = 2πM₁c²/h</span><span className="eq-line">ω₂ = 2πf₂ = 2πM₂c²/h</span></div>
+                  <div className="eq-box"><span className="eq-label">Frequency 1</span>f₁ = M₁c²/h</div>
+                  <div className="eq-box"><span className="eq-label">Frequency 2</span>f₂ = M₂c²/h</div>
+                  <div className="eq-box"><span className="eq-label">Period 1</span>T₁ = 1/f₁ = h/(M₁c²)</div>
+                  <div className="eq-box"><span className="eq-label">Period 2</span>T₂ = 1/f₂ = h/(M₂c²)</div>
+                  <div className="eq-box wide"><span className="eq-label">Structural wavelengths</span><span className="eq-line">λ₁ = (2Gh²/M₁c⁴)<sup>1/3</sup>·(i√(M₁/M₂) − 1)<sup>−1/3</sup></span><span className="eq-line">λ₂ = i√(M₁/M₂)·λ₁</span></div>
+                  <div className="eq-box"><span className="eq-label">Decay</span>β = |M₁−M₂|/(M₁+M₂)</div>
+                  <div className="eq-box"><span className="eq-label">(λₙ span)</span>L = 4π</div>
+                  <div className="eq-box"><span className="eq-label">Amplitudes</span><span className="eq-line">A₁ = √(M₂/(M₁+M₂))</span><span className="eq-line">A₂ = √(M₁/(M₁+M₂))</span></div>
                 </div>
               </div>
             </>
@@ -592,20 +579,20 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>General form <span className="eq-note">— plotted · display units</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box">∂ψ₁/∂M₁ = ∂/∂M₁[A₁e<sup>−βλₙ</sup>e<sup>i(k₁λₙ−ω₁M₂τ)</sup>]</div>
-                  <div className="eq-box">∂ψ₂/∂M₁ = ∂/∂M₁[A₂e<sup>−β(L−λₙ)</sup>e<sup>i(−k₂λₙ−ω₂M₁τ)</sup>]</div>
-                  <div className="eq-box">∂ψ₁/∂M₂ = ∂/∂M₂[A₁e<sup>−βλₙ</sup>e<sup>i(k₁λₙ−ω₁M₂τ)</sup>]</div>
-                  <div className="eq-box">∂ψ₂/∂M₂ = ∂/∂M₂[A₂e<sup>−β(L−λₙ)</sup>e<sup>i(−k₂λₙ−ω₂M₁τ)</sup>]</div>
+                  <div className="eq-box"><span className="eq-label">M₁ · ψ₁</span>∂ψ₁/∂M₁ = ∂/∂M₁[A₁e<sup>−βλₙ</sup>e<sup>i(k₁λₙ−ω₁M₂τ)</sup>]</div>
+                  <div className="eq-box"><span className="eq-label">M₁ · ψ₂</span>∂ψ₂/∂M₁ = ∂/∂M₁[A₂e<sup>−β(L−λₙ)</sup>e<sup>i(−k₂λₙ−ω₂M₁τ)</sup>]</div>
+                  <div className="eq-box"><span className="eq-label">M₂ · ψ₁</span>∂ψ₁/∂M₂ = ∂/∂M₂[A₁e<sup>−βλₙ</sup>e<sup>i(k₁λₙ−ω₁M₂τ)</sup>]</div>
+                  <div className="eq-box"><span className="eq-label">M₂ · ψ₂</span>∂ψ₂/∂M₂ = ∂/∂M₂[A₂e<sup>−β(L−λₙ)</sup>e<sup>i(−k₂λₙ−ω₂M₁τ)</sup>]</div>
                 </div>
               </div>
 
               <div className="eq-group">
                 <h4>Simplified <span className="eq-note">— fixed-parameter phase gradients</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box">∂ψ₁/∂M₁ = ik₁ψ₁ <em>(solid)</em></div>
-                  <div className="eq-box">∂ψ₂/∂M₁ = −iω₂ψ₂ <em>(solid)</em></div>
-                  <div className="eq-box">∂ψ₁/∂M₂ = −iω₁ψ₁ <em>(dashed)</em></div>
-                  <div className="eq-box">∂ψ₂/∂M₂ = ik₂ψ₂ <em>(dashed)</em></div>
+                  <div className="eq-box"><span className="eq-label">solid</span>∂ψ₁/∂M₁ = ik₁ψ₁</div>
+                  <div className="eq-box"><span className="eq-label">solid</span>∂ψ₂/∂M₁ = −iω₂ψ₂</div>
+                  <div className="eq-box"><span className="eq-label">dashed</span>∂ψ₁/∂M₂ = −iω₁ψ₁</div>
+                  <div className="eq-box"><span className="eq-label">dashed</span>∂ψ₂/∂M₂ = ik₂ψ₂</div>
                 </div>
               </div>
 
@@ -613,39 +600,31 @@ export default function WaveLab() {
                 <h4>With values substituted <span className="eq-note">— full theory · current M₁, M₂</span></h4>
                 {T ? (
                   <div className="eq-list">
-                    <div className="eq-box">∂ψ₁/∂M₁ = i·<CSci z={T.k1} />·ψ₁</div>
-                    <div className="eq-box">∂ψ₂/∂M₁ = −i·<Sci v={T.w2} />·ψ₂</div>
-                    <div className="eq-box">∂ψ₁/∂M₂ = −i·<Sci v={T.w1} />·ψ₁</div>
-                    <div className="eq-box">∂ψ₂/∂M₂ = i·<CSci z={T.k2} />·ψ₂</div>
+                    <div className="eq-box wide"><span className="eq-label">M₁ = {fmt(M1)} · M₂ = {fmt(M2)}</span><span className="eq-line">∂ψ₁/∂M₁ = i·[<CSci z={T.k1} />]·ψ₁</span><span className="eq-line">∂ψ₂/∂M₁ = −i·[<Sci v={T.w2} />]·ψ₂</span><span className="eq-line">∂ψ₁/∂M₂ = −i·[<Sci v={T.w1} />]·ψ₁</span><span className="eq-line">∂ψ₂/∂M₂ = i·[<CSci z={T.k2} />]·ψ₂</span></div>
                   </div>
                 ) : (
-                  <p className="hint">k, ω are singular at zero mass — no finite theory values here.</p>
+                  <p className="hint">Singular at zero mass: the full-theory λ and k substitutions are undefined when M₁ or M₂ is 0.</p>
                 )}
               </div>
 
               <div className="eq-group">
                 <h4>Relations</h4>
                 <div className="eq-list">
-                  <div className="eq-box">∂ψ₁/∂M₁ + ∂ψ₂/∂M₁ = 0</div>
-                  <div className="eq-box">∂ψ₁/∂M₂ + ∂ψ₂/∂M₂ = 0</div>
-                  <div className="eq-box">k₁ψ₁ = ω₂ψ₂</div>
-                  <div className="eq-box">k₂ψ₂ = ω₁ψ₁</div>
-                  <div className="eq-box wide">dψ<sub>s</sub> = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁ + ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</div>
+                  <div className="eq-box"><span className="eq-label">Coordinate conservation</span><span className="eq-line">∂ψ₁/∂M₁ + ∂ψ₂/∂M₁ = 0</span><span className="eq-line">∂ψ₁/∂M₂ + ∂ψ₂/∂M₂ = 0</span></div>
+                  <div className="eq-box"><span className="eq-label">Cross-field balance</span><span className="eq-line">k₁ψ₁ = ω₂ψ₂</span><span className="eq-line">k₂ψ₂ = ω₁ψ₁</span></div>
+                  <div className="eq-box wide"><span className="eq-label">Coordinate half-waves</span><span className="eq-line">dM₁ half-wave = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁</span><span className="eq-line">dM₂ half-wave = ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</span></div>
+                  <div className="eq-box wide"><span className="eq-label">Total differential</span>dψ<sub>s</sub> = dM₁ half-wave + dM₂ half-wave = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁ + ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</div>
                 </div>
               </div>
 
               <div className="eq-group">
                 <h4>Variables <span className="eq-note">— defined in the gravity tab</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box">k₁ = 2π/λ₁</div>
-                  <div className="eq-box">k₂ = 2π/λ₂</div>
-                  <div className="eq-box">ω₁ = 2πM₁c²/h</div>
-                  <div className="eq-box">ω₂ = 2πM₂c²/h</div>
-                  <div className="eq-box wide">λ₁ = (2Gh²/M₁c⁴)<sup>1/3</sup>·(i√(M₁/M₂) − 1)<sup>−1/3</sup></div>
-                  <div className="eq-box wide">λ₂ = i√(M₁/M₂)·λ₁</div>
-                  <div className="eq-box">β = |M₁−M₂|/(M₁+M₂)</div>
-                  <div className="eq-box">A₁ = √(M₂/(M₁+M₂))</div>
-                  <div className="eq-box">A₂ = √(M₁/(M₁+M₂))</div>
+                  <div className="eq-box"><span className="eq-label">Wavenumbers</span><span className="eq-line">k₁ = 2π/λ₁</span><span className="eq-line">k₂ = 2π/λ₂</span></div>
+                  <div className="eq-box"><span className="eq-label">Angular frequencies</span><span className="eq-line">ω₁ = 2πM₁c²/h</span><span className="eq-line">ω₂ = 2πM₂c²/h</span></div>
+                  <div className="eq-box wide"><span className="eq-label">Structural wavelengths</span><span className="eq-line">λ₁ = (2Gh²/M₁c⁴)<sup>1/3</sup>·(i√(M₁/M₂) − 1)<sup>−1/3</sup></span><span className="eq-line">λ₂ = i√(M₁/M₂)·(2Gh²/M₁c⁴)<sup>1/3</sup>·(i√(M₁/M₂) − 1)<sup>−1/3</sup></span></div>
+                  <div className="eq-box"><span className="eq-label">Decay</span>β = |M₁−M₂|/(M₁+M₂)</div>
+                  <div className="eq-box"><span className="eq-label">Amplitudes</span><span className="eq-line">A₁ = √(M₂/(M₁+M₂))</span><span className="eq-line">A₂ = √(M₁/(M₁+M₂))</span></div>
                 </div>
               </div>
             </>
