@@ -704,7 +704,10 @@ function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
 
 // Motion tab, second graph: local push-pull D(λₙ) = [W₁−J₁] − [W₂−J₂].
 // The integrand of the displacement — net push in +λₙ at each point.
-function renderPushPullFrame(ctx, canvas, s, tau) {
+// Push-pull density: the local remaining-inertia difference between the bodies.
+//   P₁(λₙ) = W₁(λₙ) − J₁(λₙ),   P₂(λₙ) = W₂(λₙ) − J₂(λₙ),   D(λₙ) = P₁ − P₂.
+// Mode: 'parts' (P₁, P₂), 'diff' (D), 'all' (all three).
+function renderPushPullFrame(ctx, canvas, s, tau, mode) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
   const N = 200
@@ -730,15 +733,51 @@ function renderPushPullFrame(ctx, canvas, s, tau) {
     prevX = x
     prevW1 = p1.re; prevW2 = p2.re; prevJ1 = p1.im; prevJ2 = p2.im
   }
-  const dArr = work1.map((w, i) => (w - imp1[i]) - (work2[i] - imp2[i]))
-  const yMax = Math.max(Math.abs(Math.min(...dArr)), Math.abs(Math.max(...dArr)) * 1.15, 0.1)
+  const p1Arr = work1.map((w, i) => w - imp1[i])
+  const p2Arr = work2.map((w, i) => w - imp2[i])
+  const dArr = p1Arr.map((p, i) => p - p2Arr[i])
+  const showParts = mode === 'parts' || mode === 'all'
+  const showDiff = mode === 'diff' || mode === 'all'
+  const shown = [...(showParts ? [...p1Arr, ...p2Arr] : []), ...(showDiff ? dArr : [])]
+  const yMax = Math.max(Math.abs(Math.min(...shown)), Math.abs(Math.max(...shown)) * 1.15, 0.1)
   const { X, Y } = drawGrid(ctx, g, yMax)
-  const interp = (x) => {
+  const interp = (arr) => (x) => {
     const idx = Math.min(Math.floor((x / X_MAX) * N), N - 1)
     const t = ((x / X_MAX) * N) - idx
-    return dArr[idx] * (1 - t) + dArr[idx + 1] * t
+    return arr[idx] * (1 - t) + arr[idx + 1] * t
   }
-  trace(ctx, X, Y, interp, '#3a2c1a', 2.5, [])
+  if (showParts) {
+    trace(ctx, X, Y, interp(p1Arr), C1, 2.5, [])
+    trace(ctx, X, Y, interp(p2Arr), C2, 2.5, [])
+  }
+  if (showDiff) trace(ctx, X, Y, interp(dArr), '#3a2c1a', 2.5, [])
+}
+
+// Temporal push-pull density: the same remaining-inertia difference, the whole
+// spatial line collapsed and tracked through time. Since Fₙ(t) = Jₙ(L,t) − Wₙ(L,t),
+//   Pₙ(t) = Wₙ(L,t) − Jₙ(L,t) = −Fₙ(t),   T(t) = P₁(t) − P₂(t) = F₂(t) − F₁(t).
+function renderPushPullTimeFrame(ctx, canvas, s, mode) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  const { tauMax, NT, f1, f2 } = wobbleCurves(s.M1, s.M2, P)
+  const p1 = f1.map((v) => -v)
+  const p2 = f2.map((v) => -v)
+  const tArr = p1.map((v, i) => v - p2[i])
+  const showParts = mode === 'parts' || mode === 'all'
+  const showDiff = mode === 'diff' || mode === 'all'
+  const shown = [...(showParts ? [...p1, ...p2] : []), ...(showDiff ? tArr : [])]
+  const yMax = Math.max(Math.abs(Math.min(...shown)), Math.abs(Math.max(...shown)) * 1.15, 0.1)
+  const { X, Y } = drawTimeGrid(ctx, g, yMax, tauMax)
+  const interp = (arr) => (t) => {
+    const idx = Math.min(Math.floor((t / tauMax) * NT), NT - 1)
+    const f = ((t / tauMax) * NT) - idx
+    return arr[idx] * (1 - f) + arr[idx + 1] * f
+  }
+  if (showParts) {
+    trace(ctx, X, Y, interp(p1), C1, 2.5, [])
+    trace(ctx, X, Y, interp(p2), C2, 2.5, [])
+  }
+  if (showDiff) trace(ctx, X, Y, interp(tArr), '#3a2c1a', 2.5, [])
 }
 
 // Legacy wrapper for backward compatibility
@@ -806,6 +845,7 @@ export default function WaveLab() {
   const [tau, setTau] = useState(0)
   const [showSum, setShowSum] = useState(true)
   const [waveDisplay, setWaveDisplay] = useState('all')
+  const [ppDisplay, setPpDisplay] = useState('diff') // push-pull: 'parts' | 'diff' | 'all'
   const [speedMode, setSpeedMode] = useState('slow') // 'slow': 0–slowMax, 'fast': 1–2.5
   const [slowMax, setSlowMax] = useState(1)
   const [orbitZoom, setOrbitZoom] = useState(1) // True Motion zoom, 1 = fit
@@ -849,9 +889,10 @@ export default function WaveLab() {
   const canvasOrbitApparentRef = useRef(null)
   const canvasOrbitTrueRef = useRef(null)
   const canvasPushPullRef = useRef(null)
+  const canvasPushPullTimeRef = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
-  stateRef.current = { subtab, M1, M2, playing, speed, showSum, waveDisplay, orbitZoom }
+  stateRef.current = { subtab, M1, M2, playing, speed, showSum, waveDisplay, ppDisplay, orbitZoom }
 
   useEffect(() => {
     let raf
@@ -900,7 +941,9 @@ export default function WaveLab() {
         const ot = canvasOrbitTrueRef.current
         if (ot) renderOrbitFrame(ot.getContext('2d'), ot, s, tauRef.current, true)
         const pp = canvasPushPullRef.current
-        if (pp) renderPushPullFrame(pp.getContext('2d'), pp, s, tauRef.current)
+        if (pp) renderPushPullFrame(pp.getContext('2d'), pp, s, tauRef.current, s.ppDisplay)
+        const ppt = canvasPushPullTimeRef.current
+        if (ppt) renderPushPullTimeFrame(ppt.getContext('2d'), ppt, s, s.ppDisplay)
       }
       raf = requestAnimationFrame(draw)
     }
@@ -1180,6 +1223,56 @@ export default function WaveLab() {
           <>
           <div className="graph-box">
             <div className="graph-title-row">
+              <h2 className="graph-title">Push-Pull Density (spatial)</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                {(ppDisplay === 'parts' || ppDisplay === 'all') && (
+                  <>
+                    <span><i className="swatch" style={{ background: C1 }} /><Tex tex="P_1(\lambda_n)" /></span>
+                    <span><i className="swatch" style={{ background: C2 }} /><Tex tex="P_2(\lambda_n)" /></span>
+                  </>
+                )}
+                {(ppDisplay === 'diff' || ppDisplay === 'all') && <span><i className="swatch" style={{ background: '#3a2c1a' }} /><Tex tex="D(\lambda_n) = P_1 - P_2" /></span>}
+              </div>
+              <label className="check-row graph-check">
+                Display
+                <select value={ppDisplay} onChange={(e) => setPpDisplay(e.target.value)}>
+                  <option value="parts">P₁, P₂</option>
+                  <option value="diff">P₁ − P₂</option>
+                  <option value="all">P₁, P₂, P₁ − P₂</option>
+                </select>
+              </label>
+            </div>
+            <canvas ref={canvasPushPullRef} className="wave-canvas" />
+          </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Push-Pull Density (temporal)</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                {(ppDisplay === 'parts' || ppDisplay === 'all') && (
+                  <>
+                    <span><i className="swatch" style={{ background: C1 }} /><Tex tex="P_1(t)" /></span>
+                    <span><i className="swatch" style={{ background: C2 }} /><Tex tex="P_2(t)" /></span>
+                  </>
+                )}
+                {(ppDisplay === 'diff' || ppDisplay === 'all') && <span><i className="swatch" style={{ background: '#3a2c1a' }} /><Tex tex="T(t) = P_1 - P_2" /></span>}
+              </div>
+              <label className="check-row graph-check">
+                Display
+                <select value={ppDisplay} onChange={(e) => setPpDisplay(e.target.value)}>
+                  <option value="parts">P₁, P₂</option>
+                  <option value="diff">P₁ − P₂</option>
+                  <option value="all">P₁, P₂, P₁ − P₂</option>
+                </select>
+              </label>
+            </div>
+            <canvas ref={canvasPushPullTimeRef} className="wave-canvas" />
+          </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
               <h2 className="graph-title">Net Impulse Over Time</h2>
             </div>
             <div className="graph-meta-row">
@@ -1274,17 +1367,6 @@ export default function WaveLab() {
             <p className="placeholder-note">Both masses are at zero — there is nothing to orbit. Raise M₁ or M₂ above zero and the orbit diagrams will come back.</p>
           </div>
           )}
-          <div className="graph-box">
-            <div className="graph-title-row">
-              <h2 className="graph-title">Push-Pull Density (spatial)</h2>
-            </div>
-            <div className="graph-meta-row">
-              <div className="legend">
-                <span><Tex tex="D(\lambda_n) = [W_1 - J_1] - [W_2 - J_2]" /></span>
-              </div>
-            </div>
-            <canvas ref={canvasPushPullRef} className="wave-canvas" />
-          </div>
           </>
         ) : null}
 
@@ -1422,6 +1504,16 @@ export default function WaveLab() {
           ) : subtab === 'motion' ? (
             <>
               <div className="eq-group">
+                <h4>Push-Pull Density <span className="eq-note">— plotted · spatial + temporal</span></h4>
+                <div className="eq-list">
+                  <div className="eq-box wide"><span className="eq-label">Remaining inertia per body (spatial)</span><Tex tex="P_1(\lambda_n) = W_1(\lambda_n) - J_1(\lambda_n), \quad P_2(\lambda_n) = W_2(\lambda_n) - J_2(\lambda_n)" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Local push-pull (spatial)</span><Tex tex="D(\lambda_n) = P_1(\lambda_n) - P_2(\lambda_n)" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Remaining inertia per body (temporal)</span><Tex tex="P_n(t) = W_n(L, t) - J_n(L, t) = -F_n(t)" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Local push-pull (temporal)</span><Tex tex="T(t) = P_1(t) - P_2(t) = F_2(t) - F_1(t)" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{Where body 1's remaining inertia exceeds body 2's, and vice versa.}" /></div>
+                </div>
+              </div>
+              <div className="eq-group">
                 <h4>Wobble Over Time <span className="eq-note">— plotted · static snapshot, one cycle</span></h4>
                 <div className="eq-list">
                   <div className="eq-box wide"><span className="eq-label">Net impulse at time t</span><Tex tex="F_n(t) = J_n(L, t) - W_n(L, t) = \int_0^L [\mathrm{Im}(\psi_n) - \mathrm{Re}(\psi_n)] \, d\lambda_n" /></div>
@@ -1452,12 +1544,6 @@ export default function WaveLab() {
                   <div className="eq-box wide"><span className="eq-label">Apparent: m₁ pinned</span><Tex tex="\mathbf{r}_2(\phi) = L(\cos\phi, \sin\phi) \quad \text{— full separation}" /></div>
                   <div className="eq-box wide"><span className="eq-label">True: separation split at λ*</span><Tex tex="\mathbf{r}_1(\phi) = -\lambda^*(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +(L-\lambda^*)(\cos\phi, \sin\phi)" /></div>
                   <div className="eq-box wide"><span className="eq-label">Force direction</span><Tex tex="\text{along the line joining the masses (grey)}" /></div>
-                </div>
-              </div>
-              <div className="eq-group">
-                <h4>Push-Pull Density <span className="eq-note">— plotted · spatial</span></h4>
-                <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Local push-pull</span><Tex tex="D(\lambda_n) = [W_1(\lambda_n) - J_1(\lambda_n)] - [W_2(\lambda_n) - J_2(\lambda_n)]" /></div>
                 </div>
               </div>
             </>

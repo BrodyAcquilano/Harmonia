@@ -181,13 +181,27 @@ The colors alternate at each crossing, so the graph reads as a ledger: green ban
 
 ### 7.4 Motion — the wobble, in space and time
 
-Seven graphs, in tab order — and the order is the methodology. The time graphs come first: you would look at the integrals to find the wobble projection. Then the live wobble projections. Then the axis is wrapped around the center, the separation split at the balance point, and you get the true motion. The dot diagrams are live (they animate); the time graphs are static snapshots of one full wobble cycle, both directions, with the axis marked in time ($0$ to $T$). Two quantities are shared across them — the second integrals of Section 5d:
+Eight graphs, in tab order — and the order is the methodology. It starts from the push-pull density: the local push at each point between the bodies, which is where the whole definition began. Integrate over space and you get each body's net impulse $F_n(t)$; integrate that over time — one full period — and you get the wobble $X_n(t)$. Two integrations, and you are back to motion from the thing you started with: a definite integral over one period recovering the trajectory. Then the live wobble projections, then the axis wrapped around the center, the separation split at the balance point, and you get the true motion. The dot diagrams are live (they animate); the time graphs are static snapshots of one full wobble cycle, both directions, with the axis marked in time ($0$ to $T$). Four quantities are shared across them:
+
+$$
+P_n(\lambda_n) = W_n(\lambda_n) - J_n(\lambda_n), \qquad D(\lambda_n) = P_1(\lambda_n) - P_2(\lambda_n)
+$$
 
 $$
 F_n(t) = \int_0^L \big[\mathrm{Im}(\psi_n) - \mathrm{Re}(\psi_n)\big]\,d\lambda_n, \qquad X_n(t) = \int_0^t F_n(t')\,dt'
 $$
 
-$F_n(t)$ is the net released impulse on body $n$ at time $t$ — the whole spatial line collapsed to a single number. $X_n(t)$ is the wobble: body $n$'s displacement from its starting point as a function of time.
+$P_n(\lambda_n)$ is body $n$'s remaining inertia at the point $\lambda_n$ — what is stored minus what has been released — and $D(\lambda_n)$ is the local push: where body 1's remaining inertia exceeds body 2's, and vice versa. $F_n(t)$ is the net released impulse on body $n$ at time $t$ — the whole spatial line collapsed to a single number. $X_n(t)$ is the wobble: body $n$'s displacement from its starting point as a function of time.
+
+**"Push-Pull Density (spatial)"** — $D(\lambda_n)$ against the spatial wavelength $\lambda_n$: the starting definition, plotted first. The Display dropdown also shows the two parts separately — $P_1(\lambda_n)$ (blue) and $P_2(\lambda_n)$ (orange) — or all three together.
+
+**"Push-Pull Density (temporal)"** — the same difference, the whole spatial line collapsed and tracked through time. Since $F_n(t) = J_n(L,t) - W_n(L,t)$, each body's remaining inertia at time $t$ is $P_n(t) = -F_n(t)$, and the temporal push-pull is their difference:
+
+$$
+T(t) = P_1(t) - P_2(t) = F_2(t) - F_1(t)
+$$
+
+Same Display dropdown: the two parts, the difference, or all three. Where the spatial graph shows *where* body 1 pushes harder than body 2, this one shows *when*.
 
 **"Net Impulse Over Time"** — $F_1(t)$ (blue) and $F_2(t)$ (orange) against time. The driver: each body's total released impulse as the phasor turns through one cycle.
 
@@ -227,14 +241,6 @@ $$
 
 A semi-transparent grey line joins the two masses in both orbit diagrams: the direction gravity acts along. In "True Motion" it always passes through the center point, rotating with the bodies — the visual form of the statement that the separation (and hence $\lambda$) does not change: each body moves away fast enough to hold the distance fixed while the line between them turns.
 
-**"Push-Pull Density (spatial)"** — the local push at each point between the bodies, against the spatial wavelength $\lambda_n$:
-
-$$
-D(\lambda_n) = \big[W_1(\lambda_n) - J_1(\lambda_n)\big] - \big[W_2(\lambda_n) - J_2(\lambda_n)\big]
-$$
-
-Where body 1's remaining inertia exceeds body 2's, and vice versa. This is the only Motion graph still on the spatial axis.
-
 ## 8. What this simulation does not show
 
 This note describes the constant-relative-velocity, phasor-rotation simulation only. It does not show:
@@ -254,7 +260,7 @@ The picture, stated plainly. The Earth moves forward and the Earth pulls the Moo
 
 Then the time that got added in: the **hidden time phasor**. It cycles the phase of the wave, and as the phase cycles, the energy-over-space distribution changes. That is all that changes. **All the masses stay constant; nothing changes except the energy at each point in between the two masses.** The phasor turns; the energy redistributes; the bodies stay what they are.
 
-Integrate once over space and you get work and impulse — the energy accounts, $W_n$ and $J_n$. Then, at each instant, collapse the whole spatial line to a single number — the net released impulse $F_n(t) = J_n(L,t) - W_n(L,t)$ — and integrate *that* over time: $X_n(t) = \int_0^t F_n(t')\,dt'$. That is the second integral: not over space but over time, flipped to $J_n - W_n$ because motion comes from what is released, not what is stored. It gives each body's wobble as a trajectory, both directions. It is plotted in the Motion tab as seven graphs: the static one-cycle snapshots of net impulse and displacement over time, the live in-line wobble projection (the same motion looking down the $\lambda$ axis, $yz$ plane — the lighter body crossing in front), the apparent wobble (the $xy$-plane projection, the two dots), the apparent and true orbit diagrams (the wobble wrapped into circles — the naive fixed-center view beside the barycentric one), and the spatial push-pull density.
+Integrate once over space and you get work and impulse — the energy accounts, $W_n$ and $J_n$. Then, at each instant, collapse the whole spatial line to a single number — the net released impulse $F_n(t) = J_n(L,t) - W_n(L,t)$ — and integrate *that* over time: $X_n(t) = \int_0^t F_n(t')\,dt'$. That is the second integral: not over space but over time, flipped to $J_n - W_n$ because motion comes from what is released, not what is stored. It gives each body's wobble as a trajectory, both directions. It is plotted in the Motion tab as eight graphs: the spatial and temporal push-pull densities (the starting definition, recovered after two integrations), the static one-cycle snapshots of net impulse and displacement over time, the live in-line wobble projection (the same motion looking down the $\lambda$ axis, $yz$ plane — the lighter body crossing in front), the apparent wobble (the $xy$-plane projection, the two dots), and the apparent and true orbit diagrams (the wobble wrapped into circles — the naive fixed-center view beside the barycentric one).
 
 But here is the part that matters. If you treated the distance between the two bodies as a single variable, you would only ever know their *relative* motion — how far apart they are, how fast the gap opens and closes. The phasor gives you more than that. The phasor is the hidden time dimension; the second integral is taken over time, and that gives us motion in the time dimension we know. So we learn not only how much their motion was relative to each other, but **how much the motion was relative to a center point** — a third, impartial reference point that belongs to neither body. Not just "the Moon falls toward the Earth," but how far the Moon wobbles one way from center and how far the Earth wobbles the other, each pulled by gravity, each measured against something neutral. That is new information. The relative motion was always visible; the wobble against center was hidden until the second integral.
 
