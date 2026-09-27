@@ -315,15 +315,19 @@ export default function WaveLab() {
       <div className="lab-controls">
         <div className="control-group">
           <h3>View</h3>
-          <div className="btn-row">
+          <div className="subtabs" role="tablist" aria-label="View">
             <button
-              className={subtab === 'gravity' ? 'active' : ''}
+              className="subtab"
+              role="tab"
+              aria-selected={subtab === 'gravity'}
               onClick={() => setSubtab('gravity')}
             >
               Gravity waves
             </button>
             <button
-              className={subtab === 'deriv' ? 'active' : ''}
+              className="subtab"
+              role="tab"
+              aria-selected={subtab === 'deriv'}
               onClick={() => setSubtab('deriv')}
             >
               Derivatives
@@ -347,14 +351,20 @@ export default function WaveLab() {
 
         <div className="control-group">
           <h3>Derived from M₁, M₂</h3>
-          <dl className="readout">
-            <div><dt>k₁</dt><dd>{fmt(P.k1)}</dd><dt>k₂</dt><dd>{fmt(P.k2)}</dd></div>
-            <div><dt>ω₁</dt><dd>{fmt(P.w1)}</dd><dt>ω₂</dt><dd>{fmt(P.w2)}</dd></div>
-            <div><dt>A₁</dt><dd>{fmt(P.A1)}</dd><dt>A₂</dt><dd>{fmt(P.A2)}</dd></div>
-            <div><dt>A₁²</dt><dd>{fmt(P.A1 * P.A1)}</dd><dt>A₂²</dt><dd>{fmt(P.A2 * P.A2)}</dd></div>
-            <div><dt>β</dt><dd>{fmt(P.beta, 3)}</dd><dt>ΣA²</dt><dd>{fmt(P.A1 * P.A1 + P.A2 * P.A2)}</dd></div>
-            <div><dt>|λ₁|</dt><dd>{lam ? `${sci(cAbs(lam.l1))} m` : '—'}</dd><dt>|λ₂|</dt><dd>{lam ? `${sci(cAbs(lam.l2))} m` : '—'}</dd></div>
-          </dl>
+          <div className="derived-grid">
+            <div className="derived-box"><span>k₁</span><b>{fmt(P.k1)}</b></div>
+            <div className="derived-box"><span>k₂</span><b>{fmt(P.k2)}</b></div>
+            <div className="derived-box"><span>ω₁</span><b>{fmt(P.w1)}</b></div>
+            <div className="derived-box"><span>ω₂</span><b>{fmt(P.w2)}</b></div>
+            <div className="derived-box"><span>A₁</span><b>{fmt(P.A1)}</b></div>
+            <div className="derived-box"><span>A₂</span><b>{fmt(P.A2)}</b></div>
+            <div className="derived-box"><span>A₁²</span><b>{fmt(P.A1 * P.A1)}</b></div>
+            <div className="derived-box"><span>A₂²</span><b>{fmt(P.A2 * P.A2)}</b></div>
+            <div className="derived-box"><span>β</span><b>{fmt(P.beta, 3)}</b></div>
+            <div className="derived-box"><span>ΣA²</span><b>{fmt(P.A1 * P.A1 + P.A2 * P.A2)}</b></div>
+            <div className="derived-box"><span>|λ₁|</span><b>{lam ? `${sci(cAbs(lam.l1))} m` : '—'}</b></div>
+            <div className="derived-box"><span>|λ₂|</span><b>{lam ? `${sci(cAbs(lam.l2))} m` : '—'}</b></div>
+          </div>
         </div>
       </div>
       </div>
