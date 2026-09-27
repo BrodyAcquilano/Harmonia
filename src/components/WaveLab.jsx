@@ -118,8 +118,8 @@ function renderFrame(ctx, canvas, s, tau) {
     const grad = (which, key) => (x) => dPsi_dM(which, x, tau, P, s.M1, s.M2)[key].re
     curves = [
       { fn: grad(1, 'd1'), color: C1, width: 1.75, dash: [] },
-      { fn: grad(2, 'd1'), color: C1, width: 1.75, dash: [6, 4] },
-      { fn: grad(1, 'd2'), color: C2, width: 1.75, dash: [] },
+      { fn: grad(1, 'd2'), color: C1, width: 1.75, dash: [6, 4] },
+      { fn: grad(2, 'd1'), color: C2, width: 1.75, dash: [] },
       { fn: grad(2, 'd2'), color: C2, width: 1.75, dash: [6, 4] },
     ]
   }
@@ -354,9 +354,13 @@ export default function WaveLab() {
 
       <div className="lab-stage">
         <div className="transport transport-bar">
-          <h3 className="transport-title">Animation settings</h3>
+          <div className="transport-title-row">
+            <h3 className="transport-title">Animation settings</h3>
+            <span className="time-readout">τ = {tau.toFixed(2)}</span>
+          </div>
           <div className="transport-bar-row">
-            <div className="transport-speed">
+            <label className="speed-mode-row">
+              <span>Speed range</span>
               <select
                 className="speed-mode"
                 value={speedMode}
@@ -374,22 +378,7 @@ export default function WaveLab() {
                 <option value="slow">Slow down</option>
                 <option value="fast">Speed up</option>
               </select>
-              {speedMode === 'slow' ? (
-                <div className="speed-col">
-                  <Slider label="speed" value={Math.sqrt(Math.min(speed, slowMax) / slowMax)} min={0} max={1} step={0.005}
-                    format={() => fmtSpeed(speed)}
-                    onChange={(p) => setSpeed(slowMax * p * p)} />
-                  <button className="recalc-btn" onClick={() => recalcSlow(M1, M2)}>
-                    Recalculate slider range
-                  </button>
-                </div>
-              ) : (
-                <Slider label="speed" value={Math.min(Math.max(speed, 1), 2.5)} min={1} max={2.5} step={0.1}
-                  format={() => fmtSpeed(speed)}
-                  onChange={setSpeed} />
-              )}
-            </div>
-            <span className="time-readout">τ = {tau.toFixed(2)}</span>
+            </label>
             <div className="transport-btn-row">
               <button className="round-btn" onClick={handlePlayPause} aria-label={playing ? 'Pause' : 'Play'}>
                 {playing ? '❚❚' : '▶'}
@@ -406,6 +395,24 @@ export default function WaveLab() {
               </button>
             </div>
           </div>
+          <div className="transport-slider-row">
+            {speedMode === 'slow' ? (
+              <Slider label="speed" value={Math.sqrt(Math.min(speed, slowMax) / slowMax)} min={0} max={1} step={0.005}
+                format={() => fmtSpeed(speed)}
+                onChange={(p) => setSpeed(slowMax * p * p)} />
+            ) : (
+              <Slider label="speed" value={Math.min(Math.max(speed, 1), 2.5)} min={1} max={2.5} step={0.1}
+                format={() => fmtSpeed(speed)}
+                onChange={setSpeed} />
+            )}
+          </div>
+          {speedMode === 'slow' && (
+            <div className="transport-recalc-row">
+              <button className="recalc-btn" onClick={() => recalcSlow(M1, M2)}>
+                Recalculate slider range
+              </button>
+            </div>
+          )}
         </div>
         {subtab === 'gravity' ? (
           <div className="graph-box">

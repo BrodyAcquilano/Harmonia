@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Pirata+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap');
 
 :root {
   --bg: #faf4d7;        /* post-it off-white yellow */
@@ -18,6 +18,7 @@
 
 body {
   margin: 0;
+  overflow-x: clip;
   background: var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -37,7 +38,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px max(20px, calc(50vw - 580px)) 14px;
+  padding: 18px 20px 14px;
   margin: 0 calc(50% - 50vw) 24px;
   background: var(--brown);
   border-bottom: 3px solid var(--gold);
@@ -45,7 +46,7 @@ body {
 
 .header h1 {
   margin: 0;
-  font-family: 'Pirata One', 'Old English Text MT', 'UnifrakturMaguntia', cursive;
+  font-family: 'Pinyon Script', 'Snell Roundhand', cursive;
   font-weight: 400;
   font-size: 2.6rem;
   letter-spacing: 0.02em;
@@ -308,32 +309,54 @@ body {
 .transport-bar {
   flex-direction: column;
   align-items: stretch;
+  gap: 8px;
   margin-bottom: 20px;
 }
 
-.transport-bar .transport-title {
+.transport-title-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.transport-title-row .transport-title {
+  grid-column: 2;
   text-align: center;
+}
+
+.transport-title-row .time-readout {
+  grid-column: 3;
+  justify-self: end;
+  margin-left: 0;
 }
 
 .transport-bar-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
-.transport-speed {
+.speed-mode-row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 8px;
-  flex: 0 1 300px;
-  min-width: 220px;
+  font-size: 0.85rem;
 }
 
-.transport-bar .time-readout {
-  margin-left: 0;
-  font-size: 1.05rem;
+.transport-slider-row .slider-row {
+  margin: 2px 0;
+}
+
+.transport-recalc-row {
+  display: flex;
+  justify-content: center;
+}
+
+.transport-recalc-row .recalc-btn {
+  flex: 0 1 33%;
+  min-width: 170px;
 }
 
 .transport .check-row input {
@@ -349,6 +372,9 @@ body {
   color: #ffd94d;
   background: rgba(0, 0, 0, 0.25);
   border-color: #a93226;
+  max-width: 130px;
+  padding: 3px 6px;
+  font-size: 0.85rem;
 }
 
 .transport .speed-mode option {
@@ -655,13 +681,6 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 8px;
   padding: 8px 10px;
   cursor: pointer;
-}
-
-.speed-col {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: stretch;
 }
 
 .recalc-btn {
