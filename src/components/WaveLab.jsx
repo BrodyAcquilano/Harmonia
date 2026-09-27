@@ -1333,6 +1333,7 @@ export default function WaveLab() {
             <div className="graph-meta-row">
               <div className="legend">
                 <span><Tex tex="m_1 \text{ fixed} — \text{the naive view}" /></span>
+                <span><Tex tex="\lambda_2 - \lambda_1 = \lambda_{1-2} = x" /></span>
               </div>
             </div>
             <canvas ref={canvasOrbitApparentRef} className="wave-canvas-orbit" />
