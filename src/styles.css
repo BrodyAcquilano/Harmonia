@@ -147,17 +147,65 @@ body {
 
 .lab-layout {
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: 240px 1fr 300px;
   gap: 18px;
   align-items: start;
 }
 
 .lab-stage {
+  order: 2;
+}
+
+.sim-nav {
   order: 1;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  min-width: 0;
+}
+
+.sim-nav h3 {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.sim-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sim-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #f5edcd;
+  border: 1px solid #d8c98f;
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: #715f43;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sim-item:hover {
+  color: #3a2c1a;
+  border-color: #b8a05e;
+}
+
+.sim-item[aria-selected="true"] {
+  background: #3a2c1a;
+  border-color: #3a2c1a;
+  color: #fffdf4;
 }
 
 .lab-side {
-  order: 2;
+  order: 3;
   display: flex;
   flex-direction: column;
   gap: 18px;
