@@ -194,7 +194,7 @@ function renderFrame(ctx, canvas, s, tau) {
   // For gravity main graph: shade area between ψ₁ and ψ₂,
   // blue left of balance point, orange right
   if (s.subtab === 'gravity' && (s.waveDisplay === 'waves' || s.waveDisplay === 'all') && curves.length >= 2 && s.M1 + s.M2 > 0) {
-    const xStar = (X_MAX * s.M2) / (s.M1 + s.M2)
+    const xStar = (X_MAX * s.M1) / (s.M1 + s.M2)
     const fn1 = curves[0].fn
     const fn2 = curves[1].fn
     ctx.save()
@@ -241,12 +241,12 @@ function renderFrame(ctx, canvas, s, tau) {
     ctx.restore()
   }
   if ((s.subtab === 'gravity' || s.subtab === 'integ') && s.M1 + s.M2 > 0) {
-    // Balance point: mass-weighted center x* = L·M₂/(M₁+M₂).
-    // M₁·x* = M₂·(L−x*); equal masses → middle, M₁=3M₂ → L/4.
+    // Balance point: mass-weighted center x* = L·M₁/(M₁+M₂).
+    // M₂·x* = M₁·(L−x*); equal masses → middle, M₂=3M₁ → L/4.
     // For integration tab, use the mirrored point (opposite side).
     const xStar = s.subtab === 'integ'
-      ? X_MAX - (X_MAX * s.M2) / (s.M1 + s.M2)
-      : (X_MAX * s.M2) / (s.M1 + s.M2)
+      ? X_MAX - (X_MAX * s.M1) / (s.M1 + s.M2)
+      : (X_MAX * s.M1) / (s.M1 + s.M2)
     ctx.save()
     ctx.strokeStyle = '#9a9a9a'
     ctx.lineWidth = 1.5
@@ -346,7 +346,7 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
   }
   if (s.waveDisplay === 'waves' || s.waveDisplay === 'all') {
     // Shade area between the two lines: blue left of balance point, orange right
-    const xStar = s.M1 + s.M2 > 0 ? X_MAX - (X_MAX * s.M2) / (s.M1 + s.M2) : X_MAX / 2
+    const xStar = s.M1 + s.M2 > 0 ? X_MAX - (X_MAX * s.M1) / (s.M1 + s.M2) : X_MAX / 2
     ctx.save()
     ctx.globalAlpha = 0.15
     const n = 200
@@ -401,7 +401,7 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
   }
   // Mirrored balance point for integrals: λ*_integ = L - λ*
   if (s.M1 + s.M2 > 0) {
-    const xStar = X_MAX - (X_MAX * s.M2) / (s.M1 + s.M2)
+    const xStar = X_MAX - (X_MAX * s.M1) / (s.M1 + s.M2)
     ctx.save()
     ctx.strokeStyle = '#9a9a9a'
     ctx.lineWidth = 1.5
@@ -906,7 +906,7 @@ export default function WaveLab() {
                   <div className="eq-box"><span className="eq-label">Decay</span><Tex tex="\beta = \dfrac{|M_1 - M_2|}{M_1 + M_2}" /></div>
                   <div className="eq-box"><span className="eq-label">(λₙ span)</span><Tex tex="L = 4\pi" /></div>
                   <div className="eq-box"><span className="eq-label">Amplitudes</span><span className="eq-line"><Tex tex="A_1 = \sqrt{\dfrac{M_2}{M_1+M_2}}" /></span><span className="eq-line"><Tex tex="A_2 = \sqrt{\dfrac{M_1}{M_1+M_2}}" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Inertia Balance Point</span><span className="eq-line"><Tex tex="\lambda^* = L\dfrac{M_2}{M_1+M_2}" /></span><span className="eq-line"><Tex tex="M_1 \lambda^* = M_2 (L - \lambda^*)" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Inertia Balance Point</span><span className="eq-line"><Tex tex="\lambda^* = L\dfrac{M_1}{M_1+M_2}" /></span><span className="eq-line"><Tex tex="M_2 \lambda^* = M_1 (L - \lambda^*)" /></span></div>
                 </div>
               </div>
             </>
@@ -971,7 +971,7 @@ export default function WaveLab() {
                 <div className="eq-list">
                   <div className="eq-box wide"><span className="eq-label">Potential to Do Work (spatial)</span><span className="eq-line"><Tex tex="W_1(x) = \int_0^x \mathrm{Re}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="W_2(x) = \int_0^x \mathrm{Re}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Potential to Generate Impulse (temporal)</span><span className="eq-line"><Tex tex="J_1(x) = \int_0^x \mathrm{Im}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="J_2(x) = \int_0^x \mathrm{Im}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Energy Balance Point</span><Tex tex="W_1(\lambda^*) = W_2(\lambda^*) \quad \text{where} \quad \lambda^* = L - L\dfrac{M_2}{M_1+M_2} = L\dfrac{M_1}{M_1+M_2}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Energy Balance Point</span><Tex tex="W_1(\lambda^*) = W_2(\lambda^*) \quad \text{where} \quad \lambda^* = L - L\dfrac{M_1}{M_1+M_2} = L\dfrac{M_2}{M_1+M_2}" /></div>
                 </div>
               </div>
             </>
