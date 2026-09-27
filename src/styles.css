@@ -93,29 +93,33 @@ body {
 .transport button,
 .notes-sidebar button {
   font: inherit;
-  color: var(--muted);
-  background: var(--panel);
-  border: 1px solid var(--border);
+  color: #715f43;
+  background: transparent;
+  border: 0;
   border-radius: 8px;
-  padding: 8px 16px;
+  padding: 10px 11px;
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  width: 100%;
 }
 
 .tabs button:hover,
 .btn-row button:hover,
-.transport button:hover,
-.notes-sidebar button:hover {
+.transport button:hover {
   color: var(--text);
   border-color: var(--accent);
 }
 
 .tabs button.active,
-.btn-row button.active,
-.notes-sidebar button.active {
+.btn-row button.active {
   color: #fff;
   background: #1d2c47;
   border-color: var(--accent);
+}
+
+.notes-sidebar button.active {
+  background: #f5edcd;
+  color: #3a2c1a;
+  font-weight: 600;
 }
 
 /* ---------- wave lab layout ---------- */
@@ -154,7 +158,7 @@ body {
   align-items: center;
 }
 
-.round-btn {
+.transport .round-btn {
   width: 38px;
   height: 38px;
   border-radius: 50%;
@@ -170,7 +174,7 @@ body {
   padding: 0;
 }
 
-.round-btn:hover {
+.transport .round-btn:hover {
   border-color: #fff1a8;
   color: #fff1a8;
 }
@@ -208,31 +212,41 @@ body {
 .derived-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px 12px;
-  margin-top: 2px;
+  margin: 0;
   border: 1px solid #d8c98f;
   border-radius: 10px;
   background: #f5edcd;
-  padding: 10px 12px;
+  overflow: hidden;
 }
 
 .derived-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
+  padding: 9px 10px;
+  border-right: 1px solid #d8c98f;
+  border-bottom: 1px solid #d8c98f;
   font-variant-numeric: tabular-nums;
 }
 
+.derived-box:nth-child(2n) {
+  border-right: 0;
+}
+
+.derived-box:nth-last-child(-n+2) {
+  border-bottom: 0;
+}
+
 .derived-box span {
-  color: var(--muted);
-  font-size: 0.85rem;
+  display: block;
+  margin: 0 0 4px;
+  color: #715f43;
+  font-size: 10px;
 }
 
 .derived-box b {
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: var(--text);
+  display: block;
+  font-weight: 500;
+  font-size: 12px;
+  font-family: "IBM Plex Mono", monospace;
+  color: #3a2c1a;
 }
 
 .subtabs {
@@ -414,10 +428,18 @@ body {
 }
 
 .speed-mode-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: grid;
+  gap: 2px;
+  justify-items: start;
   font-size: 0.85rem;
+}
+
+.speed-mode-row > span {
+  display: block;
+  margin: 0;
+  font-weight: 600;
+  font-size: 11px;
+  color: #ffd94d;
 }
 
 .transport-slider-row .slider-row {
@@ -468,6 +490,7 @@ body {
   padding: 5px 8px;
   font-size: 10px;
   line-height: 1.25;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -592,9 +615,17 @@ body {
 .notes-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   position: sticky;
-  top: 16px;
+  top: 18px;
+}
+
+.notes-sidebar-title {
+  margin: 0 0 13px;
+  font-family: "Source Serif 4", serif;
+  font-size: 20px;
+  font-weight: 650;
+  color: #3a2c1a;
 }
 
 .notes-sidebar button {

@@ -428,11 +428,11 @@ export default function WaveLab() {
           </div>
           <div className="transport-slider-row">
             {speedMode === 'slow' ? (
-              <Slider label="speed" value={Math.sqrt(Math.min(speed, slowMax) / slowMax)} min={0} max={1} step={0.005}
+              <Slider label={null} value={Math.sqrt(Math.min(speed, slowMax) / slowMax)} min={0} max={1} step={0.005}
                 format={() => fmtSpeed(speed)}
                 onChange={(p) => setSpeed(slowMax * p * p)} />
             ) : (
-              <Slider label="speed" value={Math.min(Math.max(speed, 1), 2.5)} min={1} max={2.5} step={0.1}
+              <Slider label={null} value={Math.min(Math.max(speed, 1), 2.5)} min={1} max={2.5} step={0.1}
                 format={() => fmtSpeed(speed)}
                 onChange={setSpeed} />
             )}

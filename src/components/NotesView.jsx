@@ -42,6 +42,7 @@ export default function NotesView() {
   return (
     <div className="notes-layout">
       <aside className="notes-sidebar">
+        <h3 className="notes-sidebar-title">Notebook</h3>
         {notes.map((n) => (
           <button
             key={n.path}
