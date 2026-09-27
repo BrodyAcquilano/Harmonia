@@ -612,8 +612,8 @@ export default function WaveLab() {
                 <div className="eq-list">
                   <div className="eq-box"><span className="eq-label">Coordinate conservation</span><span className="eq-line">∂ψ₁/∂M₁ + ∂ψ₂/∂M₁ = 0</span><span className="eq-line">∂ψ₁/∂M₂ + ∂ψ₂/∂M₂ = 0</span></div>
                   <div className="eq-box"><span className="eq-label">Cross-field balance</span><span className="eq-line">k₁ψ₁ = ω₂ψ₂</span><span className="eq-line">k₂ψ₂ = ω₁ψ₁</span></div>
-                  <div className="eq-box wide"><span className="eq-label">Coordinate half-waves</span><span className="eq-line">dM₁ half-wave = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁</span><span className="eq-line">dM₂ half-wave = ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</span></div>
-                  <div className="eq-box wide"><span className="eq-label">Total differential</span>dψ<sub>s</sub> = dM₁ half-wave + dM₂ half-wave = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁ + ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</div>
+                  <div className="eq-box wide"><span className="eq-label">Coordinate half-waves</span><span className="eq-line">dM₁ = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁</span><span className="eq-line">dM₂ = ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</span></div>
+                  <div className="eq-box wide"><span className="eq-label">Total differential</span>dψ<sub>s</sub> = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁ + ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</div>
                 </div>
               </div>
 
