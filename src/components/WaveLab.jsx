@@ -584,10 +584,10 @@ export default function WaveLab() {
             </div>
             <div className="graph-meta-row">
               <div className="legend">
-                <span><i className="swatch" style={{ background: C1 }} />ψ₁(M₁,M₂) → +λₙ</span>
-                <span><i className="swatch" style={{ background: C2 }} />ψ₂(M₂,M₁) → −λₙ</span>
-                {showSum && <span><i className="swatch" style={{ background: CS }} />ψ<sub>s</sub> = ψ₁ + ψ₂</span>}
-                <span><i className="swatch swatch-dashed" />balance point λ*</span>
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="\psi_1(M_1,M_2) \to +\lambda_n" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="\psi_2(M_2,M_1) \to -\lambda_n" /></span>
+                {showSum && <span><i className="swatch" style={{ background: CS }} /><Tex tex="\psi_s = \psi_1 + \psi_2" /></span>}
+                <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
               </div>
               <label className="check-row graph-check">
                 <input
@@ -608,10 +608,10 @@ export default function WaveLab() {
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
-                  <span><i className="swatch" style={{ background: C1 }} />∂ψ₁/∂M₁ = ik₁ψ₁</span>
-                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} />∂ψ₁/∂M₂ = −iω₁ψ₁</span>
-                  <span><i className="swatch" style={{ background: C2 }} />∂ψ₂/∂M₁ = −iω₂ψ₂</span>
-                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />∂ψ₂/∂M₂ = ik₂ψ₂</span>
+                  <span><i className="swatch" style={{ background: C1 }} /><Tex tex="\dfrac{\partial\psi_1}{\partial M_1} = ik_1\psi_1" /></span>
+                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="\dfrac{\partial\psi_1}{\partial M_2} = -i\omega_1\psi_1" /></span>
+                  <span><i className="swatch" style={{ background: C2 }} /><Tex tex="\dfrac{\partial\psi_2}{\partial M_1} = -i\omega_2\psi_2" /></span>
+                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="\dfrac{\partial\psi_2}{\partial M_2} = ik_2\psi_2" /></span>
                 </div>
               </div>
               <canvas ref={canvasRef} className="wave-canvas" />
@@ -622,8 +622,8 @@ export default function WaveLab() {
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
-                  <span><i className="swatch" style={{ background: C1 }} />dM₁ = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁</span>
-                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />dM₂ = ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</span>
+                  <span><i className="swatch" style={{ background: C1 }} /><Tex tex="dM_1 = \dfrac{\partial\psi_1}{\partial M_1} + \dfrac{\partial\psi_2}{\partial M_1}" /></span>
+                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="dM_2 = \dfrac{\partial\psi_1}{\partial M_2} + \dfrac{\partial\psi_2}{\partial M_2}" /></span>
                 </div>
               </div>
               <canvas ref={canvasHalfRef} className="wave-canvas half-canvas" />
@@ -634,7 +634,7 @@ export default function WaveLab() {
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
-                  <span><i className="swatch" style={{ background: CS }} />total dψ<sub>s</sub></span>
+                  <span><i className="swatch" style={{ background: CS }} /><Tex tex="\text{total } d\psi_s" /></span>
                 </div>
               </div>
               <canvas ref={canvasTotalRef} className="wave-canvas total-canvas" />
@@ -648,9 +648,9 @@ export default function WaveLab() {
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
-                  <span><i className="swatch" style={{ background: C1 }} />ψ₁ area</span>
-                  <span><i className="swatch" style={{ background: C2 }} />ψ₂ area</span>
-                  <span><i className="swatch swatch-dashed" />balance point λ*</span>
+                  <span><i className="swatch" style={{ background: C1 }} /><Tex tex="\int \psi_1 \, d\lambda_n" /></span>
+                  <span><i className="swatch" style={{ background: C2 }} /><Tex tex="\int \psi_2 \, d\lambda_n" /></span>
+                  <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
                 </div>
               </div>
               <canvas ref={canvasRef} className="wave-canvas" />
@@ -661,9 +661,9 @@ export default function WaveLab() {
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
-                  <span><i className="swatch" style={{ background: C1 }} />W₁ work</span>
-                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />J₂ impulse</span>
-                  <span><i className="swatch swatch-dashed" />balance point λ*</span>
+                  <span><i className="swatch" style={{ background: C1 }} /><Tex tex="W_1 = \int \mathrm{Re}(\psi_1) \, d\lambda_n" /></span>
+                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_2 = \int \mathrm{Im}(\psi_2) \, d\lambda_n" /></span>
+                  <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
                 </div>
               </div>
               <canvas ref={canvasCumRef} className="wave-canvas" />
@@ -674,9 +674,9 @@ export default function WaveLab() {
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
-                  <span><i className="swatch" style={{ background: C2 }} />W₂ work</span>
-                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} />J₁ impulse</span>
-                  <span><i className="swatch swatch-dashed" />balance point λ*</span>
+                  <span><i className="swatch" style={{ background: C2 }} /><Tex tex="W_2 = \int \mathrm{Re}(\psi_2) \, d\lambda_n" /></span>
+                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_1 = \int \mathrm{Im}(\psi_1) \, d\lambda_n" /></span>
+                  <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
                 </div>
               </div>
               <canvas ref={canvasPair2Ref} className="wave-canvas" />
