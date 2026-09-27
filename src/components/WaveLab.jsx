@@ -779,15 +779,12 @@ export default function WaveLab() {
                       <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{work done}" /></span>
                     </>
                   )}
-                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_1 + J_2" /></span>}
                   <span><i className="swatch swatch-dashed" /><Tex tex="\psi_1: +x, \; \psi_2: -x" /></span>
                 </div>
                 <label className="check-row graph-check">
                   Display
                   <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
                     <option value="waves">W₁, J₂</option>
-                    <option value="sum">W₁ + J₂</option>
-                    <option value="all">W₁, J₂, W₁ + J₂</option>
                   </select>
                 </label>
               </div>
@@ -807,15 +804,12 @@ export default function WaveLab() {
                       <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{work done}" /></span>
                     </>
                   )}
-                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_2 + J_1" /></span>}
                   <span><i className="swatch swatch-dashed" /><Tex tex="\psi_1: +x, \; \psi_2: -x" /></span>
                 </div>
                 <label className="check-row graph-check">
                   Display
                   <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
                     <option value="waves">W₂, J₁</option>
-                    <option value="sum">W₂ + J₁</option>
-                    <option value="all">W₂, J₁, W₂ + J₁</option>
                   </select>
                 </label>
               </div>
