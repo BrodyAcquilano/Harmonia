@@ -271,19 +271,26 @@ export default function WaveLab() {
   stateRef.current = { subtab, M1, M2, playing, speed, showSum }
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
     let raf
     let last = performance.now()
     const draw = (now) => {
       const dt = Math.min((now - last) / 1000, 0.05)
       last = now
       const s = stateRef.current
+      if (!s) {
+        raf = requestAnimationFrame(draw)
+        return
+      }
       if (s.playing) {
         tauRef.current += dt * s.speed
         setTau(Math.round(tauRef.current * 20) / 20)
       }
-      renderFrame(ctx, canvas, s, tauRef.current)
+      // NOTE: canvasRef is re-read every frame because the main canvas is
+      // remounted when switching tabs (gravity/derivatives render separate
+      // <canvas> elements into the same ref). Capturing it once here would
+      // keep drawing to the detached node after a tab switch.
+      const canvas = canvasRef.current
+      if (canvas) renderFrame(canvas.getContext('2d'), canvas, s, tauRef.current)
       if (s.subtab !== 'gravity') {
         const hc = canvasHalfRef.current
         if (hc) renderHalfFrame(hc.getContext('2d'), hc, s, tauRef.current)
@@ -409,7 +416,7 @@ export default function WaveLab() {
           {speedMode === 'slow' && (
             <div className="transport-recalc-row">
               <button className="recalc-btn" onClick={() => recalcSlow(M1, M2)}>
-                Recalculate slider range
+                Recalculate slider step
               </button>
             </div>
           )}
