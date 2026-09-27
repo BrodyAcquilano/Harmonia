@@ -12,6 +12,12 @@ const noteModules = import.meta.glob('../../notes/*.md', {
   eager: true,
 })
 
+// Display order of the notes, first to last.
+const NOTE_ORDER = [
+  '../../notes/symmetric-inertia-transfer.md',
+  '../../notes/lambda-derivation.md',
+]
+
 function titleFromPath(path) {
   const base = path.split('/').pop().replace(/\.md$/, '')
   return base
@@ -23,9 +29,11 @@ function titleFromPath(path) {
 export default function NotesView() {
   const notes = useMemo(
     () =>
-      Object.entries(noteModules)
-        .map(([path, text]) => ({ path, title: titleFromPath(path), text }))
-        .sort((a, b) => a.title.localeCompare(b.title)),
+      NOTE_ORDER.map((path) => ({
+        path,
+        title: titleFromPath(path),
+        text: noteModules[path],
+      })).filter((n) => n.text),
     []
   )
   const [active, setActive] = useState(notes[0]?.path)

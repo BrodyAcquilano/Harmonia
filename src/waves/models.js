@@ -22,10 +22,11 @@
 // envelope e^{-beta*(L-x)}.
 //   beta = |M1-M2|/(M1+M2): zero for the symmetric (lossless) case.
 //
-// Display mapping: x is the spatial axis, tau advances the temporal phase
-// in place of the companion-mass coordinate:
-//   psi1(x,tau) = A1 * e^{-beta*x}     * e^{i(k1*x - w1*M2*tau)}
-//   psi2(x,tau) = A2 * e^{-beta*(L-x)} * e^{i(-k2*x - w2*M1*tau)}
+// Display mapping: λₙ is the structural-wavelength coordinate (normalized
+// display span 0..4π), tau advances the temporal phase in place of the
+// companion-mass coordinate:
+//   psi1(λₙ,tau) = A1 * e^{-beta*λₙ}     * e^{i(k1*λₙ - w1*M2*tau)}
+//   psi2(λₙ,tau) = A2 * e^{-beta*(L-λₙ)} * e^{i(-k2*λₙ - w2*M1*tau)}
 // Only the real (spatial-inertia) parts are plotted.
 //
 // Derivatives (theory's mass-coordinate gradients; the envelope is a real
@@ -38,12 +39,25 @@ export const L = 4 * Math.PI
 export function gravityParams(M1, M2) {
   const k1 = 1
   const w1 = 1
-  const k2 = k1 * Math.sqrt(M2 / M1)
-  const w2 = (k1 * k2) / w1 // symmetry condition k1*k2 = w1*w2
-  const r = w2 / k1 // A1/A2 from k1*A1 = w2*A2
-  const A2 = 1 / Math.sqrt(1 + r * r)
-  const A1 = r * A2
-  const beta = Math.abs(M1 - M2) / (M1 + M2)
+  const a = Math.max(M1, 0)
+  const b = Math.max(M2, 0)
+  const sum = a + b
+  // The wavelength relation k2 = k1*sqrt(M2/M1) is singular at M1 = 0;
+  // the companion wave flattens there (its amplitude also vanishes).
+  const k2 = a > 0 ? k1 * Math.sqrt(b / a) : 0
+  const w2 = a > 0 ? (k1 * k2) / w1 : 0 // symmetry condition k1*k2 = w1*w2
+  // Amplitudes follow the mass-ratio limit A1/A2 = sqrt(M2/M1) so the
+  // M -> 0 endpoints stay continuous with M -> 0+.
+  let A1, A2
+  if (sum <= 0) { A1 = 0; A2 = 0 }
+  else if (a <= 0) { A1 = 1; A2 = 0 }
+  else if (b <= 0) { A1 = 0; A2 = 1 }
+  else {
+    const r = Math.sqrt(b / a)
+    A2 = 1 / Math.sqrt(1 + r * r)
+    A1 = r * A2
+  }
+  const beta = sum > 0 ? Math.abs(a - b) / sum : 0
   return { k1, k2, w1, w2, A1, A2, beta }
 }
 
@@ -81,4 +95,54 @@ export function dPsi_dM(which, x, tau, P, M1, M2) {
   const d1 = which === 1 ? iTimes(P.k1, p1) : negITimes(P.w1, p1)
   const d2 = which === 1 ? negITimes(P.w2, p2) : iTimes(P.k2, p2)
   return { d1, d2, sum: psiSum(d1, d2) }
+}
+
+// ---- structural wavelengths: closed-form cubic solution from the masses ----
+//   λ1 = (2 G h^2 / (M1 c^4))^{1/3} · (i√(M1/M2) − 1)^{-1/3}
+//   λ2 = i√(M1/M2) · λ1
+// (lambda-derivation note; masses in kg, SI constants, metres out.)
+// Singular when either mass vanishes -> returns null.
+export const SI = { G: 6.6743e-11, h: 6.62607015e-34, c: 299792458 }
+
+const cMul = (a, b) => ({ re: a.re * b.re - a.im * b.im, im: a.re * b.im + a.im * b.re })
+
+// Principal-branch complex power z^p = exp(p · ln z).
+const cPow = (z, p) => {
+  const r = Math.hypot(z.re, z.im)
+  if (r === 0) return { re: 0, im: 0 }
+  const m = Math.pow(r, p)
+  const t = p * Math.atan2(z.im, z.re)
+  return { re: m * Math.cos(t), im: m * Math.sin(t) }
+}
+
+export function structuralWavelengths(M1, M2) {
+  if (!(M1 > 0) || !(M2 > 0)) return null
+  const { G, h, c } = SI
+  const pre = Math.cbrt((2 * G * h * h) / (M1 * Math.pow(c, 4)))
+  const r = Math.sqrt(M1 / M2)
+  const l1 = cMul({ re: pre, im: 0 }, cPow({ re: -1, im: r }, -1 / 3))
+  const l2 = cMul({ re: 0, im: r }, l1) // λ2 = i√(M1/M2)·λ1 by construction
+  return { l1, l2 }
+}
+
+export const cAbs = (z) => Math.hypot(z.re, z.im)
+
+// Full theory parameters straight from the symmetric-inertia-transfer paper:
+//   k_n = 2π/λ_n (complex, through λ) and ω_n = 2π M_n c²/h (real, Planck–Einstein).
+// Returns null when a mass vanishes, since λ is singular there.
+export function theoryParams(M1, M2) {
+  const lam = structuralWavelengths(M1, M2)
+  if (!lam) return null
+  const { c, h } = SI
+  const kOf = (l) => {
+    const d = l.re * l.re + l.im * l.im
+    const f = (2 * Math.PI) / d
+    return { re: f * l.re, im: -f * l.im }
+  }
+  return {
+    k1: kOf(lam.l1),
+    k2: kOf(lam.l2),
+    w1: ((2 * Math.PI) / h) * M1 * c * c,
+    w2: ((2 * Math.PI) / h) * M2 * c * c,
+  }
 }

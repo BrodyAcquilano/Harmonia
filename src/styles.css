@@ -171,6 +171,24 @@ body {
 
 /* ---------- sliders ---------- */
 
+.num-input {
+  display: block;
+  width: 110px;
+  padding: 6px 8px;
+  margin: 2px 0 4px;
+  background: #0d1117;
+  border: 1px solid #2a3648;
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.num-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 .slider-row {
   display: grid;
   grid-template-columns: 92px 1fr 48px;
@@ -367,6 +385,106 @@ input[type="range"]::-moz-range-thumb {
   color: #101828;
   font-size: 15px;
   font-family: "Times New Roman", Times, serif;
+}
+
+.eq-groups {
+  margin: 12px 0 4px;
+}
+
+.eq-group {
+  margin-bottom: 18px;
+}
+
+.eq-group h4 {
+  margin: 0 0 2px;
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.eq-group h4.eq-sub {
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+.eq-tag {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1px 8px;
+  margin-left: 8px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.eq-box.wide {
+  flex: 1 1 100%;
+}
+
+.eq-group .eq-list {
+  margin: 8px 0 0;
+}
+
+.eq-group .hint {
+  margin: 8px 0 0;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.check-row input {
+  width: 16px;
+  height: 16px;
+  accent-color: #4da3ff;
+  cursor: pointer;
+}
+
+.transport-check {
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+.speed-mode {
+  font: inherit;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.speed-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.recalc-btn {
+  font: inherit;
+  font-size: 13px;
+  color: var(--muted);
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.recalc-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
 }
 
 .readout {
