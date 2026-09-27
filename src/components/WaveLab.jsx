@@ -287,11 +287,13 @@ function renderHalfFrame(ctx, canvas, s, tau) {
   trace(ctx, X, Y, (x) => dPsi_dM(2, x, tau, P, s.M1, s.M2).sum.re, C2, 2, [6, 4])
 }
 
-// Integration tab: Potential to Do Work and Potential to Generate Impulse.
-//   Pair 1: W₁ + J₁ (work and impulse of ψ₁)
-//   Pair 2: W₂ + J₂ (work and impulse of ψ₂)
+// Integration tab: Work/Impulse cross pairs (with respect to M₁).
+//   Pair 1: W₁ (work of ψ₁) + J₂ (impulse of ψ₂)
+//   Pair 2: W₂ (work of ψ₂) + J₁ (impulse of ψ₁)
 //   Work: Wₙ(x) = ∫₀ˣ Re(ψₙ(t)) dt (spatial, solid)
 //   Impulse: Jₙ(x) = ∫₀ˣ Im(ψₙ(t)) dt (temporal, dashed)
+//   Shading: green where work is above impulse (work stored),
+//   red where impulse is above work (work done); alternates at crossings.
 function renderPairFrame(ctx, canvas, s, tau, pair) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
@@ -328,11 +330,13 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
     prevJ1 = p1.im
     prevJ2 = p2.im
   }
-  // Select the pair: pair=1 → W₁+J₁, pair=2 → W₂+J₂
+  // Select the pair: pair=1 → W₁+J₂, pair=2 → W₂+J₁
+  // (with respect to M₁: W₁ is work from ψ₁'s perspective, J₂ is impulse from ψ₂'s)
   const arr1 = pair === 1 ? work1 : work2
-  const arr2 = pair === 1 ? imp1 : imp2
-  const lineColor = pair === 1 ? C1 : C2
-  // For pair 1: W₁ solid blue, J₁ dashed blue. For pair 2: W₂ solid orange, J₂ dashed orange.
+  const arr2 = pair === 1 ? imp2 : imp1
+  const color1 = pair === 1 ? C1 : C2
+  const color2 = pair === 1 ? C2 : C1
+  // For pair 1: W₁ solid blue, J₂ dashed orange. For pair 2: W₂ solid orange, J₁ dashed blue.
   const dash1 = []
   const dash2 = [6, 4]
   const sumArr = arr1.map((v, i) => v + arr2[i])
@@ -345,56 +349,55 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
     return arr[idx] * (1 - t) + arr[idx + 1] * t
   }
   if (s.waveDisplay === 'waves' || s.waveDisplay === 'all') {
-    // Shade area between the two lines: blue left of balance point, orange right
-    const xStar = s.M1 + s.M2 > 0 ? X_MAX - (X_MAX * s.M1) / (s.M1 + s.M2) : X_MAX / 2
+    // Shade area between the curves: green where work is on top (work stored),
+    // red where impulse is on top (work done / impulse dominating).
+    // Alternates at each crossing point.
+    const CGREEN = '#16a34a'
+    const CRED = '#dc2626'
     ctx.save()
-    ctx.globalAlpha = 0.15
-    const n = 200
-    // Left side (blue)
-    ctx.fillStyle = C1
-    ctx.beginPath()
-    let first = true
+    ctx.globalAlpha = 0.18
+    const n = 400
+    let segStart = 0
+    let segAbove = null // true if arr1 (work) is above arr2 (impulse)
+    const fillSeg = (x0, x1, workOnTop) => {
+      if (x1 <= x0) return
+      ctx.fillStyle = workOnTop ? CGREEN : CRED
+      ctx.beginPath()
+      const m = 50
+      let first = true
+      for (let i = 0; i <= m; i++) {
+        const x = x0 + (i / m) * (x1 - x0)
+        if (first) { ctx.moveTo(X(x), Y(interp(arr1)(x))); first = false }
+        else ctx.lineTo(X(x), Y(interp(arr1)(x)))
+      }
+      for (let i = m; i >= 0; i--) {
+        const x = x0 + (i / m) * (x1 - x0)
+        ctx.lineTo(X(x), Y(interp(arr2)(x)))
+      }
+      ctx.closePath()
+      ctx.fill()
+    }
     for (let i = 0; i <= n; i++) {
-      const x = (i / n) * xStar
-      const y1 = interp(arr1)(x)
-      if (first) {
-        ctx.moveTo(X(x), Y(y1))
-        first = false
-      } else {
-        ctx.lineTo(X(x), Y(y1))
+      const x = (i / n) * X_MAX
+      const d = interp(arr1)(x) - interp(arr2)(x)
+      const above = d >= 0
+      if (segAbove === null) segAbove = above
+      if (above !== segAbove) {
+        // Crossing between previous x and this x — approximate crossing point
+        const xp = ((i - 1) / n) * X_MAX
+        // Linear interpolation for crossing
+        const dPrev = interp(arr1)(xp) - interp(arr2)(xp)
+        const t = Math.abs(dPrev) / (Math.abs(dPrev) + Math.abs(d))
+        const xc = xp + t * (x - xp)
+        fillSeg(segStart, xc, segAbove)
+        segStart = xc
+        segAbove = above
       }
     }
-    for (let i = n; i >= 0; i--) {
-      const x = (i / n) * xStar
-      const y2 = interp(arr2)(x)
-      ctx.lineTo(X(x), Y(y2))
-    }
-    ctx.closePath()
-    ctx.fill()
-    // Right side (orange)
-    ctx.fillStyle = C2
-    ctx.beginPath()
-    first = true
-    for (let i = 0; i <= n; i++) {
-      const x = xStar + (i / n) * (X_MAX - xStar)
-      const y1 = interp(arr1)(x)
-      if (first) {
-        ctx.moveTo(X(x), Y(y1))
-        first = false
-      } else {
-        ctx.lineTo(X(x), Y(y1))
-      }
-    }
-    for (let i = n; i >= 0; i--) {
-      const x = xStar + (i / n) * (X_MAX - xStar)
-      const y2 = interp(arr2)(x)
-      ctx.lineTo(X(x), Y(y2))
-    }
-    ctx.closePath()
-    ctx.fill()
+    fillSeg(segStart, X_MAX, segAbove)
     ctx.restore()
-    trace(ctx, X, Y, interp(arr1), lineColor, 2, dash1)
-    trace(ctx, X, Y, interp(arr2), lineColor, 2, dash2)
+    trace(ctx, X, Y, interp(arr1), color1, 2, dash1)
+    trace(ctx, X, Y, interp(arr2), color2, 2, dash2)
   }
   if (s.waveDisplay === 'sum' || s.waveDisplay === 'all') {
     trace(ctx, X, Y, interp(sumArr), CS, 2.75, [])
@@ -546,8 +549,6 @@ export default function WaveLab() {
         if (tc) renderTotalFrame(tc.getContext('2d'), tc, s, tauRef.current)
       }
       if (s.subtab === 'integ') {
-        const ac = canvasAreaRef.current
-        if (ac) renderAreaFrame(ac.getContext('2d'), ac, s, tauRef.current)
         const cc = canvasCumRef.current
         if (cc) renderPairFrame(cc.getContext('2d'), cc, s, tauRef.current, 1)
         const p2 = canvasPair2Ref.current
@@ -766,51 +767,27 @@ export default function WaveLab() {
           <>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Energy Balance Point</h2>
-              </div>
-              <div className="graph-meta-row">
-                <div className="legend">
-                  {(waveDisplay === 'waves' || waveDisplay === 'all') && (
-                    <>
-                      <span><i className="swatch" style={{ background: C1 }} /><Tex tex="\int \psi_1 \, d\lambda_n" /></span>
-                      <span><i className="swatch" style={{ background: C2 }} /><Tex tex="\int \psi_2 \, d\lambda_n" /></span>
-                    </>
-                  )}
-                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="\psi_s = \psi_1 + \psi_2" /></span>}
-                  <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
-                </div>
-                <label className="check-row graph-check">
-                  Display
-                  <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
-                    <option value="waves">ψ₁, ψ₂</option>
-                    <option value="sum">ψ₁ + ψ₂</option>
-                    <option value="all">ψ₁, ψ₂, ψ₁ + ψ₂</option>
-                  </select>
-                </label>
-              </div>
-              <canvas ref={canvasRef} className="wave-canvas" />
-            </div>
-            <div className="graph-box">
-              <div className="graph-title-row">
-                <h2 className="graph-title">Potential to Do Work₁ + Generate Impulse₁</h2>
+                <h2 className="graph-title">Work and Impulse</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
                   {(waveDisplay === 'waves' || waveDisplay === 'all') && (
                     <>
                       <span><i className="swatch" style={{ background: C1 }} /><Tex tex="W_1 = \int \mathrm{Re}(\psi_1) \, d\lambda_n" /></span>
-                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_1 = \int \mathrm{Im}(\psi_1) \, d\lambda_n" /></span>
+                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_2 = \int \mathrm{Im}(\psi_2) \, d\lambda_n" /></span>
+                      <span><i className="swatch" style={{ background: '#16a34a', opacity: 0.5 }} /><Tex tex="\text{work stored}" /></span>
+                      <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{work done}" /></span>
                     </>
                   )}
-                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_1 + J_1" /></span>}
-                  <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
+                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_1 + J_2" /></span>}
+                  <span><i className="swatch swatch-dashed" /><Tex tex="\psi_1: +x, \; \psi_2: -x" /></span>
                 </div>
                 <label className="check-row graph-check">
                   Display
                   <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
-                    <option value="waves">W₁, J₁</option>
-                    <option value="sum">W₁ + J₁</option>
-                    <option value="all">W₁, J₁, W₁ + J₁</option>
+                    <option value="waves">W₁, J₂</option>
+                    <option value="sum">W₁ + J₂</option>
+                    <option value="all">W₁, J₂, W₁ + J₂</option>
                   </select>
                 </label>
               </div>
@@ -818,25 +795,27 @@ export default function WaveLab() {
             </div>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Potential to Do Work₂ + Generate Impulse₂</h2>
+                <h2 className="graph-title">Work and Impulse</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
                   {(waveDisplay === 'waves' || waveDisplay === 'all') && (
                     <>
                       <span><i className="swatch" style={{ background: C2 }} /><Tex tex="W_2 = \int \mathrm{Re}(\psi_2) \, d\lambda_n" /></span>
-                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_2 = \int \mathrm{Im}(\psi_2) \, d\lambda_n" /></span>
+                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_1 = \int \mathrm{Im}(\psi_1) \, d\lambda_n" /></span>
+                      <span><i className="swatch" style={{ background: '#16a34a', opacity: 0.5 }} /><Tex tex="\text{work stored}" /></span>
+                      <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{work done}" /></span>
                     </>
                   )}
-                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_2 + J_2" /></span>}
-                  <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
+                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_2 + J_1" /></span>}
+                  <span><i className="swatch swatch-dashed" /><Tex tex="\psi_1: +x, \; \psi_2: -x" /></span>
                 </div>
                 <label className="check-row graph-check">
                   Display
                   <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
-                    <option value="waves">W₂, J₂</option>
-                    <option value="sum">W₂ + J₂</option>
-                    <option value="all">W₂, J₂, W₂ + J₂</option>
+                    <option value="waves">W₂, J₁</option>
+                    <option value="sum">W₂ + J₁</option>
+                    <option value="all">W₂, J₁, W₂ + J₁</option>
                   </select>
                 </label>
               </div>
@@ -967,11 +946,11 @@ export default function WaveLab() {
           ) : subtab === 'integ' ? (
             <>
               <div className="eq-group">
-                <h4>Work and Impulse <span className="eq-note">— plotted</span></h4>
+                <h4>Work and Impulse <span className="eq-note">— with respect to M₁, plotted</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Potential to Do Work (spatial)</span><span className="eq-line"><Tex tex="W_1(x) = \int_0^x \mathrm{Re}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="W_2(x) = \int_0^x \mathrm{Re}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Potential to Generate Impulse (temporal)</span><span className="eq-line"><Tex tex="J_1(x) = \int_0^x \mathrm{Im}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="J_2(x) = \int_0^x \mathrm{Im}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Energy Balance Point</span><Tex tex="W_1(\lambda^*) = W_2(\lambda^*) \quad \text{where} \quad \lambda^* = L - L\dfrac{M_1}{M_1+M_2} = L\dfrac{M_2}{M_1+M_2}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Work (spatial)</span><span className="eq-line"><Tex tex="W_1(x) = \int_0^x \mathrm{Re}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="W_2(x) = \int_0^x \mathrm{Re}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Impulse (temporal)</span><span className="eq-line"><Tex tex="J_1(x) = \int_0^x \mathrm{Im}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="J_2(x) = \int_0^x \mathrm{Im}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Shading</span><Tex tex="\text{Green: work above impulse (stored). Red: impulse above work (done).}" /></div>
                 </div>
               </div>
             </>
