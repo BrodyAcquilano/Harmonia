@@ -179,7 +179,23 @@ This note describes the constant-relative-velocity, phasor-rotation simulation o
 
 - The **mass-space view** — the fields plotted directly against $M_1$ and $M_2$ as coordinates, with no $\lambda_n$ and no $\tau$. There the wavenumber varies with the coordinate itself and the waves chirp.
 - The **accelerating case** — relative velocity changing with time, wavelength breathing in and out (the chirp of Section 5b, second half).
-- The **second integral** — the displacement $X = \int D(\lambda_n)\,d\lambda_n$ proposed in Section 5d. The work/impulse graphs exist; the push-pull difference integral does not yet.
+- The **second integral as a live view** — the displacement $X_1$, $X_2$ of Section 5d is now plotted in the Motion tab, but the $\Delta X$ readout and the center-point reference framing of Section 9 are not yet drawn on the graph itself.
 - The **$\lambda$-derivation bridge** — the explicit change of variables from $(M_1, M_2)$ to $(\lambda, T)$ via the free-fall construction, which would make the "equivalent but viewed from a different space" claim exact rather than analogical.
 
 Each of these is a future simulation. This one is kept, as is, so the ideas can be revisited as they mature.
+
+## 9. Conclusion: a chirp function in five dimensions
+
+What was built here has a name: **it is a chirp function**.
+
+The picture, stated plainly. The Earth moves forward and the Earth pulls the Moon, but their relative velocity is constant — so relative to one another, the Moon moves in a straight line. Project its motion onto the plane perpendicular to the velocity vector and the orbit collapses: the Moon falls toward the Earth and comes back, falls and comes back. **Four quarter cycles** of the Moon's motion — in, back, out, back — and that is the wave. The spatial oscillation *is* the projected orbit.
+
+Then the time that got added in: the **hidden time phasor**. It cycles the phase of the wave, and as the phase cycles, the energy-over-space distribution changes. That is all that changes. **All the masses stay constant; nothing changes except the energy at each point in between the two masses.** The phasor turns; the energy redistributes; the bodies stay what they are.
+
+Integrate once over space and you get work and impulse — the energy accounts, $W_n$ and $J_n$. Integrate again, and take the *difference* of work and impulse for each body, and you can figure out how much each one moved relative to the other. That is the second integral, $X_1$ and $X_2$, and it is now plotted in the Motion tab.
+
+But here is the part that matters. If you treated the distance between the two bodies as a single variable, you would only ever know their *relative* motion — how far apart they are, how fast the gap opens and closes. The phasor gives you more than that. The phasor is the hidden time dimension that we integrate over; the second integral we integrate over the wavelength, over space; and that gives us motion in the time dimension we know. So we learn not only how much their motion was relative to each other, but **how much the motion was relative to a center point** — a third, impartial reference point that belongs to neither body. Not just "the Moon falls toward the Earth," but how far the Moon wobbles one way from center and how far the Earth wobbles the other, each pulled by gravity, each measured against something neutral. That is new information. The relative motion was always visible; the wobble against center was hidden until the second integral.
+
+Count the dimensions. Three of space — the world the bodies move in. Then two of time: the **fourth**, the hidden phasor, over which the phase rotates and the energy redistributes; and the **fifth**, over which the second integral accumulates and motion emerges. **Five dimensions.** For every spatial dimension, two time dimensions — one to cycle the phase, one to accumulate the motion.
+
+And this is where it comes from: **Kepler's laws**. Bodies falling around each other, sweeping out their orbits in fixed periods, the period bound to the distance. The chirp function is Kepler's orbit with the common drift removed and the fall-and-return laid bare on a line. Integrating over the fifth dimension is what turns Kepler's geometry into motion — the orbit is the shape; the wobble against center is what the integrals reveal.
