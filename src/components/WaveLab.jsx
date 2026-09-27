@@ -15,9 +15,9 @@ import {
 
 const X_MAX = 4 * Math.PI
 
-const C1 = '#2563eb' // psi1 — blue
-const C2 = '#ff8c42' // psi2 — orange
-const CS = '#111827' // sum — dark, bold
+const C1 = '#2563ad' // psi1 — blue
+const C2 = '#d7642e' // psi2 — orange
+const CS = '#3a2c1a' // sum — dark, bold
 
 function frameSetup(ctx, canvas) {
   const dpr = window.devicePixelRatio || 1
@@ -30,7 +30,7 @@ function frameSetup(ctx, canvas) {
     canvas.height = H
   }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-  ctx.fillStyle = '#ffffff'
+  ctx.fillStyle = '#fffdf4'
   ctx.fillRect(0, 0, w, h)
   const padL = 46
   const padR = 18
@@ -44,9 +44,9 @@ function drawGrid(ctx, g, yMax) {
   const X = (x) => padL + (x / X_MAX) * pw
   const Y = (y) => padT + ph / 2 - (y / yMax) * (ph / 2)
   ctx.lineWidth = 1
-  ctx.strokeStyle = '#dbe1ea'
-  ctx.fillStyle = '#6b7a90'
-  ctx.font = '11px system-ui, sans-serif'
+  ctx.strokeStyle = '#e5dcc0'
+  ctx.fillStyle = '#715f43'
+  ctx.font = '10px "IBM Plex Mono", monospace'
   ctx.textAlign = 'center'
   const piLabels = ['0', 'π', '2π', '3π', '4π']
   for (let i = 0; i <= 4; i++) {
@@ -66,7 +66,7 @@ function drawGrid(ctx, g, yMax) {
     ctx.stroke()
     ctx.fillText(String(gy), padL - 8, Y(gy) + 4)
   }
-  ctx.strokeStyle = '#9fb0c3'
+  ctx.strokeStyle = '#a99760'
   ctx.beginPath()
   ctx.moveTo(padL, Y(0))
   ctx.lineTo(padL + pw, Y(0))
@@ -517,17 +517,17 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>Trigonometric form <span className="eq-note">— plotted · display units</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box">ψ₁ = A₁e<sup>−βλₙ</sup>cos(k₁λₙ−ω₁M₂τ) + i·A₁e<sup>−βλₙ</sup>sin(k₁λₙ−ω₁M₂τ)</div>
-                  <div className="eq-box">ψ₂ = A₂e<sup>−β(L−λₙ)</sup>cos(−k₂λₙ−ω₂M₁τ) + i·A₂e<sup>−β(L−λₙ)</sup>sin(−k₂λₙ−ω₂M₁τ)</div>
-                  <div className="eq-box">ψ<sub>s</sub> = ψ₁ + ψ₂</div>
+                  <div className="eq-box wide">ψ₁ = A₁e<sup>−βλₙ</sup>cos(k₁λₙ−ω₁M₂τ) + i·A₁e<sup>−βλₙ</sup>sin(k₁λₙ−ω₁M₂τ)</div>
+                  <div className="eq-box wide">ψ₂ = A₂e<sup>−β(L−λₙ)</sup>cos(−k₂λₙ−ω₂M₁τ) + i·A₂e<sup>−β(L−λₙ)</sup>sin(−k₂λₙ−ω₂M₁τ)</div>
+                  <div className="eq-box wide">ψ<sub>s</sub> = ψ₁ + ψ₂</div>
                 </div>
               </div>
 
               <div className="eq-group">
                 <h4>With k, ω, λ substituted <span className="eq-note">— full theory</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box">ψ₁ = √(M₂/(M₁+M₂))·e<sup>−βλₙ</sup>·[cos(2πλₙ/λ₁ − 2πM₁M₂c²τ/h) + i·sin(2πλₙ/λ₁ − 2πM₁M₂c²τ/h)]</div>
-                  <div className="eq-box">ψ₂ = √(M₁/(M₁+M₂))·e<sup>−β(L−λₙ)</sup>·[cos(−2πλₙ/λ₂ − 2πM₁M₂c²τ/h) + i·sin(−2πλₙ/λ₂ − 2πM₁M₂c²τ/h)]</div>
+                  <div className="eq-box wide">ψ₁ = √(M₂/(M₁+M₂))·e<sup>−βλₙ</sup>·[cos(2πλₙ/λ₁ − 2πM₁M₂c²τ/h) + i·sin(2πλₙ/λ₁ − 2πM₁M₂c²τ/h)]</div>
+                  <div className="eq-box wide">ψ₂ = √(M₁/(M₁+M₂))·e<sup>−β(L−λₙ)</sup>·[cos(−2πλₙ/λ₂ − 2πM₁M₂c²τ/h) + i·sin(−2πλₙ/λ₂ − 2πM₁M₂c²τ/h)]</div>
                 </div>
                 <h4 className="eq-sub">With f, T substituted — full theory</h4>
                 <div className="eq-list">
@@ -535,14 +535,14 @@ export default function WaveLab() {
                   <div className="eq-box">f₂ = M₂c²/h, T₂ = 1/f₂</div>
                 </div>
                 <div className="eq-list">
-                  <div className="eq-box">ψ₁ = √(M₂/(M₁+M₂))·e<sup>−βλₙ</sup>·[cos(2πλₙ/λ₁ − 2πM₂τ/T₁) + i·sin(2πλₙ/λ₁ − 2πM₂τ/T₁)]</div>
-                  <div className="eq-box">ψ₂ = √(M₁/(M₁+M₂))·e<sup>−β(4π−λₙ)</sup>·[cos(−2πλₙ/λ₂ − 2πM₁τ/T₂) + i·sin(−2πλₙ/λ₂ − 2πM₁τ/T₂)]</div>
+                  <div className="eq-box wide">ψ₁ = √(M₂/(M₁+M₂))·e<sup>−βλₙ</sup>·[cos(2πλₙ/λ₁ − 2πM₂τ/T₁) + i·sin(2πλₙ/λ₁ − 2πM₂τ/T₁)]</div>
+                  <div className="eq-box wide">ψ₂ = √(M₁/(M₁+M₂))·e<sup>−β(4π−λₙ)</sup>·[cos(−2πλₙ/λ₂ − 2πM₁τ/T₂) + i·sin(−2πλₙ/λ₂ − 2πM₁τ/T₂)]</div>
                 </div>
                 <h4 className="eq-sub">Same, with current values — M₁ = {fmt(M1)}, M₂ = {fmt(M2)}</h4>
                 {T ? (
                   <div className="eq-list">
-                    <div className="eq-box">ψ₁ = {fmt(P.A1)}·e<sup>−{fmt(P.beta, 3)}λₙ</sup>·[cos(<CSci z={T.k1} />·λₙ − <Sci v={xTerm} />·τ) + i·sin(<CSci z={T.k1} />·λₙ − <Sci v={xTerm} />·τ)]</div>
-                    <div className="eq-box">ψ₂ = {fmt(P.A2)}·e<sup>−{fmt(P.beta, 3)}({X_MAX.toFixed(2)}−λₙ)</sup>·[cos(<CSci z={{ re: -T.k2.re, im: -T.k2.im }} />·λₙ − <Sci v={xTerm} />·τ) + i·sin(<CSci z={{ re: -T.k2.re, im: -T.k2.im }} />·λₙ − <Sci v={xTerm} />·τ)]</div>
+                    <div className="eq-box wide">ψ₁ = {fmt(P.A1)}·e<sup>−{fmt(P.beta, 3)}λₙ</sup>·[cos(<CSci z={T.k1} />·λₙ − <Sci v={xTerm} />·τ) + i·sin(<CSci z={T.k1} />·λₙ − <Sci v={xTerm} />·τ)]</div>
+                    <div className="eq-box wide">ψ₂ = {fmt(P.A2)}·e<sup>−{fmt(P.beta, 3)}({X_MAX.toFixed(2)}−λₙ)</sup>·[cos(<CSci z={{ re: -T.k2.re, im: -T.k2.im }} />·λₙ − <Sci v={xTerm} />·τ) + i·sin(<CSci z={{ re: -T.k2.re, im: -T.k2.im }} />·λₙ − <Sci v={xTerm} />·τ)]</div>
                   </div>
                 ) : (
                   <p className="hint">λ and k are singular at zero mass — no finite theory values here.</p>
@@ -630,7 +630,7 @@ export default function WaveLab() {
                   <div className="eq-box">∂ψ₁/∂M₂ + ∂ψ₂/∂M₂ = 0</div>
                   <div className="eq-box">k₁ψ₁ = ω₂ψ₂</div>
                   <div className="eq-box">k₂ψ₂ = ω₁ψ₁</div>
-                  <div className="eq-box">dψ<sub>s</sub> = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁ + ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</div>
+                  <div className="eq-box wide">dψ<sub>s</sub> = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁ + ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</div>
                 </div>
               </div>
 
