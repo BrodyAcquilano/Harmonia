@@ -378,7 +378,7 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
   const dash2 = [6, 4]
   const diffArr = arr1.map((v, i) => v - arr2[i])
   const all = s.waveDisplay === 'sum' ? diffArr : [...arr1, ...arr2, ...diffArr]
-  const yMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all)) * 1.15, 0.1)
+  const yMax = Math.max(Math.abs(Math.min(...all)) * 1.15, Math.abs(Math.max(...all)) * 1.15, 0.1)
   const { X, Y } = drawGrid(ctx, g, yMax)
   const interp = (arr) => (x) => {
     const idx = Math.min(Math.floor((x / X_MAX) * N), N - 1)
@@ -446,60 +446,67 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
 //   Fₙ(τ) = Jₙ(L,τ) − Wₙ(L,τ) = ∫₀ᴸ [Im(ψₙ) − Re(ψₙ)] dλₙ.
 // Integrating over τ gives the wobble: Xₙ(τ) = ∫₀^τ Fₙ(τ′) dτ′.
 // Cached by (M1, M2) since it doesn't depend on the animation frame.
+// Each body's wobble is sampled over its OWN natural period — F₁ oscillates
+// at w₁M₂ = M₂ in τ, F₂ at w₂M₁ = √(M₁M₂) — so each curve closes exactly and
+// the live dots can wrap on their own period with no teleport at the loop.
 let wobbleCache = { key: null }
 function wobbleCurves(M1, M2, P) {
-  // One wobble cycle of body 1: F₁ oscillates at ω₁M₂ = M₂ in τ.
-  const tauMax = (2 * Math.PI) / Math.max(M2, 0.05)
-  const key = `${M1}|${M2}|${tauMax}`
+  const T1 = (2 * Math.PI) / Math.max(M2, 0.05)
+  const w2M1 = P.w2 * Math.max(M1, 0)
+  const T2 = w2M1 > 1e-9 ? (2 * Math.PI) / w2M1 : T1
+  const key = `${M1}|${M2}|${T1}|${T2}`
   if (wobbleCache.key === key) return wobbleCache
   const NT = 720, NS = 120
-  const dx = X_MAX / NS, dt = tauMax / NT
-  const f1 = [], f2 = []
-  for (let i = 0; i <= NT; i++) {
-    const t = (i / NT) * tauMax
-    let s1 = 0, s2 = 0
-    for (let j = 0; j <= NS; j++) {
-      const x = (j / NS) * X_MAX
-      const p1 = psi1(x, t, P, M2)
-      const p2 = psi2(x, t, P, M1)
-      const w = (j === 0 || j === NS) ? 0.5 : 1
-      s1 += w * (p1.im - p1.re)
-      s2 += w * (p2.im - p2.re)
+  const dx = X_MAX / NS
+  // Net impulse + wobble of one body over its own period T.
+  const sampleBody = (T, n) => {
+    const dt = T / NT
+    const f = [], x = []
+    let c = 0
+    for (let i = 0; i <= NT; i++) {
+      const t = (i / NT) * T
+      let s = 0
+      for (let j = 0; j <= NS; j++) {
+        const px = (j / NS) * X_MAX
+        const p = n === 1 ? psi1(px, t, P, M2) : psi2(px, t, P, M1)
+        const w = (j === 0 || j === NS) ? 0.5 : 1
+        s += w * (p.im - p.re)
+      }
+      f.push(s * dx)
+      if (i > 0) c += ((f[i - 1] + f[i]) / 2) * dt
+      x.push(c)
     }
-    f1.push(s1 * dx); f2.push(s2 * dx)
+    // Center on zero over the body's own full period.
+    const m = x.reduce((a, b) => a + b, 0) / x.length
+    return { f, x: x.map((v) => v - m) }
   }
-  const x1 = [], x2 = []
-  let c1 = 0, c2 = 0
-  for (let i = 0; i <= NT; i++) {
-    if (i > 0) {
-      c1 += ((f1[i - 1] + f1[i]) / 2) * dt
-      c2 += ((f2[i - 1] + f2[i]) / 2) * dt
-    }
-    x1.push(c1); x2.push(c2)
-  }
-  // Center on zero so the curves read as wobble around the middle.
-  const m1 = x1.reduce((a, b) => a + b, 0) / x1.length
-  const m2 = x2.reduce((a, b) => a + b, 0) / x2.length
-  wobbleCache = { key, tauMax, NT, f1, f2, x1: x1.map(v => v - m1), x2: x2.map(v => v - m2) }
+  const b1 = sampleBody(T1, 1), b2 = sampleBody(T2, 2)
+  wobbleCache = { key, tauMax: T1, T1, T2, NT, f1: b1.f, f2: b2.f, x1: b1.x, x2: b2.x }
   return wobbleCache
+}
+
+// Sample one body's curve array at time t, wrapping on that body's own
+// period so live animations loop seamlessly at any mass ratio.
+function samplePeriodic(arr, T, NT, t) {
+  const tw = ((t % T) + T) % T
+  const idx = Math.min(Math.floor((tw / T) * NT), NT - 1)
+  const f = ((tw / T) * NT) - idx
+  return arr[idx] * (1 - f) + arr[idx + 1] * f
 }
 
 // Wobble vs time — STATIC snapshot of one full cycle (both directions).
 // X₁(t) blue, X₂(t) orange. No animation: this is the trajectory, not a frame.
+// The window is body 1's period; body 2 is shown over the same window via its
+// own periodic extension, exactly as the live dots draw it.
 function renderWobbleTimeFrame(ctx, canvas, s) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
-  const { tauMax, NT, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
+  const { tauMax, T2, NT, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
   const all = [...x1, ...x2]
-  const yMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all)) * 1.15, 0.1)
+  const yMax = Math.max(Math.abs(Math.min(...all)) * 1.15, Math.abs(Math.max(...all)) * 1.15, 0.1)
   const { X, Y } = drawTimeGrid(ctx, g, yMax, tauMax)
-  const interp = (arr) => (t) => {
-    const idx = Math.min(Math.floor((t / tauMax) * NT), NT - 1)
-    const f = ((t / tauMax) * NT) - idx
-    return arr[idx] * (1 - f) + arr[idx + 1] * f
-  }
-  trace(ctx, X, Y, interp(x1), C1, 2.5, [])
-  trace(ctx, X, Y, interp(x2), C2, 2.5, [])
+  trace(ctx, X, Y, (t) => samplePeriodic(x1, tauMax, NT, t), C1, 2.5, [])
+  trace(ctx, X, Y, (t) => samplePeriodic(x2, T2, NT, t), C2, 2.5, [])
 }
 
 // Net impulse vs time — STATIC snapshot of one full cycle.
@@ -507,31 +514,24 @@ function renderWobbleTimeFrame(ctx, canvas, s) {
 function renderForceTimeFrame(ctx, canvas, s) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
-  const { tauMax, NT, f1, f2 } = wobbleCurves(s.M1, s.M2, P)
+  const { tauMax, T2, NT, f1, f2 } = wobbleCurves(s.M1, s.M2, P)
   const all = [...f1, ...f2]
-  const yMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all)) * 1.15, 0.1)
+  const yMax = Math.max(Math.abs(Math.min(...all)) * 1.15, Math.abs(Math.max(...all)) * 1.15, 0.1)
   const { X, Y } = drawTimeGrid(ctx, g, yMax, tauMax)
-  const interp = (arr) => (t) => {
-    const idx = Math.min(Math.floor((t / tauMax) * NT), NT - 1)
-    const f = ((t / tauMax) * NT) - idx
-    return arr[idx] * (1 - f) + arr[idx + 1] * f
-  }
-  trace(ctx, X, Y, interp(f1), C1, 2.5, [])
-  trace(ctx, X, Y, interp(f2), C2, 2.5, [])
+  trace(ctx, X, Y, (t) => samplePeriodic(f1, tauMax, NT, t), C1, 2.5, [])
+  trace(ctx, X, Y, (t) => samplePeriodic(f2, T2, NT, t), C2, 2.5, [])
 }
 
 // Wobble diagram: m₁ dot left (blue), m₂ dot right (orange), each moving
 // up/down with Xₙ(τ). No motion along the horizontal — relative velocity
-// is constant, so the wobble is purely perpendicular.
+// is constant, so the wobble is purely perpendicular. Each dot wraps on its
+// own wobble period, so both loop seamlessly at any mass ratio.
 function renderWobbleDotsFrame(ctx, canvas, s, tau) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
-  const { tauMax, NT, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
-  const tc = ((tau % tauMax) + tauMax) % tauMax
-  const idx = Math.min(Math.floor((tc / tauMax) * NT), NT - 1)
-  const f = ((tc / tauMax) * NT) - idx
-  const v1 = x1[idx] * (1 - f) + x1[idx + 1] * f
-  const v2 = x2[idx] * (1 - f) + x2[idx + 1] * f
+  const { T1, T2, NT, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
+  const v1 = samplePeriodic(x1, T1, NT, tau)
+  const v2 = samplePeriodic(x2, T2, NT, tau)
   const all = [...x1, ...x2]
   const vMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all)), 0.1)
   const { padL, padT, pw, ph } = g
@@ -584,15 +584,13 @@ function dotRadius(M, M1, M2) {
 // which lies horizontal in this view: yₙ(t) = Xₙ(t). They move opposite —
 // when one shifts left, the other shifts right — so the smaller (lighter)
 // body visibly crosses in front of the larger one (drawn on top at crossings).
+// Each dot wraps on its own wobble period, so both loop seamlessly.
 function renderInlineWobbleFrame(ctx, canvas, s, tau) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
-  const { tauMax, NT, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
-  const tc = ((tau % tauMax) + tauMax) % tauMax
-  const idx = Math.min(Math.floor((tc / tauMax) * NT), NT - 1)
-  const f = ((tc / tauMax) * NT) - idx
-  const v1 = x1[idx] * (1 - f) + x1[idx + 1] * f
-  const v2 = x2[idx] * (1 - f) + x2[idx + 1] * f
+  const { T1, T2, NT, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
+  const v1 = samplePeriodic(x1, T1, NT, tau)
+  const v2 = samplePeriodic(x2, T2, NT, tau)
   const all = [...x1, ...x2]
   const vMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all)), 0.1)
   const { padL, padT, pw, ph } = g
@@ -739,7 +737,7 @@ function renderPushPullFrame(ctx, canvas, s, tau, mode) {
   const showParts = mode === 'parts' || mode === 'all'
   const showDiff = mode === 'diff' || mode === 'all'
   const shown = [...(showParts ? [...p1Arr, ...p2Arr] : []), ...(showDiff ? dArr : [])]
-  const yMax = Math.max(Math.abs(Math.min(...shown)), Math.abs(Math.max(...shown)) * 1.15, 0.1)
+  const yMax = Math.max(Math.abs(Math.min(...shown)) * 1.15, Math.abs(Math.max(...shown)) * 1.15, 0.1)
   const { X, Y } = drawGrid(ctx, g, yMax)
   const interp = (arr) => (x) => {
     const idx = Math.min(Math.floor((x / X_MAX) * N), N - 1)
@@ -759,25 +757,27 @@ function renderPushPullFrame(ctx, canvas, s, tau, mode) {
 function renderPushPullTimeFrame(ctx, canvas, s, mode) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
-  const { tauMax, NT, f1, f2 } = wobbleCurves(s.M1, s.M2, P)
-  const p1 = f1.map((v) => -v)
-  const p2 = f2.map((v) => -v)
-  const tArr = p1.map((v, i) => v - p2[i])
+  const { tauMax, T2, NT, f1, f2 } = wobbleCurves(s.M1, s.M2, P)
+  // Pₙ(t) = −Fₙ(t), evaluated at the same instant t for both bodies; body 2
+  // wraps on its own period.
+  const p1at = (t) => -samplePeriodic(f1, tauMax, NT, t)
+  const p2at = (t) => -samplePeriodic(f2, T2, NT, t)
+  const diffAt = (t) => p1at(t) - p2at(t)
   const showParts = mode === 'parts' || mode === 'all'
   const showDiff = mode === 'diff' || mode === 'all'
-  const shown = [...(showParts ? [...p1, ...p2] : []), ...(showDiff ? tArr : [])]
-  const yMax = Math.max(Math.abs(Math.min(...shown)), Math.abs(Math.max(...shown)) * 1.15, 0.1)
+  const shown = []
+  for (let i = 0; i <= 240; i++) {
+    const t = (i / 240) * tauMax
+    if (showParts) shown.push(p1at(t), p2at(t))
+    if (showDiff) shown.push(diffAt(t))
+  }
+  const yMax = Math.max(Math.abs(Math.min(...shown)) * 1.15, Math.abs(Math.max(...shown)) * 1.15, 0.1)
   const { X, Y } = drawTimeGrid(ctx, g, yMax, tauMax)
-  const interp = (arr) => (t) => {
-    const idx = Math.min(Math.floor((t / tauMax) * NT), NT - 1)
-    const f = ((t / tauMax) * NT) - idx
-    return arr[idx] * (1 - f) + arr[idx + 1] * f
-  }
   if (showParts) {
-    trace(ctx, X, Y, interp(p1), C1, 2.5, [])
-    trace(ctx, X, Y, interp(p2), C2, 2.5, [])
+    trace(ctx, X, Y, p1at, C1, 2.5, [])
+    trace(ctx, X, Y, p2at, C2, 2.5, [])
   }
-  if (showDiff) trace(ctx, X, Y, interp(tArr), '#3a2c1a', 2.5, [])
+  if (showDiff) trace(ctx, X, Y, diffAt, '#3a2c1a', 2.5, [])
 }
 
 // Legacy wrapper for backward compatibility
