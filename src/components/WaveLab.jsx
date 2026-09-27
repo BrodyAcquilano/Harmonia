@@ -781,12 +781,6 @@ export default function WaveLab() {
                   )}
                   <span><i className="swatch swatch-dashed" /><Tex tex="\psi_1: +x, \; \psi_2: -x" /></span>
                 </div>
-                <label className="check-row graph-check">
-                  Display
-                  <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
-                    <option value="waves">W₁, J₂</option>
-                  </select>
-                </label>
               </div>
               <canvas ref={canvasCumRef} className="wave-canvas" />
             </div>
@@ -806,12 +800,6 @@ export default function WaveLab() {
                   )}
                   <span><i className="swatch swatch-dashed" /><Tex tex="\psi_1: +x, \; \psi_2: -x" /></span>
                 </div>
-                <label className="check-row graph-check">
-                  Display
-                  <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
-                    <option value="waves">W₂, J₁</option>
-                  </select>
-                </label>
               </div>
               <canvas ref={canvasPair2Ref} className="wave-canvas" />
             </div>
