@@ -34,7 +34,7 @@ function frameSetup(ctx, canvas) {
   ctx.fillRect(0, 0, w, h)
   const compact = h < 220
   const padL = 50
-  const padR = 22
+  const padR = 50
   const padT = compact ? 12 : 20
   const padB = compact ? 39 : 46
   return { w, h, padL, padR, padT, padB, pw: w - padL - padR, ph: h - padT - padB }

@@ -259,13 +259,13 @@ body {
   display: block;
   margin: 0 0 4px;
   color: #715f43;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .derived-box b {
   display: block;
   font-weight: 500;
-  font-size: 12px;
+  font-size: 14px;
   font-family: "IBM Plex Mono", monospace;
   color: #3a2c1a;
 }
@@ -828,8 +828,11 @@ body {
   border-radius: 8px;
   padding: 12px;
   color: #3a2c1a;
-  font: 500 11.5px/1.65 "IBM Plex Mono", monospace;
+  font: 500 14px/1.65 "IBM Plex Mono", monospace;
   overflow-wrap: anywhere;
+  text-align: center;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .eq-box.wide {
@@ -843,6 +846,8 @@ body {
   font: 600 10px/1.3 "IBM Plex Sans", sans-serif;
   text-transform: uppercase;
   letter-spacing: .055em;
+  text-align: left;
+  white-space: normal;
 }
 
 .eq-line {
