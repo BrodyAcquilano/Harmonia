@@ -562,11 +562,11 @@ function renderWobbleDotsFrame(ctx, canvas, s, tau) {
   ctx.textAlign = 'center'
   ctx.fillText('m₁', xL, padT + ph + 22)
   ctx.fillText('m₂', xR, padT + ph + 22)
-  // Axes: the λ–y plane.
+  // Axes: the xy plane (x is the λ line).
   ctx.fillStyle = '#715f43'
   ctx.font = '11px "IBM Plex Mono", monospace'
   ctx.textAlign = 'right'
-  ctx.fillText('λ (spatial)', padL + pw, midY - 8)
+  ctx.fillText('x (spatial)', padL + pw, midY - 8)
   ctx.textAlign = 'left'
   ctx.fillText('y', padL + 4, padT + 12)
   ctx.restore()
@@ -627,11 +627,11 @@ function renderInlineWobbleFrame(ctx, canvas, s, tau) {
   ctx.textAlign = 'center'
   ctx.fillText('m₁', xL, midY + 30)
   ctx.fillText('m₂', xR, midY + 30)
-  // Axes: the λ–z plane (motion along λ; z labels the viewing plane).
+  // Axes: the xz plane (motion along x = the λ line; z labels the viewing plane).
   ctx.fillStyle = '#715f43'
   ctx.font = '11px "IBM Plex Mono", monospace'
   ctx.textAlign = 'right'
-  ctx.fillText('λ (spatial)', padL + pw, midY - 8)
+  ctx.fillText('x (spatial)', padL + pw, midY - 8)
   ctx.textAlign = 'left'
   ctx.fillText('z', padL + 4, padT + 12)
   ctx.restore()
@@ -1166,13 +1166,13 @@ export default function WaveLab() {
           <>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Bodies: Wobble Diagram</h2>
+              <h2 className="graph-title">Bodies: Wobble (xy plane)</h2>
             </div>
             <canvas ref={canvasWobbleDotsRef} className="wave-canvas" />
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Bodies: In-Line Wobble</h2>
+              <h2 className="graph-title">Bodies: In-Line Wobble (xz plane)</h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
@@ -1192,6 +1192,7 @@ export default function WaveLab() {
               </div>
             </div>
             <canvas ref={canvasOrbitApparentRef} className="wave-canvas-sq" />
+            <div className="graph-footnote">xy plane</div>
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
@@ -1203,6 +1204,7 @@ export default function WaveLab() {
               </div>
             </div>
             <canvas ref={canvasOrbitTrueRef} className="wave-canvas-sq" />
+            <div className="graph-footnote">xy plane</div>
           </div>
           </div>
           <div className="graph-box">

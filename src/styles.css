@@ -469,6 +469,15 @@ body {
   background: transparent;
 }
 
+/* Small italic footnote at the bottom corner of a graph box */
+.graph-footnote {
+  padding: 6px 20px 12px;
+  text-align: right;
+  font-style: italic;
+  font-size: 12px;
+  color: #715f43;
+}
+
 /* Two graph boxes sharing one row */
 .graph-duo {
   display: grid;
