@@ -134,7 +134,7 @@ Three curves, all real parts (the spatial-inertia component) plotted against $\l
 
 - **$\psi_1$ (blue)** travels toward $+\lambda_n$; **$\psi_2$ (orange)** travels toward $-\lambda_n$. They are counter-propagating by construction: the sign of the spatial phase term is reversed between them.
 - **$\psi_s = \psi_1 + \psi_2$ (dark)** is the summed field — the total inertial state of the closed system.
-- The vertical dashed line is the **balance point** $\lambda^* = L\,M_1/(M_1+M_2)$, the mass-weighted center. For equal masses it sits at the midpoint; for $M_2 = 3M_1$ it sits at $L/4$.
+- The vertical dashed line is the **balance point** $\lambda^* = L\,M_2/(M_1+M_2)$, the mass-weighted center. For equal masses it sits at the midpoint; for $M_2 = 3M_1$ it sits at $3L/4$ — nearer the heavier body.
 
 The display dropdown selects $\psi_1,\psi_2$ alone, their sum alone, or all three. As the phasor rotates (animation playing), watch the blue and orange curves trade amplitude: when one is at a crest of spatial inertia, the other is crossing through zero into temporal inertia. Their sum stays bounded — the visual form of the conservation law.
 
@@ -205,10 +205,10 @@ $$
 
 The center cross is the impartial reference point, head-on. Dot size scales with mass, and the lighter body is drawn on top, so at each crossing it visibly passes *in front of* the heavier body, like a transit. The $xy$ view shows the wobble from the side; this one shows it head-on down the line between the bodies.
 
-**"Apparent Relative Motion"** and **"True Motion"** — the wobble wrapped into circular orbits, stacked full-width one above the other, each footnoted *xy plane* (the orbit is drawn in the same $xy$ plane as the first wobble diagram — the $x$-axis wrapped into a circle). "True Motion" gets the bigger box, with tiny zoom controls underneath (50%–400%), so the rings have room to expand as the masses change. The orbital angle runs one full turn per wobble cycle, synced to the same clock as the wobble diagram; both diagrams share one scale so they compare directly. The center point ($+$) is the **opposite balance point** $L - \lambda^* = L\,M_2/(M_1+M_2)$ — the mirror of the Gravity tab's $\lambda^*$, i.e. the center of mass — and each body's orbital radius is its distance from that point:
+**"Apparent Relative Motion"** and **"True Motion"** — the wobble wrapped into circular orbits, stacked full-width one above the other, each footnoted *xy plane* (the orbit is drawn in the same $xy$ plane as the first wobble diagram — the $x$-axis wrapped into a circle). "True Motion" gets the bigger box, with tiny zoom controls underneath (50%–400%), so the rings have room to expand as the masses change. The orbital angle runs one full turn per wobble cycle, synced to the same clock as the wobble diagram; both diagrams share one scale so they compare directly. The center point ($+$) is the **balance point** $\lambda^* = L\,M_2/(M_1+M_2)$ — the center of mass — and each body's orbital radius is its distance from that point:
 
 $$
-\phi(t) = 2\pi t / T, \qquad \lambda^* = L\frac{M_1}{M_1+M_2}
+\phi(t) = 2\pi t / T, \qquad \lambda^* = L\frac{M_2}{M_1+M_2}
 $$
 
 $$
@@ -216,7 +216,7 @@ $$
 $$
 
 $$
-\text{true: } \mathbf{r}_1(\phi) = -(L-\lambda^*)(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +\lambda^*(\cos\phi, \sin\phi)
+\text{true: } \mathbf{r}_1(\phi) = -\lambda^*(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +(L-\lambda^*)(\cos\phi, \sin\phi)
 $$
 
 "Apparent" pins $m_1$ (blue) at the center while $m_2$ (orange) circles it at the full separation $L$ — the naive view, what the Moon's orbit looks like if you assume the Earth doesn't move. We know it is wrong, and it is labeled as such. "True" splits the separation at the center of mass: $r_1 + r_2 = L$ always, the two bodies circling ($+$) on opposite sides, the heavier mass tracing the smaller circle — consistent with the wobble diagram, where the heavier mass moves less. The wobble diagram is the edge-on view of this motion; the orbit diagrams are the face-on view.

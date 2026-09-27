@@ -231,7 +231,7 @@ function renderFrame(ctx, canvas, s, tau) {
   // For gravity main graph: shade area between ψ₁ and ψ₂,
   // blue left of balance point, orange right
   if (s.subtab === 'gravity' && (s.waveDisplay === 'waves' || s.waveDisplay === 'all') && curves.length >= 2 && s.M1 + s.M2 > 0) {
-    const xStar = (X_MAX * s.M1) / (s.M1 + s.M2)
+    const xStar = (X_MAX * s.M2) / (s.M1 + s.M2)
     const fn1 = curves[0].fn
     const fn2 = curves[1].fn
     ctx.save()
@@ -278,12 +278,12 @@ function renderFrame(ctx, canvas, s, tau) {
     ctx.restore()
   }
   if ((s.subtab === 'gravity' || s.subtab === 'integ') && s.M1 + s.M2 > 0) {
-    // Balance point: mass-weighted center x* = L·M₁/(M₁+M₂).
-    // M₂·x* = M₁·(L−x*); equal masses → middle, M₂=3M₁ → L/4.
+    // Balance point: mass-weighted center x* = L·M₂/(M₁+M₂).
+    // M₁·x* = M₂·(L−x*); equal masses → middle, M₂=3M₁ → 3L/4.
     // For integration tab, use the mirrored point (opposite side).
     const xStar = s.subtab === 'integ'
-      ? X_MAX - (X_MAX * s.M1) / (s.M1 + s.M2)
-      : (X_MAX * s.M1) / (s.M1 + s.M2)
+      ? X_MAX - (X_MAX * s.M2) / (s.M1 + s.M2)
+      : (X_MAX * s.M2) / (s.M1 + s.M2)
     ctx.save()
     ctx.strokeStyle = '#9a9a9a'
     ctx.lineWidth = 1.5
@@ -629,24 +629,24 @@ function renderInlineWobbleFrame(ctx, canvas, s, tau) {
   ctx.restore()
 }
 
-// Orbit diagrams: circular orbits about the opposite balance point.
-// The center (+) is L − λ* = L·M₂/(M₁+M₂) — the mirror of the Gravity tab's
-// balance point, i.e. the center of mass. Each body's orbital radius is its
-// distance from that point: r₁ = L − λ*, r₂ = λ*, so r₁ + r₂ = L always.
+// Orbit diagrams: circular orbits about the balance point.
+// The center (+) is λ* = L·M₂/(M₁+M₂) — the Gravity tab's balance point,
+// i.e. the center of mass. Each body's orbital radius is its distance from
+// that point: r₁ = λ*, r₂ = L − λ*, so r₁ + r₂ = L always.
 // The heavier mass traces the smaller circle, matching the wobble diagram.
 // The orbital angle φ runs one full turn per displayed wobble cycle, synced
 // to the same animation clock as the wobble dots. Both diagrams share one
 // scale so they compare directly.
 // trueMotion=false: "apparent" — m₁ pinned at the center, m₂ circling it at
 // the full separation L (the naive relative orbit).
-// trueMotion=true:  "true" — the separation split at the center of mass,
+// trueMotion=true:  "true" — the separation split at the balance point,
 // both bodies circling (+), opposite.
 function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
   const { tauMax } = wobbleCurves(s.M1, s.M2, P)
-  const lamStar = (X_MAX * s.M1) / (s.M1 + s.M2)
-  const R1 = X_MAX - lamStar, R2 = lamStar
+  const lamStar = (X_MAX * s.M2) / (s.M1 + s.M2)
+  const R1 = lamStar, R2 = X_MAX - lamStar
   const { padT, pw, ph } = g
   const cx = g.padL + pw / 2, cy = padT + ph / 2
   // True Motion zooms around the fit scale; Apparent stays at fit.
@@ -1323,7 +1323,7 @@ export default function WaveLab() {
                   <div className="eq-box"><span className="eq-label">Decay</span><Tex tex="\beta = \dfrac{|M_1 - M_2|}{M_1 + M_2}" /></div>
                   <div className="eq-box"><span className="eq-label">(λₙ span)</span><Tex tex="L = 4\pi" /></div>
                   <div className="eq-box"><span className="eq-label">Amplitudes</span><span className="eq-line"><Tex tex="A_1 = \sqrt{\dfrac{M_2}{M_1+M_2}}" /></span><span className="eq-line"><Tex tex="A_2 = \sqrt{\dfrac{M_1}{M_1+M_2}}" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Inertia Balance Point</span><span className="eq-line"><Tex tex="\lambda^* = L\dfrac{M_1}{M_1+M_2}" /></span><span className="eq-line"><Tex tex="M_2 \lambda^* = M_1 (L - \lambda^*)" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Inertia Balance Point</span><span className="eq-line"><Tex tex="\lambda^* = L\dfrac{M_2}{M_1+M_2}" /></span><span className="eq-line"><Tex tex="M_1 \lambda^* = M_2 (L - \lambda^*)" /></span></div>
                 </div>
               </div>
             </>
@@ -1406,9 +1406,9 @@ export default function WaveLab() {
                 <h4>Orbit Diagrams <span className="eq-note">— plotted · live</span></h4>
                 <div className="eq-list">
                   <div className="eq-box wide"><span className="eq-label">Orbital angle (one turn per wobble cycle)</span><Tex tex="\phi(t) = 2\pi t / T" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Center: the opposite balance point</span><Tex tex="L - \lambda^*, \quad \lambda^* = L\frac{M_1}{M_1+M_2} \quad \text{— the center of mass}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Center: the balance point</span><Tex tex="\lambda^*, \quad \lambda^* = L\frac{M_2}{M_1+M_2} \quad \text{— the center of mass}" /></div>
                   <div className="eq-box wide"><span className="eq-label">Apparent: m₁ pinned</span><Tex tex="\mathbf{r}_2(\phi) = L(\cos\phi, \sin\phi) \quad \text{— full separation}" /></div>
-                  <div className="eq-box wide"><span className="eq-label">True: separation split at the center of mass</span><Tex tex="\mathbf{r}_1(\phi) = -(L-\lambda^*)(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +\lambda^*(\cos\phi, \sin\phi)" /></div>
+                  <div className="eq-box wide"><span className="eq-label">True: separation split at λ*</span><Tex tex="\mathbf{r}_1(\phi) = -\lambda^*(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +(L-\lambda^*)(\cos\phi, \sin\phi)" /></div>
                   <div className="eq-box wide"><span className="eq-label">Force direction</span><Tex tex="\text{along the line joining the masses (grey)}" /></div>
                 </div>
               </div>
