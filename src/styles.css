@@ -143,6 +143,32 @@ body {
   color: #ffd94d;
 }
 
+.transport-btn-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.round-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px solid #ffd94d;
+  background: #4a2c17;
+  color: #ffd94d;
+  font-size: 17px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.round-btn:hover {
+  background: #5d3a20;
+}
+
 @media (max-width: 860px) {
   .lab-layout {
     grid-template-columns: 1fr;
@@ -217,6 +243,27 @@ body {
 
 .total-legend {
   margin-top: 4px;
+}
+
+.graph-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.graph-head .legend {
+  margin-bottom: 0;
+}
+
+.graph-check {
+  margin-top: 0;
+  padding-top: 2px;
+  white-space: nowrap;
+}
+
+.half-canvas {
+  height: 220px;
 }
 
 .equation {

@@ -118,8 +118,8 @@ function renderFrame(ctx, canvas, s, tau) {
     const grad = (which, key) => (x) => dPsi_dM(which, x, tau, P, s.M1, s.M2)[key].re
     curves = [
       { fn: grad(1, 'd1'), color: C1, width: 1.75, dash: [] },
-      { fn: grad(1, 'd2'), color: C2, width: 1.75, dash: [] },
       { fn: grad(2, 'd1'), color: C1, width: 1.75, dash: [6, 4] },
+      { fn: grad(1, 'd2'), color: C2, width: 1.75, dash: [] },
       { fn: grad(2, 'd2'), color: C2, width: 1.75, dash: [6, 4] },
     ]
   }
@@ -139,6 +139,20 @@ function renderTotalFrame(ctx, canvas, s, tau) {
     dPsi_dM(2, x, tau, P, s.M1, s.M2).sum.re
   const { X, Y } = drawGrid(ctx, g, yMax)
   trace(ctx, X, Y, totalFn, CS, 2.75, [])
+}
+
+// Derivatives tab, middle graph: the two half-waves.
+//   dM₁ half = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁  (sum of the solid pair)
+//   dM₂ half = ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂  (sum of the dashed pair)
+// They are exact opposites (S₁ = −S₂), hence the flat total below.
+function renderHalfFrame(ctx, canvas, s, tau) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  const tot = P.k1 * P.A1 + P.w2 * P.A2 + P.w1 * P.A1 + P.k2 * P.A2
+  const yMax = Math.max(tot * 1.15, 0.2)
+  const { X, Y } = drawGrid(ctx, g, yMax)
+  trace(ctx, X, Y, (x) => dPsi_dM(1, x, tau, P, s.M1, s.M2).sum.re, CS, 2, [])
+  trace(ctx, X, Y, (x) => dPsi_dM(2, x, tau, P, s.M1, s.M2).sum.re, CS, 2, [6, 4])
 }
 
 const fmt = (v, d = 2) => v.toFixed(d)
@@ -230,7 +244,27 @@ export default function WaveLab() {
     setSpeed(m)
   }
 
+  // Pause parks the speed at slow-down/0 — that is what stops the motion.
+  // Play restores the exact speed state from before the pause.
+  const prevSpeedRef = useRef(null)
+  const handlePlayPause = () => {
+    if (playing) {
+      prevSpeedRef.current = { mode: speedMode, speed }
+      setSpeedMode('slow')
+      setSpeed(0)
+      setPlaying(false)
+    } else {
+      const prev = prevSpeedRef.current
+      if (prev) {
+        setSpeedMode(prev.mode)
+        setSpeed(prev.speed)
+      }
+      setPlaying(true)
+    }
+  }
+
   const canvasRef = useRef(null)
+  const canvasHalfRef = useRef(null)
   const canvasTotalRef = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
@@ -250,7 +284,9 @@ export default function WaveLab() {
         setTau(Math.round(tauRef.current * 20) / 20)
       }
       renderFrame(ctx, canvas, s, tauRef.current)
-      if (s.subtab === 'derivatives' && s.showSum) {
+      if (s.subtab === 'derivatives') {
+        const hc = canvasHalfRef.current
+        if (hc) renderHalfFrame(hc.getContext('2d'), hc, s, tauRef.current)
         const tc = canvasTotalRef.current
         if (tc) renderTotalFrame(tc.getContext('2d'), tc, s, tauRef.current)
       }
@@ -315,28 +351,22 @@ export default function WaveLab() {
         </div>
         <div className="transport">
           <h3 className="transport-title">Animation</h3>
-          <button onClick={() => setPlaying((p) => !p)}>{playing ? 'Pause' : 'Play'}</button>
-          <button
-            onClick={() => {
-              tauRef.current = 0
-              setTau(0)
-            }}
-          >
-            Reset
-          </button>
+          <div className="transport-btn-row">
+            <button className="round-btn" onClick={handlePlayPause} aria-label={playing ? 'Pause' : 'Play'}>
+              {playing ? '❚❚' : '▶'}
+            </button>
+            <button
+              className="round-btn"
+              aria-label="Reset time"
+              onClick={() => {
+                tauRef.current = 0
+                setTau(0)
+              }}
+            >
+              ↻
+            </button>
+          </div>
           <span className="time-readout">τ = {tau.toFixed(2)}</span>
-          <label className="check-row transport-check">
-            <input
-              type="checkbox"
-              checked={showSum}
-              onChange={(e) => setShowSum(e.target.checked)}
-            />
-            {subtab === 'gravity' ? (
-              <>standing wave ψ<sub>s</sub></>
-            ) : (
-              <>total dψ<sub>s</sub></>
-            )}
-          </label>
           <select
             className="speed-mode"
             value={speedMode}
@@ -373,35 +403,51 @@ export default function WaveLab() {
       </div>
 
       <div className="lab-stage">
-        <div className="graph-box">
-        <div className="legend">
-          {subtab === 'gravity' ? (
-            <>
-              <span><i className="swatch" style={{ background: C1 }} />ψ₁(M₁,M₂) → +λₙ</span>
-              <span><i className="swatch" style={{ background: C2 }} />ψ₂(M₂,M₁) → −λₙ</span>
-              {showSum && <span><i className="swatch" style={{ background: CS }} />ψ<sub>s</sub> = ψ₁ + ψ₂</span>}
-            </>
-          ) : (
-            <>
-              <span><i className="swatch" style={{ background: C1 }} />∂ψ₁/∂M₁ = ik₁ψ₁</span>
-              <span><i className="swatch" style={{ background: C2 }} />∂ψ₂/∂M₁ = −iω₂ψ₂</span>
-              <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} />∂ψ₁/∂M₂ = −iω₁ψ₁</span>
-              <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />∂ψ₂/∂M₂ = ik₂ψ₂</span>
-            </>
-          )}
-        </div>
-
-        <canvas ref={canvasRef} className="wave-canvas" />
-
-        {subtab === 'derivatives' && showSum && (
-          <>
-            <div className="legend total-legend">
-              <span><i className="swatch" style={{ background: CS }} />total dψ<sub>s</sub></span>
+        {subtab === 'gravity' ? (
+          <div className="graph-box">
+            <div className="graph-head">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: C1 }} />ψ₁(M₁,M₂) → +λₙ</span>
+                <span><i className="swatch" style={{ background: C2 }} />ψ₂(M₂,M₁) → −λₙ</span>
+                {showSum && <span><i className="swatch" style={{ background: CS }} />ψ<sub>s</sub> = ψ₁ + ψ₂</span>}
+              </div>
+              <label className="check-row graph-check">
+                <input
+                  type="checkbox"
+                  checked={showSum}
+                  onChange={(e) => setShowSum(e.target.checked)}
+                />
+                standing wave ψ<sub>s</sub>
+              </label>
             </div>
-            <canvas ref={canvasTotalRef} className="wave-canvas total-canvas" />
+            <canvas ref={canvasRef} className="wave-canvas" />
+          </div>
+        ) : (
+          <>
+            <div className="graph-box">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: C1 }} />∂ψ₁/∂M₁ = ik₁ψ₁</span>
+                <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} />∂ψ₁/∂M₂ = −iω₁ψ₁</span>
+                <span><i className="swatch" style={{ background: C2 }} />∂ψ₂/∂M₁ = −iω₂ψ₂</span>
+                <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />∂ψ₂/∂M₂ = ik₂ψ₂</span>
+              </div>
+              <canvas ref={canvasRef} className="wave-canvas" />
+            </div>
+            <div className="graph-box">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: CS }} />dM₁ half-wave = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁</span>
+                <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${CS} 0 5px, transparent 5px 9px)` }} />dM₂ half-wave = ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</span>
+              </div>
+              <canvas ref={canvasHalfRef} className="wave-canvas half-canvas" />
+            </div>
+            <div className="graph-box">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: CS }} />total dψ<sub>s</sub></span>
+              </div>
+              <canvas ref={canvasTotalRef} className="wave-canvas total-canvas" />
+            </div>
           </>
         )}
-        </div>
 
         <div className="eq-panel">
         <div className="eq-groups">
