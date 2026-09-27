@@ -287,11 +287,11 @@ function renderHalfFrame(ctx, canvas, s, tau) {
   trace(ctx, X, Y, (x) => dPsi_dM(2, x, tau, P, s.M1, s.M2).sum.re, C2, 2, [6, 4])
 }
 
-// Integration tab: Potential Work and Potential Impulse.
-//   Pair 1: W₁ + W₂ (potential work of both waves, solid)
-//   Pair 2: J₁ + J₂ (potential impulse of both waves, dashed)
-//   Work: Wₙ(x) = ∫₀ˣ Re(ψₙ(t)) dt (spatial)
-//   Impulse: Jₙ(x) = ∫₀ˣ Im(ψₙ(t)) dt (temporal)
+// Integration tab: Potential to Do Work and Potential to Generate Impulse.
+//   Pair 1: W₁ + J₁ (work and impulse of ψ₁)
+//   Pair 2: W₂ + J₂ (work and impulse of ψ₂)
+//   Work: Wₙ(x) = ∫₀ˣ Re(ψₙ(t)) dt (spatial, solid)
+//   Impulse: Jₙ(x) = ∫₀ˣ Im(ψₙ(t)) dt (temporal, dashed)
 function renderPairFrame(ctx, canvas, s, tau, pair) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
@@ -328,11 +328,11 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
     prevJ1 = p1.im
     prevJ2 = p2.im
   }
-  // Select the pair: pair=1 → W₁+J₂, pair=2 → W₂+J₁
+  // Select the pair: pair=1 → W₁+J₁, pair=2 → W₂+J₂
   const arr1 = pair === 1 ? work1 : work2
-  const arr2 = pair === 1 ? imp2 : imp1
-  const isWorkPair = pair === 1
-  // For pair 1: W₁ solid, J₂ dashed. For pair 2: W₂ solid, J₁ dashed.
+  const arr2 = pair === 1 ? imp1 : imp2
+  const lineColor = pair === 1 ? C1 : C2
+  // For pair 1: W₁ solid blue, J₁ dashed blue. For pair 2: W₂ solid orange, J₂ dashed orange.
   const dash1 = []
   const dash2 = [6, 4]
   const sumArr = arr1.map((v, i) => v + arr2[i])
@@ -393,8 +393,8 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
     ctx.closePath()
     ctx.fill()
     ctx.restore()
-    trace(ctx, X, Y, interp(arr1), C1, 2, dash1)
-    trace(ctx, X, Y, interp(arr2), C2, 2, dash2)
+    trace(ctx, X, Y, interp(arr1), lineColor, 2, dash1)
+    trace(ctx, X, Y, interp(arr2), lineColor, 2, dash2)
   }
   if (s.waveDisplay === 'sum' || s.waveDisplay === 'all') {
     trace(ctx, X, Y, interp(sumArr), CS, 2.75, [])
@@ -792,25 +792,25 @@ export default function WaveLab() {
             </div>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Potential to Do Work₁ + Generate Impulse₂</h2>
+                <h2 className="graph-title">Potential to Do Work₁ + Generate Impulse₁</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
                   {(waveDisplay === 'waves' || waveDisplay === 'all') && (
                     <>
                       <span><i className="swatch" style={{ background: C1 }} /><Tex tex="W_1 = \int \mathrm{Re}(\psi_1) \, d\lambda_n" /></span>
-                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_2 = \int \mathrm{Im}(\psi_2) \, d\lambda_n" /></span>
+                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_1 = \int \mathrm{Im}(\psi_1) \, d\lambda_n" /></span>
                     </>
                   )}
-                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_1 + J_2" /></span>}
+                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_1 + J_1" /></span>}
                   <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
                 </div>
                 <label className="check-row graph-check">
                   Display
                   <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
-                    <option value="waves">W₁, J₂</option>
-                    <option value="sum">W₁ + J₂</option>
-                    <option value="all">W₁, J₂, W₁ + J₂</option>
+                    <option value="waves">W₁, J₁</option>
+                    <option value="sum">W₁ + J₁</option>
+                    <option value="all">W₁, J₁, W₁ + J₁</option>
                   </select>
                 </label>
               </div>
@@ -818,25 +818,25 @@ export default function WaveLab() {
             </div>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Potential to Do Work₂ + Generate Impulse₁</h2>
+                <h2 className="graph-title">Potential to Do Work₂ + Generate Impulse₂</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
                   {(waveDisplay === 'waves' || waveDisplay === 'all') && (
                     <>
                       <span><i className="swatch" style={{ background: C2 }} /><Tex tex="W_2 = \int \mathrm{Re}(\psi_2) \, d\lambda_n" /></span>
-                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_1 = \int \mathrm{Im}(\psi_1) \, d\lambda_n" /></span>
+                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_2 = \int \mathrm{Im}(\psi_2) \, d\lambda_n" /></span>
                     </>
                   )}
-                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_2 + J_1" /></span>}
+                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_2 + J_2" /></span>}
                   <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
                 </div>
                 <label className="check-row graph-check">
                   Display
                   <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
-                    <option value="waves">W₂, J₁</option>
-                    <option value="sum">W₂ + J₁</option>
-                    <option value="all">W₂, J₁, W₂ + J₁</option>
+                    <option value="waves">W₂, J₂</option>
+                    <option value="sum">W₂ + J₂</option>
+                    <option value="all">W₂, J₂, W₂ + J₂</option>
                   </select>
                 </label>
               </div>
