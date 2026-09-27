@@ -350,7 +350,7 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
   }
   if (s.waveDisplay === 'waves' || s.waveDisplay === 'all') {
     // Shade area between the curves: green where work is on top (inertia stored),
-    // red where impulse is on top (energy stored).
+    // red where impulse is on top (inertia released).
     // Alternates at each crossing point.
     const CGREEN = '#16a34a'
     const CRED = '#dc2626'
@@ -763,7 +763,7 @@ export default function WaveLab() {
                       <span><i className="swatch" style={{ background: C1 }} /><Tex tex="W_1 = \int \mathrm{Re}(\psi_1) \, d\lambda_n" /></span>
                       <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_1 = \int \mathrm{Im}(\psi_1) \, d\lambda_n" /></span>
                       <span><i className="swatch" style={{ background: '#16a34a', opacity: 0.5 }} /><Tex tex="\text{inertia stored}" /></span>
-                      <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{energy stored}" /></span>
+                      <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{inertia released}" /></span>
                     </>
                   )}
                   {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_1 - J_1 = \text{inertia remaining}" /></span>}
@@ -790,7 +790,7 @@ export default function WaveLab() {
                       <span><i className="swatch" style={{ background: C2 }} /><Tex tex="W_2 = \int \mathrm{Re}(\psi_2) \, d\lambda_n" /></span>
                       <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_2 = \int \mathrm{Im}(\psi_2) \, d\lambda_n" /></span>
                       <span><i className="swatch" style={{ background: '#16a34a', opacity: 0.5 }} /><Tex tex="\text{inertia stored}" /></span>
-                      <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{energy stored}" /></span>
+                      <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{inertia released}" /></span>
                     </>
                   )}
                   {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_2 - J_2 = \text{inertia remaining}" /></span>}
@@ -936,7 +936,7 @@ export default function WaveLab() {
                   <div className="eq-box wide"><span className="eq-label">Potential Work (spatial)</span><span className="eq-line"><Tex tex="W_1(x) = \int_0^x \mathrm{Re}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="W_2(x) = \int_0^x \mathrm{Re}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Impulse Generated (temporal)</span><span className="eq-line"><Tex tex="J_1(x) = \int_0^x \mathrm{Im}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="J_2(x) = \int_0^x \mathrm{Im}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Inertia Remaining</span><Tex tex="W_n - J_n = \text{inertia remaining at } x" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Shading</span><Tex tex="\text{Green: inertia stored. Red: energy stored.}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Shading</span><Tex tex="\text{Green: inertia stored. Red: inertia released.}" /></div>
                 </div>
               </div>
             </>
