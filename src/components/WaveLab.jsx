@@ -151,8 +151,8 @@ function renderHalfFrame(ctx, canvas, s, tau) {
   const tot = P.k1 * P.A1 + P.w2 * P.A2 + P.w1 * P.A1 + P.k2 * P.A2
   const yMax = Math.max(tot * 1.15, 0.2)
   const { X, Y } = drawGrid(ctx, g, yMax)
-  trace(ctx, X, Y, (x) => dPsi_dM(1, x, tau, P, s.M1, s.M2).sum.re, CS, 2, [])
-  trace(ctx, X, Y, (x) => dPsi_dM(2, x, tau, P, s.M1, s.M2).sum.re, CS, 2, [6, 4])
+  trace(ctx, X, Y, (x) => dPsi_dM(1, x, tau, P, s.M1, s.M2).sum.re, C1, 2, [])
+  trace(ctx, X, Y, (x) => dPsi_dM(2, x, tau, P, s.M1, s.M2).sum.re, C2, 2, [6, 4])
 }
 
 const fmt = (v, d = 2) => v.toFixed(d)
@@ -284,7 +284,7 @@ export default function WaveLab() {
         setTau(Math.round(tauRef.current * 20) / 20)
       }
       renderFrame(ctx, canvas, s, tauRef.current)
-      if (s.subtab === 'derivatives') {
+      if (s.subtab !== 'gravity') {
         const hc = canvasHalfRef.current
         if (hc) renderHalfFrame(hc.getContext('2d'), hc, s, tauRef.current)
         const tc = canvasTotalRef.current
@@ -325,16 +325,16 @@ export default function WaveLab() {
         </div>
 
         <div className="control-group">
-          <h3>ψ₁ — mass M₁</h3>
+          <h3>M₁</h3>
           <NumberInput value={M1} min={0} max={100} onCommit={setM1} />
-          <Slider label="M₁" value={M1} min={0} max={100} step={0.1}
+          <Slider value={M1} min={0} max={100} step={0.1}
             onChange={setM1} />
         </div>
 
         <div className="control-group">
-          <h3>ψ₂ — mass M₂</h3>
+          <h3>M₂</h3>
           <NumberInput value={M2} min={0} max={100} onCommit={setM2} />
-          <Slider label="M₂" value={M2} min={0} max={100} step={0.1}
+          <Slider value={M2} min={0} max={100} step={0.1}
             onChange={setM2} />
         </div>
 
@@ -349,60 +349,64 @@ export default function WaveLab() {
             <div><dt>|λ₁|</dt><dd>{lam ? `${sci(cAbs(lam.l1))} m` : '—'}</dd><dt>|λ₂|</dt><dd>{lam ? `${sci(cAbs(lam.l2))} m` : '—'}</dd></div>
           </dl>
         </div>
-        <div className="transport">
-          <h3 className="transport-title">Animation</h3>
-          <div className="transport-btn-row">
-            <button className="round-btn" onClick={handlePlayPause} aria-label={playing ? 'Pause' : 'Play'}>
-              {playing ? '❚❚' : '▶'}
-            </button>
-            <button
-              className="round-btn"
-              aria-label="Reset time"
-              onClick={() => {
-                tauRef.current = 0
-                setTau(0)
-              }}
-            >
-              ↻
-            </button>
-          </div>
-          <span className="time-readout">τ = {tau.toFixed(2)}</span>
-          <select
-            className="speed-mode"
-            value={speedMode}
-            aria-label="speed mode"
-            onChange={(e) => {
-              const m = e.target.value
-              setSpeedMode(m)
-              if (m === 'fast') {
-                setSpeed((s) => Math.max(s, 1))
-              } else {
-                recalcSlow(M1, M2) // auto-recompute when switching back to slow down
-              }
-            }}
-          >
-            <option value="slow">Slow down</option>
-            <option value="fast">Speed up</option>
-          </select>
-          {speedMode === 'slow' ? (
-            <div className="speed-col">
-              <Slider label="speed" value={Math.sqrt(Math.min(speed, slowMax) / slowMax)} min={0} max={1} step={0.005}
-                format={() => fmtSpeed(speed)}
-                onChange={(p) => setSpeed(slowMax * p * p)} />
-              <button className="recalc-btn" onClick={() => recalcSlow(M1, M2)}>
-                Recalculate slider range
-              </button>
-            </div>
-          ) : (
-            <Slider label="speed" value={Math.min(Math.max(speed, 1), 2.5)} min={1} max={2.5} step={0.1}
-              format={() => fmtSpeed(speed)}
-              onChange={setSpeed} />
-          )}
-        </div>
-        </div>
+      </div>
       </div>
 
       <div className="lab-stage">
+        <div className="transport transport-bar">
+          <h3 className="transport-title">Animation settings</h3>
+          <div className="transport-bar-row">
+            <div className="transport-speed">
+              <select
+                className="speed-mode"
+                value={speedMode}
+                aria-label="speed mode"
+                onChange={(e) => {
+                  const m = e.target.value
+                  setSpeedMode(m)
+                  if (m === 'fast') {
+                    setSpeed((s) => Math.max(s, 1))
+                  } else {
+                    recalcSlow(M1, M2) // auto-recompute when switching back to slow down
+                  }
+                }}
+              >
+                <option value="slow">Slow down</option>
+                <option value="fast">Speed up</option>
+              </select>
+              {speedMode === 'slow' ? (
+                <div className="speed-col">
+                  <Slider label="speed" value={Math.sqrt(Math.min(speed, slowMax) / slowMax)} min={0} max={1} step={0.005}
+                    format={() => fmtSpeed(speed)}
+                    onChange={(p) => setSpeed(slowMax * p * p)} />
+                  <button className="recalc-btn" onClick={() => recalcSlow(M1, M2)}>
+                    Recalculate slider range
+                  </button>
+                </div>
+              ) : (
+                <Slider label="speed" value={Math.min(Math.max(speed, 1), 2.5)} min={1} max={2.5} step={0.1}
+                  format={() => fmtSpeed(speed)}
+                  onChange={setSpeed} />
+              )}
+            </div>
+            <span className="time-readout">τ = {tau.toFixed(2)}</span>
+            <div className="transport-btn-row">
+              <button className="round-btn" onClick={handlePlayPause} aria-label={playing ? 'Pause' : 'Play'}>
+                {playing ? '❚❚' : '▶'}
+              </button>
+              <button
+                className="round-btn"
+                aria-label="Reset time"
+                onClick={() => {
+                  tauRef.current = 0
+                  setTau(0)
+                }}
+              >
+                ↻
+              </button>
+            </div>
+          </div>
+        </div>
         {subtab === 'gravity' ? (
           <div className="graph-box">
             <div className="graph-head">
@@ -435,8 +439,8 @@ export default function WaveLab() {
             </div>
             <div className="graph-box">
               <div className="legend">
-                <span><i className="swatch" style={{ background: CS }} />dM₁ half-wave = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁</span>
-                <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${CS} 0 5px, transparent 5px 9px)` }} />dM₂ half-wave = ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</span>
+                <span><i className="swatch" style={{ background: C1 }} />dM₁ half-wave = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁</span>
+                <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />dM₂ half-wave = ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</span>
               </div>
               <canvas ref={canvasHalfRef} className="wave-canvas half-canvas" />
             </div>
@@ -454,7 +458,7 @@ export default function WaveLab() {
           {subtab === 'gravity' ? (
             <>
               <div className="eq-group">
-                <h4>Trigonometric form <span className="eq-tag">plotted · display units</span></h4>
+                <h4>Trigonometric form — plotted · display units</h4>
                 <div className="eq-list">
                   <div className="eq-box">ψ₁ = A₁e<sup>−βλₙ</sup>cos(k₁λₙ−ω₁M₂τ) + i·A₁e<sup>−βλₙ</sup>sin(k₁λₙ−ω₁M₂τ)</div>
                   <div className="eq-box">ψ₂ = A₂e<sup>−β(L−λₙ)</sup>cos(−k₂λₙ−ω₂M₁τ) + i·A₂e<sup>−β(L−λₙ)</sup>sin(−k₂λₙ−ω₂M₁τ)</div>
@@ -463,12 +467,12 @@ export default function WaveLab() {
               </div>
 
               <div className="eq-group">
-                <h4>With k, ω, λ substituted <span className="eq-tag">full theory</span></h4>
+                <h4>With k, ω, λ substituted — full theory</h4>
                 <div className="eq-list">
                   <div className="eq-box">ψ₁ = √(M₂/(M₁+M₂))·e<sup>−βλₙ</sup>·[cos(2πλₙ/λ₁ − 2πM₁M₂c²τ/h) + i·sin(2πλₙ/λ₁ − 2πM₁M₂c²τ/h)]</div>
                   <div className="eq-box">ψ₂ = √(M₁/(M₁+M₂))·e<sup>−β(L−λₙ)</sup>·[cos(−2πλₙ/λ₂ − 2πM₁M₂c²τ/h) + i·sin(−2πλₙ/λ₂ − 2πM₁M₂c²τ/h)]</div>
                 </div>
-                <h4 className="eq-sub">With f, T substituted <span className="eq-tag">full theory</span></h4>
+                <h4 className="eq-sub">With f, T substituted — full theory</h4>
                 <div className="eq-list">
                   <div className="eq-box">f₁ = M₁c²/h, T₁ = 1/f₁</div>
                   <div className="eq-box">f₂ = M₂c²/h, T₂ = 1/f₂</div>
@@ -477,7 +481,7 @@ export default function WaveLab() {
                   <div className="eq-box">ψ₁ = √(M₂/(M₁+M₂))·e<sup>−βλₙ</sup>·[cos(2πλₙ/λ₁ − 2πM₂τ/T₁) + i·sin(2πλₙ/λ₁ − 2πM₂τ/T₁)]</div>
                   <div className="eq-box">ψ₂ = √(M₁/(M₁+M₂))·e<sup>−β(4π−λₙ)</sup>·[cos(−2πλₙ/λ₂ − 2πM₁τ/T₂) + i·sin(−2πλₙ/λ₂ − 2πM₁τ/T₂)]</div>
                 </div>
-                <h4 className="eq-sub">Same, with current values <span className="eq-tag">M₁ = {fmt(M1)}, M₂ = {fmt(M2)}</span></h4>
+                <h4 className="eq-sub">Same, with current values — M₁ = {fmt(M1)}, M₂ = {fmt(M2)}</h4>
                 {T ? (
                   <div className="eq-list">
                     <div className="eq-box">ψ₁ = {fmt(P.A1)}·e<sup>−{fmt(P.beta, 3)}λₙ</sup>·[cos(<CSci z={T.k1} />·λₙ − <Sci v={xTerm} />·τ) + i·sin(<CSci z={T.k1} />·λₙ − <Sci v={xTerm} />·τ)]</div>
@@ -489,7 +493,7 @@ export default function WaveLab() {
               </div>
 
               <div className="eq-group">
-                <h4>Ratios &amp; relationships <span className="eq-tag">paper</span></h4>
+                <h4>Ratios &amp; relationships — paper</h4>
                 <div className="eq-list">
                   <div className="eq-box">ω₂/ω₁ = M₂/M₁</div>
                   <div className="eq-box">k₂/k₁ = λ₁/λ₂ = −i√(M₂/M₁)</div>
@@ -506,7 +510,7 @@ export default function WaveLab() {
               </div>
 
               <div className="eq-group">
-                <h4>Definitions <span className="eq-tag">paper · β from the display derivation</span></h4>
+                <h4>Definitions — paper · β from the display derivation</h4>
                 <div className="eq-list">
                   <div className="eq-box">k₁ = 2π/λ₁</div>
                   <div className="eq-box">k₂ = 2π/λ₂</div>
@@ -528,7 +532,7 @@ export default function WaveLab() {
           ) : (
             <>
               <div className="eq-group">
-                <h4>General form <span className="eq-tag">plotted · display units</span></h4>
+                <h4>General form — plotted · display units</h4>
                 <div className="eq-list">
                   <div className="eq-box">∂ψ₁/∂M₁ = ∂/∂M₁[A₁e<sup>−βλₙ</sup>e<sup>i(k₁λₙ−ω₁M₂τ)</sup>]</div>
                   <div className="eq-box">∂ψ₂/∂M₁ = ∂/∂M₁[A₂e<sup>−β(L−λₙ)</sup>e<sup>i(−k₂λₙ−ω₂M₁τ)</sup>]</div>
@@ -538,7 +542,7 @@ export default function WaveLab() {
               </div>
 
               <div className="eq-group">
-                <h4>Simplified <span className="eq-tag">fixed-parameter phase gradients</span></h4>
+                <h4>Simplified — fixed-parameter phase gradients</h4>
                 <div className="eq-list">
                   <div className="eq-box">∂ψ₁/∂M₁ = ik₁ψ₁ <em>(solid)</em></div>
                   <div className="eq-box">∂ψ₂/∂M₁ = −iω₂ψ₂ <em>(solid)</em></div>
@@ -548,7 +552,7 @@ export default function WaveLab() {
               </div>
 
               <div className="eq-group">
-                <h4>With values substituted <span className="eq-tag">full theory · current M₁, M₂</span></h4>
+                <h4>With values substituted — full theory · current M₁, M₂</h4>
                 {T ? (
                   <div className="eq-list">
                     <div className="eq-box">∂ψ₁/∂M₁ = i·<CSci z={T.k1} />·ψ₁</div>
@@ -573,7 +577,7 @@ export default function WaveLab() {
               </div>
 
               <div className="eq-group">
-                <h4>Variables <span className="eq-tag">defined in the gravity tab</span></h4>
+                <h4>Variables — defined in the gravity tab</h4>
                 <div className="eq-list">
                   <div className="eq-box">k₁ = 2π/λ₁</div>
                   <div className="eq-box">k₂ = 2π/λ₂</div>

@@ -37,8 +37,8 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 20px 14px;
-  margin: 0 -20px 24px;
+  padding: 18px max(20px, calc(50vw - 580px)) 14px;
+  margin: 0 calc(50% - 50vw) 24px;
   background: var(--brown);
   border-bottom: 3px solid var(--gold);
 }
@@ -124,15 +124,6 @@ body {
   flex-direction: column;
   gap: 20px;
   min-width: 0;
-}
-
-.lab-side .transport {
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.lab-side .transport .time-readout {
-  margin-left: 0;
 }
 
 .transport-title {
@@ -313,6 +304,38 @@ body {
   color: #ffd94d;
 }
 
+/* animation settings as a full-width bar above the graphs */
+.transport-bar {
+  flex-direction: column;
+  align-items: stretch;
+  margin-bottom: 20px;
+}
+
+.transport-bar .transport-title {
+  text-align: center;
+}
+
+.transport-bar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.transport-speed {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 0 1 300px;
+  min-width: 220px;
+}
+
+.transport-bar .time-readout {
+  margin-left: 0;
+  font-size: 1.05rem;
+}
+
 .transport .check-row input {
   accent-color: #f6a609;
 }
@@ -375,6 +398,10 @@ body {
   gap: 10px;
   margin: 10px 0;
   cursor: pointer;
+}
+
+.slider-row.no-label {
+  grid-template-columns: 1fr 48px;
 }
 
 .slider-label {
@@ -584,18 +611,6 @@ input[type="range"]::-moz-range-thumb {
 .eq-group h4.eq-sub {
   margin-top: 10px;
   font-weight: 500;
-}
-
-.eq-tag {
-  font-size: 11px;
-  font-weight: 400;
-  color: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1px 8px;
-  margin-left: 8px;
-  vertical-align: middle;
-  white-space: nowrap;
 }
 
 .eq-box.wide {

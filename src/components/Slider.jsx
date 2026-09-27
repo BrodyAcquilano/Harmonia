@@ -1,8 +1,8 @@
 export default function Slider({ label, value, min, max, step, onChange, format }) {
   const fmt = format || ((v) => Number(v).toFixed(2))
   return (
-    <label className="slider-row">
-      <span className="slider-label">{label}</span>
+    <label className={label ? 'slider-row' : 'slider-row no-label'}>
+      {label ? <span className="slider-label">{label}</span> : null}
       <input
         type="range"
         min={min}
