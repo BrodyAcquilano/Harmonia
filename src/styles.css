@@ -458,6 +458,31 @@ body {
   background: transparent;
 }
 
+/* Squarish canvas for the side-by-side orbit diagrams */
+.wave-canvas-sq {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  display: block;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Two graph boxes sharing one row */
+.graph-duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  min-width: 0;
+}
+
+@media (max-width: 700px) {
+  .graph-duo {
+    grid-template-columns: 1fr;
+  }
+}
+
 .transport {
   display: flex;
   align-items: center;

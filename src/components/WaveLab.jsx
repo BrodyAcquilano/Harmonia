@@ -452,7 +452,7 @@ function wobbleCurves(M1, M2, P) {
   const tauMax = (2 * Math.PI) / Math.max(M2, 0.05)
   const key = `${M1}|${M2}|${tauMax}`
   if (wobbleCache.key === key) return wobbleCache
-  const NT = 160, NS = 120
+  const NT = 720, NS = 120
   const dx = X_MAX / NS, dt = tauMax / NT
   const f1 = [], f2 = []
   for (let i = 0; i <= NT; i++) {
@@ -550,16 +550,142 @@ function renderWobbleDotsFrame(ctx, canvas, s, tau) {
   ctx.lineWidth = 1
   ctx.beginPath(); ctx.moveTo(xL, padT); ctx.lineTo(xL, padT + ph); ctx.stroke()
   ctx.beginPath(); ctx.moveTo(xR, padT); ctx.lineTo(xR, padT + ph); ctx.stroke()
-  // Dots
+  // Dots (heavier body larger)
+  const r1 = dotRadius(s.M1, s.M1, s.M2)
+  const r2 = dotRadius(s.M2, s.M1, s.M2)
   ctx.fillStyle = C1
-  ctx.beginPath(); ctx.arc(xL, y1, 10, 0, 2 * Math.PI); ctx.fill()
+  ctx.beginPath(); ctx.arc(xL, y1, r1, 0, 2 * Math.PI); ctx.fill()
   ctx.fillStyle = C2
-  ctx.beginPath(); ctx.arc(xR, y2, 10, 0, 2 * Math.PI); ctx.fill()
+  ctx.beginPath(); ctx.arc(xR, y2, r2, 0, 2 * Math.PI); ctx.fill()
   ctx.fillStyle = '#3a2c1a'
   ctx.font = '600 13px "IBM Plex Mono", monospace'
   ctx.textAlign = 'center'
   ctx.fillText('m₁', xL, padT + ph + 22)
   ctx.fillText('m₂', xR, padT + ph + 22)
+  // Axes: the λ–y plane.
+  ctx.fillStyle = '#715f43'
+  ctx.font = '11px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'right'
+  ctx.fillText('λ (spatial)', padL + pw, midY - 8)
+  ctx.textAlign = 'left'
+  ctx.fillText('y', padL + 4, padT + 12)
+  ctx.restore()
+}
+
+// Dot radius scales with mass: the heavier body draws larger.
+function dotRadius(M, M1, M2) {
+  return 5 + 7 * (M / Math.max(M1, M2))
+}
+
+// Bodies: in-line wobble — the same Xₙ(t) as the wobble diagram, but viewed
+// along the λ line instead of across it. Dots oscillate horizontally around
+// their rest positions: toward each other, then apart. The lighter body's
+// swing carries it past the center, so it visibly crosses in front of the
+// heavier body (drawn on top when they overlap).
+function renderInlineWobbleFrame(ctx, canvas, s, tau) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  const { tauMax, NT, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
+  const tc = ((tau % tauMax) + tauMax) % tauMax
+  const idx = Math.min(Math.floor((tc / tauMax) * NT), NT - 1)
+  const f = ((tc / tauMax) * NT) - idx
+  const v1 = x1[idx] * (1 - f) + x1[idx + 1] * f
+  const v2 = x2[idx] * (1 - f) + x2[idx + 1] * f
+  const all = [...x1, ...x2]
+  const vMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all)), 0.1)
+  const { padL, padT, pw, ph } = g
+  const midY = padT + ph / 2
+  const midX = padL + pw / 2
+  const gap = pw * 0.1
+  const xL = midX - gap, xR = midX + gap
+  const amp = gap * 1.7
+  const px1 = xL + (v1 / vMax) * amp
+  const px2 = xR + (v2 / vMax) * amp
+  const r1 = dotRadius(s.M1, s.M1, s.M2)
+  const r2 = dotRadius(s.M2, s.M1, s.M2)
+  ctx.save()
+  // The λ line between the bodies.
+  ctx.strokeStyle = '#a99760'
+  ctx.lineWidth = 1.5
+  ctx.beginPath(); ctx.moveTo(padL, midY); ctx.lineTo(padL + pw, midY); ctx.stroke()
+  // Rest-position ticks.
+  ctx.strokeStyle = '#e5dcc0'
+  ctx.lineWidth = 1
+  for (const rx of [xL, xR]) {
+    ctx.beginPath(); ctx.moveTo(rx, midY - 8); ctx.lineTo(rx, midY + 8); ctx.stroke()
+  }
+  // Heavier body first (underneath), lighter on top at crossings.
+  const order = s.M1 >= s.M2
+    ? [[px1, r1, C1, 'm₁'], [px2, r2, C2, 'm₂']]
+    : [[px2, r2, C2, 'm₂'], [px1, r1, C1, 'm₁']]
+  for (const [px, r, color] of order) {
+    ctx.fillStyle = color
+    ctx.beginPath(); ctx.arc(px, midY, r, 0, 2 * Math.PI); ctx.fill()
+  }
+  ctx.fillStyle = '#3a2c1a'
+  ctx.font = '600 13px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'center'
+  ctx.fillText('m₁', xL, midY + 30)
+  ctx.fillText('m₂', xR, midY + 30)
+  // Axes: the λ–z plane (motion along λ; z labels the viewing plane).
+  ctx.fillStyle = '#715f43'
+  ctx.font = '11px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'right'
+  ctx.fillText('λ (spatial)', padL + pw, midY - 8)
+  ctx.textAlign = 'left'
+  ctx.fillText('z', padL + 4, padT + 12)
+  ctx.restore()
+}
+
+// Orbit diagrams: wrap the wobble into circular orbits.
+// The orbital angle φ runs one full turn per displayed wobble cycle, synced
+// to the same animation clock as the wobble dots. Radii come from the measured
+// wobble amplitudes Aₙ = max|Xₙ| — the heavier mass wobbles less, so it traces
+// the smaller circle. Both diagrams share one scale so they compare directly.
+// trueMotion=false: "apparent" — m₁ pinned at the center, m₂ circling it.
+// trueMotion=true:  "true" — both bodies circle the barycenter (+), opposite.
+function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  const { tauMax, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
+  const A1 = Math.max(...x1.map(Math.abs), 1e-6)
+  const A2 = Math.max(...x2.map(Math.abs), 1e-6)
+  const { padT, pw, ph } = g
+  const cx = g.padL + pw / 2, cy = padT + ph / 2
+  const sc = ((Math.min(pw, ph) / 2) * 0.78) / Math.max(A1, A2)
+  const phi = 2 * Math.PI * (((tau % tauMax) + tauMax) % tauMax) / tauMax
+  ctx.save()
+  // Orbit guides
+  ctx.strokeStyle = '#e5dcc0'
+  ctx.lineWidth = 1
+  for (const A of (trueMotion ? [A1, A2] : [A2])) {
+    ctx.beginPath(); ctx.arc(cx, cy, A * sc, 0, 2 * Math.PI); ctx.stroke()
+  }
+  if (trueMotion) {
+    // Barycenter: the impartial center point.
+    ctx.strokeStyle = '#a99760'
+    ctx.beginPath()
+    ctx.moveTo(cx - 6, cy); ctx.lineTo(cx + 6, cy)
+    ctx.moveTo(cx, cy - 6); ctx.lineTo(cx, cy + 6)
+    ctx.stroke()
+  }
+  const dot = (x, y, r, color, label) => {
+    ctx.fillStyle = color
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill()
+    ctx.fillStyle = '#3a2c1a'
+    ctx.font = '600 13px "IBM Plex Mono", monospace'
+    ctx.textAlign = 'center'
+    ctx.fillText(label, x, y + 26)
+  }
+  const r1 = dotRadius(s.M1, s.M1, s.M2)
+  const r2 = dotRadius(s.M2, s.M1, s.M2)
+  if (trueMotion) {
+    dot(cx - A1 * sc * Math.cos(phi), cy - A1 * sc * Math.sin(phi), r1, C1, 'm₁')
+    dot(cx + A2 * sc * Math.cos(phi), cy + A2 * sc * Math.sin(phi), r2, C2, 'm₂')
+  } else {
+    dot(cx, cy, r1, C1, 'm₁')
+    dot(cx + A2 * sc * Math.cos(phi), cy + A2 * sc * Math.sin(phi), r2, C2, 'm₂')
+  }
   ctx.restore()
 }
 
@@ -705,6 +831,9 @@ export default function WaveLab() {
   const canvasWobbleTimeRef = useRef(null)
   const canvasForceTimeRef = useRef(null)
   const canvasWobbleDotsRef = useRef(null)
+  const canvasInlineWobbleRef = useRef(null)
+  const canvasOrbitApparentRef = useRef(null)
+  const canvasOrbitTrueRef = useRef(null)
   const canvasPushPullRef = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
@@ -750,6 +879,12 @@ export default function WaveLab() {
         if (ft) renderForceTimeFrame(ft.getContext('2d'), ft, s)
         const wd = canvasWobbleDotsRef.current
         if (wd) renderWobbleDotsFrame(wd.getContext('2d'), wd, s, tauRef.current)
+        const iw = canvasInlineWobbleRef.current
+        if (iw) renderInlineWobbleFrame(iw.getContext('2d'), iw, s, tauRef.current)
+        const oa = canvasOrbitApparentRef.current
+        if (oa) renderOrbitFrame(oa.getContext('2d'), oa, s, tauRef.current, false)
+        const ot = canvasOrbitTrueRef.current
+        if (ot) renderOrbitFrame(ot.getContext('2d'), ot, s, tauRef.current, true)
         const pp = canvasPushPullRef.current
         if (pp) renderPushPullFrame(pp.getContext('2d'), pp, s, tauRef.current)
       }
@@ -1037,6 +1172,41 @@ export default function WaveLab() {
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
+              <h2 className="graph-title">Bodies: In-Line Wobble</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><Tex tex="\text{same wobble, viewed along } \lambda" /></span>
+              </div>
+            </div>
+            <canvas ref={canvasInlineWobbleRef} className="wave-canvas" />
+          </div>
+          <div className="graph-duo">
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Apparent Relative Motion</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><Tex tex="m_1 \text{ fixed} — \text{the naive view}" /></span>
+              </div>
+            </div>
+            <canvas ref={canvasOrbitApparentRef} className="wave-canvas-sq" />
+          </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">True Motion</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><Tex tex="\text{both orbit the center point}" /></span>
+              </div>
+            </div>
+            <canvas ref={canvasOrbitTrueRef} className="wave-canvas-sq" />
+          </div>
+          </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
               <h2 className="graph-title">Push-Pull Density (spatial)</h2>
             </div>
             <div className="graph-meta-row">
@@ -1206,6 +1376,22 @@ export default function WaveLab() {
             </>
           ) : subtab === 'motion' ? (
             <>
+              <div className="eq-group">
+                <h4>In-Line Wobble <span className="eq-note">— plotted · live</span></h4>
+                <div className="eq-list">
+                  <div className="eq-box wide"><span className="eq-label">Same wobble, along λ</span><Tex tex="x_1(t) = x_{1,0} + X_1(t), \quad x_2(t) = x_{2,0} + X_2(t)" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{Bodies move toward each other, then apart. Lighter body crosses in front.}" /></div>
+                </div>
+              </div>
+              <div className="eq-group">
+                <h4>Orbit Diagrams <span className="eq-note">— plotted · live</span></h4>
+                <div className="eq-list">
+                  <div className="eq-box wide"><span className="eq-label">Orbital angle (one turn per wobble cycle)</span><Tex tex="\phi(t) = 2\pi t / T" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Apparent: m₁ pinned</span><Tex tex="\mathbf{r}_2(\phi) = A_2(\cos\phi, \sin\phi)" /></div>
+                  <div className="eq-box wide"><span className="eq-label">True: both orbit the center</span><Tex tex="\mathbf{r}_1(\phi) = -A_1(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +A_2(\cos\phi, \sin\phi)" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Radii from the wobble</span><Tex tex="A_n = \max|X_n(t)| — \text{heavier mass traces the smaller circle}" /></div>
+                </div>
+              </div>
               <div className="eq-group">
                 <h4>Wobble Over Time <span className="eq-note">— plotted · static snapshot, one cycle</span></h4>
                 <div className="eq-list">
