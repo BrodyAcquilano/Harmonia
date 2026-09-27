@@ -16,6 +16,7 @@ const noteModules = import.meta.glob('../../notes/*.md', {
 const NOTE_ORDER = [
   '../../notes/symmetric-inertia-transfer.md',
   '../../notes/lambda-derivation.md',
+  '../../notes/hidden-phasor.md',
 ]
 
 function titleFromPath(path) {
