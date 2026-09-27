@@ -137,6 +137,14 @@ function renderFrame(ctx, canvas, s, tau) {
         width: 2.75,
       })
     }
+  } else if (s.subtab === 'integ') {
+    // Integration tab, first graph: wave areas with balance point.
+    // Shows ψ₁ and ψ₂ with filled areas, marking where they meet at λ*.
+    yMax = Math.max((P.A1 + P.A2) * 1.15, 0.5)
+    curves = [
+      { fn: (x) => psi1(x, tau, P, s.M2).re, color: C1, width: 1.75, fill: true },
+      { fn: (x) => psi2(x, tau, P, s.M1).re, color: C2, width: 1.75, fill: true },
+    ]
   } else {
     // Both mass derivatives at once: color = wave, solid = d/dM1, dashed = d/dM2.
     const tot = P.k1 * P.A1 + P.w2 * P.A2 + P.w1 * P.A1 + P.k2 * P.A2
@@ -150,8 +158,27 @@ function renderFrame(ctx, canvas, s, tau) {
     ]
   }
   const { X, Y } = drawGrid(ctx, g, yMax)
-  curves.forEach((c) => trace(ctx, X, Y, c.fn, c.color, c.width, c.dash))
-  if (s.subtab === 'gravity' && s.M1 + s.M2 > 0) {
+  curves.forEach((c) => {
+    if (c.fill) {
+      // Fill area under the curve
+      ctx.save()
+      ctx.globalAlpha = 0.15
+      ctx.fillStyle = c.color
+      ctx.beginPath()
+      const n = 200
+      ctx.moveTo(X(0), Y(0))
+      for (let i = 0; i <= n; i++) {
+        const x = (i / n) * X_MAX
+        ctx.lineTo(X(x), Y(c.fn(x)))
+      }
+      ctx.lineTo(X(X_MAX), Y(0))
+      ctx.closePath()
+      ctx.fill()
+      ctx.restore()
+    }
+    trace(ctx, X, Y, c.fn, c.color, c.width, c.dash)
+  })
+  if ((s.subtab === 'gravity' || s.subtab === 'integ') && s.M1 + s.M2 > 0) {
     // Balance point: mass-weighted center x* = L·M₂/(M₁+M₂).
     // M₁·x* = M₂·(L−x*); equal masses → middle, M₁=3M₂ → L/4.
     const xStar = (X_MAX * s.M2) / (s.M1 + s.M2)
@@ -193,6 +220,75 @@ function renderHalfFrame(ctx, canvas, s, tau) {
   const { X, Y } = drawGrid(ctx, g, yMax)
   trace(ctx, X, Y, (x) => dPsi_dM(1, x, tau, P, s.M1, s.M2).sum.re, C1, 2, [])
   trace(ctx, X, Y, (x) => dPsi_dM(2, x, tau, P, s.M1, s.M2).sum.re, C2, 2, [6, 4])
+}
+
+// Integration tab, second graph: cumulative integrals.
+//   F₁(x) = ∫₀ˣ Re(ψ₁(t)) dt, F₂(x) = ∫₀ˣ Re(ψ₂(t)) dt
+// Shows where the accumulated areas meet/become equal.
+function renderCumFrame(ctx, canvas, s, tau) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  // Precompute cumulative integrals via trapezoidal rule
+  const N = 200
+  const xs = []
+  const f1 = []
+  const f2 = []
+  let cum1 = 0
+  let cum2 = 0
+  let prevX = 0
+  let prevY1 = psi1(0, tau, P, s.M2).re
+  let prevY2 = psi2(0, tau, P, s.M1).re
+  for (let i = 0; i <= N; i++) {
+    const x = (i / N) * X_MAX
+    const y1 = psi1(x, tau, P, s.M2).re
+    const y2 = psi2(x, tau, P, s.M1).re
+    if (i > 0) {
+      const dx = x - prevX
+      cum1 += ((prevY1 + y1) / 2) * dx
+      cum2 += ((prevY2 + y2) / 2) * dx
+    }
+    xs.push(x)
+    f1.push(cum1)
+    f2.push(cum2)
+    prevX = x
+    prevY1 = y1
+    prevY2 = y2
+  }
+  const yMax = Math.max(Math.abs(Math.min(...f1, ...f2)), Math.abs(Math.max(...f1, ...f2))) * 1.15
+  const yMaxSafe = Math.max(yMax, 0.1)
+  const { X, Y } = drawGrid(ctx, g, yMaxSafe)
+  // Interpolate functions for trace
+  const f1Fn = (x) => {
+    const idx = Math.min(Math.floor((x / X_MAX) * N), N - 1)
+    const t = ((x / X_MAX) * N) - idx
+    return f1[idx] * (1 - t) + f1[idx + 1] * t
+  }
+  const f2Fn = (x) => {
+    const idx = Math.min(Math.floor((x / X_MAX) * N), N - 1)
+    const t = ((x / X_MAX) * N) - idx
+    return f2[idx] * (1 - t) + f2[idx + 1] * t
+  }
+  trace(ctx, X, Y, f1Fn, C1, 2, [])
+  trace(ctx, X, Y, f2Fn, C2, 2, [])
+  // Balance point line
+  if (s.M1 + s.M2 > 0) {
+    const xStar = (X_MAX * s.M2) / (s.M1 + s.M2)
+    ctx.save()
+    ctx.strokeStyle = '#9a9a9a'
+    ctx.lineWidth = 1.5
+    ctx.setLineDash([6, 4])
+    ctx.beginPath()
+    ctx.moveTo(X(xStar), g.padT)
+    ctx.lineTo(X(xStar), g.padT + g.ph)
+    ctx.stroke()
+    ctx.restore()
+  }
+}
+
+// Placeholder for area frame (not used - area is drawn in renderFrame for integ)
+function renderAreaFrame(ctx, canvas, s, tau) {
+  // Area graph is rendered via renderFrame with subtab='integ'
+  renderFrame(ctx, canvas, s, tau)
 }
 
 const fmt = (v, d = 2) => v.toFixed(d)
@@ -280,6 +376,8 @@ export default function WaveLab() {
   const canvasRef = useRef(null)
   const canvasHalfRef = useRef(null)
   const canvasTotalRef = useRef(null)
+  const canvasAreaRef = useRef(null)
+  const canvasCumRef = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
   stateRef.current = { subtab, M1, M2, playing, speed, showSum }
@@ -305,11 +403,17 @@ export default function WaveLab() {
       // keep drawing to the detached node after a tab switch.
       const canvas = canvasRef.current
       if (canvas) renderFrame(canvas.getContext('2d'), canvas, s, tauRef.current)
-      if (s.subtab !== 'gravity') {
+      if (s.subtab === 'deriv') {
         const hc = canvasHalfRef.current
         if (hc) renderHalfFrame(hc.getContext('2d'), hc, s, tauRef.current)
         const tc = canvasTotalRef.current
         if (tc) renderTotalFrame(tc.getContext('2d'), tc, s, tauRef.current)
+      }
+      if (s.subtab === 'integ') {
+        const ac = canvasAreaRef.current
+        if (ac) renderAreaFrame(ac.getContext('2d'), ac, s, tauRef.current)
+        const cc = canvasCumRef.current
+        if (cc) renderCumFrame(cc.getContext('2d'), cc, s, tauRef.current)
       }
       raf = requestAnimationFrame(draw)
     }
@@ -345,6 +449,14 @@ export default function WaveLab() {
               onClick={() => setSubtab('deriv')}
             >
               Derivatives
+            </button>
+            <button
+              className="subtab"
+              role="tab"
+              aria-selected={subtab === 'integ'}
+              onClick={() => setSubtab('integ')}
+            >
+              Integration
             </button>
           </div>
         </div>
@@ -468,7 +580,7 @@ export default function WaveLab() {
             </div>
             <canvas ref={canvasRef} className="wave-canvas" />
           </div>
-        ) : (
+        ) : subtab === 'deriv' ? (
           <>
             <div className="graph-box">
               <div className="graph-title-row">
@@ -508,7 +620,36 @@ export default function WaveLab() {
               <canvas ref={canvasTotalRef} className="wave-canvas total-canvas" />
             </div>
           </>
-        )}
+        ) : subtab === 'integ' ? (
+          <>
+            <div className="graph-box">
+              <div className="graph-title-row">
+                <h2 className="graph-title">Wave Areas</h2>
+              </div>
+              <div className="graph-meta-row">
+                <div className="legend">
+                  <span><i className="swatch" style={{ background: C1 }} />ψ₁ area</span>
+                  <span><i className="swatch" style={{ background: C2 }} />ψ₂ area</span>
+                  <span><i className="swatch swatch-dashed" />balance point λ*</span>
+                </div>
+              </div>
+              <canvas ref={canvasRef} className="wave-canvas" />
+            </div>
+            <div className="graph-box">
+              <div className="graph-title-row">
+                <h2 className="graph-title">Cumulative Integrals</h2>
+              </div>
+              <div className="graph-meta-row">
+                <div className="legend">
+                  <span><i className="swatch" style={{ background: C1 }} />F₁(x) = ∫₀ˣ ψ₁</span>
+                  <span><i className="swatch" style={{ background: C2 }} />F₂(x) = ∫₀ˣ ψ₂</span>
+                  <span><i className="swatch swatch-dashed" />balance point λ*</span>
+                </div>
+              </div>
+              <canvas ref={canvasCumRef} className="wave-canvas" />
+            </div>
+          </>
+        ) : null}
 
         <div className="eq-panel">
         <div className="eq-groups">
@@ -526,18 +667,18 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>With k, ω, λ substituted <span className="eq-note">— full theory</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">ψ₁(M₁,M₂)</span><Tex tex="\psi_1 = \sqrt{\frac{M_2}{M_1+M_2}} e^{-\beta\lambda_n} \left[\cos\left(\frac{2\pi\lambda_n}{\lambda_1} - \frac{2\pi M_1 M_2 c^2 \tau}{h}\right) + i \sin\left(\frac{2\pi\lambda_n}{\lambda_1} - \frac{2\pi M_1 M_2 c^2 \tau}{h}\right)\right]" /></div>
-                  <div className="eq-box wide"><span className="eq-label">ψ₂(M₂,M₁)</span><Tex tex="\psi_2 = \sqrt{\frac{M_1}{M_1+M_2}} e^{-\beta(L-\lambda_n)} \left[\cos\left(-\frac{2\pi\lambda_n}{\lambda_2} - \frac{2\pi M_1 M_2 c^2 \tau}{h}\right) + i \sin\left(-\frac{2\pi\lambda_n}{\lambda_2} - \frac{2\pi M_1 M_2 c^2 \tau}{h}\right)\right]" /></div>
+                  <div className="eq-box wide"><span className="eq-label">ψ₁(M₁,M₂)</span><Tex tex="\psi_1 = \sqrt{\dfrac{M_2}{M_1+M_2}} e^{-\beta\lambda_n} \left[\cos\left(\dfrac{2\pi\lambda_n}{\lambda_1} - \dfrac{2\pi M_1 M_2 c^2 \tau}{h}\right) + i \sin\left(\dfrac{2\pi\lambda_n}{\lambda_1} - \dfrac{2\pi M_1 M_2 c^2 \tau}{h}\right)\right]" /></div>
+                  <div className="eq-box wide"><span className="eq-label">ψ₂(M₂,M₁)</span><Tex tex="\psi_2 = \sqrt{\dfrac{M_1}{M_1+M_2}} e^{-\beta(L-\lambda_n)} \left[\cos\left(-\dfrac{2\pi\lambda_n}{\lambda_2} - \dfrac{2\pi M_1 M_2 c^2 \tau}{h}\right) + i \sin\left(-\dfrac{2\pi\lambda_n}{\lambda_2} - \dfrac{2\pi M_1 M_2 c^2 \tau}{h}\right)\right]" /></div>
                 </div>
               </div>
 
               <div className="eq-group">
                 <h4>With f, T substituted <span className="eq-note">— full theory</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box"><span className="eq-label">Body 1</span><span className="eq-line"><Tex tex="f_1 = \frac{M_1 c^2}{h}" /></span><span className="eq-line"><Tex tex="T_1 = \frac{1}{f_1}" /></span></div>
-                  <div className="eq-box"><span className="eq-label">Body 2</span><span className="eq-line"><Tex tex="f_2 = \frac{M_2 c^2}{h}" /></span><span className="eq-line"><Tex tex="T_2 = \frac{1}{f_2}" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">ψ₁(M₁,M₂)</span><Tex tex="\psi_1 = \sqrt{\frac{M_2}{M_1+M_2}} e^{-\beta\lambda_n} \left[\cos\left(\frac{2\pi\lambda_n}{\lambda_1} - \frac{2\pi M_2 \tau}{T_1}\right) + i \sin\left(\frac{2\pi\lambda_n}{\lambda_1} - \frac{2\pi M_2 \tau}{T_1}\right)\right]" /></div>
-                  <div className="eq-box wide"><span className="eq-label">ψ₂(M₂,M₁)</span><Tex tex="\psi_2 = \sqrt{\frac{M_1}{M_1+M_2}} e^{-\beta(4\pi-\lambda_n)} \left[\cos\left(-\frac{2\pi\lambda_n}{\lambda_2} - \frac{2\pi M_1 \tau}{T_2}\right) + i \sin\left(-\frac{2\pi\lambda_n}{\lambda_2} - \frac{2\pi M_1 \tau}{T_2}\right)\right]" /></div>
+                  <div className="eq-box"><span className="eq-label">Body 1</span><span className="eq-line"><Tex tex="f_1 = \dfrac{M_1 c^2}{h}" /></span><span className="eq-line"><Tex tex="T_1 = \dfrac{1}{f_1}" /></span></div>
+                  <div className="eq-box"><span className="eq-label">Body 2</span><span className="eq-line"><Tex tex="f_2 = \dfrac{M_2 c^2}{h}" /></span><span className="eq-line"><Tex tex="T_2 = \dfrac{1}{f_2}" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">ψ₁(M₁,M₂)</span><Tex tex="\psi_1 = \sqrt{\dfrac{M_2}{M_1+M_2}} e^{-\beta\lambda_n} \left[\cos\left(\dfrac{2\pi\lambda_n}{\lambda_1} - \dfrac{2\pi M_2 \tau}{T_1}\right) + i \sin\left(\dfrac{2\pi\lambda_n}{\lambda_1} - \dfrac{2\pi M_2 \tau}{T_1}\right)\right]" /></div>
+                  <div className="eq-box wide"><span className="eq-label">ψ₂(M₂,M₁)</span><Tex tex="\psi_2 = \sqrt{\dfrac{M_1}{M_1+M_2}} e^{-\beta(4\pi-\lambda_n)} \left[\cos\left(-\dfrac{2\pi\lambda_n}{\lambda_2} - \dfrac{2\pi M_1 \tau}{T_2}\right) + i \sin\left(-\dfrac{2\pi\lambda_n}{\lambda_2} - \dfrac{2\pi M_1 \tau}{T_2}\right)\right]" /></div>
                 </div>
                 <h4 className="eq-sub">Same, with current values</h4>
                 {T ? (
@@ -554,45 +695,45 @@ export default function WaveLab() {
                 <h4>Ratios &amp; relationships <span className="eq-note">— paper</span></h4>
                 <div className="eq-list">
                   <div className="eq-box wide"><span className="eq-label">Proportionality &amp; Symmetry</span><span className="eq-line"><Tex tex="\dfrac{\omega_2}{\omega_1} = \dfrac{M_2}{M_1}" /></span><span className="eq-line"><Tex tex="\dfrac{k_2}{k_1} = \dfrac{\lambda_1}{\lambda_2} = -i\sqrt{\dfrac{M_2}{M_1}}" /></span><span className="eq-line"><Tex tex="\dfrac{\lambda_2}{\lambda_1} = i\sqrt{\dfrac{M_1}{M_2}}" /></span><span className="eq-line"><Tex tex="M_1 \lambda_1^2 = -M_2 \lambda_2^2" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Display-unit consequences of the same structure</span><span className="eq-line"><Tex tex="\frac{A_1}{A_2} = \sqrt{\frac{M_2}{M_1}}" /></span><span className="eq-line"><Tex tex="A_1^2 + A_2^2 = 1" /></span><span className="eq-line"><Tex tex="k_1 k_2 = \omega_1 \omega_2" /></span><span className="eq-line"><Tex tex="k_1 A_1 = \omega_2 A_2" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Display-unit consequences of the same structure</span><span className="eq-line"><Tex tex="\dfrac{A_1}{A_2} = \sqrt{\dfrac{M_2}{M_1}}" /></span><span className="eq-line"><Tex tex="A_1^2 + A_2^2 = 1" /></span><span className="eq-line"><Tex tex="k_1 k_2 = \omega_1 \omega_2" /></span><span className="eq-line"><Tex tex="k_1 A_1 = \omega_2 A_2" /></span></div>
                 </div>
               </div>
 
               <div className="eq-group">
                 <h4>Definitions <span className="eq-note">— paper · β from the display derivation</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box"><span className="eq-label">Wavenumbers</span><span className="eq-line"><Tex tex="k_1 = \frac{2\pi}{\lambda_1}" /></span><span className="eq-line"><Tex tex="k_2 = \frac{2\pi}{\lambda_2}" /></span></div>
-                  <div className="eq-box"><span className="eq-label">Angular frequencies</span><span className="eq-line"><Tex tex="\omega_1 = 2\pi f_1 = \frac{2\pi M_1 c^2}{h}" /></span><span className="eq-line"><Tex tex="\omega_2 = 2\pi f_2 = \frac{2\pi M_2 c^2}{h}" /></span></div>
-                  <div className="eq-box"><span className="eq-label">Frequency 1</span><Tex tex="f_1 = \frac{M_1 c^2}{h}" /></div>
-                  <div className="eq-box"><span className="eq-label">Frequency 2</span><Tex tex="f_2 = \frac{M_2 c^2}{h}" /></div>
-                  <div className="eq-box"><span className="eq-label">Period 1</span><Tex tex="T_1 = \frac{1}{f_1} = \frac{h}{M_1 c^2}" /></div>
-                  <div className="eq-box"><span className="eq-label">Period 2</span><Tex tex="T_2 = \frac{1}{f_2} = \frac{h}{M_2 c^2}" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Structural wavelengths</span><span className="eq-line"><Tex tex="\lambda_1 = \left(\frac{2Gh^2}{M_1 c^4}\right)^{1/3} \left(i\sqrt{\frac{M_1}{M_2}} - 1\right)^{-1/3}" /></span><span className="eq-line"><Tex tex="\lambda_2 = i\sqrt{\frac{M_1}{M_2}} \left(\frac{2Gh^2}{M_1 c^4}\right)^{1/3} \left(i\sqrt{\frac{M_1}{M_2}} - 1\right)^{-1/3}" /></span></div>
-                  <div className="eq-box"><span className="eq-label">Decay</span><Tex tex="\beta = \frac{|M_1 - M_2|}{M_1 + M_2}" /></div>
+                  <div className="eq-box"><span className="eq-label">Wavenumbers</span><span className="eq-line"><Tex tex="k_1 = \dfrac{2\pi}{\lambda_1}" /></span><span className="eq-line"><Tex tex="k_2 = \dfrac{2\pi}{\lambda_2}" /></span></div>
+                  <div className="eq-box"><span className="eq-label">Angular frequencies</span><span className="eq-line"><Tex tex="\omega_1 = 2\pi f_1 = \dfrac{2\pi M_1 c^2}{h}" /></span><span className="eq-line"><Tex tex="\omega_2 = 2\pi f_2 = \dfrac{2\pi M_2 c^2}{h}" /></span></div>
+                  <div className="eq-box"><span className="eq-label">Frequency 1</span><Tex tex="f_1 = \dfrac{M_1 c^2}{h}" /></div>
+                  <div className="eq-box"><span className="eq-label">Frequency 2</span><Tex tex="f_2 = \dfrac{M_2 c^2}{h}" /></div>
+                  <div className="eq-box"><span className="eq-label">Period 1</span><Tex tex="T_1 = \dfrac{1}{f_1} = \dfrac{h}{M_1 c^2}" /></div>
+                  <div className="eq-box"><span className="eq-label">Period 2</span><Tex tex="T_2 = \dfrac{1}{f_2} = \dfrac{h}{M_2 c^2}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Structural wavelengths</span><span className="eq-line"><Tex tex="\lambda_1 = \left(\dfrac{2Gh^2}{M_1 c^4}\right)^{1/3} \left(i\sqrt{\dfrac{M_1}{M_2}} - 1\right)^{-1/3}" /></span><span className="eq-line"><Tex tex="\lambda_2 = i\sqrt{\dfrac{M_1}{M_2}} \left(\dfrac{2Gh^2}{M_1 c^4}\right)^{1/3} \left(i\sqrt{\dfrac{M_1}{M_2}} - 1\right)^{-1/3}" /></span></div>
+                  <div className="eq-box"><span className="eq-label">Decay</span><Tex tex="\beta = \dfrac{|M_1 - M_2|}{M_1 + M_2}" /></div>
                   <div className="eq-box"><span className="eq-label">(λₙ span)</span><Tex tex="L = 4\pi" /></div>
-                  <div className="eq-box"><span className="eq-label">Amplitudes</span><span className="eq-line"><Tex tex="A_1 = \sqrt{\frac{M_2}{M_1+M_2}}" /></span><span className="eq-line"><Tex tex="A_2 = \sqrt{\frac{M_1}{M_1+M_2}}" /></span></div>
+                  <div className="eq-box"><span className="eq-label">Amplitudes</span><span className="eq-line"><Tex tex="A_1 = \sqrt{\dfrac{M_2}{M_1+M_2}}" /></span><span className="eq-line"><Tex tex="A_2 = \sqrt{\dfrac{M_1}{M_1+M_2}}" /></span></div>
                 </div>
               </div>
             </>
-          ) : (
+          ) : subtab === 'deriv' ? (
             <>
               <div className="eq-group">
                 <h4>General form <span className="eq-note">— plotted · display units</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box"><span className="eq-label">M₁ · ψ₁</span><Tex tex="\frac{\partial\psi_1}{\partial M_1} = \frac{\partial}{\partial M_1}\left[A_1 e^{-\beta\lambda_n} e^{i(k_1\lambda_n - \omega_1 M_2 \tau)}\right]" /></div>
-                  <div className="eq-box"><span className="eq-label">M₁ · ψ₂</span><Tex tex="\frac{\partial\psi_2}{\partial M_1} = \frac{\partial}{\partial M_1}\left[A_2 e^{-\beta(L-\lambda_n)} e^{i(-k_2\lambda_n - \omega_2 M_1 \tau)}\right]" /></div>
-                  <div className="eq-box"><span className="eq-label">M₂ · ψ₁</span><Tex tex="\frac{\partial\psi_1}{\partial M_2} = \frac{\partial}{\partial M_2}\left[A_1 e^{-\beta\lambda_n} e^{i(k_1\lambda_n - \omega_1 M_2 \tau)}\right]" /></div>
-                  <div className="eq-box"><span className="eq-label">M₂ · ψ₂</span><Tex tex="\frac{\partial\psi_2}{\partial M_2} = \frac{\partial}{\partial M_2}\left[A_2 e^{-\beta(L-\lambda_n)} e^{i(-k_2\lambda_n - \omega_2 M_1 \tau)}\right]" /></div>
+                  <div className="eq-box"><span className="eq-label">M₁ · ψ₁</span><Tex tex="\dfrac{\partial\psi_1}{\partial M_1} = \dfrac{\partial}{\partial M_1}\left[A_1 e^{-\beta\lambda_n} e^{i(k_1\lambda_n - \omega_1 M_2 \tau)}\right]" /></div>
+                  <div className="eq-box"><span className="eq-label">M₁ · ψ₂</span><Tex tex="\dfrac{\partial\psi_2}{\partial M_1} = \dfrac{\partial}{\partial M_1}\left[A_2 e^{-\beta(L-\lambda_n)} e^{i(-k_2\lambda_n - \omega_2 M_1 \tau)}\right]" /></div>
+                  <div className="eq-box"><span className="eq-label">M₂ · ψ₁</span><Tex tex="\dfrac{\partial\psi_1}{\partial M_2} = \dfrac{\partial}{\partial M_2}\left[A_1 e^{-\beta\lambda_n} e^{i(k_1\lambda_n - \omega_1 M_2 \tau)}\right]" /></div>
+                  <div className="eq-box"><span className="eq-label">M₂ · ψ₂</span><Tex tex="\dfrac{\partial\psi_2}{\partial M_2} = \dfrac{\partial}{\partial M_2}\left[A_2 e^{-\beta(L-\lambda_n)} e^{i(-k_2\lambda_n - \omega_2 M_1 \tau)}\right]" /></div>
                 </div>
               </div>
 
               <div className="eq-group">
                 <h4>Simplified <span className="eq-note">— fixed-parameter phase gradients</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box"><span className="eq-label">solid</span><Tex tex="\frac{\partial\psi_1}{\partial M_1} = ik_1\psi_1" /></div>
-                  <div className="eq-box"><span className="eq-label">solid</span><Tex tex="\frac{\partial\psi_2}{\partial M_1} = -i\omega_2\psi_2" /></div>
-                  <div className="eq-box"><span className="eq-label">dashed</span><Tex tex="\frac{\partial\psi_1}{\partial M_2} = -i\omega_1\psi_1" /></div>
-                  <div className="eq-box"><span className="eq-label">dashed</span><Tex tex="\frac{\partial\psi_2}{\partial M_2} = ik_2\psi_2" /></div>
+                  <div className="eq-box"><span className="eq-label">solid</span><Tex tex="\dfrac{\partial\psi_1}{\partial M_1} = ik_1\psi_1" /></div>
+                  <div className="eq-box"><span className="eq-label">solid</span><Tex tex="\dfrac{\partial\psi_2}{\partial M_1} = -i\omega_2\psi_2" /></div>
+                  <div className="eq-box"><span className="eq-label">dashed</span><Tex tex="\dfrac{\partial\psi_1}{\partial M_2} = -i\omega_1\psi_1" /></div>
+                  <div className="eq-box"><span className="eq-label">dashed</span><Tex tex="\dfrac{\partial\psi_2}{\partial M_2} = ik_2\psi_2" /></div>
                 </div>
               </div>
 
@@ -600,7 +741,7 @@ export default function WaveLab() {
                 <h4>With values substituted <span className="eq-note">— full theory · current M₁, M₂</span></h4>
                 {T ? (
                   <div className="eq-list">
-                    <div className="eq-box wide"><span className="eq-label">M₁ = {fmt(M1)} · M₂ = {fmt(M2)}</span><span className="eq-line"><Tex tex={`\\frac{\\partial\\psi_1}{\\partial M_1} = i[${csciTex(T.k1)}]\\psi_1`} /></span><span className="eq-line"><Tex tex={`\\frac{\\partial\\psi_2}{\\partial M_1} = -i[${sciTex(T.w2)}]\\psi_2`} /></span><span className="eq-line"><Tex tex={`\\frac{\\partial\\psi_1}{\\partial M_2} = -i[${sciTex(T.w1)}]\\psi_1`} /></span><span className="eq-line"><Tex tex={`\\frac{\\partial\\psi_2}{\\partial M_2} = i[${csciTex(T.k2)}]\\psi_2`} /></span></div>
+                    <div className="eq-box wide"><span className="eq-label">M₁ = {fmt(M1)} · M₂ = {fmt(M2)}</span><span className="eq-line"><Tex tex={`\\dfrac{\\partial\\psi_1}{\\partial M_1} = i[${csciTex(T.k1)}]\\psi_1`} /></span><span className="eq-line"><Tex tex={`\\dfrac{\\partial\\psi_2}{\\partial M_1} = -i[${sciTex(T.w2)}]\\psi_2`} /></span><span className="eq-line"><Tex tex={`\\dfrac{\\partial\\psi_1}{\\partial M_2} = -i[${sciTex(T.w1)}]\\psi_1`} /></span><span className="eq-line"><Tex tex={`\\dfrac{\\partial\\psi_2}{\\partial M_2} = i[${csciTex(T.k2)}]\\psi_2`} /></span></div>
                   </div>
                 ) : (
                   <p className="hint">Singular at zero mass: the full-theory λ and k substitutions are undefined when M₁ or M₂ is 0.</p>
@@ -610,25 +751,36 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>Relations</h4>
                 <div className="eq-list">
-                  <div className="eq-box"><span className="eq-label">Coordinate conservation</span><span className="eq-line"><Tex tex="\frac{\partial\psi_1}{\partial M_1} + \frac{\partial\psi_2}{\partial M_1} = 0" /></span><span className="eq-line"><Tex tex="\frac{\partial\psi_1}{\partial M_2} + \frac{\partial\psi_2}{\partial M_2} = 0" /></span></div>
+                  <div className="eq-box"><span className="eq-label">Coordinate conservation</span><span className="eq-line"><Tex tex="\dfrac{\partial\psi_1}{\partial M_1} + \dfrac{\partial\psi_2}{\partial M_1} = 0" /></span><span className="eq-line"><Tex tex="\dfrac{\partial\psi_1}{\partial M_2} + \dfrac{\partial\psi_2}{\partial M_2} = 0" /></span></div>
                   <div className="eq-box"><span className="eq-label">Cross-field balance</span><span className="eq-line"><Tex tex="k_1\psi_1 = \omega_2\psi_2" /></span><span className="eq-line"><Tex tex="k_2\psi_2 = \omega_1\psi_1" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Coordinate half-waves</span><span className="eq-line"><Tex tex="dM_1 = \frac{\partial\psi_1}{\partial M_1} + \frac{\partial\psi_2}{\partial M_1}" /></span><span className="eq-line"><Tex tex="dM_2 = \frac{\partial\psi_1}{\partial M_2} + \frac{\partial\psi_2}{\partial M_2}" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Total differential</span><Tex tex="d\psi_s = \frac{\partial\psi_1}{\partial M_1} + \frac{\partial\psi_2}{\partial M_1} + \frac{\partial\psi_1}{\partial M_2} + \frac{\partial\psi_2}{\partial M_2}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Coordinate half-waves</span><span className="eq-line"><Tex tex="dM_1 = \dfrac{\partial\psi_1}{\partial M_1} + \dfrac{\partial\psi_2}{\partial M_1}" /></span><span className="eq-line"><Tex tex="dM_2 = \dfrac{\partial\psi_1}{\partial M_2} + \dfrac{\partial\psi_2}{\partial M_2}" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Total differential</span><Tex tex="d\psi_s = \dfrac{\partial\psi_1}{\partial M_1} + \dfrac{\partial\psi_2}{\partial M_1} + \dfrac{\partial\psi_1}{\partial M_2} + \dfrac{\partial\psi_2}{\partial M_2}" /></div>
                 </div>
               </div>
 
               <div className="eq-group">
                 <h4>Variables <span className="eq-note">— defined in the gravity tab</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box"><span className="eq-label">Wavenumbers</span><span className="eq-line"><Tex tex="k_1 = \frac{2\pi}{\lambda_1}" /></span><span className="eq-line"><Tex tex="k_2 = \frac{2\pi}{\lambda_2}" /></span></div>
-                  <div className="eq-box"><span className="eq-label">Angular frequencies</span><span className="eq-line"><Tex tex="\omega_1 = \frac{2\pi M_1 c^2}{h}" /></span><span className="eq-line"><Tex tex="\omega_2 = \frac{2\pi M_2 c^2}{h}" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Structural wavelengths</span><span className="eq-line"><Tex tex="\lambda_1 = \left(\frac{2Gh^2}{M_1 c^4}\right)^{1/3} \left(i\sqrt{\frac{M_1}{M_2}} - 1\right)^{-1/3}" /></span><span className="eq-line"><Tex tex="\lambda_2 = i\sqrt{\frac{M_1}{M_2}} \left(\frac{2Gh^2}{M_1 c^4}\right)^{1/3} \left(i\sqrt{\frac{M_1}{M_2}} - 1\right)^{-1/3}" /></span></div>
-                  <div className="eq-box"><span className="eq-label">Decay</span><Tex tex="\beta = \frac{|M_1 - M_2|}{M_1 + M_2}" /></div>
-                  <div className="eq-box"><span className="eq-label">Amplitudes</span><span className="eq-line"><Tex tex="A_1 = \sqrt{\frac{M_2}{M_1+M_2}}" /></span><span className="eq-line"><Tex tex="A_2 = \sqrt{\frac{M_1}{M_1+M_2}}" /></span></div>
+                  <div className="eq-box"><span className="eq-label">Wavenumbers</span><span className="eq-line"><Tex tex="k_1 = \dfrac{2\pi}{\lambda_1}" /></span><span className="eq-line"><Tex tex="k_2 = \dfrac{2\pi}{\lambda_2}" /></span></div>
+                  <div className="eq-box"><span className="eq-label">Angular frequencies</span><span className="eq-line"><Tex tex="\omega_1 = \dfrac{2\pi M_1 c^2}{h}" /></span><span className="eq-line"><Tex tex="\omega_2 = \dfrac{2\pi M_2 c^2}{h}" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Structural wavelengths</span><span className="eq-line"><Tex tex="\lambda_1 = \left(\dfrac{2Gh^2}{M_1 c^4}\right)^{1/3} \left(i\sqrt{\dfrac{M_1}{M_2}} - 1\right)^{-1/3}" /></span><span className="eq-line"><Tex tex="\lambda_2 = i\sqrt{\dfrac{M_1}{M_2}} \left(\dfrac{2Gh^2}{M_1 c^4}\right)^{1/3} \left(i\sqrt{\dfrac{M_1}{M_2}} - 1\right)^{-1/3}" /></span></div>
+                  <div className="eq-box"><span className="eq-label">Decay</span><Tex tex="\beta = \dfrac{|M_1 - M_2|}{M_1 + M_2}" /></div>
+                  <div className="eq-box"><span className="eq-label">Amplitudes</span><span className="eq-line"><Tex tex="A_1 = \sqrt{\dfrac{M_2}{M_1+M_2}}" /></span><span className="eq-line"><Tex tex="A_2 = \sqrt{\dfrac{M_1}{M_1+M_2}}" /></span></div>
                 </div>
               </div>
             </>
-          )}
+          ) : subtab === 'integ' ? (
+            <>
+              <div className="eq-group">
+                <h4>Cumulative integrals <span className="eq-note">— plotted</span></h4>
+                <div className="eq-list">
+                  <div className="eq-box wide"><span className="eq-label">Definitions</span><span className="eq-line"><Tex tex="F_1(x) = \int_0^x \psi_1(\lambda_n) \, d\lambda_n" /></span><span className="eq-line"><Tex tex="F_2(x) = \int_0^x \psi_2(\lambda_n) \, d\lambda_n" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Balance condition</span><Tex tex="F_1(\lambda^*) = F_2(\lambda^*) \quad \text{where} \quad \lambda^* = L\dfrac{M_2}{M_1+M_2}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Total areas</span><span className="eq-line"><Tex tex="A_1^{\text{tot}} = \int_0^L \psi_1(\lambda_n) \, d\lambda_n" /></span><span className="eq-line"><Tex tex="A_2^{\text{tot}} = \int_0^L \psi_2(\lambda_n) \, d\lambda_n" /></span></div>
+                </div>
+              </div>
+            </>
+          ) : null}
         </div>
         </div>
       </div>
