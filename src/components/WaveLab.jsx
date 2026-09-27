@@ -349,8 +349,8 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
     return arr[idx] * (1 - t) + arr[idx + 1] * t
   }
   if (s.waveDisplay === 'waves' || s.waveDisplay === 'all') {
-    // Shade area between the curves: green where work is on top (work stored),
-    // red where impulse is on top (work done / impulse dominating).
+    // Shade area between the curves: green where work is on top (inertia stored),
+    // red where impulse is on top (energy stored).
     // Alternates at each crossing point.
     const CGREEN = '#16a34a'
     const CRED = '#dc2626'
@@ -398,22 +398,6 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
     ctx.restore()
     trace(ctx, X, Y, interp(arr1), color1, 2, dash1)
     trace(ctx, X, Y, interp(arr2), color2, 2, dash2)
-  }
-  if (s.waveDisplay === 'sum' || s.waveDisplay === 'all') {
-    trace(ctx, X, Y, interp(sumArr), CS, 2.75, [])
-  }
-  // Mirrored balance point for integrals: λ*_integ = L - λ*
-  if (s.M1 + s.M2 > 0) {
-    const xStar = X_MAX - (X_MAX * s.M1) / (s.M1 + s.M2)
-    ctx.save()
-    ctx.strokeStyle = '#9a9a9a'
-    ctx.lineWidth = 1.5
-    ctx.setLineDash([6, 4])
-    ctx.beginPath()
-    ctx.moveTo(X(xStar), g.padT)
-    ctx.lineTo(X(xStar), g.padT + g.ph)
-    ctx.stroke()
-    ctx.restore()
   }
 }
 
@@ -767,7 +751,7 @@ export default function WaveLab() {
           <>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Work and Impulse</h2>
+                <h2 className="graph-title">Work and Impulse of M₁</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
@@ -775,18 +759,17 @@ export default function WaveLab() {
                     <>
                       <span><i className="swatch" style={{ background: C1 }} /><Tex tex="W_1 = \int \mathrm{Re}(\psi_1) \, d\lambda_n" /></span>
                       <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_2 = \int \mathrm{Im}(\psi_2) \, d\lambda_n" /></span>
-                      <span><i className="swatch" style={{ background: '#16a34a', opacity: 0.5 }} /><Tex tex="\text{work stored}" /></span>
-                      <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{work done}" /></span>
+                      <span><i className="swatch" style={{ background: '#16a34a', opacity: 0.5 }} /><Tex tex="\text{inertia stored}" /></span>
+                      <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{energy stored}" /></span>
                     </>
                   )}
-                  <span><i className="swatch swatch-dashed" /><Tex tex="\psi_1: +x, \; \psi_2: -x" /></span>
                 </div>
               </div>
               <canvas ref={canvasCumRef} className="wave-canvas" />
             </div>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Work and Impulse</h2>
+                <h2 className="graph-title">Work and Impulse of M₂</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
@@ -794,11 +777,10 @@ export default function WaveLab() {
                     <>
                       <span><i className="swatch" style={{ background: C2 }} /><Tex tex="W_2 = \int \mathrm{Re}(\psi_2) \, d\lambda_n" /></span>
                       <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_1 = \int \mathrm{Im}(\psi_1) \, d\lambda_n" /></span>
-                      <span><i className="swatch" style={{ background: '#16a34a', opacity: 0.5 }} /><Tex tex="\text{work stored}" /></span>
-                      <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{work done}" /></span>
+                      <span><i className="swatch" style={{ background: '#16a34a', opacity: 0.5 }} /><Tex tex="\text{inertia stored}" /></span>
+                      <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{energy stored}" /></span>
                     </>
                   )}
-                  <span><i className="swatch swatch-dashed" /><Tex tex="\psi_1: +x, \; \psi_2: -x" /></span>
                 </div>
               </div>
               <canvas ref={canvasPair2Ref} className="wave-canvas" />
@@ -928,11 +910,11 @@ export default function WaveLab() {
           ) : subtab === 'integ' ? (
             <>
               <div className="eq-group">
-                <h4>Work and Impulse <span className="eq-note">— with respect to M₁, plotted</span></h4>
+                <h4>Work and Impulse <span className="eq-note">— with respect to M₁ / M₂, plotted</span></h4>
                 <div className="eq-list">
                   <div className="eq-box wide"><span className="eq-label">Work (spatial)</span><span className="eq-line"><Tex tex="W_1(x) = \int_0^x \mathrm{Re}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="W_2(x) = \int_0^x \mathrm{Re}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Impulse (temporal)</span><span className="eq-line"><Tex tex="J_1(x) = \int_0^x \mathrm{Im}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="J_2(x) = \int_0^x \mathrm{Im}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Shading</span><Tex tex="\text{Green: work above impulse (stored). Red: impulse above work (done).}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Shading</span><Tex tex="\text{Green: inertia stored. Red: energy stored.}" /></div>
                 </div>
               </div>
             </>
