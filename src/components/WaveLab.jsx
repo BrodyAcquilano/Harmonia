@@ -139,14 +139,15 @@ function drawTimeGrid(ctx, g, yMax, tauMax) {
   return { X, Y }
 }
 
-function trace(ctx, X, Y, fn, color, width, dash) {
+function trace(ctx, X, Y, fn, color, width, dash, xMax) {
   ctx.strokeStyle = color
   ctx.lineWidth = width
   ctx.setLineDash(dash || [])
   ctx.beginPath()
   const N = 420
+  const dom = xMax === undefined ? X_MAX : xMax
   for (let i = 0; i <= N; i++) {
-    const x = (i / N) * X_MAX
+    const x = (i / N) * dom
     const px = X(x)
     const py = Y(fn(x))
     if (i === 0) ctx.moveTo(px, py)
@@ -505,8 +506,8 @@ function renderWobbleTimeFrame(ctx, canvas, s) {
   const all = [...x1, ...x2]
   const yMax = Math.max(Math.abs(Math.min(...all)) * 1.15, Math.abs(Math.max(...all)) * 1.15, 0.1)
   const { X, Y } = drawTimeGrid(ctx, g, yMax, tauMax)
-  trace(ctx, X, Y, (t) => samplePeriodic(x1, tauMax, NT, t), C1, 2.5, [])
-  trace(ctx, X, Y, (t) => samplePeriodic(x2, T2, NT, t), C2, 2.5, [])
+  trace(ctx, X, Y, (t) => samplePeriodic(x1, tauMax, NT, t), C1, 2.5, [], tauMax)
+  trace(ctx, X, Y, (t) => samplePeriodic(x2, T2, NT, t), C2, 2.5, [], tauMax)
 }
 
 // Net impulse vs time — STATIC snapshot of one full cycle.
@@ -518,8 +519,8 @@ function renderForceTimeFrame(ctx, canvas, s) {
   const all = [...f1, ...f2]
   const yMax = Math.max(Math.abs(Math.min(...all)) * 1.15, Math.abs(Math.max(...all)) * 1.15, 0.1)
   const { X, Y } = drawTimeGrid(ctx, g, yMax, tauMax)
-  trace(ctx, X, Y, (t) => samplePeriodic(f1, tauMax, NT, t), C1, 2.5, [])
-  trace(ctx, X, Y, (t) => samplePeriodic(f2, T2, NT, t), C2, 2.5, [])
+  trace(ctx, X, Y, (t) => samplePeriodic(f1, tauMax, NT, t), C1, 2.5, [], tauMax)
+  trace(ctx, X, Y, (t) => samplePeriodic(f2, T2, NT, t), C2, 2.5, [], tauMax)
 }
 
 // Wobble diagram: m₁ dot left (blue), m₂ dot right (orange), each moving
@@ -774,10 +775,10 @@ function renderPushPullTimeFrame(ctx, canvas, s, mode) {
   const yMax = Math.max(Math.abs(Math.min(...shown)) * 1.15, Math.abs(Math.max(...shown)) * 1.15, 0.1)
   const { X, Y } = drawTimeGrid(ctx, g, yMax, tauMax)
   if (showParts) {
-    trace(ctx, X, Y, p1at, C1, 2.5, [])
-    trace(ctx, X, Y, p2at, C2, 2.5, [])
+    trace(ctx, X, Y, p1at, C1, 2.5, [], tauMax)
+    trace(ctx, X, Y, p2at, C2, 2.5, [], tauMax)
   }
-  if (showDiff) trace(ctx, X, Y, diffAt, '#3a2c1a', 2.5, [])
+  if (showDiff) trace(ctx, X, Y, diffAt, '#3a2c1a', 2.5, [], tauMax)
 }
 
 // Legacy wrapper for backward compatibility
