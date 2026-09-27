@@ -830,7 +830,6 @@ body {
   color: #3a2c1a;
   font: 500 14px/1.65 "IBM Plex Mono", monospace;
   overflow-wrap: anywhere;
-  text-align: center;
   overflow-x: auto;
   white-space: nowrap;
 }
