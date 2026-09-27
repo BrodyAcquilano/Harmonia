@@ -330,13 +330,13 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
     prevJ1 = p1.im
     prevJ2 = p2.im
   }
-  // Select the pair: pair=1 → W₁+J₂, pair=2 → W₂+J₁
-  // (with respect to M₁: W₁ is work from ψ₁'s perspective, J₂ is impulse from ψ₂'s)
+  // Select the pair: pair=1 → W₁+J₁, pair=2 → W₂+J₂
+  // Wₙ = potential work of Mₙ, Jₙ = impulse generated, Wₙ−Jₙ = inertia remaining.
   const arr1 = pair === 1 ? work1 : work2
-  const arr2 = pair === 1 ? imp2 : imp1
+  const arr2 = pair === 1 ? imp1 : imp2
   const color1 = pair === 1 ? C1 : C2
-  const color2 = pair === 1 ? C2 : C1
-  // For pair 1: W₁ solid blue, J₂ dashed orange. For pair 2: W₂ solid orange, J₁ dashed blue.
+  const color2 = pair === 1 ? C1 : C2
+  // For pair 1: W₁ solid blue, J₁ dashed blue. For pair 2: W₂ solid orange, J₂ dashed orange.
   const dash1 = []
   const dash2 = [6, 4]
   const diffArr = arr1.map((v, i) => v - arr2[i])
@@ -754,26 +754,26 @@ export default function WaveLab() {
           <>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Work and Impulse of M₁</h2>
+                <h2 className="graph-title">Potential Work and Impulse of M₁</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
                   {(waveDisplay === 'waves' || waveDisplay === 'all') && (
                     <>
                       <span><i className="swatch" style={{ background: C1 }} /><Tex tex="W_1 = \int \mathrm{Re}(\psi_1) \, d\lambda_n" /></span>
-                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_2 = \int \mathrm{Im}(\psi_2) \, d\lambda_n" /></span>
+                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_1 = \int \mathrm{Im}(\psi_1) \, d\lambda_n" /></span>
                       <span><i className="swatch" style={{ background: '#16a34a', opacity: 0.5 }} /><Tex tex="\text{inertia stored}" /></span>
                       <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{energy stored}" /></span>
                     </>
                   )}
-                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_1 - J_2" /></span>}
+                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_1 - J_1 = \text{inertia remaining}" /></span>}
                 </div>
                 <label className="check-row graph-check">
                   Display
                   <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
-                    <option value="waves">W₁, J₂</option>
-                    <option value="sum">W₁ − J₂</option>
-                    <option value="all">W₁, J₂, W₁ − J₂</option>
+                    <option value="waves">W₁, J₁</option>
+                    <option value="sum">W₁ − J₁</option>
+                    <option value="all">W₁, J₁, W₁ − J₁</option>
                   </select>
                 </label>
               </div>
@@ -781,26 +781,26 @@ export default function WaveLab() {
             </div>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Work and Impulse of M₂</h2>
+                <h2 className="graph-title">Potential Work and Impulse of M₂</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
                   {(waveDisplay === 'waves' || waveDisplay === 'all') && (
                     <>
                       <span><i className="swatch" style={{ background: C2 }} /><Tex tex="W_2 = \int \mathrm{Re}(\psi_2) \, d\lambda_n" /></span>
-                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_1 = \int \mathrm{Im}(\psi_1) \, d\lambda_n" /></span>
+                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_2 = \int \mathrm{Im}(\psi_2) \, d\lambda_n" /></span>
                       <span><i className="swatch" style={{ background: '#16a34a', opacity: 0.5 }} /><Tex tex="\text{inertia stored}" /></span>
                       <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{energy stored}" /></span>
                     </>
                   )}
-                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_2 - J_1" /></span>}
+                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_2 - J_2 = \text{inertia remaining}" /></span>}
                 </div>
                 <label className="check-row graph-check">
                   Display
                   <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
-                    <option value="waves">W₂, J₁</option>
-                    <option value="sum">W₂ − J₁</option>
-                    <option value="all">W₂, J₁, W₂ − J₁</option>
+                    <option value="waves">W₂, J₂</option>
+                    <option value="sum">W₂ − J₂</option>
+                    <option value="all">W₂, J₂, W₂ − J₂</option>
                   </select>
                 </label>
               </div>
@@ -931,10 +931,11 @@ export default function WaveLab() {
           ) : subtab === 'integ' ? (
             <>
               <div className="eq-group">
-                <h4>Work and Impulse <span className="eq-note">— with respect to M₁ / M₂, plotted</span></h4>
+                <h4>Work and Impulse <span className="eq-note">— plotted</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Work (spatial)</span><span className="eq-line"><Tex tex="W_1(x) = \int_0^x \mathrm{Re}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="W_2(x) = \int_0^x \mathrm{Re}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Impulse (temporal)</span><span className="eq-line"><Tex tex="J_1(x) = \int_0^x \mathrm{Im}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="J_2(x) = \int_0^x \mathrm{Im}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Potential Work (spatial)</span><span className="eq-line"><Tex tex="W_1(x) = \int_0^x \mathrm{Re}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="W_2(x) = \int_0^x \mathrm{Re}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Impulse Generated (temporal)</span><span className="eq-line"><Tex tex="J_1(x) = \int_0^x \mathrm{Im}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="J_2(x) = \int_0^x \mathrm{Im}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Inertia Remaining</span><Tex tex="W_n - J_n = \text{inertia remaining at } x" /></div>
                   <div className="eq-box wide"><span className="eq-label">Shading</span><Tex tex="\text{Green: inertia stored. Red: energy stored.}" /></div>
                 </div>
               </div>
