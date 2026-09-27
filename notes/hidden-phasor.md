@@ -64,6 +64,54 @@ Now project this motion onto the plane perpendicular to Earth's velocity around 
 
 The simulation shows exactly this projection. The wave's oscillation is the back-and-forth, laid out along a line. The fixed wavelength is the fixed relative velocity. The phasor rotation is the cycling of fall-and-return. If we added Earth's heliocentric velocity back in, we would recover the Moon's full three-dimensional path; the Wave Lab shows the relative motion with the common drift removed. It is offered here as an interpretation and a direction for future work, not as a derived result.
 
+### 5b. Two endpoints, two center-crossings, two cycles
+
+Read the $4\pi$ window in these terms. Start at the center: the body falls inward, crosses the center, reaches the far endpoint, falls back, crosses the center again, reaches the near endpoint, and returns. **One full wavelength contains two center-crossings and two endpoints** — the complete fall-and-return in both directions. The $4\pi$ axis holds two such wavelengths, so the graph shows the cycle twice: fall, return, fall, return.
+
+The quarter-cycle offset between the real and imaginary parts is what makes this readable. When spatial inertia ($\cos\phi$, the real part) is at an endpoint — maximum displacement — temporal inertia ($\sin\phi$, the imaginary part) is at zero: all position, no change. When the body crosses the center, the reverse holds: spatial inertia is zero, temporal inertia is maximal — all change, no displacement. The two curves hand the motion back and forth every quarter cycle, and the $4\pi$ window lets you watch the handoff happen four times.
+
+A word on the chirp, since it belongs here too. The Moon's orbit as drawn above is the *stable* case: fixed relative velocity, fixed wavelength, no chirp. But a decaying orbit — the Moon spiraling inward, or a body accelerating as it falls — would change the wavelength over time: the wave would chirp, compressing as the fall steepens. Section 3 named the chirp as the accelerating case; the Moon example shows both sides. Stable orbit: constant $k$, pure rotation. Decaying orbit: $k(t)$, chirp. The simulation currently implements only the first.
+
+## 5c. The mutual pull: two equations, two directions
+
+So far we have spoken as if only one body moves. But the Earth is also pulled by the Moon — and that is what the *second* equation is for.
+
+$$
+\psi_1 \;\longleftrightarrow\; \text{body 1's view}, \qquad \psi_2 \;\longleftrightarrow\; \text{body 2's view}
+$$
+
+The two waves are not two pictures of the same thing. They are the two directions of a conversation. At each point $\lambda_n$ between the bodies, $\psi_1$ reports how much energy body 1 is sending toward body 2, and $\psi_2$ reports how much body 2 is sending back. They are signals — each body telling the other how hard it is pulling, and the pull being answered.
+
+This is why the waves are counter-propagating ($\psi_1$ toward $+\lambda_n$, $\psi_2$ toward $-\lambda_n$) and why they decay in opposite directions. Each wave is strongest at its own body's end and fades toward the other: the signal attenuates with distance. The balance point $\lambda^*$, where the envelopes cross, is where the two signals meet at equal strength — the negotiation point of the mutual pull.
+
+The relative velocity stays fixed — the bodies are not accelerating *relative to each other* — but within that fixed frame they wobble back and forth, each tugging the other. The wobble switches direction **every half cycle**: push becomes pull, pull becomes push, at each zero-crossing of the wave. That switching is the heartbeat of the energy transfer.
+
+## 5d. From energy at a point to distance moved
+
+This leads to the central conclusion of the simulation. If we can read, at every point $\lambda_n$ along the wavelength, how much spatial inertia has acted there — how much work has been done, how much impulse generated — then we can determine **how far the body has moved**. The spatial pattern of energy *is* the displacement history, encoded as a wave.
+
+We are very close to making this quantitative. The integration graphs already compute the first integrals:
+
+$$
+W_n(\lambda_n) = \int_0^{\lambda_n} \mathrm{Re}(\psi_n)\,d\lambda', \qquad J_n(\lambda_n) = \int_0^{\lambda_n} \mathrm{Im}(\psi_n)\,d\lambda'
+$$
+
+The next step — not yet implemented — is a **second integral**: not a plain accumulation, but the integral of the *difference* between the two bodies' work-impulse balances. Define the local push-pull at each point:
+
+$$
+D(\lambda_n) = \big[W_1(\lambda_n) - J_1(\lambda_n)\big] - \big[W_2(\lambda_n) - J_2(\lambda_n)\big]
+$$
+
+$D(\lambda_n)$ is the net push in the $+\lambda_n$ direction at that point: body 1's remaining inertia minus body 2's. Integrating it along the wavelength,
+
+$$
+X = \int_0^{L} D(\lambda_n)\,d\lambda_n
+$$
+
+gives the total displacement — how far the system has moved over the elapsed phasor time. The first integral turned the field into energy; the second turns the energy *difference* into motion.
+
+There is a dimensional logic to this, worth stating plainly. We started with **one dimension**: the spatial line $\lambda_n$ between the bodies. We added a **second**: the hidden phasor dimension $\tau$, time as rotation. Integrating once over the wavelength gave us energy as a function of position. Integrating the *difference* once more gives us displacement as a function of time. **For every spatial dimension, we add two time dimensions**: one for the phase to rotate through, one for the motion to accumulate in. The pattern — space, phasor-time, displacement-time — should generalize to higher dimensions the same way.
+
 ## 6. Why the axis runs $0$ to $4\pi$
 
 The spatial axis spans $0$ to $4\pi$. With the normalized $k_1 = 1$, the spatial wavelength is $2\pi/k_1 = 2\pi$, so the window holds exactly **two full wavelengths**.
@@ -130,7 +178,8 @@ The colors alternate at each crossing, so the graph reads as a ledger: green ban
 This note describes the constant-relative-velocity, phasor-rotation simulation only. It does not show:
 
 - The **mass-space view** — the fields plotted directly against $M_1$ and $M_2$ as coordinates, with no $\lambda_n$ and no $\tau$. There the wavenumber varies with the coordinate itself and the waves chirp.
-- The **accelerating case** — relative velocity changing with time, wavelength breathing in and out.
+- The **accelerating case** — relative velocity changing with time, wavelength breathing in and out (the chirp of Section 5b, second half).
+- The **second integral** — the displacement $X = \int D(\lambda_n)\,d\lambda_n$ proposed in Section 5d. The work/impulse graphs exist; the push-pull difference integral does not yet.
 - The **$\lambda$-derivation bridge** — the explicit change of variables from $(M_1, M_2)$ to $(\lambda, T)$ via the free-fall construction, which would make the "equivalent but viewed from a different space" claim exact rather than analogical.
 
 Each of these is a future simulation. This one is kept, as is, so the ideas can be revisited as they mature.

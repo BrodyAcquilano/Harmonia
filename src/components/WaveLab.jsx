@@ -292,8 +292,8 @@ function renderHalfFrame(ctx, canvas, s, tau) {
 //   Pair 2: W₂ (work of ψ₂) + J₁ (impulse of ψ₁)
 //   Work: Wₙ(x) = ∫₀ˣ Re(ψₙ(t)) dt (spatial, solid)
 //   Impulse: Jₙ(x) = ∫₀ˣ Im(ψₙ(t)) dt (temporal, dashed)
-//   Shading: green where work is above impulse (work stored),
-//   red where impulse is above work (work done); alternates at crossings.
+//   Shading: green where work is on top (inertia stored),
+//   red where impulse is on top (inertia released); alternates at crossings.
 function renderPairFrame(ctx, canvas, s, tau, pair) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
@@ -404,6 +404,73 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
   }
 }
 
+// Motion tab: second integral — displacement from starting point.
+//   D(λₙ) = [W₁−J₁] − [W₂−J₂]: net push-pull at each point (blue +, orange −).
+//   X₁(λₙ) = ∫₀^λₙ [W₁−J₁] dλ′: body 1's displacement from its start.
+//   X₂(λₙ) = ∫₀^λₙ [W₂−J₂] dλ′: body 2's displacement from its start.
+// Plots X₁ (blue) and X₂ (orange); endpoint values are the total displacements.
+function renderMotionFrame(ctx, canvas, s, tau) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  // First integrals: work and impulse (trapezoidal rule), as in renderPairFrame.
+  const N = 200
+  const work1 = [], work2 = [], imp1 = [], imp2 = []
+  let w1 = 0, w2 = 0, j1 = 0, j2 = 0
+  let prevX = 0
+  let prevW1 = psi1(0, tau, P, s.M2).re
+  let prevW2 = psi2(0, tau, P, s.M1).re
+  let prevJ1 = psi1(0, tau, P, s.M2).im
+  let prevJ2 = psi2(0, tau, P, s.M1).im
+  for (let i = 0; i <= N; i++) {
+    const x = (i / N) * X_MAX
+    const p1 = psi1(x, tau, P, s.M2)
+    const p2 = psi2(x, tau, P, s.M1)
+    if (i > 0) {
+      const dx = x - prevX
+      w1 += ((prevW1 + p1.re) / 2) * dx
+      w2 += ((prevW2 + p2.re) / 2) * dx
+      j1 += ((prevJ1 + p1.im) / 2) * dx
+      j2 += ((prevJ2 + p2.im) / 2) * dx
+    }
+    work1.push(w1); work2.push(w2); imp1.push(j1); imp2.push(j2)
+    prevX = x
+    prevW1 = p1.re; prevW2 = p2.re; prevJ1 = p1.im; prevJ2 = p2.im
+  }
+  // Second integral: cumulative displacement per body.
+  const disp1 = [], disp2 = []
+  let x1 = 0, x2 = 0
+  let prevD1 = work1[0] - imp1[0]
+  let prevD2 = work2[0] - imp2[0]
+  const dx = X_MAX / N
+  for (let i = 0; i <= N; i++) {
+    const d1 = work1[i] - imp1[i]
+    const d2 = work2[i] - imp2[i]
+    if (i > 0) {
+      x1 += ((prevD1 + d1) / 2) * dx
+      x2 += ((prevD2 + d2) / 2) * dx
+    }
+    disp1.push(x1); disp2.push(x2)
+    prevD1 = d1; prevD2 = d2
+  }
+  const all = [...disp1, ...disp2]
+  const yMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all)) * 1.15, 0.1)
+  const { X, Y } = drawGrid(ctx, g, yMax)
+  const interp = (arr) => (x) => {
+    const idx = Math.min(Math.floor((x / X_MAX) * N), N - 1)
+    const t = ((x / X_MAX) * N) - idx
+    return arr[idx] * (1 - t) + arr[idx + 1] * t
+  }
+  trace(ctx, X, Y, interp(disp1), C1, 2.5, [])
+  trace(ctx, X, Y, interp(disp2), C2, 2.5, [])
+  // Endpoint markers: final displacement of each body.
+  ctx.save()
+  ctx.fillStyle = C1
+  ctx.beginPath(); ctx.arc(X(X_MAX), Y(disp1[N]), 4, 0, 2 * Math.PI); ctx.fill()
+  ctx.fillStyle = C2
+  ctx.beginPath(); ctx.arc(X(X_MAX), Y(disp2[N]), 4, 0, 2 * Math.PI); ctx.fill()
+  ctx.restore()
+}
+
 // Legacy wrapper for backward compatibility
 function renderCumFrame(ctx, canvas, s, tau) {
   renderPairFrame(ctx, canvas, s, tau, 1)
@@ -504,6 +571,7 @@ export default function WaveLab() {
   const canvasAreaRef = useRef(null)
   const canvasCumRef = useRef(null)
   const canvasPair2Ref = useRef(null)
+  const canvasMotionRef = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
   stateRef.current = { subtab, M1, M2, playing, speed, showSum, waveDisplay }
@@ -540,6 +608,10 @@ export default function WaveLab() {
         if (cc) renderPairFrame(cc.getContext('2d'), cc, s, tauRef.current, 1)
         const p2 = canvasPair2Ref.current
         if (p2) renderPairFrame(p2.getContext('2d'), p2, s, tauRef.current, 2)
+      }
+      if (s.subtab === 'motion') {
+        const mc = canvasMotionRef.current
+        if (mc) renderMotionFrame(mc.getContext('2d'), mc, s, tauRef.current)
       }
       raf = requestAnimationFrame(draw)
     }
@@ -583,6 +655,14 @@ export default function WaveLab() {
               onClick={() => setSubtab('integ')}
             >
               Integration
+            </button>
+            <button
+              className="subtab"
+              role="tab"
+              aria-selected={subtab === 'motion'}
+              onClick={() => setSubtab('motion')}
+            >
+              Motion
             </button>
           </div>
         </div>
@@ -807,6 +887,19 @@ export default function WaveLab() {
               <canvas ref={canvasPair2Ref} className="wave-canvas" />
             </div>
           </>
+        ) : subtab === 'motion' ? (
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Body Displacement from Starting Point</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="X_1 = \int_0^L [W_1 - J_1] \, d\lambda_n" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="X_2 = \int_0^L [W_2 - J_2] \, d\lambda_n" /></span>
+              </div>
+            </div>
+            <canvas ref={canvasMotionRef} className="wave-canvas" />
+          </div>
         ) : null}
 
         <div className="eq-panel">
@@ -937,6 +1030,18 @@ export default function WaveLab() {
                   <div className="eq-box wide"><span className="eq-label">Impulse Generated (temporal)</span><span className="eq-line"><Tex tex="J_1(x) = \int_0^x \mathrm{Im}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="J_2(x) = \int_0^x \mathrm{Im}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Inertia Remaining</span><Tex tex="W_n - J_n = \text{inertia remaining at } x" /></div>
                   <div className="eq-box wide"><span className="eq-label">Shading</span><Tex tex="\text{Green: inertia stored. Red: inertia released.}" /></div>
+                </div>
+              </div>
+            </>
+          ) : subtab === 'motion' ? (
+            <>
+              <div className="eq-group">
+                <h4>Second Integral — Displacement <span className="eq-note">— plotted</span></h4>
+                <div className="eq-list">
+                  <div className="eq-box wide"><span className="eq-label">Local push-pull</span><Tex tex="D(\lambda_n) = [W_1(\lambda_n) - J_1(\lambda_n)] - [W_2(\lambda_n) - J_2(\lambda_n)]" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Body 1 displacement</span><Tex tex="X_1 = \int_0^L [W_1(\lambda_n) - J_1(\lambda_n)] \, d\lambda_n" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Body 2 displacement</span><Tex tex="X_2 = \int_0^L [W_2(\lambda_n) - J_2(\lambda_n)] \, d\lambda_n" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Relative displacement</span><Tex tex="\Delta X = X_1 - X_2 = \int_0^L D(\lambda_n) \, d\lambda_n" /></div>
                 </div>
               </div>
             </>
