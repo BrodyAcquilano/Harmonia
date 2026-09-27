@@ -577,11 +577,11 @@ function dotRadius(M, M1, M2) {
   return 5 + 7 * (M / Math.max(M1, M2))
 }
 
-// Bodies: in-line wobble — the same Xₙ(t) as the wobble diagram, but viewed
-// along the λ line instead of across it. Dots oscillate horizontally around
-// their rest positions: toward each other, then apart. The lighter body's
-// swing carries it past the center, so it visibly crosses in front of the
-// heavier body (drawn on top when they overlap).
+// Bodies: in-line wobble — the yz plane, looking down the x (λ) axis.
+// Both bodies sit on the line of sight (center x); the wobble Xₙ(t) is drawn
+// vertically along y. They move opposite — when one rises, the other falls —
+// so the smaller (lighter) body visibly crosses in front of the larger one
+// (drawn on top at the crossing).
 function renderInlineWobbleFrame(ctx, canvas, s, tau) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
@@ -594,46 +594,38 @@ function renderInlineWobbleFrame(ctx, canvas, s, tau) {
   const all = [...x1, ...x2]
   const vMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all)), 0.1)
   const { padL, padT, pw, ph } = g
-  const midY = padT + ph / 2
-  const midX = padL + pw / 2
-  const gap = pw * 0.1
-  const xL = midX - gap, xR = midX + gap
-  const amp = gap * 1.7
-  const px1 = xL + (v1 / vMax) * amp
-  const px2 = xR + (v2 / vMax) * amp
+  const midX = padL + pw / 2, midY = padT + ph / 2
+  const amp = (ph / 2) * 0.8
+  const y1 = midY - (v1 / vMax) * amp
+  const y2 = midY - (v2 / vMax) * amp
   const r1 = dotRadius(s.M1, s.M1, s.M2)
   const r2 = dotRadius(s.M2, s.M1, s.M2)
   ctx.save()
-  // The λ line between the bodies.
-  ctx.strokeStyle = '#a99760'
-  ctx.lineWidth = 1.5
-  ctx.beginPath(); ctx.moveTo(padL, midY); ctx.lineTo(padL + pw, midY); ctx.stroke()
-  // Rest-position ticks.
+  // Vertical rail: the x-axis seen end-on.
   ctx.strokeStyle = '#e5dcc0'
   ctx.lineWidth = 1
-  for (const rx of [xL, xR]) {
-    ctx.beginPath(); ctx.moveTo(rx, midY - 8); ctx.lineTo(rx, midY + 8); ctx.stroke()
-  }
-  // Heavier body first (underneath), lighter on top at crossings.
+  ctx.beginPath(); ctx.moveTo(midX, padT); ctx.lineTo(midX, padT + ph); ctx.stroke()
+  // Center point: the impartial reference, head-on.
+  ctx.strokeStyle = '#a99760'
+  ctx.beginPath()
+  ctx.moveTo(midX - 6, midY); ctx.lineTo(midX + 6, midY)
+  ctx.moveTo(midX, midY - 6); ctx.lineTo(midX, midY + 6)
+  ctx.stroke()
+  // Heavier/larger first (underneath), lighter on top at crossings.
   const order = s.M1 >= s.M2
-    ? [[px1, r1, C1, 'm₁'], [px2, r2, C2, 'm₂']]
-    : [[px2, r2, C2, 'm₂'], [px1, r1, C1, 'm₁']]
-  for (const [px, r, color] of order) {
+    ? [[y1, r1, C1], [y2, r2, C2]]
+    : [[y2, r2, C2], [y1, r1, C1]]
+  for (const [py, r, color] of order) {
     ctx.fillStyle = color
-    ctx.beginPath(); ctx.arc(px, midY, r, 0, 2 * Math.PI); ctx.fill()
+    ctx.beginPath(); ctx.arc(midX, py, r, 0, 2 * Math.PI); ctx.fill()
   }
-  ctx.fillStyle = '#3a2c1a'
-  ctx.font = '600 13px "IBM Plex Mono", monospace'
-  ctx.textAlign = 'center'
-  ctx.fillText('m₁', xL, midY + 30)
-  ctx.fillText('m₂', xR, midY + 30)
-  // Axes: the xz plane (motion along x = the λ line; z labels the viewing plane).
+  // Axes: the yz plane.
   ctx.fillStyle = '#715f43'
   ctx.font = '11px "IBM Plex Mono", monospace'
-  ctx.textAlign = 'right'
-  ctx.fillText('x (spatial)', padL + pw, midY - 8)
   ctx.textAlign = 'left'
-  ctx.fillText('z', padL + 4, padT + 12)
+  ctx.fillText('y', midX + 8, padT + 12)
+  ctx.textAlign = 'right'
+  ctx.fillText('z', padL + pw - 4, midY - 8)
   ctx.restore()
 }
 
@@ -654,6 +646,10 @@ function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
   const cx = g.padL + pw / 2, cy = padT + ph / 2
   const sc = ((Math.min(pw, ph) / 2) * 0.78) / Math.max(A1, A2)
   const phi = 2 * Math.PI * (((tau % tauMax) + tauMax) % tauMax) / tauMax
+  const p1x = trueMotion ? cx - A1 * sc * Math.cos(phi) : cx
+  const p1y = trueMotion ? cy - A1 * sc * Math.sin(phi) : cy
+  const p2x = cx + A2 * sc * Math.cos(phi)
+  const p2y = cy + A2 * sc * Math.sin(phi)
   ctx.save()
   // Orbit guides
   ctx.strokeStyle = '#e5dcc0'
@@ -669,6 +665,16 @@ function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
     ctx.moveTo(cx, cy - 6); ctx.lineTo(cx, cy + 6)
     ctx.stroke()
   }
+  // Force line: gravity acts along the line joining the two masses.
+  ctx.save()
+  ctx.globalAlpha = 0.55
+  ctx.strokeStyle = '#b3a684'
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  ctx.moveTo(p1x, p1y)
+  ctx.lineTo(p2x, p2y)
+  ctx.stroke()
+  ctx.restore()
   const dot = (x, y, r, color, label) => {
     ctx.fillStyle = color
     ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill()
@@ -679,13 +685,8 @@ function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
   }
   const r1 = dotRadius(s.M1, s.M1, s.M2)
   const r2 = dotRadius(s.M2, s.M1, s.M2)
-  if (trueMotion) {
-    dot(cx - A1 * sc * Math.cos(phi), cy - A1 * sc * Math.sin(phi), r1, C1, 'm₁')
-    dot(cx + A2 * sc * Math.cos(phi), cy + A2 * sc * Math.sin(phi), r2, C2, 'm₂')
-  } else {
-    dot(cx, cy, r1, C1, 'm₁')
-    dot(cx + A2 * sc * Math.cos(phi), cy + A2 * sc * Math.sin(phi), r2, C2, 'm₂')
-  }
+  dot(p1x, p1y, r1, C1, 'm₁')
+  dot(p2x, p2y, r2, C2, 'm₂')
   ctx.restore()
 }
 
@@ -1172,11 +1173,13 @@ export default function WaveLab() {
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Bodies: In-Line Wobble (xz plane)</h2>
+              <h2 className="graph-title">Bodies: In-Line Wobble (yz plane)</h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
-                <span><Tex tex="\text{same wobble, viewed along } \lambda" /></span>
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="m_1" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="m_2" /></span>
+                <span><Tex tex="\text{same wobble, looking down the } x \text{ axis}" /></span>
               </div>
             </div>
             <canvas ref={canvasInlineWobbleRef} className="wave-canvas" />
@@ -1381,8 +1384,8 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>In-Line Wobble <span className="eq-note">— plotted · live</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Same wobble, along λ</span><Tex tex="x_1(t) = x_{1,0} + X_1(t), \quad x_2(t) = x_{2,0} + X_2(t)" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{Bodies move toward each other, then apart. Lighter body crosses in front.}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Same wobble, yz plane</span><Tex tex="y_1(t) = X_1(t), \quad y_2(t) = X_2(t) \quad \text{(looking down } x\text{)}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{Bodies superimposed, moving opposite. Lighter crosses in front of heavier.}" /></div>
                 </div>
               </div>
               <div className="eq-group">
@@ -1392,6 +1395,7 @@ export default function WaveLab() {
                   <div className="eq-box wide"><span className="eq-label">Apparent: m₁ pinned</span><Tex tex="\mathbf{r}_2(\phi) = A_2(\cos\phi, \sin\phi)" /></div>
                   <div className="eq-box wide"><span className="eq-label">True: both orbit the center</span><Tex tex="\mathbf{r}_1(\phi) = -A_1(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +A_2(\cos\phi, \sin\phi)" /></div>
                   <div className="eq-box wide"><span className="eq-label">Radii from the wobble</span><Tex tex="A_n = \max|X_n(t)| — \text{heavier mass traces the smaller circle}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Force direction</span><Tex tex="\text{along the line joining the masses (grey)}" /></div>
                 </div>
               </div>
               <div className="eq-group">
