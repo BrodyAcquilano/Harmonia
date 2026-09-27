@@ -828,10 +828,13 @@ body {
   border-radius: 8px;
   padding: 12px;
   color: #3a2c1a;
-  font: 500 14px/1.65 "IBM Plex Mono", monospace;
   overflow-wrap: anywhere;
   overflow-x: auto;
-  white-space: nowrap;
+}
+
+.eq-box .katex {
+  font-size: 1.15em;
+  color: #3a2c1a;
 }
 
 .eq-box.wide {
