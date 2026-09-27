@@ -399,6 +399,9 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
     trace(ctx, X, Y, interp(arr1), color1, 2, dash1)
     trace(ctx, X, Y, interp(arr2), color2, 2, dash2)
   }
+  if (s.waveDisplay === 'sum' || s.waveDisplay === 'all') {
+    trace(ctx, X, Y, interp(sumArr), CS, 2.75, [])
+  }
 }
 
 // Legacy wrapper for backward compatibility
@@ -763,7 +766,16 @@ export default function WaveLab() {
                       <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{energy stored}" /></span>
                     </>
                   )}
+                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_1 + J_2" /></span>}
                 </div>
+                <label className="check-row graph-check">
+                  Display
+                  <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
+                    <option value="waves">W₁, J₂</option>
+                    <option value="sum">W₁ + J₂</option>
+                    <option value="all">W₁, J₂, W₁ + J₂</option>
+                  </select>
+                </label>
               </div>
               <canvas ref={canvasCumRef} className="wave-canvas" />
             </div>
@@ -781,7 +793,16 @@ export default function WaveLab() {
                       <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{energy stored}" /></span>
                     </>
                   )}
+                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_2 + J_1" /></span>}
                 </div>
+                <label className="check-row graph-check">
+                  Display
+                  <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
+                    <option value="waves">W₂, J₁</option>
+                    <option value="sum">W₂ + J₁</option>
+                    <option value="all">W₂, J₁, W₂ + J₁</option>
+                  </select>
+                </label>
               </div>
               <canvas ref={canvasPair2Ref} className="wave-canvas" />
             </div>
