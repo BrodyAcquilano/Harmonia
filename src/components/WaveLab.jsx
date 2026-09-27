@@ -580,7 +580,7 @@ export default function WaveLab() {
         {subtab === 'gravity' ? (
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Gravity Waves</h2>
+              <h2 className="graph-title">Gravity Waves Inertia/Energy</h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
@@ -604,7 +604,7 @@ export default function WaveLab() {
           <>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Gravity-Wave Derivatives</h2>
+                <h2 className="graph-title">Gravity Wave Inertia Energy Derivatives</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
@@ -618,19 +618,19 @@ export default function WaveLab() {
             </div>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Derivative Half-Waves</h2>
+                <h2 className="graph-title">Inertia To Energy Symmetry</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
-                  <span><i className="swatch" style={{ background: C1 }} />dM₁ half-wave = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁</span>
-                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />dM₂ half-wave = ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</span>
+                  <span><i className="swatch" style={{ background: C1 }} />dM₁ = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁</span>
+                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />dM₂ = ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</span>
                 </div>
               </div>
               <canvas ref={canvasHalfRef} className="wave-canvas half-canvas" />
             </div>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Total dψ<sub>s</sub></h2>
+                <h2 className="graph-title">Conservation</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
@@ -644,7 +644,7 @@ export default function WaveLab() {
           <>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Wave Areas</h2>
+                <h2 className="graph-title">Energy Balance Point</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
@@ -745,6 +745,7 @@ export default function WaveLab() {
                   <div className="eq-box"><span className="eq-label">Decay</span><Tex tex="\beta = \dfrac{|M_1 - M_2|}{M_1 + M_2}" /></div>
                   <div className="eq-box"><span className="eq-label">(λₙ span)</span><Tex tex="L = 4\pi" /></div>
                   <div className="eq-box"><span className="eq-label">Amplitudes</span><span className="eq-line"><Tex tex="A_1 = \sqrt{\dfrac{M_2}{M_1+M_2}}" /></span><span className="eq-line"><Tex tex="A_2 = \sqrt{\dfrac{M_1}{M_1+M_2}}" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Inertia Balance Point</span><span className="eq-line"><Tex tex="\lambda^* = L\dfrac{M_2}{M_1+M_2}" /></span><span className="eq-line"><Tex tex="M_1 \lambda^* = M_2 (L - \lambda^*)" /></span></div>
                 </div>
               </div>
             </>
@@ -809,7 +810,7 @@ export default function WaveLab() {
                 <div className="eq-list">
                   <div className="eq-box wide"><span className="eq-label">Work (spatial)</span><span className="eq-line"><Tex tex="W_1(x) = \int_0^x \mathrm{Re}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="W_2(x) = \int_0^x \mathrm{Re}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Impulse (temporal)</span><span className="eq-line"><Tex tex="J_1(x) = \int_0^x \mathrm{Im}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="J_2(x) = \int_0^x \mathrm{Im}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Balance condition</span><Tex tex="W_1(\lambda^*) = W_2(\lambda^*) \quad \text{where} \quad \lambda^* = L - L\dfrac{M_2}{M_1+M_2} = L\dfrac{M_1}{M_1+M_2}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Energy Balance Point</span><Tex tex="W_1(\lambda^*) = W_2(\lambda^*) \quad \text{where} \quad \lambda^* = L - L\dfrac{M_2}{M_1+M_2} = L\dfrac{M_1}{M_1+M_2}" /></div>
                 </div>
               </div>
             </>
