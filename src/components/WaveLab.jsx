@@ -181,7 +181,10 @@ function renderFrame(ctx, canvas, s, tau) {
   if ((s.subtab === 'gravity' || s.subtab === 'integ') && s.M1 + s.M2 > 0) {
     // Balance point: mass-weighted center x* = L·M₂/(M₁+M₂).
     // M₁·x* = M₂·(L−x*); equal masses → middle, M₁=3M₂ → L/4.
-    const xStar = (X_MAX * s.M2) / (s.M1 + s.M2)
+    // For integration tab, use the mirrored point (opposite side).
+    const xStar = s.subtab === 'integ'
+      ? X_MAX - (X_MAX * s.M2) / (s.M1 + s.M2)
+      : (X_MAX * s.M2) / (s.M1 + s.M2)
     ctx.save()
     ctx.strokeStyle = '#9a9a9a'
     ctx.lineWidth = 1.5
@@ -222,57 +225,63 @@ function renderHalfFrame(ctx, canvas, s, tau) {
   trace(ctx, X, Y, (x) => dPsi_dM(2, x, tau, P, s.M1, s.M2).sum.re, C2, 2, [6, 4])
 }
 
-// Integration tab, second graph: cumulative integrals.
-//   F₁(x) = ∫₀ˣ Re(ψ₁(t)) dt, F₂(x) = ∫₀ˣ Re(ψ₂(t)) dt
-// Shows where the accumulated areas meet/become equal.
+// Integration tab, second graph: Work and Impulse.
+//   Work: Wₙ(x) = ∫₀ˣ Re(ψₙ(t)) dt (spatial, solid)
+//   Impulse: Jₙ(x) = ∫₀ˣ Im(ψₙ(t)) dt (temporal, dashed)
+// Shows the accumulated work and impulse for each wave.
 function renderCumFrame(ctx, canvas, s, tau) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
-  // Precompute cumulative integrals via trapezoidal rule
+  // Precompute work and impulse via trapezoidal rule
   const N = 200
-  const xs = []
-  const f1 = []
-  const f2 = []
-  let cum1 = 0
-  let cum2 = 0
+  const work1 = []
+  const work2 = []
+  const imp1 = []
+  const imp2 = []
+  let w1 = 0, w2 = 0, j1 = 0, j2 = 0
   let prevX = 0
-  let prevY1 = psi1(0, tau, P, s.M2).re
-  let prevY2 = psi2(0, tau, P, s.M1).re
+  let prevW1 = psi1(0, tau, P, s.M2).re
+  let prevW2 = psi2(0, tau, P, s.M1).re
+  let prevJ1 = psi1(0, tau, P, s.M2).im
+  let prevJ2 = psi2(0, tau, P, s.M1).im
   for (let i = 0; i <= N; i++) {
     const x = (i / N) * X_MAX
-    const y1 = psi1(x, tau, P, s.M2).re
-    const y2 = psi2(x, tau, P, s.M1).re
+    const p1 = psi1(x, tau, P, s.M2)
+    const p2 = psi2(x, tau, P, s.M1)
     if (i > 0) {
       const dx = x - prevX
-      cum1 += ((prevY1 + y1) / 2) * dx
-      cum2 += ((prevY2 + y2) / 2) * dx
+      w1 += ((prevW1 + p1.re) / 2) * dx
+      w2 += ((prevW2 + p2.re) / 2) * dx
+      j1 += ((prevJ1 + p1.im) / 2) * dx
+      j2 += ((prevJ2 + p2.im) / 2) * dx
     }
-    xs.push(x)
-    f1.push(cum1)
-    f2.push(cum2)
+    work1.push(w1)
+    work2.push(w2)
+    imp1.push(j1)
+    imp2.push(j2)
     prevX = x
-    prevY1 = y1
-    prevY2 = y2
+    prevW1 = p1.re
+    prevW2 = p2.re
+    prevJ1 = p1.im
+    prevJ2 = p2.im
   }
-  const yMax = Math.max(Math.abs(Math.min(...f1, ...f2)), Math.abs(Math.max(...f1, ...f2))) * 1.15
+  const all = [...work1, ...work2, ...imp1, ...imp2]
+  const yMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all))) * 1.15
   const yMaxSafe = Math.max(yMax, 0.1)
   const { X, Y } = drawGrid(ctx, g, yMaxSafe)
   // Interpolate functions for trace
-  const f1Fn = (x) => {
+  const interp = (arr) => (x) => {
     const idx = Math.min(Math.floor((x / X_MAX) * N), N - 1)
     const t = ((x / X_MAX) * N) - idx
-    return f1[idx] * (1 - t) + f1[idx + 1] * t
+    return arr[idx] * (1 - t) + arr[idx + 1] * t
   }
-  const f2Fn = (x) => {
-    const idx = Math.min(Math.floor((x / X_MAX) * N), N - 1)
-    const t = ((x / X_MAX) * N) - idx
-    return f2[idx] * (1 - t) + f2[idx + 1] * t
-  }
-  trace(ctx, X, Y, f1Fn, C1, 2, [])
-  trace(ctx, X, Y, f2Fn, C2, 2, [])
-  // Balance point line
+  trace(ctx, X, Y, interp(work1), C1, 2, [])
+  trace(ctx, X, Y, interp(work2), C2, 2, [])
+  trace(ctx, X, Y, interp(imp1), C1, 2, [6, 4])
+  trace(ctx, X, Y, interp(imp2), C2, 2, [6, 4])
+  // Mirrored balance point for integrals: λ*_integ = L - λ*
   if (s.M1 + s.M2 > 0) {
-    const xStar = (X_MAX * s.M2) / (s.M1 + s.M2)
+    const xStar = X_MAX - (X_MAX * s.M2) / (s.M1 + s.M2)
     ctx.save()
     ctx.strokeStyle = '#9a9a9a'
     ctx.lineWidth = 1.5
@@ -637,12 +646,14 @@ export default function WaveLab() {
             </div>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Cumulative Integrals</h2>
+                <h2 className="graph-title">Work And Impulse</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
-                  <span><i className="swatch" style={{ background: C1 }} />F₁(x) = ∫₀ˣ ψ₁</span>
-                  <span><i className="swatch" style={{ background: C2 }} />F₂(x) = ∫₀ˣ ψ₂</span>
+                  <span><i className="swatch" style={{ background: C1 }} />W₁ work</span>
+                  <span><i className="swatch" style={{ background: C2 }} />W₂ work</span>
+                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} />J₁ impulse</span>
+                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />J₂ impulse</span>
                   <span><i className="swatch swatch-dashed" />balance point λ*</span>
                 </div>
               </div>
@@ -772,11 +783,11 @@ export default function WaveLab() {
           ) : subtab === 'integ' ? (
             <>
               <div className="eq-group">
-                <h4>Cumulative integrals <span className="eq-note">— plotted</span></h4>
+                <h4>Work and Impulse <span className="eq-note">— plotted</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Definitions</span><span className="eq-line"><Tex tex="F_1(x) = \int_0^x \psi_1(\lambda_n) \, d\lambda_n" /></span><span className="eq-line"><Tex tex="F_2(x) = \int_0^x \psi_2(\lambda_n) \, d\lambda_n" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Balance condition</span><Tex tex="F_1(\lambda^*) = F_2(\lambda^*) \quad \text{where} \quad \lambda^* = L\dfrac{M_2}{M_1+M_2}" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Total areas</span><span className="eq-line"><Tex tex="A_1^{\text{tot}} = \int_0^L \psi_1(\lambda_n) \, d\lambda_n" /></span><span className="eq-line"><Tex tex="A_2^{\text{tot}} = \int_0^L \psi_2(\lambda_n) \, d\lambda_n" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Work (spatial)</span><span className="eq-line"><Tex tex="W_1(x) = \int_0^x \mathrm{Re}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="W_2(x) = \int_0^x \mathrm{Re}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Impulse (temporal)</span><span className="eq-line"><Tex tex="J_1(x) = \int_0^x \mathrm{Im}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="J_2(x) = \int_0^x \mathrm{Im}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Balance condition</span><Tex tex="W_1(\lambda^*) = W_2(\lambda^*) \quad \text{where} \quad \lambda^* = L - L\dfrac{M_2}{M_1+M_2} = L\dfrac{M_1}{M_1+M_2}" /></div>
                 </div>
               </div>
             </>
