@@ -448,7 +448,7 @@ export default function WaveLab() {
         {subtab === 'gravity' ? (
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Reciprocal gravity waves</h2>
+              <h2 className="graph-title">Gravity Waves</h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
@@ -472,7 +472,7 @@ export default function WaveLab() {
           <>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Gravity-wave derivatives</h2>
+                <h2 className="graph-title">Gravity-Wave Derivatives</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
@@ -486,7 +486,7 @@ export default function WaveLab() {
             </div>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Derivative half-waves</h2>
+                <h2 className="graph-title">Derivative Half-Waves</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
@@ -553,7 +553,7 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>Ratios &amp; relationships <span className="eq-note">— paper</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-line"><Tex tex="\frac{\omega_2}{\omega_1} = \frac{M_2}{M_1}" /></span><span className="eq-line"><Tex tex="\frac{k_2}{k_1} = \frac{\lambda_1}{\lambda_2} = -i\sqrt{\frac{M_2}{M_1}}" /></span><span className="eq-line"><Tex tex="\frac{\lambda_2}{\lambda_1} = i\sqrt{\frac{M_1}{M_2}}" /></span><span className="eq-line"><Tex tex="M_1 \lambda_1^2 = -M_2 \lambda_2^2" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Proportionality &amp; Symmetry</span><span className="eq-line"><Tex tex="\frac{\omega_2}{\omega_1} = \frac{M_2}{M_1}" /></span><span className="eq-line"><Tex tex="\frac{k_2}{k_1} = \frac{\lambda_1}{\lambda_2} = -i\sqrt{\frac{M_2}{M_1}}" /></span><span className="eq-line"><Tex tex="\frac{\lambda_2}{\lambda_1} = i\sqrt{\frac{M_1}{M_2}}" /></span><span className="eq-line"><Tex tex="M_1 \lambda_1^2 = -M_2 \lambda_2^2" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Display-unit consequences of the same structure</span><span className="eq-line"><Tex tex="\frac{A_1}{A_2} = \sqrt{\frac{M_2}{M_1}}" /></span><span className="eq-line"><Tex tex="A_1^2 + A_2^2 = 1" /></span><span className="eq-line"><Tex tex="k_1 k_2 = \omega_1 \omega_2" /></span><span className="eq-line"><Tex tex="k_1 A_1 = \omega_2 A_2" /></span></div>
                 </div>
               </div>
@@ -567,7 +567,7 @@ export default function WaveLab() {
                   <div className="eq-box"><span className="eq-label">Frequency 2</span><Tex tex="f_2 = \frac{M_2 c^2}{h}" /></div>
                   <div className="eq-box"><span className="eq-label">Period 1</span><Tex tex="T_1 = \frac{1}{f_1} = \frac{h}{M_1 c^2}" /></div>
                   <div className="eq-box"><span className="eq-label">Period 2</span><Tex tex="T_2 = \frac{1}{f_2} = \frac{h}{M_2 c^2}" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Structural wavelengths</span><span className="eq-line"><Tex tex="\lambda_1 = \left(\frac{2Gh^2}{M_1 c^4}\right)^{1/3} \left(i\sqrt{\frac{M_1}{M_2}} - 1\right)^{-1/3}" /></span><span className="eq-line"><Tex tex="\lambda_2 = i\sqrt{\frac{M_1}{M_2}} \lambda_1" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Structural wavelengths</span><span className="eq-line"><Tex tex="\lambda_1 = \left(\frac{2Gh^2}{M_1 c^4}\right)^{1/3} \left(i\sqrt{\frac{M_1}{M_2}} - 1\right)^{-1/3}" /></span><span className="eq-line"><Tex tex="\lambda_2 = i\sqrt{\frac{M_1}{M_2}} \left(\frac{2Gh^2}{M_1 c^4}\right)^{1/3} \left(i\sqrt{\frac{M_1}{M_2}} - 1\right)^{-1/3}" /></span></div>
                   <div className="eq-box"><span className="eq-label">Decay</span><Tex tex="\beta = \frac{|M_1 - M_2|}{M_1 + M_2}" /></div>
                   <div className="eq-box"><span className="eq-label">(λₙ span)</span><Tex tex="L = 4\pi" /></div>
                   <div className="eq-box"><span className="eq-label">Amplitudes</span><span className="eq-line"><Tex tex="A_1 = \sqrt{\frac{M_2}{M_1+M_2}}" /></span><span className="eq-line"><Tex tex="A_2 = \sqrt{\frac{M_1}{M_1+M_2}}" /></span></div>
