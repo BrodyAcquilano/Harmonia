@@ -469,6 +469,65 @@ body {
   background: transparent;
 }
 
+/* Wide canvas for the full-width orbit diagrams */
+.wave-canvas-orbit {
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  height: auto;
+  display: block;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Bigger canvas for True Motion — the rings expand into the window */
+.wave-canvas-orbit-lg {
+  width: 100%;
+  aspect-ratio: 21 / 11;
+  height: auto;
+  display: block;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Tiny zoom controls under a graph */
+.graph-foot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 20px 12px;
+}
+.graph-foot-row .graph-footnote {
+  padding: 0;
+}
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.zoom-btn {
+  font-size: 12px;
+  padding: 2px 9px;
+  border-radius: 6px;
+  border: 1px solid #d8cba6;
+  background: #fbf6e9;
+  color: #5a4a2f;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1.5;
+}
+.zoom-btn:hover {
+  background: #f3ead0;
+}
+.zoom-level {
+  font-size: 11px;
+  color: #715f43;
+  min-width: 40px;
+  text-align: center;
+  font-style: italic;
+}
+
 /* Small italic footnote at the bottom corner of a graph box */
 .graph-footnote {
   padding: 6px 20px 12px;

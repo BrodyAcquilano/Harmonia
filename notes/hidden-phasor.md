@@ -205,21 +205,21 @@ $$
 
 The center cross is the impartial reference point, head-on. Dot size scales with mass, and the lighter body is drawn on top, so at each crossing it visibly passes *in front of* the heavier body, like a transit. The $xy$ view shows the wobble from the side; this one shows it head-on down the line between the bodies.
 
-**"Apparent Relative Motion"** and **"True Motion"** — the wobble wrapped into circular orbits: two small diagrams side by side, sharing one scale, each footnoted *xy plane* (the orbit is drawn in the same $xy$ plane as the first wobble diagram — the $x$-axis wrapped into a circle). The orbital angle runs one full turn per wobble cycle, synced to the same clock as the wobble diagram; radii come from the measured wobble amplitudes:
+**"Apparent Relative Motion"** and **"True Motion"** — the wobble wrapped into circular orbits, stacked full-width one above the other, each footnoted *xy plane* (the orbit is drawn in the same $xy$ plane as the first wobble diagram — the $x$-axis wrapped into a circle). "True Motion" gets the bigger box, with tiny zoom controls underneath (50%–400%), so the rings have room to expand as the masses change. The orbital angle runs one full turn per wobble cycle, synced to the same clock as the wobble diagram; both diagrams share one scale so they compare directly. The center point ($+$) is the **opposite balance point** $L - \lambda^* = L\,M_2/(M_1+M_2)$ — the mirror of the Gravity tab's $\lambda^*$, i.e. the center of mass — and each body's orbital radius is its distance from that point:
 
 $$
-\phi(t) = 2\pi t / T, \qquad A_n = \max|X_n(t)|
-$$
-
-$$
-\text{apparent: } \mathbf{r}_1 = 0, \quad \mathbf{r}_2(\phi) = A_2(\cos\phi, \sin\phi)
+\phi(t) = 2\pi t / T, \qquad \lambda^* = L\frac{M_1}{M_1+M_2}
 $$
 
 $$
-\text{true: } \mathbf{r}_1(\phi) = -A_1(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +A_2(\cos\phi, \sin\phi)
+\text{apparent: } \mathbf{r}_1 = 0, \quad \mathbf{r}_2(\phi) = L(\cos\phi, \sin\phi)
 $$
 
-"Apparent" pins $m_1$ (blue) at the center while $m_2$ (orange) circles it — the naive view, what the Moon's orbit looks like if you assume the Earth doesn't move. We know it is wrong, and it is labeled as such. "True" circles both bodies around the barycenter (marked $+$), on opposite sides: whichever mass is heavier traces the smaller circle — nearer the center, wobbling slightly while the lighter body swings wide. The wobble diagram is the edge-on view of this motion; the orbit diagrams are the face-on view.
+$$
+\text{true: } \mathbf{r}_1(\phi) = -(L-\lambda^*)(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +\lambda^*(\cos\phi, \sin\phi)
+$$
+
+"Apparent" pins $m_1$ (blue) at the center while $m_2$ (orange) circles it at the full separation $L$ — the naive view, what the Moon's orbit looks like if you assume the Earth doesn't move. We know it is wrong, and it is labeled as such. "True" splits the separation at the center of mass: $r_1 + r_2 = L$ always, the two bodies circling ($+$) on opposite sides, the heavier mass tracing the smaller circle — consistent with the wobble diagram, where the heavier mass moves less. The wobble diagram is the edge-on view of this motion; the orbit diagrams are the face-on view.
 
 A semi-transparent grey line joins the two masses in both orbit diagrams: the direction gravity acts along. In "True Motion" it always passes through the center point, rotating with the bodies — the visual form of the statement that the separation (and hence $\lambda$) does not change: each body moves away fast enough to hold the distance fixed while the line between them turns.
 

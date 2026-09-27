@@ -629,33 +629,40 @@ function renderInlineWobbleFrame(ctx, canvas, s, tau) {
   ctx.restore()
 }
 
-// Orbit diagrams: wrap the wobble into circular orbits.
+// Orbit diagrams: circular orbits about the opposite balance point.
+// The center (+) is L − λ* = L·M₂/(M₁+M₂) — the mirror of the Gravity tab's
+// balance point, i.e. the center of mass. Each body's orbital radius is its
+// distance from that point: r₁ = L − λ*, r₂ = λ*, so r₁ + r₂ = L always.
+// The heavier mass traces the smaller circle, matching the wobble diagram.
 // The orbital angle φ runs one full turn per displayed wobble cycle, synced
-// to the same animation clock as the wobble dots. Radii come from the measured
-// wobble amplitudes Aₙ = max|Xₙ| — the heavier mass wobbles less, so it traces
-// the smaller circle. Both diagrams share one scale so they compare directly.
-// trueMotion=false: "apparent" — m₁ pinned at the center, m₂ circling it.
-// trueMotion=true:  "true" — both bodies circle the barycenter (+), opposite.
+// to the same animation clock as the wobble dots. Both diagrams share one
+// scale so they compare directly.
+// trueMotion=false: "apparent" — m₁ pinned at the center, m₂ circling it at
+// the full separation L (the naive relative orbit).
+// trueMotion=true:  "true" — the separation split at the center of mass,
+// both bodies circling (+), opposite.
 function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
-  const { tauMax, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
-  const A1 = Math.max(...x1.map(Math.abs), 1e-6)
-  const A2 = Math.max(...x2.map(Math.abs), 1e-6)
+  const { tauMax } = wobbleCurves(s.M1, s.M2, P)
+  const lamStar = (X_MAX * s.M1) / (s.M1 + s.M2)
+  const R1 = X_MAX - lamStar, R2 = lamStar
   const { padT, pw, ph } = g
   const cx = g.padL + pw / 2, cy = padT + ph / 2
-  const sc = ((Math.min(pw, ph) / 2) * 0.78) / Math.max(A1, A2)
+  // True Motion zooms around the fit scale; Apparent stays at fit.
+  const zoom = trueMotion ? (s.orbitZoom || 1) : 1
+  const sc = (((Math.min(pw, ph) / 2) * 0.78) / X_MAX) * zoom
   const phi = 2 * Math.PI * (((tau % tauMax) + tauMax) % tauMax) / tauMax
-  const p1x = trueMotion ? cx - A1 * sc * Math.cos(phi) : cx
-  const p1y = trueMotion ? cy - A1 * sc * Math.sin(phi) : cy
-  const p2x = cx + A2 * sc * Math.cos(phi)
-  const p2y = cy + A2 * sc * Math.sin(phi)
+  const p1x = trueMotion ? cx - R1 * sc * Math.cos(phi) : cx
+  const p1y = trueMotion ? cy - R1 * sc * Math.sin(phi) : cy
+  const p2x = cx + (trueMotion ? R2 : X_MAX) * sc * Math.cos(phi)
+  const p2y = cy + (trueMotion ? R2 : X_MAX) * sc * Math.sin(phi)
   ctx.save()
   // Orbit guides
   ctx.strokeStyle = '#e5dcc0'
   ctx.lineWidth = 1
-  for (const A of (trueMotion ? [A1, A2] : [A2])) {
-    ctx.beginPath(); ctx.arc(cx, cy, A * sc, 0, 2 * Math.PI); ctx.stroke()
+  for (const R of (trueMotion ? [R1, R2] : [X_MAX])) {
+    ctx.beginPath(); ctx.arc(cx, cy, R * sc, 0, 2 * Math.PI); ctx.stroke()
   }
   if (trueMotion) {
     // Barycenter: the impartial center point.
@@ -796,6 +803,7 @@ export default function WaveLab() {
   const [waveDisplay, setWaveDisplay] = useState('all')
   const [speedMode, setSpeedMode] = useState('slow') // 'slow': 0–slowMax, 'fast': 1–2.5
   const [slowMax, setSlowMax] = useState(1)
+  const [orbitZoom, setOrbitZoom] = useState(1) // True Motion zoom, 1 = fit
 
   // Rescale the slow-down range from the current masses; park speed at the top.
   const recalcSlow = (a, b) => {
@@ -838,7 +846,7 @@ export default function WaveLab() {
   const canvasPushPullRef = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
-  stateRef.current = { subtab, M1, M2, playing, speed, showSum, waveDisplay }
+  stateRef.current = { subtab, M1, M2, playing, speed, showSum, waveDisplay, orbitZoom }
 
   useEffect(() => {
     let raf
@@ -1184,7 +1192,6 @@ export default function WaveLab() {
             </div>
             <canvas ref={canvasInlineWobbleRef} className="wave-canvas" />
           </div>
-          <div className="graph-duo">
           <div className="graph-box">
             <div className="graph-title-row">
               <h2 className="graph-title">Apparent Relative Motion</h2>
@@ -1194,7 +1201,7 @@ export default function WaveLab() {
                 <span><Tex tex="m_1 \text{ fixed} — \text{the naive view}" /></span>
               </div>
             </div>
-            <canvas ref={canvasOrbitApparentRef} className="wave-canvas-sq" />
+            <canvas ref={canvasOrbitApparentRef} className="wave-canvas-orbit" />
             <div className="graph-footnote">xy plane</div>
           </div>
           <div className="graph-box">
@@ -1206,9 +1213,16 @@ export default function WaveLab() {
                 <span><Tex tex="\text{both orbit the center point}" /></span>
               </div>
             </div>
-            <canvas ref={canvasOrbitTrueRef} className="wave-canvas-sq" />
-            <div className="graph-footnote">xy plane</div>
-          </div>
+            <canvas ref={canvasOrbitTrueRef} className="wave-canvas-orbit-lg" />
+            <div className="graph-foot-row">
+              <div className="zoom-controls">
+                <button className="zoom-btn" onClick={() => setOrbitZoom(z => Math.max(0.5, z / 1.25))} aria-label="Zoom out">−</button>
+                <span className="zoom-level">{Math.round(orbitZoom * 100)}%</span>
+                <button className="zoom-btn" onClick={() => setOrbitZoom(z => Math.min(4, z * 1.25))} aria-label="Zoom in">+</button>
+                {orbitZoom !== 1 && <button className="zoom-btn" onClick={() => setOrbitZoom(1)} aria-label="Reset zoom">reset</button>}
+              </div>
+              <div className="graph-footnote">xy plane</div>
+            </div>
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
@@ -1392,9 +1406,9 @@ export default function WaveLab() {
                 <h4>Orbit Diagrams <span className="eq-note">— plotted · live</span></h4>
                 <div className="eq-list">
                   <div className="eq-box wide"><span className="eq-label">Orbital angle (one turn per wobble cycle)</span><Tex tex="\phi(t) = 2\pi t / T" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Apparent: m₁ pinned</span><Tex tex="\mathbf{r}_2(\phi) = A_2(\cos\phi, \sin\phi)" /></div>
-                  <div className="eq-box wide"><span className="eq-label">True: both orbit the center</span><Tex tex="\mathbf{r}_1(\phi) = -A_1(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +A_2(\cos\phi, \sin\phi)" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Radii from the wobble</span><Tex tex="A_n = \max|X_n(t)| — \text{heavier mass traces the smaller circle}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Center: the opposite balance point</span><Tex tex="L - \lambda^*, \quad \lambda^* = L\frac{M_1}{M_1+M_2} \quad \text{— the center of mass}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Apparent: m₁ pinned</span><Tex tex="\mathbf{r}_2(\phi) = L(\cos\phi, \sin\phi) \quad \text{— full separation}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">True: separation split at the center of mass</span><Tex tex="\mathbf{r}_1(\phi) = -(L-\lambda^*)(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +\lambda^*(\cos\phi, \sin\phi)" /></div>
                   <div className="eq-box wide"><span className="eq-label">Force direction</span><Tex tex="\text{along the line joining the masses (grey)}" /></div>
                 </div>
               </div>
