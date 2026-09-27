@@ -1,11 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
+
 :root {
-  --bg: #0d1117;
-  --panel: #141b26;
-  --border: #232d3d;
-  --text: #e6edf3;
-  --muted: #8b98ab;
-  --accent: #6ea8fe;
-  --accent-2: #dc78c8;
+  --bg: #faf4d7;        /* post-it off-white yellow */
+  --panel: #fffdf4;     /* cards */
+  --border: #d8c98f;    /* warm border */
+  --text: #3a2c1a;      /* dark brown text */
+  --muted: #8a7550;
+  --accent: #2563eb;
+  --accent-2: #b0488f;
+  --brown: #6b4226;
+  --gold: #d9a441;
 }
 
 * {
@@ -33,15 +37,37 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 22px 0 16px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 24px;
+  padding: 18px 20px 14px;
+  margin: 0 -20px 24px;
+  background: var(--brown);
+  border-bottom: 3px solid var(--gold);
 }
 
 .header h1 {
   margin: 0;
-  font-size: 1.6rem;
-  letter-spacing: 0.04em;
+  font-family: 'Lobster', 'Brush Script MT', 'Segoe Script', cursive;
+  font-weight: 400;
+  font-size: 2.6rem;
+  letter-spacing: 0.02em;
+  color: #f6a609;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35), 0 0 18px rgba(246, 166, 9, 0.35);
+}
+
+.header .tabs button {
+  color: #ffe9b0;
+  background: rgba(0, 0, 0, 0.22);
+  border-color: rgba(217, 164, 65, 0.55);
+}
+
+.header .tabs button:hover {
+  color: #fff7e0;
+  border-color: var(--gold);
+}
+
+.header .tabs button.active {
+  color: #fff7e0;
+  background: rgba(0, 0, 0, 0.42);
+  border-color: var(--gold);
 }
 
 .tabs {
@@ -83,9 +109,38 @@ body {
 
 .lab-layout {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 1fr 300px;
   gap: 20px;
   align-items: start;
+}
+
+.lab-stage {
+  order: 1;
+}
+
+.lab-side {
+  order: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.lab-side .transport {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.lab-side .transport .time-readout {
+  margin-left: 0;
+}
+
+.transport-title {
+  margin: 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffd94d;
 }
 
 @media (max-width: 860px) {
@@ -161,12 +216,62 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
+  background: var(--brown);
+  border: 2px solid #c0392b;
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #ffd94d;
+}
+
+.transport button {
+  color: #ffd94d;
+  background: rgba(0, 0, 0, 0.25);
+  border-color: #a93226;
+}
+
+.transport button:hover {
+  color: #fff3c4;
+  border-color: #ffd94d;
+}
+
+.transport .check-row {
+  color: #ffd94d;
+}
+
+.transport .check-row input {
+  accent-color: #f6a609;
+}
+
+.transport .slider-label,
+.transport .slider-value {
+  color: #ffd94d;
+}
+
+.transport .speed-mode {
+  color: #ffd94d;
+  background: rgba(0, 0, 0, 0.25);
+  border-color: #a93226;
+}
+
+.transport .speed-mode option {
+  color: #3a2c1a;
+}
+
+.transport .recalc-btn {
+  color: #ffe9b0;
+  border-color: #a93226;
+}
+
+.transport .recalc-btn:hover {
+  color: #fff3c4;
+  border-color: #ffd94d;
 }
 
 .time-readout {
   margin-left: auto;
   font-variant-numeric: tabular-nums;
-  color: var(--muted);
+  color: #ffd94d;
 }
 
 /* ---------- sliders ---------- */
@@ -176,8 +281,8 @@ body {
   width: 110px;
   padding: 6px 8px;
   margin: 2px 0 4px;
-  background: #0d1117;
-  border: 1px solid #2a3648;
+  background: #ffffff;
+  border: 1px solid #c9b878;
   border-radius: 6px;
   color: var(--text);
   font-size: 0.85rem;
@@ -281,7 +386,7 @@ input[type="range"]::-moz-range-thumb {
 .note-body h1,
 .note-body h2,
 .note-body h3 {
-  color: #8db4ff;
+  color: #1e40af;
   border-bottom: 1px solid var(--border);
   padding-bottom: 6px;
 }
@@ -291,7 +396,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .note-body code {
-  background: #0d1117;
+  background: #f1e8cb;
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 1px 6px;
@@ -299,7 +404,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .note-body pre {
-  background: #0d1117;
+  background: #f5eeda;
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 14px;

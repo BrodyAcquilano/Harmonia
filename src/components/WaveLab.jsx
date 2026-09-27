@@ -259,6 +259,7 @@ export default function WaveLab() {
 
   return (
     <div className="lab-layout">
+      <div className="lab-side">
       <div className="lab-controls">
         <div className="control-group">
           <h3>View</h3>
@@ -307,6 +308,63 @@ export default function WaveLab() {
             λ₁, λ₂ are the closed cubic forms in SI units (masses in kg);
             theory has kₙ = 2π/λₙ while the display sets k₁ = 1.
           </p>
+        </div>
+        <div className="transport">
+          <h3 className="transport-title">Animation</h3>
+          <button onClick={() => setPlaying((p) => !p)}>{playing ? 'Pause' : 'Play'}</button>
+          <button
+            onClick={() => {
+              tauRef.current = 0
+              setTau(0)
+            }}
+          >
+            Reset
+          </button>
+          <span className="time-readout">τ = {tau.toFixed(2)}</span>
+          <label className="check-row transport-check">
+            <input
+              type="checkbox"
+              checked={showSum}
+              onChange={(e) => setShowSum(e.target.checked)}
+            />
+            {subtab === 'gravity' ? (
+              <>standing wave ψ<sub>s</sub></>
+            ) : (
+              <>total dψ<sub>s</sub></>
+            )}
+          </label>
+          <select
+            className="speed-mode"
+            value={speedMode}
+            aria-label="speed mode"
+            onChange={(e) => {
+              const m = e.target.value
+              setSpeedMode(m)
+              if (m === 'fast') {
+                setSpeed((s) => Math.max(s, 1))
+              } else {
+                recalcSlow(M1, M2) // auto-recompute when switching back to slow down
+              }
+            }}
+          >
+            <option value="slow">Slow down</option>
+            <option value="fast">Speed up</option>
+          </select>
+          {speedMode === 'slow' ? (
+            <div className="speed-col">
+              <Slider label="speed" value={Math.sqrt(Math.min(speed, slowMax) / slowMax)} min={0} max={1} step={0.005}
+                format={() => fmtSpeed(speed)}
+                onChange={(p) => setSpeed(slowMax * p * p)} />
+              <button className="recalc-btn" onClick={() => recalcSlow(M1, M2)}>
+                Recalculate slider range
+              </button>
+            </div>
+          ) : (
+            <Slider label="speed" value={Math.min(Math.max(speed, 1), 2.5)} min={1} max={2.5} step={0.1}
+              format={() => fmtSpeed(speed)}
+              onChange={setSpeed} />
+          )}
+        </div>
         </div>
       </div>
 
@@ -468,62 +526,6 @@ export default function WaveLab() {
                 </div>
               </div>
             </>
-          )}
-        </div>
-
-        <div className="transport">
-          <button onClick={() => setPlaying((p) => !p)}>{playing ? 'Pause' : 'Play'}</button>
-          <button
-            onClick={() => {
-              tauRef.current = 0
-              setTau(0)
-            }}
-          >
-            Reset
-          </button>
-          <span className="time-readout">τ = {tau.toFixed(2)}</span>
-          <label className="check-row transport-check">
-            <input
-              type="checkbox"
-              checked={showSum}
-              onChange={(e) => setShowSum(e.target.checked)}
-            />
-            {subtab === 'gravity' ? (
-              <>standing wave ψ<sub>s</sub></>
-            ) : (
-              <>total dψ<sub>s</sub></>
-            )}
-          </label>
-          <select
-            className="speed-mode"
-            value={speedMode}
-            aria-label="speed mode"
-            onChange={(e) => {
-              const m = e.target.value
-              setSpeedMode(m)
-              if (m === 'fast') {
-                setSpeed((s) => Math.max(s, 1))
-              } else {
-                recalcSlow(M1, M2) // auto-recompute when switching back to slow down
-              }
-            }}
-          >
-            <option value="slow">Slow down</option>
-            <option value="fast">Speed up</option>
-          </select>
-          {speedMode === 'slow' ? (
-            <div className="speed-col">
-              <Slider label="speed" value={Math.sqrt(Math.min(speed, slowMax) / slowMax)} min={0} max={1} step={0.005}
-                format={() => fmtSpeed(speed)}
-                onChange={(p) => setSpeed(slowMax * p * p)} />
-              <button className="recalc-btn" onClick={() => recalcSlow(M1, M2)}>
-                Recalculate slider range
-              </button>
-            </div>
-          ) : (
-            <Slider label="speed" value={Math.min(Math.max(speed, 1), 2.5)} min={1} max={2.5} step={0.1}
-              format={() => fmtSpeed(speed)}
-              onChange={setSpeed} />
           )}
         </div>
 
