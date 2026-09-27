@@ -8,7 +8,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="header">
-        <h1>Harmonia</h1>
+        <h1>Harmonium</h1>
         <nav className="tabs">
           <button
             className={tab === 'lab' ? 'active' : ''}

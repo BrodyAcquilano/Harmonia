@@ -1,4 +1,4 @@
-# Harmonia
+# Harmonium
 
 A small site for visualizing wave equations: a **Notes** tab that renders
 stored markdown files (with LaTeX), and a **Wave Lab** tab with interactive
@@ -27,7 +27,7 @@ npm run build    # production build into dist/
 ## Project layout
 
 ```
-harmonia/
+harmonium/
 ├── index.html
 ├── notes/                  # markdown notes rendered by the Notes tab
 │   ├── standing-waves.md
