@@ -447,7 +447,10 @@ export default function WaveLab() {
         </div>
         {subtab === 'gravity' ? (
           <div className="graph-box">
-            <div className="graph-head">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Reciprocal gravity waves</h2>
+            </div>
+            <div className="graph-meta-row">
               <div className="legend">
                 <span><i className="swatch" style={{ background: C1 }} />ψ₁(M₁,M₂) → +λₙ</span>
                 <span><i className="swatch" style={{ background: C2 }} />ψ₂(M₂,M₁) → −λₙ</span>
@@ -468,24 +471,39 @@ export default function WaveLab() {
         ) : (
           <>
             <div className="graph-box">
-              <div className="legend">
-                <span><i className="swatch" style={{ background: C1 }} />∂ψ₁/∂M₁ = ik₁ψ₁</span>
-                <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} />∂ψ₁/∂M₂ = −iω₁ψ₁</span>
-                <span><i className="swatch" style={{ background: C2 }} />∂ψ₂/∂M₁ = −iω₂ψ₂</span>
-                <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />∂ψ₂/∂M₂ = ik₂ψ₂</span>
+              <div className="graph-title-row">
+                <h2 className="graph-title">Gravity-wave derivatives</h2>
+              </div>
+              <div className="graph-meta-row">
+                <div className="legend">
+                  <span><i className="swatch" style={{ background: C1 }} />∂ψ₁/∂M₁ = ik₁ψ₁</span>
+                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} />∂ψ₁/∂M₂ = −iω₁ψ₁</span>
+                  <span><i className="swatch" style={{ background: C2 }} />∂ψ₂/∂M₁ = −iω₂ψ₂</span>
+                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />∂ψ₂/∂M₂ = ik₂ψ₂</span>
+                </div>
               </div>
               <canvas ref={canvasRef} className="wave-canvas" />
             </div>
             <div className="graph-box">
-              <div className="legend">
-                <span><i className="swatch" style={{ background: C1 }} />dM₁ half-wave = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁</span>
-                <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />dM₂ half-wave = ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</span>
+              <div className="graph-title-row">
+                <h2 className="graph-title">Derivative half-waves</h2>
+              </div>
+              <div className="graph-meta-row">
+                <div className="legend">
+                  <span><i className="swatch" style={{ background: C1 }} />dM₁ half-wave = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁</span>
+                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />dM₂ half-wave = ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂</span>
+                </div>
               </div>
               <canvas ref={canvasHalfRef} className="wave-canvas half-canvas" />
             </div>
             <div className="graph-box">
-              <div className="legend">
-                <span><i className="swatch" style={{ background: CS }} />total dψ<sub>s</sub></span>
+              <div className="graph-title-row">
+                <h2 className="graph-title">Total dψ<sub>s</sub></h2>
+              </div>
+              <div className="graph-meta-row">
+                <div className="legend">
+                  <span><i className="swatch" style={{ background: CS }} />total dψ<sub>s</sub></span>
+                </div>
               </div>
               <canvas ref={canvasTotalRef} className="wave-canvas total-canvas" />
             </div>
