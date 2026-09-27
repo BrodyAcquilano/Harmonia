@@ -553,7 +553,7 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>Ratios &amp; relationships <span className="eq-note">— paper</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Proportionality &amp; Symmetry</span><span className="eq-line"><Tex tex="\frac{\omega_2}{\omega_1} = \frac{M_2}{M_1}" /></span><span className="eq-line"><Tex tex="\frac{k_2}{k_1} = \frac{\lambda_1}{\lambda_2} = -i\sqrt{\frac{M_2}{M_1}}" /></span><span className="eq-line"><Tex tex="\frac{\lambda_2}{\lambda_1} = i\sqrt{\frac{M_1}{M_2}}" /></span><span className="eq-line"><Tex tex="M_1 \lambda_1^2 = -M_2 \lambda_2^2" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Proportionality &amp; Symmetry</span><span className="eq-line"><Tex tex="\dfrac{\omega_2}{\omega_1} = \dfrac{M_2}{M_1}" /></span><span className="eq-line"><Tex tex="\dfrac{k_2}{k_1} = \dfrac{\lambda_1}{\lambda_2} = -i\sqrt{\dfrac{M_2}{M_1}}" /></span><span className="eq-line"><Tex tex="\dfrac{\lambda_2}{\lambda_1} = i\sqrt{\dfrac{M_1}{M_2}}" /></span><span className="eq-line"><Tex tex="M_1 \lambda_1^2 = -M_2 \lambda_2^2" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Display-unit consequences of the same structure</span><span className="eq-line"><Tex tex="\frac{A_1}{A_2} = \sqrt{\frac{M_2}{M_1}}" /></span><span className="eq-line"><Tex tex="A_1^2 + A_2^2 = 1" /></span><span className="eq-line"><Tex tex="k_1 k_2 = \omega_1 \omega_2" /></span><span className="eq-line"><Tex tex="k_1 A_1 = \omega_2 A_2" /></span></div>
                 </div>
               </div>
