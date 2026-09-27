@@ -126,11 +126,14 @@ function renderFrame(ctx, canvas, s, tau) {
   let curves
   if (s.subtab === 'gravity') {
     yMax = Math.max((P.A1 + P.A2) * 1.15, 0.5)
-    curves = [
-      { fn: (x) => psi1(x, tau, P, s.M2).re, color: C1, width: 1.75 },
-      { fn: (x) => psi2(x, tau, P, s.M1).re, color: C2, width: 1.75 },
-    ]
-    if (s.showSum) {
+    curves = []
+    if (s.waveDisplay === 'waves' || s.waveDisplay === 'all') {
+      curves.push(
+        { fn: (x) => psi1(x, tau, P, s.M2).re, color: C1, width: 1.75 },
+        { fn: (x) => psi2(x, tau, P, s.M1).re, color: C2, width: 1.75 },
+      )
+    }
+    if (s.waveDisplay === 'sum' || s.waveDisplay === 'all') {
       curves.push({
         fn: (x) => psiSum(psi1(x, tau, P, s.M2), psi2(x, tau, P, s.M1)).re,
         color: CS,
@@ -141,10 +144,20 @@ function renderFrame(ctx, canvas, s, tau) {
     // Integration tab, first graph: wave areas with balance point.
     // Shows ψ₁ and ψ₂ with filled areas, marking where they meet at λ*.
     yMax = Math.max((P.A1 + P.A2) * 1.15, 0.5)
-    curves = [
-      { fn: (x) => psi1(x, tau, P, s.M2).re, color: C1, width: 1.75, fill: true },
-      { fn: (x) => psi2(x, tau, P, s.M1).re, color: C2, width: 1.75, fill: true },
-    ]
+    curves = []
+    if (s.waveDisplay === 'waves' || s.waveDisplay === 'all') {
+      curves.push(
+        { fn: (x) => psi1(x, tau, P, s.M2).re, color: C1, width: 1.75, fill: true },
+        { fn: (x) => psi2(x, tau, P, s.M1).re, color: C2, width: 1.75, fill: true },
+      )
+    }
+    if (s.waveDisplay === 'sum' || s.waveDisplay === 'all') {
+      curves.push({
+        fn: (x) => psiSum(psi1(x, tau, P, s.M2), psi2(x, tau, P, s.M1)).re,
+        color: CS,
+        width: 2.75,
+      })
+    }
   } else {
     // Both mass derivatives at once: color = wave, solid = d/dM1, dashed = d/dM2.
     const tot = P.k1 * P.A1 + P.w2 * P.A2 + P.w1 * P.A1 + P.k2 * P.A2
@@ -271,17 +284,22 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
   const impArr = pair === 1 ? imp2 : imp1
   const workColor = pair === 1 ? C1 : C2
   const impColor = pair === 1 ? C2 : C1
-  const all = [...workArr, ...impArr]
-  const yMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all))) * 1.15
-  const yMaxSafe = Math.max(yMax, 0.1)
-  const { X, Y } = drawGrid(ctx, g, yMaxSafe)
+  const sumArr = workArr.map((v, i) => v + impArr[i])
+  const all = s.waveDisplay === 'sum' ? sumArr : [...workArr, ...impArr, ...sumArr]
+  const yMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all)) * 1.15, 0.1)
+  const { X, Y } = drawGrid(ctx, g, yMax)
   const interp = (arr) => (x) => {
     const idx = Math.min(Math.floor((x / X_MAX) * N), N - 1)
     const t = ((x / X_MAX) * N) - idx
     return arr[idx] * (1 - t) + arr[idx + 1] * t
   }
-  trace(ctx, X, Y, interp(workArr), workColor, 2, [])
-  trace(ctx, X, Y, interp(impArr), impColor, 2, [6, 4])
+  if (s.waveDisplay === 'waves' || s.waveDisplay === 'all') {
+    trace(ctx, X, Y, interp(workArr), workColor, 2, [])
+    trace(ctx, X, Y, interp(impArr), impColor, 2, [6, 4])
+  }
+  if (s.waveDisplay === 'sum' || s.waveDisplay === 'all') {
+    trace(ctx, X, Y, interp(sumArr), CS, 2.75, [])
+  }
   // Mirrored balance point for integrals: λ*_integ = L - λ*
   if (s.M1 + s.M2 > 0) {
     const xStar = X_MAX - (X_MAX * s.M2) / (s.M1 + s.M2)
@@ -361,6 +379,7 @@ export default function WaveLab() {
   const [speed, setSpeed] = useState(1)
   const [tau, setTau] = useState(0)
   const [showSum, setShowSum] = useState(true)
+  const [waveDisplay, setWaveDisplay] = useState('all')
   const [speedMode, setSpeedMode] = useState('slow') // 'slow': 0–slowMax, 'fast': 1–2.5
   const [slowMax, setSlowMax] = useState(1)
 
@@ -398,7 +417,7 @@ export default function WaveLab() {
   const canvasPair2Ref = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
-  stateRef.current = { subtab, M1, M2, playing, speed, showSum }
+  stateRef.current = { subtab, M1, M2, playing, speed, showSum, waveDisplay }
 
   useEffect(() => {
     let raf
@@ -584,18 +603,22 @@ export default function WaveLab() {
             </div>
             <div className="graph-meta-row">
               <div className="legend">
-                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="\psi_1(M_1,M_2) \to +\lambda_n" /></span>
-                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="\psi_2(M_2,M_1) \to -\lambda_n" /></span>
-                {showSum && <span><i className="swatch" style={{ background: CS }} /><Tex tex="\psi_s = \psi_1 + \psi_2" /></span>}
+                {(waveDisplay === 'waves' || waveDisplay === 'all') && (
+                  <>
+                    <span><i className="swatch" style={{ background: C1 }} /><Tex tex="\psi_1(M_1,M_2) \to +\lambda_n" /></span>
+                    <span><i className="swatch" style={{ background: C2 }} /><Tex tex="\psi_2(M_2,M_1) \to -\lambda_n" /></span>
+                  </>
+                )}
+                {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="\psi_s = \psi_1 + \psi_2" /></span>}
                 <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
               </div>
               <label className="check-row graph-check">
-                <input
-                  type="checkbox"
-                  checked={showSum}
-                  onChange={(e) => setShowSum(e.target.checked)}
-                />
-                standing wave ψ<sub>s</sub>
+                Display
+                <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
+                  <option value="waves">ψ₁, ψ₂</option>
+                  <option value="sum">ψ₁ + ψ₂</option>
+                  <option value="all">ψ₁, ψ₂, ψ₁ + ψ₂</option>
+                </select>
               </label>
             </div>
             <canvas ref={canvasRef} className="wave-canvas" />
@@ -604,7 +627,7 @@ export default function WaveLab() {
           <>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Gravity Wave Inertia Energy Derivatives</h2>
+                <h2 className="graph-title">Gravity Wave Inertia Energy Rates Of Change</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
@@ -648,10 +671,23 @@ export default function WaveLab() {
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
-                  <span><i className="swatch" style={{ background: C1 }} /><Tex tex="\int \psi_1 \, d\lambda_n" /></span>
-                  <span><i className="swatch" style={{ background: C2 }} /><Tex tex="\int \psi_2 \, d\lambda_n" /></span>
+                  {(waveDisplay === 'waves' || waveDisplay === 'all') && (
+                    <>
+                      <span><i className="swatch" style={{ background: C1 }} /><Tex tex="\int \psi_1 \, d\lambda_n" /></span>
+                      <span><i className="swatch" style={{ background: C2 }} /><Tex tex="\int \psi_2 \, d\lambda_n" /></span>
+                    </>
+                  )}
+                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="\psi_s = \psi_1 + \psi_2" /></span>}
                   <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
                 </div>
+                <label className="check-row graph-check">
+                  Display
+                  <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
+                    <option value="waves">ψ₁, ψ₂</option>
+                    <option value="sum">ψ₁ + ψ₂</option>
+                    <option value="all">ψ₁, ψ₂, ψ₁ + ψ₂</option>
+                  </select>
+                </label>
               </div>
               <canvas ref={canvasRef} className="wave-canvas" />
             </div>
@@ -661,10 +697,23 @@ export default function WaveLab() {
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
-                  <span><i className="swatch" style={{ background: C1 }} /><Tex tex="W_1 = \int \mathrm{Re}(\psi_1) \, d\lambda_n" /></span>
-                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_2 = \int \mathrm{Im}(\psi_2) \, d\lambda_n" /></span>
+                  {(waveDisplay === 'waves' || waveDisplay === 'all') && (
+                    <>
+                      <span><i className="swatch" style={{ background: C1 }} /><Tex tex="W_1 = \int \mathrm{Re}(\psi_1) \, d\lambda_n" /></span>
+                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_2 = \int \mathrm{Im}(\psi_2) \, d\lambda_n" /></span>
+                    </>
+                  )}
+                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_1 + J_2" /></span>}
                   <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
                 </div>
+                <label className="check-row graph-check">
+                  Display
+                  <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
+                    <option value="waves">W₁, J₂</option>
+                    <option value="sum">W₁ + J₂</option>
+                    <option value="all">W₁, J₂, W₁ + J₂</option>
+                  </select>
+                </label>
               </div>
               <canvas ref={canvasCumRef} className="wave-canvas" />
             </div>
@@ -674,10 +723,23 @@ export default function WaveLab() {
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
-                  <span><i className="swatch" style={{ background: C2 }} /><Tex tex="W_2 = \int \mathrm{Re}(\psi_2) \, d\lambda_n" /></span>
-                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_1 = \int \mathrm{Im}(\psi_1) \, d\lambda_n" /></span>
+                  {(waveDisplay === 'waves' || waveDisplay === 'all') && (
+                    <>
+                      <span><i className="swatch" style={{ background: C2 }} /><Tex tex="W_2 = \int \mathrm{Re}(\psi_2) \, d\lambda_n" /></span>
+                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_1 = \int \mathrm{Im}(\psi_1) \, d\lambda_n" /></span>
+                    </>
+                  )}
+                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_2 + J_1" /></span>}
                   <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
                 </div>
+                <label className="check-row graph-check">
+                  Display
+                  <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
+                    <option value="waves">W₂, J₁</option>
+                    <option value="sum">W₂ + J₁</option>
+                    <option value="all">W₂, J₁, W₂ + J₁</option>
+                  </select>
+                </label>
               </div>
               <canvas ref={canvasPair2Ref} className="wave-canvas" />
             </div>
