@@ -482,7 +482,7 @@ export default function WaveLab() {
           {subtab === 'gravity' ? (
             <>
               <div className="eq-group">
-                <h4>Trigonometric form — plotted · display units</h4>
+                <h4>Trigonometric form <span className="eq-note">— plotted · display units</span></h4>
                 <div className="eq-list">
                   <div className="eq-box">ψ₁ = A₁e<sup>−βλₙ</sup>cos(k₁λₙ−ω₁M₂τ) + i·A₁e<sup>−βλₙ</sup>sin(k₁λₙ−ω₁M₂τ)</div>
                   <div className="eq-box">ψ₂ = A₂e<sup>−β(L−λₙ)</sup>cos(−k₂λₙ−ω₂M₁τ) + i·A₂e<sup>−β(L−λₙ)</sup>sin(−k₂λₙ−ω₂M₁τ)</div>
@@ -491,7 +491,7 @@ export default function WaveLab() {
               </div>
 
               <div className="eq-group">
-                <h4>With k, ω, λ substituted — full theory</h4>
+                <h4>With k, ω, λ substituted <span className="eq-note">— full theory</span></h4>
                 <div className="eq-list">
                   <div className="eq-box">ψ₁ = √(M₂/(M₁+M₂))·e<sup>−βλₙ</sup>·[cos(2πλₙ/λ₁ − 2πM₁M₂c²τ/h) + i·sin(2πλₙ/λ₁ − 2πM₁M₂c²τ/h)]</div>
                   <div className="eq-box">ψ₂ = √(M₁/(M₁+M₂))·e<sup>−β(L−λₙ)</sup>·[cos(−2πλₙ/λ₂ − 2πM₁M₂c²τ/h) + i·sin(−2πλₙ/λ₂ − 2πM₁M₂c²τ/h)]</div>
@@ -517,7 +517,7 @@ export default function WaveLab() {
               </div>
 
               <div className="eq-group">
-                <h4>Ratios &amp; relationships — paper</h4>
+                <h4>Ratios &amp; relationships <span className="eq-note">— paper</span></h4>
                 <div className="eq-list">
                   <div className="eq-box">ω₂/ω₁ = M₂/M₁</div>
                   <div className="eq-box">k₂/k₁ = λ₁/λ₂ = −i√(M₂/M₁)</div>
@@ -534,7 +534,7 @@ export default function WaveLab() {
               </div>
 
               <div className="eq-group">
-                <h4>Definitions — paper · β from the display derivation</h4>
+                <h4>Definitions <span className="eq-note">— paper · β from the display derivation</span></h4>
                 <div className="eq-list">
                   <div className="eq-box">k₁ = 2π/λ₁</div>
                   <div className="eq-box">k₂ = 2π/λ₂</div>
@@ -556,7 +556,7 @@ export default function WaveLab() {
           ) : (
             <>
               <div className="eq-group">
-                <h4>General form — plotted · display units</h4>
+                <h4>General form <span className="eq-note">— plotted · display units</span></h4>
                 <div className="eq-list">
                   <div className="eq-box">∂ψ₁/∂M₁ = ∂/∂M₁[A₁e<sup>−βλₙ</sup>e<sup>i(k₁λₙ−ω₁M₂τ)</sup>]</div>
                   <div className="eq-box">∂ψ₂/∂M₁ = ∂/∂M₁[A₂e<sup>−β(L−λₙ)</sup>e<sup>i(−k₂λₙ−ω₂M₁τ)</sup>]</div>
@@ -566,7 +566,7 @@ export default function WaveLab() {
               </div>
 
               <div className="eq-group">
-                <h4>Simplified — fixed-parameter phase gradients</h4>
+                <h4>Simplified <span className="eq-note">— fixed-parameter phase gradients</span></h4>
                 <div className="eq-list">
                   <div className="eq-box">∂ψ₁/∂M₁ = ik₁ψ₁ <em>(solid)</em></div>
                   <div className="eq-box">∂ψ₂/∂M₁ = −iω₂ψ₂ <em>(solid)</em></div>
@@ -576,7 +576,7 @@ export default function WaveLab() {
               </div>
 
               <div className="eq-group">
-                <h4>With values substituted — full theory · current M₁, M₂</h4>
+                <h4>With values substituted <span className="eq-note">— full theory · current M₁, M₂</span></h4>
                 {T ? (
                   <div className="eq-list">
                     <div className="eq-box">∂ψ₁/∂M₁ = i·<CSci z={T.k1} />·ψ₁</div>
@@ -601,7 +601,7 @@ export default function WaveLab() {
               </div>
 
               <div className="eq-group">
-                <h4>Variables — defined in the gravity tab</h4>
+                <h4>Variables <span className="eq-note">— defined in the gravity tab</span></h4>
                 <div className="eq-list">
                   <div className="eq-box">k₁ = 2π/λ₁</div>
                   <div className="eq-box">k₂ = 2π/λ₂</div>
