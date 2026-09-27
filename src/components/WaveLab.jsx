@@ -1180,6 +1180,30 @@ export default function WaveLab() {
           <>
           <div className="graph-box">
             <div className="graph-title-row">
+              <h2 className="graph-title">Net Impulse Over Time</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="F_1(t)" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="F_2(t)" /></span>
+              </div>
+            </div>
+            <canvas ref={canvasForceTimeRef} className="wave-canvas" />
+          </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Wobble Over Time</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="X_1(t)" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="X_2(t)" /></span>
+              </div>
+            </div>
+            <canvas ref={canvasWobbleTimeRef} className="wave-canvas" />
+          </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
               <h2 className="graph-title">Bodies: In-Line Wobble (yz plane)</h2>
             </div>
             <div className="graph-meta-row">
@@ -1227,7 +1251,7 @@ export default function WaveLab() {
             </div>
             <div className="graph-meta-row">
               <div className="legend">
-                <span><Tex tex="\text{both orbit the center point}" /></span>
+                <span><Tex tex="\text{axis wrapped around the center, split at } \lambda^*" /></span>
               </div>
             </div>
             <canvas ref={canvasOrbitTrueRef} className="wave-canvas-orbit-lg" />
@@ -1260,30 +1284,6 @@ export default function WaveLab() {
               </div>
             </div>
             <canvas ref={canvasPushPullRef} className="wave-canvas" />
-          </div>
-          <div className="graph-box">
-            <div className="graph-title-row">
-              <h2 className="graph-title">Net Impulse Over Time</h2>
-            </div>
-            <div className="graph-meta-row">
-              <div className="legend">
-                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="F_1(t)" /></span>
-                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="F_2(t)" /></span>
-              </div>
-            </div>
-            <canvas ref={canvasForceTimeRef} className="wave-canvas" />
-          </div>
-          <div className="graph-box">
-            <div className="graph-title-row">
-              <h2 className="graph-title">Wobble Over Time</h2>
-            </div>
-            <div className="graph-meta-row">
-              <div className="legend">
-                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="X_1(t)" /></span>
-                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="X_2(t)" /></span>
-              </div>
-            </div>
-            <canvas ref={canvasWobbleTimeRef} className="wave-canvas" />
           </div>
           </>
         ) : null}
@@ -1422,6 +1422,22 @@ export default function WaveLab() {
           ) : subtab === 'motion' ? (
             <>
               <div className="eq-group">
+                <h4>Wobble Over Time <span className="eq-note">— plotted · static snapshot, one cycle</span></h4>
+                <div className="eq-list">
+                  <div className="eq-box wide"><span className="eq-label">Net impulse at time t</span><Tex tex="F_n(t) = J_n(L, t) - W_n(L, t) = \int_0^L [\mathrm{Im}(\psi_n) - \mathrm{Re}(\psi_n)] \, d\lambda_n" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Body 1 wobble</span><Tex tex="X_1(t) = \int_0^t F_1(t') \, dt'" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Body 2 wobble</span><Tex tex="X_2(t) = \int_0^t F_2(t') \, dt'" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{Heavy mass wobbles less. Bodies move opposite: one up, the other down.}" /></div>
+                </div>
+              </div>
+              <div className="eq-group">
+                <h4>Apparent Wobble <span className="eq-note">— plotted · live</span></h4>
+                <div className="eq-list">
+                  <div className="eq-box wide"><span className="eq-label">Projection, xy plane</span><Tex tex="y_1(t) = X_1(t), \quad y_2(t) = X_2(t) \quad \text{(} x \text{ pinned at the } \lambda \text{ line)}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{The } y \text{-component of the circular motion, before wrapping into circles.}" /></div>
+                </div>
+              </div>
+              <div className="eq-group">
                 <h4>In-Line Wobble <span className="eq-note">— plotted · live</span></h4>
                 <div className="eq-list">
                   <div className="eq-box wide"><span className="eq-label">Same wobble, yz plane</span><Tex tex="y_1(t) = X_1(t), \quad y_2(t) = X_2(t) \quad \text{(looking down } x\text{)}" /></div>
@@ -1436,15 +1452,6 @@ export default function WaveLab() {
                   <div className="eq-box wide"><span className="eq-label">Apparent: m₁ pinned</span><Tex tex="\mathbf{r}_2(\phi) = L(\cos\phi, \sin\phi) \quad \text{— full separation}" /></div>
                   <div className="eq-box wide"><span className="eq-label">True: separation split at λ*</span><Tex tex="\mathbf{r}_1(\phi) = -\lambda^*(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +(L-\lambda^*)(\cos\phi, \sin\phi)" /></div>
                   <div className="eq-box wide"><span className="eq-label">Force direction</span><Tex tex="\text{along the line joining the masses (grey)}" /></div>
-                </div>
-              </div>
-              <div className="eq-group">
-                <h4>Wobble Over Time <span className="eq-note">— plotted · static snapshot, one cycle</span></h4>
-                <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Net impulse at time t</span><Tex tex="F_n(t) = J_n(L, t) - W_n(L, t) = \int_0^L [\mathrm{Im}(\psi_n) - \mathrm{Re}(\psi_n)] \, d\lambda_n" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Body 1 wobble</span><Tex tex="X_1(t) = \int_0^t F_1(t') \, dt'" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Body 2 wobble</span><Tex tex="X_2(t) = \int_0^t F_2(t') \, dt'" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{Heavy mass wobbles less. Bodies move opposite: one up, the other down.}" /></div>
                 </div>
               </div>
               <div className="eq-group">

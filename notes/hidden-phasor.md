@@ -181,7 +181,7 @@ The colors alternate at each crossing, so the graph reads as a ledger: green ban
 
 ### 7.4 Motion — the wobble, in space and time
 
-Seven graphs, in tab order. The dot diagrams are live (they animate); the time graphs are static snapshots of one full wobble cycle, both directions, with the axis marked in time ($0$ to $T$). Two quantities are shared across them — the second integrals of Section 5d:
+Seven graphs, in tab order — and the order is the methodology. The time graphs come first: you would look at the integrals to find the wobble projection. Then the live wobble projections. Then the axis is wrapped around the center, the separation split at the balance point, and you get the true motion. The dot diagrams are live (they animate); the time graphs are static snapshots of one full wobble cycle, both directions, with the axis marked in time ($0$ to $T$). Two quantities are shared across them — the second integrals of Section 5d:
 
 $$
 F_n(t) = \int_0^L \big[\mathrm{Im}(\psi_n) - \mathrm{Re}(\psi_n)\big]\,d\lambda_n, \qquad X_n(t) = \int_0^t F_n(t')\,dt'
@@ -189,15 +189,19 @@ $$
 
 $F_n(t)$ is the net released impulse on body $n$ at time $t$ — the whole spatial line collapsed to a single number. $X_n(t)$ is the wobble: body $n$'s displacement from its starting point as a function of time.
 
-**"Bodies: In-Line Wobble (yz plane)"** — the same $X_n(t)$, now looking straight down the $x$ ($\lambda$) axis, $z$ up. Both bodies sit on the line of sight — superimposed at the center — and the wobble is drawn horizontally along $y$ (the wobble direction, seen edge-on):
+**"Net Impulse Over Time"** — $F_1(t)$ (blue) and $F_2(t)$ (orange) against time. The driver: each body's total released impulse as the phasor turns through one cycle.
+
+**"Wobble Over Time"** — $X_1(t)$ (blue) and $X_2(t)$ (orange) against time, same one-cycle window. The trajectories: each body's displacement from its start. Read them against the center line — this is motion relative to the impartial reference point, not merely the relative motion between the bodies.
+
+**"Bodies: In-Line Wobble (yz plane)"** — the wobble projection, live: the same $X_n(t)$, now looking straight down the $x$ ($\lambda$) axis, $z$ up. Both bodies sit on the line of sight — superimposed at the center — and the wobble is drawn horizontally along $y$ (the wobble direction, seen edge-on):
 
 $$
 y_1(t) = X_1(t), \qquad y_2(t) = X_2(t)
 $$
 
-The center cross is the impartial reference point, head-on. Dot size scales with mass, and the lighter body is drawn on top, so at each crossing it visibly passes *in front of* the heavier body, like a transit. The $xy$ view shows the wobble from the side; this one shows it head-on down the line between the bodies.
+The center cross is the impartial reference point, head-on. Dot size scales with mass, and the lighter body is drawn on top, so at each crossing it visibly passes *in front of* the heavier body, like a transit. This is the head-on view down the line between the bodies.
 
-**"Bodies: Wobble (xy plane)"** — the **apparent wobble**, a projection. $m_1$ (blue) on the left, $m_2$ (orange) on the right, each sliding up and down as the animation runs. This is the motion before it is wrapped into circles: the $y$-component of the circular orbit with the bodies pinned at their $x$ positions — what you would reconstruct if you saw the system from the $xz$ plane and knew there was a distance $\lambda$ between the bodies. This is the $xy$ plane: $x$ (spatial) runs horizontally between the bodies — it is the $\lambda$ line, the coordinate the rest of the site calls $\lambda_n$ — and the wobble is drawn along $y$, a spatial direction with no special name, just the perpendicular:
+**"Bodies: Wobble (xy plane)"** — the **apparent wobble**, a projection, live. $m_1$ (blue) on the left, $m_2$ (orange) on the right, each sliding up and down as the animation runs. This is the motion before it is wrapped into circles: the $y$-component of the circular orbit with the bodies pinned at their $x$ positions — what you would reconstruct if you saw the system from the $xz$ plane and knew there was a distance $\lambda$ between the bodies. This is the $xy$ plane: $x$ (spatial) runs horizontally between the bodies — it is the $\lambda$ line, the coordinate the rest of the site calls $\lambda_n$ — and the wobble is drawn along $y$, a spatial direction with no special name, just the perpendicular:
 
 $$
 y_1(t) = X_1(t), \qquad y_2(t) = X_2(t)
@@ -205,7 +209,7 @@ $$
 
 The horizontal center line is the constant-relative-velocity axis: there is no motion along it, so the wobble is purely perpendicular. The dots move opposite — when one rises, the other falls — and the heavier mass visibly moves less. This is the live instant; the time graphs show the full trajectory it traces.
 
-**"Apparent Relative Motion"** and **"True Motion"** — the wobble wrapped into circular orbits, stacked full-width one above the other, each footnoted *xy plane* (the orbit is drawn in the same $xy$ plane as the first wobble diagram — the $x$-axis wrapped into a circle). "True Motion" gets the bigger box, with tiny zoom controls underneath (50%–400%), so the rings have room to expand as the masses change. The orbital angle runs one full turn per wobble cycle, synced to the same clock as the wobble diagram; both diagrams share one scale so they compare directly. The center point ($+$) is the **balance point** $\lambda^* = L\,M_2/(M_1+M_2)$ — the center of mass — and each body's orbital radius is its distance from that point:
+**"Apparent Relative Motion"** and **"True Motion"** — the wobble wrapped into circular orbits: the $x$-axis ($\lambda$ line) bent into a circle around the center point, the orbital angle running one full turn per wobble cycle, synced to the same clock as the wobble diagrams. Stacked full-width one above the other, each footnoted *xy plane* (the orbit is drawn in the same $xy$ plane as the apparent-wobble diagram). "True Motion" gets the bigger box, with tiny zoom controls underneath (50%–400%), so the rings have room to expand as the masses change; both diagrams share one scale so they compare directly. The center point ($+$) is the **balance point** $\lambda^* = L\,M_2/(M_1+M_2)$ — the center of mass — and each body's orbital radius is its distance from that point:
 
 $$
 \phi(t) = 2\pi t / T, \qquad \lambda^* = L\frac{M_2}{M_1+M_2}
@@ -219,7 +223,7 @@ $$
 \text{true: } \mathbf{r}_1(\phi) = -\lambda^*(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +(L-\lambda^*)(\cos\phi, \sin\phi)
 $$
 
-"Apparent" pins $m_1$ (blue) at the center while $m_2$ (orange) circles it at the full separation $L$ — the naive view, what the Moon's orbit looks like if you assume the Earth doesn't move. We know it is wrong, and it is labeled as such. "True" splits the separation at the center of mass: $r_1 + r_2 = L$ always, the two bodies circling ($+$) on opposite sides, the heavier mass tracing the smaller circle — consistent with the wobble diagram, where the heavier mass moves less. The wobble diagram is the edge-on view of this motion; the orbit diagrams are the face-on view.
+"Apparent" pins $m_1$ (blue) at the center while $m_2$ (orange) circles it at the full separation $L$ — the naive view, what the Moon's orbit looks like if you assume the Earth doesn't move. We know it is wrong, and it is labeled as such. "True" applies the balance point: the separation is split at the center of mass, $r_1 + r_2 = L$ always, the two bodies circling ($+$) on opposite sides, the heavier mass tracing the smaller circle — consistent with the wobble projection, where the heavier mass moves less. The wobble diagrams are the unwrapped view of this motion; the orbit diagrams wrap the $\lambda$ line into a circle around the center.
 
 A semi-transparent grey line joins the two masses in both orbit diagrams: the direction gravity acts along. In "True Motion" it always passes through the center point, rotating with the bodies — the visual form of the statement that the separation (and hence $\lambda$) does not change: each body moves away fast enough to hold the distance fixed while the line between them turns.
 
@@ -230,10 +234,6 @@ D(\lambda_n) = \big[W_1(\lambda_n) - J_1(\lambda_n)\big] - \big[W_2(\lambda_n) -
 $$
 
 Where body 1's remaining inertia exceeds body 2's, and vice versa. This is the only Motion graph still on the spatial axis.
-
-**"Net Impulse Over Time"** — $F_1(t)$ (blue) and $F_2(t)$ (orange) against time. The driver: each body's total released impulse as the phasor turns through one cycle.
-
-**"Wobble Over Time"** — $X_1(t)$ (blue) and $X_2(t)$ (orange) against time, same one-cycle window. The trajectories: each body's displacement from its start. Read them against the center line — this is motion relative to the impartial reference point, not merely the relative motion between the bodies.
 
 ## 8. What this simulation does not show
 
@@ -254,7 +254,7 @@ The picture, stated plainly. The Earth moves forward and the Earth pulls the Moo
 
 Then the time that got added in: the **hidden time phasor**. It cycles the phase of the wave, and as the phase cycles, the energy-over-space distribution changes. That is all that changes. **All the masses stay constant; nothing changes except the energy at each point in between the two masses.** The phasor turns; the energy redistributes; the bodies stay what they are.
 
-Integrate once over space and you get work and impulse — the energy accounts, $W_n$ and $J_n$. Then, at each instant, collapse the whole spatial line to a single number — the net released impulse $F_n(t) = J_n(L,t) - W_n(L,t)$ — and integrate *that* over time: $X_n(t) = \int_0^t F_n(t')\,dt'$. That is the second integral: not over space but over time, flipped to $J_n - W_n$ because motion comes from what is released, not what is stored. It gives each body's wobble as a trajectory, both directions. It is plotted in the Motion tab as seven graphs: the live wobble diagram (the two dots, $xy$ plane), the in-line wobble (the same motion looking down the $\lambda$ axis, $yz$ plane — the lighter body crossing in front), the apparent and true orbit diagrams (the wobble wrapped into circles — the naive fixed-center view beside the barycentric one), the spatial push-pull density, and the static one-cycle snapshots of net impulse and displacement over time.
+Integrate once over space and you get work and impulse — the energy accounts, $W_n$ and $J_n$. Then, at each instant, collapse the whole spatial line to a single number — the net released impulse $F_n(t) = J_n(L,t) - W_n(L,t)$ — and integrate *that* over time: $X_n(t) = \int_0^t F_n(t')\,dt'$. That is the second integral: not over space but over time, flipped to $J_n - W_n$ because motion comes from what is released, not what is stored. It gives each body's wobble as a trajectory, both directions. It is plotted in the Motion tab as seven graphs: the static one-cycle snapshots of net impulse and displacement over time, the live in-line wobble projection (the same motion looking down the $\lambda$ axis, $yz$ plane — the lighter body crossing in front), the apparent wobble (the $xy$-plane projection, the two dots), the apparent and true orbit diagrams (the wobble wrapped into circles — the naive fixed-center view beside the barycentric one), and the spatial push-pull density.
 
 But here is the part that matters. If you treated the distance between the two bodies as a single variable, you would only ever know their *relative* motion — how far apart they are, how fast the gap opens and closes. The phasor gives you more than that. The phasor is the hidden time dimension; the second integral is taken over time, and that gives us motion in the time dimension we know. So we learn not only how much their motion was relative to each other, but **how much the motion was relative to a center point** — a third, impartial reference point that belongs to neither body. Not just "the Moon falls toward the Earth," but how far the Moon wobbles one way from center and how far the Earth wobbles the other, each pulled by gravity, each measured against something neutral. That is new information. The relative motion was always visible; the wobble against center was hidden until the second integral.
 
