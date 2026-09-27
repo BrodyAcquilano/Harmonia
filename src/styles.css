@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pirata+One&display=swap');
 
 :root {
   --bg: #faf4d7;        /* post-it off-white yellow */
@@ -45,7 +45,7 @@ body {
 
 .header h1 {
   margin: 0;
-  font-family: 'Lobster', 'Brush Script MT', 'Segoe Script', cursive;
+  font-family: 'Pirata One', 'Old English Text MT', 'UnifrakturMaguntia', cursive;
   font-weight: 400;
   font-size: 2.6rem;
   letter-spacing: 0.02em;
@@ -188,8 +188,35 @@ body {
 .lab-stage {
   display: flex;
   flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.graph-box {
+  background: #fffdf4;
+  border: 1px solid #d8c98f;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   min-width: 0;
+}
+
+.eq-panel {
+  background: #fffdf4;
+  border: 1px solid #d8c98f;
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 0;
+}
+
+.total-canvas {
+  height: 220px;
+}
+
+.total-legend {
+  margin-top: 4px;
 }
 
 .equation {
@@ -483,7 +510,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .eq-box {
-  background: #dce9fd;
+  background: #fff8d6;
   border: 1px solid #9cc3f5;
   border-radius: 8px;
   padding: 8px 14px;

@@ -15,9 +15,9 @@ import {
 
 const X_MAX = 4 * Math.PI
 
-const C1 = '#4da3ff' // psi1 — blue
+const C1 = '#2563eb' // psi1 — blue
 const C2 = '#ff8c42' // psi2 — orange
-const CS = '#f2f6ff' // sum — white, bold
+const CS = '#111827' // sum — dark, bold
 
 function frameSetup(ctx, canvas) {
   const dpr = window.devicePixelRatio || 1
@@ -30,7 +30,7 @@ function frameSetup(ctx, canvas) {
     canvas.height = H
   }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-  ctx.fillStyle = '#0d1117'
+  ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, w, h)
   const padL = 46
   const padR = 18
@@ -44,7 +44,7 @@ function drawGrid(ctx, g, yMax) {
   const X = (x) => padL + (x / X_MAX) * pw
   const Y = (y) => padT + ph / 2 - (y / yMax) * (ph / 2)
   ctx.lineWidth = 1
-  ctx.strokeStyle = '#1a2230'
+  ctx.strokeStyle = '#dbe1ea'
   ctx.fillStyle = '#6b7a90'
   ctx.font = '11px system-ui, sans-serif'
   ctx.textAlign = 'center'
@@ -66,7 +66,7 @@ function drawGrid(ctx, g, yMax) {
     ctx.stroke()
     ctx.fillText(String(gy), padL - 8, Y(gy) + 4)
   }
-  ctx.strokeStyle = '#39465c'
+  ctx.strokeStyle = '#9fb0c3'
   ctx.beginPath()
   ctx.moveTo(padL, Y(0))
   ctx.lineTo(padL + pw, Y(0))
@@ -122,19 +122,23 @@ function renderFrame(ctx, canvas, s, tau) {
       { fn: grad(2, 'd1'), color: C1, width: 1.75, dash: [6, 4] },
       { fn: grad(2, 'd2'), color: C2, width: 1.75, dash: [6, 4] },
     ]
-    if (s.showSum) {
-      curves.push({
-        fn: (x) =>
-          dPsi_dM(1, x, tau, P, s.M1, s.M2).sum.re +
-          dPsi_dM(2, x, tau, P, s.M1, s.M2).sum.re,
-        color: CS,
-        width: 2.75,
-        dash: [],
-      })
-    }
   }
   const { X, Y } = drawGrid(ctx, g, yMax)
   curves.forEach((c) => trace(ctx, X, Y, c.fn, c.color, c.width, c.dash))
+}
+
+// Derivatives tab, lower graph: the summed total on its own, drawn on the
+// same vertical scale as the component graph so the cancellation reads directly.
+function renderTotalFrame(ctx, canvas, s, tau) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  const tot = P.k1 * P.A1 + P.w2 * P.A2 + P.w1 * P.A1 + P.k2 * P.A2
+  const yMax = Math.max(tot * 1.15, 0.2)
+  const totalFn = (x) =>
+    dPsi_dM(1, x, tau, P, s.M1, s.M2).sum.re +
+    dPsi_dM(2, x, tau, P, s.M1, s.M2).sum.re
+  const { X, Y } = drawGrid(ctx, g, yMax)
+  trace(ctx, X, Y, totalFn, CS, 2.75, [])
 }
 
 const fmt = (v, d = 2) => v.toFixed(d)
@@ -227,6 +231,7 @@ export default function WaveLab() {
   }
 
   const canvasRef = useRef(null)
+  const canvasTotalRef = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
   stateRef.current = { subtab, M1, M2, playing, speed, showSum }
@@ -245,6 +250,10 @@ export default function WaveLab() {
         setTau(Math.round(tauRef.current * 20) / 20)
       }
       renderFrame(ctx, canvas, s, tauRef.current)
+      if (s.subtab === 'derivatives' && s.showSum) {
+        const tc = canvasTotalRef.current
+        if (tc) renderTotalFrame(tc.getContext('2d'), tc, s, tauRef.current)
+      }
       raf = requestAnimationFrame(draw)
     }
     raf = requestAnimationFrame(draw)
@@ -303,11 +312,6 @@ export default function WaveLab() {
             <div><dt>β</dt><dd>{fmt(P.beta, 3)}</dd><dt>ΣA²</dt><dd>{fmt(P.A1 * P.A1 + P.A2 * P.A2)}</dd></div>
             <div><dt>|λ₁|</dt><dd>{lam ? `${sci(cAbs(lam.l1))} m` : '—'}</dd><dt>|λ₂|</dt><dd>{lam ? `${sci(cAbs(lam.l2))} m` : '—'}</dd></div>
           </dl>
-          <p className="hint">
-            k₂ = √(M₂/M₁); k₁k₂ = ω₁ω₂; k₁A₁ = ω₂A₂; β = |M₁−M₂|/(M₁+M₂).
-            λ₁, λ₂ are the closed cubic forms in SI units (masses in kg);
-            theory has kₙ = 2π/λₙ while the display sets k₁ = 1.
-          </p>
         </div>
         <div className="transport">
           <h3 className="transport-title">Animation</h3>
@@ -369,6 +373,7 @@ export default function WaveLab() {
       </div>
 
       <div className="lab-stage">
+        <div className="graph-box">
         <div className="legend">
           {subtab === 'gravity' ? (
             <>
@@ -382,13 +387,23 @@ export default function WaveLab() {
               <span><i className="swatch" style={{ background: C2 }} />∂ψ₂/∂M₁ = −iω₂ψ₂</span>
               <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} />∂ψ₁/∂M₂ = −iω₁ψ₁</span>
               <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />∂ψ₂/∂M₂ = ik₂ψ₂</span>
-              {showSum && <span><i className="swatch" style={{ background: CS }} />total dψ<sub>s</sub></span>}
             </>
           )}
         </div>
 
         <canvas ref={canvasRef} className="wave-canvas" />
 
+        {subtab === 'derivatives' && showSum && (
+          <>
+            <div className="legend total-legend">
+              <span><i className="swatch" style={{ background: CS }} />total dψ<sub>s</sub></span>
+            </div>
+            <canvas ref={canvasTotalRef} className="wave-canvas total-canvas" />
+          </>
+        )}
+        </div>
+
+        <div className="eq-panel">
         <div className="eq-groups">
           {subtab === 'gravity' ? (
             <>
@@ -528,16 +543,7 @@ export default function WaveLab() {
             </>
           )}
         </div>
-
-        <p className="hint">
-          Real (spatial-inertia) parts shown. λₙ is the structural-wavelength
-          coordinate, plotted over the normalized display span 0–4π; τ advances
-          the temporal phase in place of the companion-mass coordinate. Each wave
-          decays exponentially with distance travelled from its source mass, at
-          rate β set by the mass asymmetry. λ₁, λ₂ use SI G, h, c with masses in
-          kg (singular when a mass is 0); the display itself works in scaled
-          units that preserve the theory's structural ratios.
-        </p>
+        </div>
       </div>
     </div>
   )
