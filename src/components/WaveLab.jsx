@@ -219,8 +219,8 @@ function renderFrame(ctx, canvas, s, tau) {
     }
     ctx.closePath()
     ctx.fill()
-    // Right side (green — potential)
-    ctx.fillStyle = CG
+    // Right side (orange)
+    ctx.fillStyle = C2
     ctx.beginPath()
     first = true
     for (let i = 0; i <= n; i++) {
@@ -331,8 +331,7 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
   // Select the pair: pair=1 → W₁+J₁, pair=2 → W₂+J₂
   const arr1 = pair === 1 ? work1 : work2
   const arr2 = pair === 1 ? imp1 : imp2
-  const color1 = pair === 1 ? C1 : C2
-  const color2 = pair === 1 ? C1 : C2
+  const lineColor = pair === 1 ? C1 : C2
   // For pair 1: W₁ solid blue, J₁ dashed blue. For pair 2: W₂ solid orange, J₂ dashed orange.
   const dash1 = []
   const dash2 = [6, 4]
@@ -394,8 +393,8 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
     ctx.closePath()
     ctx.fill()
     ctx.restore()
-    trace(ctx, X, Y, interp(arr1), color1, 2, dash1)
-    trace(ctx, X, Y, interp(arr2), color2, 2, dash2)
+    trace(ctx, X, Y, interp(arr1), lineColor, 2, dash1)
+    trace(ctx, X, Y, interp(arr2), lineColor, 2, dash2)
   }
   if (s.waveDisplay === 'sum' || s.waveDisplay === 'all') {
     trace(ctx, X, Y, interp(sumArr), CS, 2.75, [])
@@ -767,7 +766,7 @@ export default function WaveLab() {
           <>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Total Inertia-Energy</h2>
+                <h2 className="graph-title">Energy Balance Point</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
@@ -793,14 +792,14 @@ export default function WaveLab() {
             </div>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Work Done₁ + Potential Impulse₁</h2>
+                <h2 className="graph-title">Potential to Do Work₁ + Generate Impulse₁</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
                   {(waveDisplay === 'waves' || waveDisplay === 'all') && (
                     <>
-                      <span><i className="swatch" style={{ background: C1 }} /><Tex tex="W_1 = \int \mathrm{Re}(\psi_1) \, d\lambda_n \; \text{(work done)}" /></span>
-                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_1 = \int \mathrm{Im}(\psi_1) \, d\lambda_n \; \text{(potential impulse)}" /></span>
+                      <span><i className="swatch" style={{ background: C1 }} /><Tex tex="W_1 = \int \mathrm{Re}(\psi_1) \, d\lambda_n" /></span>
+                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_1 = \int \mathrm{Im}(\psi_1) \, d\lambda_n" /></span>
                     </>
                   )}
                   {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_1 + J_1" /></span>}
@@ -819,14 +818,14 @@ export default function WaveLab() {
             </div>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Potential Work₂ + Impulse Generated₂</h2>
+                <h2 className="graph-title">Potential to Do Work₂ + Generate Impulse₂</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
                   {(waveDisplay === 'waves' || waveDisplay === 'all') && (
                     <>
-                      <span><i className="swatch" style={{ background: C2 }} /><Tex tex="W_2 = \int \mathrm{Re}(\psi_2) \, d\lambda_n \; \text{(potential work)}" /></span>
-                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_2 = \int \mathrm{Im}(\psi_2) \, d\lambda_n \; \text{(impulse generated)}" /></span>
+                      <span><i className="swatch" style={{ background: C2 }} /><Tex tex="W_2 = \int \mathrm{Re}(\psi_2) \, d\lambda_n" /></span>
+                      <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} /><Tex tex="J_2 = \int \mathrm{Im}(\psi_2) \, d\lambda_n" /></span>
                     </>
                   )}
                   {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_2 + J_2" /></span>}
@@ -970,9 +969,9 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>Work and Impulse <span className="eq-note">— plotted</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Work: done vs potential (spatial)</span><span className="eq-line"><Tex tex="W_1(x) = \int_0^x \mathrm{Re}[\psi_1(\lambda_n)] \, d\lambda_n \quad \text{(work done, }\psi_1\text{ travels }+x\text{)}" /></span><span className="eq-line"><Tex tex="W_2(x) = \int_0^x \mathrm{Re}[\psi_2(\lambda_n)] \, d\lambda_n \quad \text{(potential work, }\psi_2\text{ travels }-x\text{)}" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Impulse: generated vs potential (temporal)</span><span className="eq-line"><Tex tex="J_1(x) = \int_0^x \mathrm{Im}[\psi_1(\lambda_n)] \, d\lambda_n \quad \text{(potential impulse, }\psi_1\text{ travels }+x\text{)}" /></span><span className="eq-line"><Tex tex="J_2(x) = \int_0^x \mathrm{Im}[\psi_2(\lambda_n)] \, d\lambda_n \quad \text{(impulse generated, }\psi_2\text{ travels }-x\text{)}" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Total Inertia-Energy</span><Tex tex="\text{Area under }\mathrm{Re}(\psi_1), \mathrm{Re}(\psi_2)\text{ = completed inertia transfer over }[0, L]" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Potential to Do Work (spatial)</span><span className="eq-line"><Tex tex="W_1(x) = \int_0^x \mathrm{Re}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="W_2(x) = \int_0^x \mathrm{Re}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Potential to Generate Impulse (temporal)</span><span className="eq-line"><Tex tex="J_1(x) = \int_0^x \mathrm{Im}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="J_2(x) = \int_0^x \mathrm{Im}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Energy Balance Point</span><Tex tex="W_1(\lambda^*) = W_2(\lambda^*) \quad \text{where} \quad \lambda^* = L - L\dfrac{M_1}{M_1+M_2} = L\dfrac{M_2}{M_1+M_2}" /></div>
                 </div>
               </div>
             </>
