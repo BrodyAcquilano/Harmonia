@@ -580,10 +580,10 @@ function dotRadius(M, M1, M2) {
 }
 
 // Bodies: in-line wobble — the yz plane, looking down the x (λ) axis, z up.
-// Both bodies sit on the line of sight (center); the wobble Xₙ(t) is drawn
-// vertically along z. They move opposite — when one rises, the other falls —
-// so the smaller (lighter) body visibly crosses in front of the larger one
-// (drawn on top at the crossing).
+// Both bodies sit on the line of sight (center); the wobble Xₙ(t) is along y,
+// which lies horizontal in this view: yₙ(t) = Xₙ(t). They move opposite —
+// when one shifts left, the other shifts right — so the smaller (lighter)
+// body visibly crosses in front of the larger one (drawn on top at crossings).
 function renderInlineWobbleFrame(ctx, canvas, s, tau) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
@@ -597,16 +597,16 @@ function renderInlineWobbleFrame(ctx, canvas, s, tau) {
   const vMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all)), 0.1)
   const { padL, padT, pw, ph } = g
   const midX = padL + pw / 2, midY = padT + ph / 2
-  const amp = (ph / 2) * 0.8
-  const y1 = midY - (v1 / vMax) * amp
-  const y2 = midY - (v2 / vMax) * amp
+  const amp = (pw / 2) * 0.8
+  const x1p = midX + (v1 / vMax) * amp
+  const x2p = midX + (v2 / vMax) * amp
   const r1 = dotRadius(s.M1, s.M1, s.M2)
   const r2 = dotRadius(s.M2, s.M1, s.M2)
   ctx.save()
-  // Vertical rail: the x-axis seen end-on.
+  // Horizontal rail: the y-axis (wobble direction); z is vertical, bodies at z=0.
   ctx.strokeStyle = '#e5dcc0'
   ctx.lineWidth = 1
-  ctx.beginPath(); ctx.moveTo(midX, padT); ctx.lineTo(midX, padT + ph); ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(padL, midY); ctx.lineTo(padL + pw, midY); ctx.stroke()
   // Center point: the impartial reference, head-on.
   ctx.strokeStyle = '#a99760'
   ctx.beginPath()
@@ -615,11 +615,11 @@ function renderInlineWobbleFrame(ctx, canvas, s, tau) {
   ctx.stroke()
   // Heavier/larger first (underneath), lighter on top at crossings.
   const order = s.M1 >= s.M2
-    ? [[y1, r1, C1], [y2, r2, C2]]
-    : [[y2, r2, C2], [y1, r1, C1]]
-  for (const [py, r, color] of order) {
+    ? [[x1p, r1, C1], [x2p, r2, C2]]
+    : [[x2p, r2, C2], [x1p, r1, C1]]
+  for (const [px, r, color] of order) {
     ctx.fillStyle = color
-    ctx.beginPath(); ctx.arc(midX, py, r, 0, 2 * Math.PI); ctx.fill()
+    ctx.beginPath(); ctx.arc(px, midY, r, 0, 2 * Math.PI); ctx.fill()
   }
   // Axes: the yz plane, z up.
   ctx.fillStyle = '#715f43'
@@ -1180,12 +1180,6 @@ export default function WaveLab() {
           <>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Bodies: Wobble (xy plane)</h2>
-            </div>
-            <canvas ref={canvasWobbleDotsRef} className="wave-canvas" />
-          </div>
-          <div className="graph-box">
-            <div className="graph-title-row">
               <h2 className="graph-title">Bodies: In-Line Wobble (yz plane)</h2>
             </div>
             <div className="graph-meta-row">
@@ -1196,6 +1190,19 @@ export default function WaveLab() {
               </div>
             </div>
             <canvas ref={canvasInlineWobbleRef} className="wave-canvas" />
+          </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Bodies: Wobble (xy plane)</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="m_1" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="m_2" /></span>
+                <span><Tex tex="\text{apparent wobble — projection of the circular motion}" /></span>
+              </div>
+            </div>
+            <canvas ref={canvasWobbleDotsRef} className="wave-canvas" />
           </div>
           {/* Orbits need at least one nonzero mass; with both at zero the
               radii are 0/0, so hide the diagrams instead of drawing NaN.
@@ -1417,7 +1424,7 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>In-Line Wobble <span className="eq-note">— plotted · live</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Same wobble, yz plane</span><Tex tex="z_1(t) = X_1(t), \quad z_2(t) = X_2(t) \quad \text{(looking down } x\text{)}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Same wobble, yz plane</span><Tex tex="y_1(t) = X_1(t), \quad y_2(t) = X_2(t) \quad \text{(looking down } x\text{)}" /></div>
                   <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{Bodies superimposed, moving opposite. Lighter crosses in front of heavier.}" /></div>
                 </div>
               </div>

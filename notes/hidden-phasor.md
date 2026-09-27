@@ -189,21 +189,21 @@ $$
 
 $F_n(t)$ is the net released impulse on body $n$ at time $t$ — the whole spatial line collapsed to a single number. $X_n(t)$ is the wobble: body $n$'s displacement from its starting point as a function of time.
 
-**"Bodies: Wobble (xy plane)"** — $m_1$ (blue) on the left, $m_2$ (orange) on the right, each sliding up and down as the animation runs. This is the $xy$ plane: $x$ (spatial) runs horizontally between the bodies — it is the $\lambda$ line, the coordinate the rest of the site calls $\lambda_n$ — and the wobble is drawn along $y$, a spatial direction with no special name, just the perpendicular:
+**"Bodies: In-Line Wobble (yz plane)"** — the same $X_n(t)$, now looking straight down the $x$ ($\lambda$) axis, $z$ up. Both bodies sit on the line of sight — superimposed at the center — and the wobble is drawn horizontally along $y$ (the wobble direction, seen edge-on):
+
+$$
+y_1(t) = X_1(t), \qquad y_2(t) = X_2(t)
+$$
+
+The center cross is the impartial reference point, head-on. Dot size scales with mass, and the lighter body is drawn on top, so at each crossing it visibly passes *in front of* the heavier body, like a transit. The $xy$ view shows the wobble from the side; this one shows it head-on down the line between the bodies.
+
+**"Bodies: Wobble (xy plane)"** — the **apparent wobble**, a projection. $m_1$ (blue) on the left, $m_2$ (orange) on the right, each sliding up and down as the animation runs. This is the motion before it is wrapped into circles: the $y$-component of the circular orbit with the bodies pinned at their $x$ positions — what you would reconstruct if you saw the system from the $xz$ plane and knew there was a distance $\lambda$ between the bodies. This is the $xy$ plane: $x$ (spatial) runs horizontally between the bodies — it is the $\lambda$ line, the coordinate the rest of the site calls $\lambda_n$ — and the wobble is drawn along $y$, a spatial direction with no special name, just the perpendicular:
 
 $$
 y_1(t) = X_1(t), \qquad y_2(t) = X_2(t)
 $$
 
 The horizontal center line is the constant-relative-velocity axis: there is no motion along it, so the wobble is purely perpendicular. The dots move opposite — when one rises, the other falls — and the heavier mass visibly moves less. This is the live instant; the time graphs show the full trajectory it traces.
-
-**"Bodies: In-Line Wobble (yz plane)"** — the same $X_n(t)$, now looking straight down the $x$ ($\lambda$) axis, $z$ up. Both bodies sit on the line of sight — superimposed at the center — and the wobble is drawn vertically along $z$:
-
-$$
-z_1(t) = X_1(t), \qquad z_2(t) = X_2(t)
-$$
-
-The center cross is the impartial reference point, head-on. Dot size scales with mass, and the lighter body is drawn on top, so at each crossing it visibly passes *in front of* the heavier body, like a transit. The $xy$ view shows the wobble from the side; this one shows it head-on down the line between the bodies.
 
 **"Apparent Relative Motion"** and **"True Motion"** — the wobble wrapped into circular orbits, stacked full-width one above the other, each footnoted *xy plane* (the orbit is drawn in the same $xy$ plane as the first wobble diagram — the $x$-axis wrapped into a circle). "True Motion" gets the bigger box, with tiny zoom controls underneath (50%–400%), so the rings have room to expand as the masses change. The orbital angle runs one full turn per wobble cycle, synced to the same clock as the wobble diagram; both diagrams share one scale so they compare directly. The center point ($+$) is the **balance point** $\lambda^* = L\,M_2/(M_1+M_2)$ — the center of mass — and each body's orbital radius is its distance from that point:
 
