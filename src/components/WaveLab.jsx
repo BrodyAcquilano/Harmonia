@@ -1002,14 +1002,14 @@ export default function WaveLab() {
         <div className="control-group">
           <h3>M₁</h3>
           <NumberInput value={M1} min={0} max={100} onCommit={setM1} />
-          <Slider value={M1} min={0} max={100} step={0.1}
+          <Slider value={M1} min={0} max={100} step={0.01}
             onChange={setM1} />
         </div>
 
         <div className="control-group">
           <h3>M₂</h3>
           <NumberInput value={M2} min={0} max={100} onCommit={setM2} />
-          <Slider value={M2} min={0} max={100} step={0.1}
+          <Slider value={M2} min={0} max={100} step={0.01}
             onChange={setM2} />
         </div>
 
