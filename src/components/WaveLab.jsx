@@ -339,8 +339,8 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
   // For pair 1: W₁ solid blue, J₂ dashed orange. For pair 2: W₂ solid orange, J₁ dashed blue.
   const dash1 = []
   const dash2 = [6, 4]
-  const sumArr = arr1.map((v, i) => v + arr2[i])
-  const all = s.waveDisplay === 'sum' ? sumArr : [...arr1, ...arr2, ...sumArr]
+  const diffArr = arr1.map((v, i) => v - arr2[i])
+  const all = s.waveDisplay === 'sum' ? diffArr : [...arr1, ...arr2, ...diffArr]
   const yMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all)) * 1.15, 0.1)
   const { X, Y } = drawGrid(ctx, g, yMax)
   const interp = (arr) => (x) => {
@@ -400,7 +400,7 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
     trace(ctx, X, Y, interp(arr2), color2, 2, dash2)
   }
   if (s.waveDisplay === 'sum' || s.waveDisplay === 'all') {
-    trace(ctx, X, Y, interp(sumArr), CS, 2.75, [])
+    trace(ctx, X, Y, interp(diffArr), CS, 2.75, [])
   }
 }
 
@@ -766,14 +766,14 @@ export default function WaveLab() {
                       <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{energy stored}" /></span>
                     </>
                   )}
-                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_1 + J_2" /></span>}
+                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_1 - J_2" /></span>}
                 </div>
                 <label className="check-row graph-check">
                   Display
                   <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
                     <option value="waves">W₁, J₂</option>
-                    <option value="sum">W₁ + J₂</option>
-                    <option value="all">W₁, J₂, W₁ + J₂</option>
+                    <option value="sum">W₁ − J₂</option>
+                    <option value="all">W₁, J₂, W₁ − J₂</option>
                   </select>
                 </label>
               </div>
@@ -793,14 +793,14 @@ export default function WaveLab() {
                       <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{energy stored}" /></span>
                     </>
                   )}
-                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_2 + J_1" /></span>}
+                  {(waveDisplay === 'sum' || waveDisplay === 'all') && <span><i className="swatch" style={{ background: CS }} /><Tex tex="W_2 - J_1" /></span>}
                 </div>
                 <label className="check-row graph-check">
                   Display
                   <select value={waveDisplay} onChange={(e) => setWaveDisplay(e.target.value)}>
                     <option value="waves">W₂, J₁</option>
-                    <option value="sum">W₂ + J₁</option>
-                    <option value="all">W₂, J₁, W₂ + J₁</option>
+                    <option value="sum">W₂ − J₁</option>
+                    <option value="all">W₂, J₁, W₂ − J₁</option>
                   </select>
                 </label>
               </div>
