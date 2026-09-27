@@ -649,7 +649,10 @@ function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
   if (!(s.M1 + s.M2 > 0)) return
   const P = gravityParams(s.M1, s.M2)
   const { tauMax } = wobbleCurves(s.M1, s.M2, P)
-  const lamStar = (X_MAX * s.M2) / (s.M1 + s.M2)
+  // Clamp to [0, X_MAX]: with one mass at zero, (X_MAX·M₂)/(M₁+M₂) can
+  // round-trip a few ulps past X_MAX, making R₂ a tiny negative number —
+  // and ctx.arc throws on a negative radius, freezing every graph.
+  const lamStar = Math.min(Math.max((X_MAX * s.M2) / (s.M1 + s.M2), 0), X_MAX)
   const R1 = lamStar, R2 = X_MAX - lamStar
   const { padT, pw, ph } = g
   const cx = g.padL + pw / 2, cy = padT + ph / 2
@@ -1333,7 +1336,7 @@ export default function WaveLab() {
             </div>
             <div className="graph-meta-row">
               <div className="legend">
-                <span><Tex tex="m_1 \text{ fixed} — \text{the naive view}" /></span>
+                <span><Tex tex="m_1 \text{ fixed --- the naive view}" /></span>
                 <span><Tex tex="\lambda_2 - \lambda_1 = \lambda_{1-2} = x" /></span>
               </div>
             </div>
