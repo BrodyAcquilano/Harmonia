@@ -98,7 +98,44 @@ function drawGrid(ctx, g, yMax) {
   ctx.lineTo(padL + pw, Y(0))
   ctx.stroke()
   ctx.textAlign = 'right'
-  ctx.fillText('λₙ', padL + pw, padT + ph + 30)
+  ctx.fillText('λₙ (spatial)', padL + pw, padT + ph + 30)
+  return { X, Y }
+}
+
+// Time-axis grid: x-axis is time t (one wobble cycle), not spatial wavelength.
+function drawTimeGrid(ctx, g, yMax, tauMax) {
+  const { padL, padT, padB, pw, ph } = g
+  const X = (t) => padL + (t / tauMax) * pw
+  const Y = (y) => padT + ph / 2 - (y / yMax) * (ph / 2)
+  ctx.lineWidth = 1
+  ctx.strokeStyle = '#e5dcc0'
+  ctx.fillStyle = '#715f43'
+  ctx.font = '10px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'center'
+  const labels = ['0', 'T/4', 'T/2', '3T/4', 'T']
+  for (let i = 0; i <= 4; i++) {
+    const t = (i / 4) * tauMax
+    ctx.beginPath()
+    ctx.moveTo(X(t), padT)
+    ctx.lineTo(X(t), padT + ph)
+    ctx.stroke()
+    ctx.fillText(labels[i], X(t), padT + ph + 16)
+  }
+  ctx.textAlign = 'right'
+  for (const frac of [-1, -0.5, 0.5, 1]) {
+    const gy = frac * yMax
+    ctx.beginPath()
+    ctx.moveTo(padL, Y(gy))
+    ctx.lineTo(padL + pw, Y(gy))
+    ctx.stroke()
+  }
+  ctx.strokeStyle = '#a99760'
+  ctx.beginPath()
+  ctx.moveTo(padL, Y(0))
+  ctx.lineTo(padL + pw, Y(0))
+  ctx.stroke()
+  ctx.textAlign = 'right'
+  ctx.fillText('t (time)', padL + pw, padT + ph + 30)
   return { X, Y }
 }
 
@@ -404,71 +441,125 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
   }
 }
 
-// Motion tab: second integral — displacement from starting point.
-//   D(λₙ) = [W₁−J₁] − [W₂−J₂]: net push-pull at each point (blue +, orange −).
-//   X₁(λₙ) = ∫₀^λₙ [W₁−J₁] dλ′: body 1's displacement from its start.
-//   X₂(λₙ) = ∫₀^λₙ [W₂−J₂] dλ′: body 2's displacement from its start.
-// Plots X₁ (blue) and X₂ (orange); endpoint values are the total displacements.
-function renderMotionFrame(ctx, canvas, s, tau) {
+// ---- Motion tab, time domain ----
+// At each phasor time τ, the net released impulse on body n is
+//   Fₙ(τ) = Jₙ(L,τ) − Wₙ(L,τ) = ∫₀ᴸ [Im(ψₙ) − Re(ψₙ)] dλₙ.
+// Integrating over τ gives the wobble: Xₙ(τ) = ∫₀^τ Fₙ(τ′) dτ′.
+// Cached by (M1, M2) since it doesn't depend on the animation frame.
+let wobbleCache = { key: null }
+function wobbleCurves(M1, M2, P) {
+  // One wobble cycle of body 1: F₁ oscillates at ω₁M₂ = M₂ in τ.
+  const tauMax = (2 * Math.PI) / Math.max(M2, 0.05)
+  const key = `${M1}|${M2}|${tauMax}`
+  if (wobbleCache.key === key) return wobbleCache
+  const NT = 160, NS = 120
+  const dx = X_MAX / NS, dt = tauMax / NT
+  const f1 = [], f2 = []
+  for (let i = 0; i <= NT; i++) {
+    const t = (i / NT) * tauMax
+    let s1 = 0, s2 = 0
+    for (let j = 0; j <= NS; j++) {
+      const x = (j / NS) * X_MAX
+      const p1 = psi1(x, t, P, M2)
+      const p2 = psi2(x, t, P, M1)
+      const w = (j === 0 || j === NS) ? 0.5 : 1
+      s1 += w * (p1.im - p1.re)
+      s2 += w * (p2.im - p2.re)
+    }
+    f1.push(s1 * dx); f2.push(s2 * dx)
+  }
+  const x1 = [], x2 = []
+  let c1 = 0, c2 = 0
+  for (let i = 0; i <= NT; i++) {
+    if (i > 0) {
+      c1 += ((f1[i - 1] + f1[i]) / 2) * dt
+      c2 += ((f2[i - 1] + f2[i]) / 2) * dt
+    }
+    x1.push(c1); x2.push(c2)
+  }
+  // Center on zero so the curves read as wobble around the middle.
+  const m1 = x1.reduce((a, b) => a + b, 0) / x1.length
+  const m2 = x2.reduce((a, b) => a + b, 0) / x2.length
+  wobbleCache = { key, tauMax, NT, f1, f2, x1: x1.map(v => v - m1), x2: x2.map(v => v - m2) }
+  return wobbleCache
+}
+
+// Wobble vs time — STATIC snapshot of one full cycle (both directions).
+// X₁(t) blue, X₂(t) orange. No animation: this is the trajectory, not a frame.
+function renderWobbleTimeFrame(ctx, canvas, s) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
-  // First integrals: work and impulse (trapezoidal rule), as in renderPairFrame.
-  const N = 200
-  const work1 = [], work2 = [], imp1 = [], imp2 = []
-  let w1 = 0, w2 = 0, j1 = 0, j2 = 0
-  let prevX = 0
-  let prevW1 = psi1(0, tau, P, s.M2).re
-  let prevW2 = psi2(0, tau, P, s.M1).re
-  let prevJ1 = psi1(0, tau, P, s.M2).im
-  let prevJ2 = psi2(0, tau, P, s.M1).im
-  for (let i = 0; i <= N; i++) {
-    const x = (i / N) * X_MAX
-    const p1 = psi1(x, tau, P, s.M2)
-    const p2 = psi2(x, tau, P, s.M1)
-    if (i > 0) {
-      const dx = x - prevX
-      w1 += ((prevW1 + p1.re) / 2) * dx
-      w2 += ((prevW2 + p2.re) / 2) * dx
-      j1 += ((prevJ1 + p1.im) / 2) * dx
-      j2 += ((prevJ2 + p2.im) / 2) * dx
-    }
-    work1.push(w1); work2.push(w2); imp1.push(j1); imp2.push(j2)
-    prevX = x
-    prevW1 = p1.re; prevW2 = p2.re; prevJ1 = p1.im; prevJ2 = p2.im
-  }
-  // Second integral: cumulative displacement per body.
-  // Flipped: J−W (impulse released) drives motion; W−J is inertia stored.
-  const disp1 = [], disp2 = []
-  let x1 = 0, x2 = 0
-  let prevD1 = imp1[0] - work1[0]
-  let prevD2 = imp2[0] - work2[0]
-  const dx = X_MAX / N
-  for (let i = 0; i <= N; i++) {
-    const d1 = imp1[i] - work1[i]
-    const d2 = imp2[i] - work2[i]
-    if (i > 0) {
-      x1 += ((prevD1 + d1) / 2) * dx
-      x2 += ((prevD2 + d2) / 2) * dx
-    }
-    disp1.push(x1); disp2.push(x2)
-    prevD1 = d1; prevD2 = d2
-  }
-  const all = [...disp1, ...disp2]
+  const { tauMax, NT, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
+  const all = [...x1, ...x2]
   const yMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all)) * 1.15, 0.1)
-  const { X, Y } = drawGrid(ctx, g, yMax)
-  const interp = (arr) => (x) => {
-    const idx = Math.min(Math.floor((x / X_MAX) * N), N - 1)
-    const t = ((x / X_MAX) * N) - idx
-    return arr[idx] * (1 - t) + arr[idx + 1] * t
+  const { X, Y } = drawTimeGrid(ctx, g, yMax, tauMax)
+  const interp = (arr) => (t) => {
+    const idx = Math.min(Math.floor((t / tauMax) * NT), NT - 1)
+    const f = ((t / tauMax) * NT) - idx
+    return arr[idx] * (1 - f) + arr[idx + 1] * f
   }
-  trace(ctx, X, Y, interp(disp1), C1, 2.5, [])
-  trace(ctx, X, Y, interp(disp2), C2, 2.5, [])
-  // Endpoint markers: final displacement of each body.
+  trace(ctx, X, Y, interp(x1), C1, 2.5, [])
+  trace(ctx, X, Y, interp(x2), C2, 2.5, [])
+}
+
+// Net impulse vs time — STATIC snapshot of one full cycle.
+// F₁(t) blue, F₂(t) orange: the driver behind the wobble.
+function renderForceTimeFrame(ctx, canvas, s) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  const { tauMax, NT, f1, f2 } = wobbleCurves(s.M1, s.M2, P)
+  const all = [...f1, ...f2]
+  const yMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all)) * 1.15, 0.1)
+  const { X, Y } = drawTimeGrid(ctx, g, yMax, tauMax)
+  const interp = (arr) => (t) => {
+    const idx = Math.min(Math.floor((t / tauMax) * NT), NT - 1)
+    const f = ((t / tauMax) * NT) - idx
+    return arr[idx] * (1 - f) + arr[idx + 1] * f
+  }
+  trace(ctx, X, Y, interp(f1), C1, 2.5, [])
+  trace(ctx, X, Y, interp(f2), C2, 2.5, [])
+}
+
+// Wobble diagram: m₁ dot left (blue), m₂ dot right (orange), each moving
+// up/down with Xₙ(τ). No motion along the horizontal — relative velocity
+// is constant, so the wobble is purely perpendicular.
+function renderWobbleDotsFrame(ctx, canvas, s, tau) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  const { tauMax, NT, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
+  const tc = ((tau % tauMax) + tauMax) % tauMax
+  const idx = Math.min(Math.floor((tc / tauMax) * NT), NT - 1)
+  const f = ((tc / tauMax) * NT) - idx
+  const v1 = x1[idx] * (1 - f) + x1[idx + 1] * f
+  const v2 = x2[idx] * (1 - f) + x2[idx + 1] * f
+  const all = [...x1, ...x2]
+  const vMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all)), 0.1)
+  const { padL, padT, pw, ph } = g
+  const midY = padT + ph / 2
+  const amp = (ph / 2) * 0.8
+  const y1 = midY - (v1 / vMax) * amp
+  const y2 = midY - (v2 / vMax) * amp
+  const xL = padL + pw * 0.25, xR = padL + pw * 0.75
   ctx.save()
+  // Center line: the constant-relative-velocity axis (no motion along it).
+  ctx.strokeStyle = '#a99760'
+  ctx.lineWidth = 1.5
+  ctx.beginPath(); ctx.moveTo(padL, midY); ctx.lineTo(padL + pw, midY); ctx.stroke()
+  // Guide rails
+  ctx.strokeStyle = '#e5dcc0'
+  ctx.lineWidth = 1
+  ctx.beginPath(); ctx.moveTo(xL, padT); ctx.lineTo(xL, padT + ph); ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(xR, padT); ctx.lineTo(xR, padT + ph); ctx.stroke()
+  // Dots
   ctx.fillStyle = C1
-  ctx.beginPath(); ctx.arc(X(X_MAX), Y(disp1[N]), 4, 0, 2 * Math.PI); ctx.fill()
+  ctx.beginPath(); ctx.arc(xL, y1, 10, 0, 2 * Math.PI); ctx.fill()
   ctx.fillStyle = C2
-  ctx.beginPath(); ctx.arc(X(X_MAX), Y(disp2[N]), 4, 0, 2 * Math.PI); ctx.fill()
+  ctx.beginPath(); ctx.arc(xR, y2, 10, 0, 2 * Math.PI); ctx.fill()
+  ctx.fillStyle = '#3a2c1a'
+  ctx.font = '600 13px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'center'
+  ctx.fillText('m₁', xL, padT + ph + 22)
+  ctx.fillText('m₂', xR, padT + ph + 22)
   ctx.restore()
 }
 
@@ -611,7 +702,9 @@ export default function WaveLab() {
   const canvasAreaRef = useRef(null)
   const canvasCumRef = useRef(null)
   const canvasPair2Ref = useRef(null)
-  const canvasMotionRef = useRef(null)
+  const canvasWobbleTimeRef = useRef(null)
+  const canvasForceTimeRef = useRef(null)
+  const canvasWobbleDotsRef = useRef(null)
   const canvasPushPullRef = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
@@ -651,8 +744,12 @@ export default function WaveLab() {
         if (p2) renderPairFrame(p2.getContext('2d'), p2, s, tauRef.current, 2)
       }
       if (s.subtab === 'motion') {
-        const mc = canvasMotionRef.current
-        if (mc) renderMotionFrame(mc.getContext('2d'), mc, s, tauRef.current)
+        const wt = canvasWobbleTimeRef.current
+        if (wt) renderWobbleTimeFrame(wt.getContext('2d'), wt, s)
+        const ft = canvasForceTimeRef.current
+        if (ft) renderForceTimeFrame(ft.getContext('2d'), ft, s)
+        const wd = canvasWobbleDotsRef.current
+        if (wd) renderWobbleDotsFrame(wd.getContext('2d'), wd, s, tauRef.current)
         const pp = canvasPushPullRef.current
         if (pp) renderPushPullFrame(pp.getContext('2d'), pp, s, tauRef.current)
       }
@@ -934,7 +1031,13 @@ export default function WaveLab() {
           <>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Push-Pull Density</h2>
+              <h2 className="graph-title">Bodies: Wobble Diagram</h2>
+            </div>
+            <canvas ref={canvasWobbleDotsRef} className="wave-canvas" />
+          </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Push-Pull Density (spatial)</h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
@@ -945,15 +1048,27 @@ export default function WaveLab() {
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Body Displacement from Starting Point</h2>
+              <h2 className="graph-title">Net Impulse Over Time</h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
-                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="X_1 = \int_0^L [J_1 - W_1] \, d\lambda_n" /></span>
-                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="X_2 = \int_0^L [J_2 - W_2] \, d\lambda_n" /></span>
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="F_1(t)" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="F_2(t)" /></span>
               </div>
             </div>
-            <canvas ref={canvasMotionRef} className="wave-canvas" />
+            <canvas ref={canvasForceTimeRef} className="wave-canvas" />
+          </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Wobble Over Time</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="X_1(t)" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="X_2(t)" /></span>
+              </div>
+            </div>
+            <canvas ref={canvasWobbleTimeRef} className="wave-canvas" />
           </div>
           </>
         ) : null}
@@ -1092,12 +1207,18 @@ export default function WaveLab() {
           ) : subtab === 'motion' ? (
             <>
               <div className="eq-group">
-                <h4>Second Integral — Displacement <span className="eq-note">— plotted</span></h4>
+                <h4>Wobble Over Time <span className="eq-note">— plotted · static snapshot, one cycle</span></h4>
+                <div className="eq-list">
+                  <div className="eq-box wide"><span className="eq-label">Net impulse at time t</span><Tex tex="F_n(t) = J_n(L, t) - W_n(L, t) = \int_0^L [\mathrm{Im}(\psi_n) - \mathrm{Re}(\psi_n)] \, d\lambda_n" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Body 1 wobble</span><Tex tex="X_1(t) = \int_0^t F_1(t') \, dt'" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Body 2 wobble</span><Tex tex="X_2(t) = \int_0^t F_2(t') \, dt'" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{Heavy mass wobbles less. Bodies move opposite: one up, the other down.}" /></div>
+                </div>
+              </div>
+              <div className="eq-group">
+                <h4>Push-Pull Density <span className="eq-note">— plotted · spatial</span></h4>
                 <div className="eq-list">
                   <div className="eq-box wide"><span className="eq-label">Local push-pull</span><Tex tex="D(\lambda_n) = [W_1(\lambda_n) - J_1(\lambda_n)] - [W_2(\lambda_n) - J_2(\lambda_n)]" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Body 1 displacement</span><Tex tex="X_1 = \int_0^L [J_1(\lambda_n) - W_1(\lambda_n)] \, d\lambda_n" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Body 2 displacement</span><Tex tex="X_2 = \int_0^L [J_2(\lambda_n) - W_2(\lambda_n)] \, d\lambda_n" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Relative displacement</span><Tex tex="\Delta X = X_1 - X_2 = \int_0^L D(\lambda_n) \, d\lambda_n" /></div>
                 </div>
               </div>
             </>

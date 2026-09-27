@@ -88,29 +88,35 @@ The relative velocity stays fixed — the bodies are not accelerating *relative 
 
 ## 5d. From energy at a point to distance moved
 
-This leads to the central conclusion of the simulation. If we can read, at every point $\lambda_n$ along the wavelength, how much spatial inertia has acted there — how much work has been done, how much impulse generated — then we can determine **how far the body has moved**. The spatial pattern of energy *is* the displacement history, encoded as a wave.
+This leads to the central conclusion of the simulation. If we can read, at every point $\lambda_n$ along the wavelength, how much spatial inertia has acted there — how much work has been done, how much impulse generated — then we can determine **how far each body has moved**. But there is a subtlety that matters: the second integral must be taken over **time**, not over space.
 
-We are very close to making this quantitative. The integration graphs already compute the first integrals:
-
-$$
-W_n(\lambda_n) = \int_0^{\lambda_n} \mathrm{Re}(\psi_n)\,d\lambda', \qquad J_n(\lambda_n) = \int_0^{\lambda_n} \mathrm{Im}(\psi_n)\,d\lambda'
-$$
-
-The next step — not yet implemented — is a **second integral**: not a plain accumulation, but the integral of the *difference* between the two bodies' work-impulse balances. Define the local push-pull at each point:
+The integration graphs already compute the first integrals — over space, at each instant $t$:
 
 $$
-D(\lambda_n) = \big[W_1(\lambda_n) - J_1(\lambda_n)\big] - \big[W_2(\lambda_n) - J_2(\lambda_n)\big]
+W_n(\lambda_n, t) = \int_0^{\lambda_n} \mathrm{Re}(\psi_n)\,d\lambda', \qquad J_n(\lambda_n, t) = \int_0^{\lambda_n} \mathrm{Im}(\psi_n)\,d\lambda'
 $$
 
-$D(\lambda_n)$ is the net push in the $+\lambda_n$ direction at that point: body 1's remaining inertia minus body 2's. Integrating it along the wavelength,
+(They carry a $t$ now, because the phasor rotates: work and impulse breathe as the phase cycles.)
+
+An earlier draft of this note proposed integrating the work-impulse difference over space a second time. That yields a spatial accumulation — a number that grows along the wavelength — but it is not a trajectory. It answers "how much has piled up by this point" when the question we want is "where is the body now." Wrong axis.
+
+The correct second integral works the other way: at each instant $t$, collapse the whole spatial line to a single number — the **net released impulse** on each body:
 
 $$
-X = \int_0^{L} D(\lambda_n)\,d\lambda_n
+F_n(t) = J_n(L, t) - W_n(L, t) = \int_0^L \big[\mathrm{Im}(\psi_n) - \mathrm{Re}(\psi_n)\big]\,d\lambda_n
 $$
 
-gives the total displacement — how far the system has moved over the elapsed phasor time. The first integral turned the field into energy; the second turns the energy *difference* into motion.
+$F_n(t)$ is the driver: how hard the field is pushing body $n$ at time $t$. The sign is flipped from $W_n - J_n$ on purpose — on the Integration tab, $W_n > J_n$ (green) is inertia *stored*; motion comes from what is *released*, $J_n > W_n$ (red). Then integrate over time:
 
-There is a dimensional logic to this, worth stating plainly. We started with **one dimension**: the spatial line $\lambda_n$ between the bodies. We added a **second**: the hidden phasor dimension $\tau$, time as rotation. Integrating once over the wavelength gave us energy as a function of position. Integrating the *difference* once more gives us displacement as a function of time. **For every spatial dimension, we add two time dimensions**: one for the phase to rotate through, one for the motion to accumulate in. The pattern — space, phasor-time, displacement-time — should generalize to higher dimensions the same way.
+$$
+X_n(t) = \int_0^t F_n(t')\,dt'
+$$
+
+$X_n(t)$ is the wobble: body $n$'s displacement from its starting point, as a function of time, both directions. This is what the Motion tab now plots.
+
+There is a dimensional logic to this, worth stating plainly. We started with **one dimension**: the spatial line $\lambda_n$ between the bodies. We added a **second**: the hidden phasor dimension, time as rotation. Integrating once over the wavelength gave us energy as a function of position. The second integral is taken over **time**, not space — and it gives us displacement as a function of time. **For every spatial dimension, we add two time dimensions**: one for the phase to rotate through, one for the motion to accumulate in. The pattern — space, phasor-time, displacement-time — should generalize to higher dimensions the same way.
+
+A note on wavelengths, since the two axes are easily confused: the **spatial wavelength** is $2\pi$ (with normalized $k_1 = 1$). The **phasor's temporal period** is $2\pi/(\omega_1 M_2)$ — a different quantity, different units, different axis. Every graph before the Motion tab is plotted against the spatial one; the Motion tab's time graphs are plotted against the temporal one. They are not the same wavelength.
 
 ## 6. Why the axis runs $0$ to $4\pi$
 
@@ -173,13 +179,25 @@ The shading between the curves is the key:
 
 The colors alternate at each crossing, so the graph reads as a ledger: green bands where the body is charging, red bands where it is discharging. The $W_n - J_n$ line tracks the running balance.
 
+### 7.4 Motion — the wobble, in space and time
+
+Four graphs. The first two are live (they animate); the last two are static snapshots of one full wobble cycle, both directions, with the axis marked in time ($0$ to $T$).
+
+**"Bodies: Wobble Diagram"** — $m_1$ (blue) on the left, $m_2$ (orange) on the right, each sliding up and down as the animation runs. The horizontal center line is the constant-relative-velocity axis: there is no motion along it, so the wobble is purely perpendicular. The dots move opposite — when one rises, the other falls — and the heavier mass visibly moves less. This is the live instant; the time graphs show the full trajectory it traces.
+
+**"Push-Pull Density (spatial)"** — $D(\lambda_n) = [W_1 - J_1] - [W_2 - J_2]$ against the spatial wavelength $\lambda_n$. The local push at each point between the bodies: where body 1's remaining inertia exceeds body 2's, and vice versa. This is the only Motion graph still on the spatial axis.
+
+**"Net Impulse Over Time"** — $F_1(t)$ (blue) and $F_2(t)$ (orange) against time. The driver: each body's total released impulse as the phasor turns through one cycle.
+
+**"Wobble Over Time"** — $X_1(t)$ (blue) and $X_2(t)$ (orange) against time, same one-cycle window. The trajectories: each body's displacement from its start. Read them against the center line — this is motion relative to the impartial reference point, not merely the relative motion between the bodies.
+
 ## 8. What this simulation does not show
 
 This note describes the constant-relative-velocity, phasor-rotation simulation only. It does not show:
 
 - The **mass-space view** — the fields plotted directly against $M_1$ and $M_2$ as coordinates, with no $\lambda_n$ and no $\tau$. There the wavenumber varies with the coordinate itself and the waves chirp.
 - The **accelerating case** — relative velocity changing with time, wavelength breathing in and out (the chirp of Section 5b, second half).
-- The **second integral as a live view** — the displacement $X_1$, $X_2$ of Section 5d is now plotted in the Motion tab, but the $\Delta X$ readout and the center-point reference framing of Section 9 are not yet drawn on the graph itself.
+- The **$\Delta X$ readout** — the Motion tab plots $X_1(t)$ and $X_2(t)$ separately, but their difference $\Delta X(t) = X_1 - X_2$ is not yet drawn as its own curve, and the center point is not yet marked as an explicit reference on the graphs.
 - The **$\lambda$-derivation bridge** — the explicit change of variables from $(M_1, M_2)$ to $(\lambda, T)$ via the free-fall construction, which would make the "equivalent but viewed from a different space" claim exact rather than analogical.
 
 Each of these is a future simulation. This one is kept, as is, so the ideas can be revisited as they mature.
@@ -192,9 +210,9 @@ The picture, stated plainly. The Earth moves forward and the Earth pulls the Moo
 
 Then the time that got added in: the **hidden time phasor**. It cycles the phase of the wave, and as the phase cycles, the energy-over-space distribution changes. That is all that changes. **All the masses stay constant; nothing changes except the energy at each point in between the two masses.** The phasor turns; the energy redistributes; the bodies stay what they are.
 
-Integrate once over space and you get work and impulse — the energy accounts, $W_n$ and $J_n$. Integrate again, and take the *difference* of work and impulse for each body, and you can figure out how much each one moved relative to the other. That is the second integral, $X_1$ and $X_2$, and it is now plotted in the Motion tab.
+Integrate once over space and you get work and impulse — the energy accounts, $W_n$ and $J_n$. Then, at each instant, collapse the whole spatial line to a single number — the net released impulse $F_n(t) = J_n(L,t) - W_n(L,t)$ — and integrate *that* over time: $X_n(t) = \int_0^t F_n(t')\,dt'$. That is the second integral: not over space but over time, flipped to $J_n - W_n$ because motion comes from what is released, not what is stored. It gives each body's wobble as a trajectory, both directions. It is plotted in the Motion tab as four graphs: the live wobble diagram (the two dots), the spatial push-pull density, and the static one-cycle snapshots of net impulse and displacement over time.
 
-But here is the part that matters. If you treated the distance between the two bodies as a single variable, you would only ever know their *relative* motion — how far apart they are, how fast the gap opens and closes. The phasor gives you more than that. The phasor is the hidden time dimension that we integrate over; the second integral we integrate over the wavelength, over space; and that gives us motion in the time dimension we know. So we learn not only how much their motion was relative to each other, but **how much the motion was relative to a center point** — a third, impartial reference point that belongs to neither body. Not just "the Moon falls toward the Earth," but how far the Moon wobbles one way from center and how far the Earth wobbles the other, each pulled by gravity, each measured against something neutral. That is new information. The relative motion was always visible; the wobble against center was hidden until the second integral.
+But here is the part that matters. If you treated the distance between the two bodies as a single variable, you would only ever know their *relative* motion — how far apart they are, how fast the gap opens and closes. The phasor gives you more than that. The phasor is the hidden time dimension; the second integral is taken over time, and that gives us motion in the time dimension we know. So we learn not only how much their motion was relative to each other, but **how much the motion was relative to a center point** — a third, impartial reference point that belongs to neither body. Not just "the Moon falls toward the Earth," but how far the Moon wobbles one way from center and how far the Earth wobbles the other, each pulled by gravity, each measured against something neutral. That is new information. The relative motion was always visible; the wobble against center was hidden until the second integral.
 
 Count the dimensions. Three of space — the world the bodies move in. Then two of time: the **fourth**, the hidden phasor, over which the phase rotates and the energy redistributes; and the **fifth**, over which the second integral accumulates and motion emerges. **Five dimensions.** For every spatial dimension, two time dimensions — one to cycle the phase, one to accumulate the motion.
 
