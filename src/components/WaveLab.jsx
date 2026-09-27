@@ -191,6 +191,55 @@ function renderFrame(ctx, canvas, s, tau) {
     }
     trace(ctx, X, Y, c.fn, c.color, c.width, c.dash)
   })
+  // For integration Energy Balance Point: shade area between the two lines,
+  // blue left of balance point, orange right (like the gravity page style)
+  if (s.subtab === 'integ' && (s.waveDisplay === 'waves' || s.waveDisplay === 'all') && curves.length >= 2) {
+    const xStar = s.M1 + s.M2 > 0 ? X_MAX - (X_MAX * s.M2) / (s.M1 + s.M2) : X_MAX / 2
+    const fn1 = curves[0].fn
+    const fn2 = curves[1].fn
+    ctx.save()
+    ctx.globalAlpha = 0.15
+    const n = 200
+    // Left side (blue)
+    ctx.fillStyle = C1
+    ctx.beginPath()
+    let first = true
+    for (let i = 0; i <= n; i++) {
+      const x = (i / n) * xStar
+      if (first) {
+        ctx.moveTo(X(x), Y(fn1(x)))
+        first = false
+      } else {
+        ctx.lineTo(X(x), Y(fn1(x)))
+      }
+    }
+    for (let i = n; i >= 0; i--) {
+      const x = (i / n) * xStar
+      ctx.lineTo(X(x), Y(fn2(x)))
+    }
+    ctx.closePath()
+    ctx.fill()
+    // Right side (orange)
+    ctx.fillStyle = C2
+    ctx.beginPath()
+    first = true
+    for (let i = 0; i <= n; i++) {
+      const x = xStar + (i / n) * (X_MAX - xStar)
+      if (first) {
+        ctx.moveTo(X(x), Y(fn1(x)))
+        first = false
+      } else {
+        ctx.lineTo(X(x), Y(fn1(x)))
+      }
+    }
+    for (let i = n; i >= 0; i--) {
+      const x = xStar + (i / n) * (X_MAX - xStar)
+      ctx.lineTo(X(x), Y(fn2(x)))
+    }
+    ctx.closePath()
+    ctx.fill()
+    ctx.restore()
+  }
   if ((s.subtab === 'gravity' || s.subtab === 'integ') && s.M1 + s.M2 > 0) {
     // Balance point: mass-weighted center x* = L·M₂/(M₁+M₂).
     // M₁·x* = M₂·(L−x*); equal masses → middle, M₁=3M₂ → L/4.
@@ -295,6 +344,55 @@ function renderPairFrame(ctx, canvas, s, tau, pair) {
   if (s.waveDisplay === 'waves' || s.waveDisplay === 'all') {
     // Work: solid lines; Impulse: dashed lines
     const dash = isWork ? [] : [6, 4]
+    // Shade area between the two lines: blue left of balance point, orange right
+    const xStar = s.M1 + s.M2 > 0 ? X_MAX - (X_MAX * s.M2) / (s.M1 + s.M2) : X_MAX / 2
+    ctx.save()
+    ctx.globalAlpha = 0.15
+    const n = 200
+    // Left side (blue)
+    ctx.fillStyle = C1
+    ctx.beginPath()
+    let first = true
+    for (let i = 0; i <= n; i++) {
+      const x = (i / n) * xStar
+      const y1 = interp(arr1)(x)
+      const y2 = interp(arr2)(x)
+      if (first) {
+        ctx.moveTo(X(x), Y(y1))
+        first = false
+      } else {
+        ctx.lineTo(X(x), Y(y1))
+      }
+    }
+    for (let i = n; i >= 0; i--) {
+      const x = (i / n) * xStar
+      const y2 = interp(arr2)(x)
+      ctx.lineTo(X(x), Y(y2))
+    }
+    ctx.closePath()
+    ctx.fill()
+    // Right side (orange)
+    ctx.fillStyle = C2
+    ctx.beginPath()
+    first = true
+    for (let i = 0; i <= n; i++) {
+      const x = xStar + (i / n) * (X_MAX - xStar)
+      const y1 = interp(arr1)(x)
+      if (first) {
+        ctx.moveTo(X(x), Y(y1))
+        first = false
+      } else {
+        ctx.lineTo(X(x), Y(y1))
+      }
+    }
+    for (let i = n; i >= 0; i--) {
+      const x = xStar + (i / n) * (X_MAX - xStar)
+      const y2 = interp(arr2)(x)
+      ctx.lineTo(X(x), Y(y2))
+    }
+    ctx.closePath()
+    ctx.fill()
+    ctx.restore()
     trace(ctx, X, Y, interp(arr1), C1, 2, dash)
     trace(ctx, X, Y, interp(arr2), C2, 2, dash)
   }
@@ -694,7 +792,7 @@ export default function WaveLab() {
             </div>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Potential Work</h2>
+                <h2 className="graph-title">Potential to Do Work</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
@@ -720,7 +818,7 @@ export default function WaveLab() {
             </div>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Potential Impulse</h2>
+                <h2 className="graph-title">Potential to Generate Impulse</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
@@ -871,8 +969,8 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>Work and Impulse <span className="eq-note">— plotted</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Potential Work (spatial)</span><span className="eq-line"><Tex tex="W_1(x) = \int_0^x \mathrm{Re}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="W_2(x) = \int_0^x \mathrm{Re}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Potential Impulse (temporal)</span><span className="eq-line"><Tex tex="J_1(x) = \int_0^x \mathrm{Im}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="J_2(x) = \int_0^x \mathrm{Im}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Potential to Do Work (spatial)</span><span className="eq-line"><Tex tex="W_1(x) = \int_0^x \mathrm{Re}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="W_2(x) = \int_0^x \mathrm{Re}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Potential to Generate Impulse (temporal)</span><span className="eq-line"><Tex tex="J_1(x) = \int_0^x \mathrm{Im}[\psi_1(\lambda_n)] \, d\lambda_n" /></span><span className="eq-line"><Tex tex="J_2(x) = \int_0^x \mathrm{Im}[\psi_2(\lambda_n)] \, d\lambda_n" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Energy Balance Point</span><Tex tex="W_1(\lambda^*) = W_2(\lambda^*) \quad \text{where} \quad \lambda^* = L - L\dfrac{M_2}{M_1+M_2} = L\dfrac{M_1}{M_1+M_2}" /></div>
                 </div>
               </div>
