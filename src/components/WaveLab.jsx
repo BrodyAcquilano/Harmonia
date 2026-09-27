@@ -573,8 +573,10 @@ function renderWobbleDotsFrame(ctx, canvas, s, tau) {
 }
 
 // Dot radius scales with mass: the heavier body draws larger.
+// Guarded: both masses zero -> plain base radius (avoids 0/0 = NaN).
 function dotRadius(M, M1, M2) {
-  return 5 + 7 * (M / Math.max(M1, M2))
+  const mMax = Math.max(M1, M2)
+  return mMax > 0 ? 5 + 7 * (M / mMax) : 5
 }
 
 // Bodies: in-line wobble — the yz plane, looking down the x (λ) axis, z up.
@@ -643,6 +645,9 @@ function renderInlineWobbleFrame(ctx, canvas, s, tau) {
 // both bodies circling (+), opposite.
 function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
   const g = frameSetup(ctx, canvas)
+  // Degenerate case (both masses zero): no orbits to draw — the widget is
+  // hidden by the JSX guard, but never let NaN reach the canvas.
+  if (!(s.M1 + s.M2 > 0)) return
   const P = gravityParams(s.M1, s.M2)
   const { tauMax } = wobbleCurves(s.M1, s.M2, P)
   const lamStar = (X_MAX * s.M2) / (s.M1 + s.M2)
@@ -1192,6 +1197,11 @@ export default function WaveLab() {
             </div>
             <canvas ref={canvasInlineWobbleRef} className="wave-canvas" />
           </div>
+          {/* Orbits need at least one nonzero mass; with both at zero the
+              radii are 0/0, so hide the diagrams instead of drawing NaN.
+              They remount automatically once a mass is nonzero again. */}
+          {M1 + M2 > 0 ? (
+          <>
           <div className="graph-box">
             <div className="graph-title-row">
               <h2 className="graph-title">Apparent Relative Motion</h2>
@@ -1224,6 +1234,15 @@ export default function WaveLab() {
               <div className="graph-footnote">xy plane</div>
             </div>
           </div>
+          </>
+          ) : (
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Orbits</h2>
+            </div>
+            <p className="placeholder-note">Both masses are at zero — there is nothing to orbit. Raise M₁ or M₂ above zero and the orbit diagrams will come back.</p>
+          </div>
+          )}
           <div className="graph-box">
             <div className="graph-title-row">
               <h2 className="graph-title">Push-Pull Density (spatial)</h2>

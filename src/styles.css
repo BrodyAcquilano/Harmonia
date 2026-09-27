@@ -534,6 +534,17 @@ body {
   font-style: italic;
 }
 
+/* Placeholder shown when a diagram is hidden (e.g. both masses zero) */
+.placeholder-note {
+  margin: 4px 0 10px;
+  padding: 18px 20px;
+  font-style: italic;
+  color: #715f43;
+  background: #fbf6e9;
+  border: 1px dashed #d8cba6;
+  border-radius: 10px;
+}
+
 /* Small italic footnote at the bottom corner of a graph box */
 .graph-footnote {
   padding: 6px 20px 12px;
