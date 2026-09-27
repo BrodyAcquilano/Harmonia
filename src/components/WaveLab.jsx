@@ -225,11 +225,12 @@ function renderHalfFrame(ctx, canvas, s, tau) {
   trace(ctx, X, Y, (x) => dPsi_dM(2, x, tau, P, s.M1, s.M2).sum.re, C2, 2, [6, 4])
 }
 
-// Integration tab, second graph: Work and Impulse.
+// Integration tab: Work/Impulse pairs.
+//   Pair 1: W₁ (work of ψ₁) + J₂ (impulse of ψ₂)
+//   Pair 2: W₂ (work of ψ₂) + J₁ (impulse of ψ₁)
 //   Work: Wₙ(x) = ∫₀ˣ Re(ψₙ(t)) dt (spatial, solid)
 //   Impulse: Jₙ(x) = ∫₀ˣ Im(ψₙ(t)) dt (temporal, dashed)
-// Shows the accumulated work and impulse for each wave.
-function renderCumFrame(ctx, canvas, s, tau) {
+function renderPairFrame(ctx, canvas, s, tau, pair) {
   const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
   // Precompute work and impulse via trapezoidal rule
@@ -265,20 +266,22 @@ function renderCumFrame(ctx, canvas, s, tau) {
     prevJ1 = p1.im
     prevJ2 = p2.im
   }
-  const all = [...work1, ...work2, ...imp1, ...imp2]
+  // Select the pair: pair=1 → W₁+J₂, pair=2 → W₂+J₁
+  const workArr = pair === 1 ? work1 : work2
+  const impArr = pair === 1 ? imp2 : imp1
+  const workColor = pair === 1 ? C1 : C2
+  const impColor = pair === 1 ? C2 : C1
+  const all = [...workArr, ...impArr]
   const yMax = Math.max(Math.abs(Math.min(...all)), Math.abs(Math.max(...all))) * 1.15
   const yMaxSafe = Math.max(yMax, 0.1)
   const { X, Y } = drawGrid(ctx, g, yMaxSafe)
-  // Interpolate functions for trace
   const interp = (arr) => (x) => {
     const idx = Math.min(Math.floor((x / X_MAX) * N), N - 1)
     const t = ((x / X_MAX) * N) - idx
     return arr[idx] * (1 - t) + arr[idx + 1] * t
   }
-  trace(ctx, X, Y, interp(work1), C1, 2, [])
-  trace(ctx, X, Y, interp(work2), C2, 2, [])
-  trace(ctx, X, Y, interp(imp1), C1, 2, [6, 4])
-  trace(ctx, X, Y, interp(imp2), C2, 2, [6, 4])
+  trace(ctx, X, Y, interp(workArr), workColor, 2, [])
+  trace(ctx, X, Y, interp(impArr), impColor, 2, [6, 4])
   // Mirrored balance point for integrals: λ*_integ = L - λ*
   if (s.M1 + s.M2 > 0) {
     const xStar = X_MAX - (X_MAX * s.M2) / (s.M1 + s.M2)
@@ -292,6 +295,11 @@ function renderCumFrame(ctx, canvas, s, tau) {
     ctx.stroke()
     ctx.restore()
   }
+}
+
+// Legacy wrapper for backward compatibility
+function renderCumFrame(ctx, canvas, s, tau) {
+  renderPairFrame(ctx, canvas, s, tau, 1)
 }
 
 // Placeholder for area frame (not used - area is drawn in renderFrame for integ)
@@ -387,6 +395,7 @@ export default function WaveLab() {
   const canvasTotalRef = useRef(null)
   const canvasAreaRef = useRef(null)
   const canvasCumRef = useRef(null)
+  const canvasPair2Ref = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
   stateRef.current = { subtab, M1, M2, playing, speed, showSum }
@@ -422,7 +431,9 @@ export default function WaveLab() {
         const ac = canvasAreaRef.current
         if (ac) renderAreaFrame(ac.getContext('2d'), ac, s, tauRef.current)
         const cc = canvasCumRef.current
-        if (cc) renderCumFrame(cc.getContext('2d'), cc, s, tauRef.current)
+        if (cc) renderPairFrame(cc.getContext('2d'), cc, s, tauRef.current, 1)
+        const p2 = canvasPair2Ref.current
+        if (p2) renderPairFrame(p2.getContext('2d'), p2, s, tauRef.current, 2)
       }
       raf = requestAnimationFrame(draw)
     }
@@ -646,18 +657,29 @@ export default function WaveLab() {
             </div>
             <div className="graph-box">
               <div className="graph-title-row">
-                <h2 className="graph-title">Work And Impulse</h2>
+                <h2 className="graph-title">Work₁ + Impulse₂</h2>
               </div>
               <div className="graph-meta-row">
                 <div className="legend">
                   <span><i className="swatch" style={{ background: C1 }} />W₁ work</span>
-                  <span><i className="swatch" style={{ background: C2 }} />W₂ work</span>
-                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} />J₁ impulse</span>
                   <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C2} 0 5px, transparent 5px 9px)` }} />J₂ impulse</span>
                   <span><i className="swatch swatch-dashed" />balance point λ*</span>
                 </div>
               </div>
               <canvas ref={canvasCumRef} className="wave-canvas" />
+            </div>
+            <div className="graph-box">
+              <div className="graph-title-row">
+                <h2 className="graph-title">Work₂ + Impulse₁</h2>
+              </div>
+              <div className="graph-meta-row">
+                <div className="legend">
+                  <span><i className="swatch" style={{ background: C2 }} />W₂ work</span>
+                  <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} />J₁ impulse</span>
+                  <span><i className="swatch swatch-dashed" />balance point λ*</span>
+                </div>
+              </div>
+              <canvas ref={canvasPair2Ref} className="wave-canvas" />
             </div>
           </>
         ) : null}
