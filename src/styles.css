@@ -701,6 +701,12 @@ body {
   vertical-align: middle;
 }
 
+.legend .swatch-dashed {
+  height: 0;
+  border-top: 2px dashed #9a9a9a;
+  border-radius: 0;
+}
+
 .eq-groups {
   margin: 12px 0 4px;
   background: #fffdf4;

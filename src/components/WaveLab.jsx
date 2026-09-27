@@ -125,6 +125,20 @@ function renderFrame(ctx, canvas, s, tau) {
   }
   const { X, Y } = drawGrid(ctx, g, yMax)
   curves.forEach((c) => trace(ctx, X, Y, c.fn, c.color, c.width, c.dash))
+  if (s.subtab === 'gravity' && s.M1 + s.M2 > 0) {
+    // Inversion (balance) point: mass-weighted center x* = L·M₂/(M₁+M₂).
+    // M₁·x* = M₂·(L−x*); equal masses → middle, M₁=3M₂ → L/4.
+    const xStar = (X_MAX * s.M2) / (s.M1 + s.M2)
+    ctx.save()
+    ctx.strokeStyle = '#9a9a9a'
+    ctx.lineWidth = 1.5
+    ctx.setLineDash([6, 4])
+    ctx.beginPath()
+    ctx.moveTo(X(xStar), g.padT)
+    ctx.lineTo(X(xStar), g.padT + g.ph)
+    ctx.stroke()
+    ctx.restore()
+  }
 }
 
 // Derivatives tab, lower graph: the summed total on its own, drawn on the
@@ -438,6 +452,7 @@ export default function WaveLab() {
                 <span><i className="swatch" style={{ background: C1 }} />ψ₁(M₁,M₂) → +λₙ</span>
                 <span><i className="swatch" style={{ background: C2 }} />ψ₂(M₂,M₁) → −λₙ</span>
                 {showSum && <span><i className="swatch" style={{ background: CS }} />ψ<sub>s</sub> = ψ₁ + ψ₂</span>}
+                <span><i className="swatch swatch-dashed" />inversion point λ*</span>
               </div>
               <label className="check-row graph-check">
                 <input
@@ -550,6 +565,7 @@ export default function WaveLab() {
                   <div className="eq-box">L = 4π <em>(λₙ span)</em></div>
                   <div className="eq-box">A₁ = √(M₂/(M₁+M₂))</div>
                   <div className="eq-box">A₂ = √(M₁/(M₁+M₂))</div>
+                  <div className="eq-box wide">λ* = L·M₂/(M₁+M₂) <em>(inversion point — dashed grey line)</em></div>
                 </div>
               </div>
             </>
