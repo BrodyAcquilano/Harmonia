@@ -1668,9 +1668,10 @@ export default function WaveLab() {
             </div>
             <p className="graph-note">Restoring distance variance — the larger mass fixed, the eccentricity set by the balance-point split.</p>
             <canvas ref={canvasEllipseRef} className="wave-canvas-orbit" />
-            <div className="graph-caption"><Tex tex="T^2 \propto a^3 \text{ --- Kepler's third law}" /></div>
             <canvas ref={canvasEllipseGeomRef} className="wave-canvas-orbit" />
             <div className="graph-caption"><Tex tex="\text{static ellipse: } a \text{ semi-major axis, } b \text{ semi-minor axis}" /></div>
+            <div className="graph-caption"><Tex tex="T^2 \propto a^3" /></div>
+            <div className="graph-caption"><Tex tex="\text{Kepler's third law}" /></div>
             <div className="graph-footnote">xy plane</div>
           </div>
           <div className="graph-box">
