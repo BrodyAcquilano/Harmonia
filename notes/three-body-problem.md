@@ -16,6 +16,10 @@
 - [8. The resultant of the two circles](#8-the-resultant-of-the-two-circles)
 - [9. Conic sections](#9-conic-sections)
 - [10. Wave Lab setup](#10-wave-lab-setup)
+- [11. Resultants from phasors](#11-resultants-from-phasors)
+- [12. The resultant wobble](#12-the-resultant-wobble)
+- [13. Center, balance points, and why the motion is elliptical](#13-center-balance-points-and-why-the-motion-is-elliptical)
+- [14. Conclusion — the 3-4-5 problem, solved](#14-conclusion--the-3-4-5-problem-solved)
 
 
 ## 1. Why three bodies
@@ -213,3 +217,78 @@ From there the reconstruction follows the two-body procedure: analyze the orthog
 The three masses (3, 4, 5) are close together and the starting separations are comparable (spans 5, 4, 3), and the boundary conditions put the bodies on near-circular paths — so the wobbles *should* look alike: similar frequencies, similar amplitudes, near-uniform across the three pairs. The uniformity in the lab is the expectation, not a bug.
 
 Two of the three pairs drive only one branch direction: the $\phi$ pair's $x$ banners are flat, and the $\chi$ pair's $y$ banners are flat. That is the right triangle speaking. The $\phi$ side runs vertically ($M_1 \to M_3$ at $x = 1$), so the pair pulls purely in $y$; the $\chi$ side runs horizontally ($M_2 \to M_3$ at $y = -1$), so it pulls purely in $x$. Only the hypotenuse $\psi$ meets its bodies at a slant, with both $x$ and $y$ components — direction cosines $(-0.6, -0.8)$. The flat banners are the boundary conditions' own prediction, confirmed by the $(0,-1)$ and $(1,0)$ cosines in the right panel.
+
+---
+
+## 11. Resultants from phasors
+
+§6 ends with twelve wobbles — four per body (two pairs × two branches). §8 left the summation as a choice between vector sum, ratio average, or circle intersection. The Wave Lab executes the vector sum, and it does it through phasors.
+
+Each nonzero branch is reduced to one phasor — a magnitude and an angle:
+
+- **Magnitude** $r$: the branch wobble's peak amplitude over the $4\pi$ window.
+- **Angle** $\theta$: the argument of the pair-span integral at $\tau = 0$, plus $\pi$ when the branch's direction cosine is negative (a negative cosine flips that branch's phase, because the branch wobble is the radial wobble times that cosine).
+
+A zero direction cosine is a zero branch: no phasor ($\phi$'s $x$, $\chi$'s $y$).
+
+The resultants are then **complex addition** — not multiplication:
+
+$$Z = \sum_k r_k e^{i\theta_k}$$
+
+$$R = \sqrt{r_1^2 + r_2^2 + 2r_1r_2\cos(\theta_1 - \theta_2)}, \qquad \Theta = \operatorname{atan2}\!\left(\sum_k r_k\sin\theta_k,\, \sum_k r_k\cos\theta_k\right).$$
+
+Not products — phases don't add here, vectors do. Not $\sqrt{r_1^2 + r_2^2}$ either — that's only the $\pm 90°$ special case. Per body, per direction, the two pair-branches sum to one directional resultant: twelve branches into six directional resultants, three bodies each with an $x$ and a $y$:
+
+$$W_1 = \big(0.156\angle{-1.21},\; 0.474\angle{-1.43}\big), \qquad W_2 = \big(0.317\angle{1.18},\; 0.114\angle{-0.79}\big), \qquad W_3 = \big(0.322\angle{-1.79},\; 0.157\angle{-0.26}\big),$$
+
+in the Wave Lab's normalized units. That is §8's Idea 1 executed — the straight vector sum, no subtraction needed. The symmetry held.
+
+---
+
+## 12. The resultant wobble
+
+Each $W_n$ is a pair of directional phasors: $Z_{n,x} = R_{n,x}e^{i\Theta_{n,x}}$, $Z_{n,y} = R_{n,y}e^{i\Theta_{n,y}}$. Read as a time-dependent displacement, the path they imply is:
+
+$$x_n(\tau) = R_{n,x}\cos(\tau + \Theta_{n,x}), \qquad y_n(\tau) = R_{n,y}\cos(\tau + \Theta_{n,y}).$$
+
+Equal frequencies — but the $x/y$ phases differ, and that phase split is what makes the path elliptical rather than a straight line. The splits:
+
+- $M_1$: $\Delta\Theta = \Theta_x - \Theta_y \approx 0.22\ \mathrm{rad} \approx 13°$ — nearly in phase; a thin ellipse, almost one-dimensional.
+- $M_2$: $\Delta\Theta \approx 1.97\ \mathrm{rad} \approx 113°$ — an open ellipse.
+- $M_3$: $\Delta\Theta \approx -1.53\ \mathrm{rad} \approx -88°$ — nearly a proper ellipse, axes almost aligned.
+
+So $M_1$'s wobble nearly collapses to the single-axis case — the resultant almost acts along one line — while $M_2$ and $M_3$ genuinely need two dimensions. The phase split does visible work here; it is a result, not an assumption.
+
+One honesty note, carried from the build: these branch phasors are (peak, span-phase) proxies, not true Fourier amplitudes. The machine still computes the radial pair-line version and projects it into $x/y$ — the branches are not independently integrated per dimension. The compact phasor sum is the interim summation; the geometric time-series sum is the later check. This section records what was actually done.
+
+---
+
+## 13. Center, balance points, and why the motion is elliptical
+
+The geometric setup is §7's and it stands: three pair balance points ($B_{12}$, $B_{13}$, $B_{23}$) dividing the triangle sides in the mass ratios, three cevians concurring by Ceva at the center of mass $(0,0)$. Every body's motion is referred to that one center.
+
+Now the step that decides the shape — and it comes from comparing with the two-body tab. There, $\lambda^*$ split the motion into two circular parts about the balance point, and that was *right*: for two bodies the force is direct and radial — one line, one circle. Read it as the $a$ and $b$ of a would-be ellipse that coincide. The anisotropy is zero, so the ellipse collapses to a circle, and shifting the body's circle relative to the center is exactly the correct move when the force acts directly.
+
+But the three-body resultants are not direct forces. Each $W_n$ is a **resultant force** — a phasor sum of two pair-waves, synthesized by addition, exerted along no single pair line. Its $x$ and $y$ components have different magnitudes ($R_x \neq R_y$) and different phases. No one circle can carry that anisotropy. Splitting the resultant into $x$ and $y$ hands us $a \propto R_x$ and $b \propto R_y$ directly — an ellipse, with eccentricity $e = \sqrt{1 - (b/a)^2}$ read off the calculation, not chosen.
+
+That is why the ellipses here are not Kepler's error. Nothing was imposed and then fit — §9's warning was heeded. The phasor sum dictated unequal axes; the ellipse is what the resultant *is*, drawn as a path. Had $R_x$ equaled $R_y$ at equal phases, the method would have drawn circles. The method decides the shape; the assumption never enters.
+
+The Wave Lab's "Three Body Motion" is this section drawn: one center $C = (0,0)$, three ellipses centered there with $a \propto R_x$, $b \propto R_y$ (major axis scaled to each body's starting distance from the center), the three bodies riding their ellipses.
+
+---
+
+## 14. Conclusion — the 3-4-5 problem, solved
+
+The chain, end to end:
+
+1. **Boundary conditions** (§2): 3-4-5 masses at Burrau's coordinates, released from rest, center of mass at the origin.
+2. **Six pair-waves** (§5): $\psi$, $\phi$, $\chi$, each branched in $x$ and $y$ (§4) — twelve branches, one overall scale free.
+3. **Throughput** (§6): each pair through the quantum tech stack — twelve impulses, twelve wobbles.
+4. **Phasors** (§11): each nonzero branch reduced to (peak, span-phase); $\pi$ flip on negative direction cosine.
+5. **Resultants** (§11): complex addition per body per direction — $W_1$, $W_2$, $W_3$.
+6. **Center** (§7, §13): three balance points, Ceva's concurrence, one center of mass.
+7. **Paths** (§12–§13): the directional resultants project to ellipses — $a \propto R_x$, $b \propto R_y$ — centered at the common center.
+
+The summation problem of §3, the thing the textbooks say forces numerical integration, is resolved by phasor arithmetic: Idea 1 (vector sum) for the resultants, Idea 3 (Ceva) for the center, and the projection surface read off the resultant instead of assumed. No trajectory was numerically integrated. No chaos was invoked. Twelve branches went in; three elliptical wobbles came out — one per body, each referred to the single center the balance points prove.
+
+That is the 3-4-5 problem solved by this method: closed-form pair-waves, phasor-summed resultants, and the motion each body executes — not a step-by-step integration but the sum the machine was built to compute.
