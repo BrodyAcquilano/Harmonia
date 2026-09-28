@@ -13,6 +13,8 @@
 - [5. Through the quantum tech stack](#5-through-the-quantum-tech-stack)
 - [6. Finding the actual center](#6-finding-the-actual-center)
 - [7. The resultant of the two circles](#7-the-resultant-of-the-two-circles)
+- [8. Convergence and divergence](#8-convergence-and-divergence)
+- [9. Wave Lab setup](#9-wave-lab-setup)
 
 
 ## 1. Why three bodies
@@ -156,3 +158,19 @@ The pair-impulses of §5 drive them; the balance points of §2/§6 locate them; 
 3. **Circle intersection** — the geometric route: intersect each body's two circles (referred to the common center) and read the true circle off the intersection structure.
 
 The execution is left here, open for inspection: the machine produces pairs, the triangle produces balance points, Ceva produces the center — and the resultant is the last operation. Intersections, vectors, or ratios; the note will record whichever one the working chooses.
+
+---
+
+## 8. Convergence and divergence
+
+The expected result of the 3-4-5 problem is known: the lighter body is ejected. In our language the story reads as convergence and divergence. The three bodies spiral inward and converge — the pair-waves pile into the same region, the released energy has nowhere left to go, and the configuration becomes unstable. Energy must go somewhere, and by symmetry the third body is expelled: it diverges, its motion increasing without bound, and one mass is ejected.
+
+This may pose a problem for us, because it suggests acceleration is at play — and from what we know of the quantum tech stack, recovering something conserved after an acceleration may require another layer of integration, a sixth layer. But our boundary conditions exist at layer 5 on the incoming side, and we are unsure whether we are allowed to go up another level: the other side has no sixth layer, because all three bodies start from free fall. The question becomes: can we go up one more level of time to recover something stable and finite, or would that break the symmetry? It may be possible to extend up one more layer and simply account for the rotation. This idea makes sense because we have added another spatial dimension to the problem — three bodies need the full plane where two needed a line, and the extra layer may be where the rotation lives.
+
+---
+
+## 9. Wave Lab setup
+
+The Wave Lab's three-body tab is where the impulses get used. It jumps straight to three-body motion: no per-level graphs, no per-body descent — the quantum tech stack's definite integrals are taken as given, integrated, and plotted. The wobble-over-time graph sums each body's two pair-impulses (idea 1, the straight sum) and integrates over time, the same $X_n(t) = \int F_n$ construction as the two-body Motion tab. The three pair graphs are static snapshots at $\tau = 0$, one per pair, so the six waves can be inspected the way the gravity tab inspects two. Masses are fixed at 3, 4, 5 — the 3-4-5 problem — and the right panel shows the solved pair values instead of sliders.
+
+From there the reconstruction follows the two-body procedure: analyze the orthographic projections on each plane, take the apparent projection onto the plane we don't know, and draw the six circles — each body's two pair-circles about the pair balance points, re-referred to the single center of §6. Once the problem can be visualized — six circles, three balance points, one center — the summation of §7 has something to work on.

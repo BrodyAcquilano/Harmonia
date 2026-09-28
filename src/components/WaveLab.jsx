@@ -566,12 +566,136 @@ function samplePeriodic(arr, T, NT, t) {
   return arr[idx] * (1 - f) + arr[idx + 1] * f
 }
 
+// ---- Three-body tab: the 3-4-5 problem, fixed masses ----
+// Three pairs, six waves: ψ for (M₁,M₂), φ for (M₁,M₃), χ for (M₂,M₃).
+// Each pair reuses the two-body display form on its own span (the pair's
+// separation: 5, 4, 3). All graphs here are static snapshots — no animation.
+const TB_C3 = '#1e9e6a' // M₃ — green
+const TB_PAIRS = [
+  { tag: 'ψ', a: 0, b: 1, Ma: 3, Mb: 4, span: 5, sub: 'M₁ = 3, M₂ = 4', legA: '\\mathrm{Re}(\\psi_1)', legB: '\\mathrm{Re}(\\psi_2)' },
+  { tag: 'φ', a: 0, b: 2, Ma: 3, Mb: 5, span: 4, sub: 'M₁ = 3, M₃ = 5', legA: '\\mathrm{Re}(\\phi_1)', legB: '\\mathrm{Re}(\\phi_3)' },
+  { tag: 'χ', a: 1, b: 2, Ma: 4, Mb: 5, span: 3, sub: 'M₂ = 4, M₃ = 5', legA: '\\mathrm{Re}(\\chi_2)', legB: '\\mathrm{Re}(\\chi_3)' },
+]
+// Solved pair parameters: the 3-4-5 boundary conditions fix everything,
+// so this is computed once at module load.
+const TB_SOLVED = TB_PAIRS.map((p) => ({ ...p, P: gravityParams(p.Ma, p.Mb) }))
+
+// One pair-wave at (x, tau). 'a' is the body-a wave (psi1 form); 'b' is the
+// body-b wave with the pair-span-aware envelope e^{-β(span−x)}.
+function tbWave(pair, which, x, tau) {
+  const { P, Ma, Mb, span } = pair
+  if (which === 'a') return psi1(x, tau, P, Mb)
+  const ph = -P.k2 * x - P.w2 * Ma * tau
+  const env = Math.exp(-P.beta * (span - x))
+  return { re: P.A2 * env * Math.cos(ph), im: P.A2 * env * Math.sin(ph) }
+}
+
+// Net impulse per body: Idea 1, the straight sum of its two pair-impulses.
+//   F₁ = F₁⁽¹²⁾ + F₁⁽¹³⁾,  F₂ = F₂⁽¹²⁾ + F₂⁽²³⁾,  F₃ = F₃⁽¹³⁾ + F₃⁽²³⁾
+//   Fₙ(t) = Σ ∫₀^{span} [Im − Re] dλ,   Xₙ(t) = ∫₀ᵗ Fₙ(t′) dt′.
+// Static snapshot over [0, 4π]; cached — the masses never change.
+let tbWobbleCache = { key: null }
+function threeBodyWobble() {
+  if (tbWobbleCache.key === 'tb345') return tbWobbleCache
+  const T = 4 * Math.PI, NT = 720, NS = 120
+  const dt = T / NT
+  // bodyPairs[n] = [[pairIdx, 'a'|'b'], ...] — which pair-waves belong to body n.
+  const bodyPairs = [[[0, 'a'], [1, 'a']], [[0, 'b'], [2, 'a']], [[1, 'b'], [2, 'b']]]
+  const F = [[], [], []], X = [[], [], []], c = [0, 0, 0]
+  for (let i = 0; i <= NT; i++) {
+    const t = (i / NT) * T
+    for (let n = 0; n < 3; n++) {
+      let f = 0
+      for (const [pi, ab] of bodyPairs[n]) {
+        const pr = TB_SOLVED[pi]
+        const dx = pr.span / NS
+        let s = 0
+        for (let j = 0; j <= NS; j++) {
+          const x = (j / NS) * pr.span
+          const p = tbWave(pr, ab, x, t)
+          const w = j === 0 || j === NS ? 0.5 : 1
+          s += w * (p.im - p.re)
+        }
+        f += s * dx
+      }
+      F[n].push(f)
+      if (i > 0) c[n] += ((F[n][i - 1] + f) / 2) * dt
+      X[n].push(c[n])
+    }
+  }
+  // Center each wobble on zero over the window.
+  const Xc = X.map((arr) => {
+    const m = arr.reduce((a, b) => a + b, 0) / arr.length
+    return arr.map((v) => v - m)
+  })
+  tbWobbleCache = { key: 'tb345', T, NT, F, X: Xc }
+  return tbWobbleCache
+}
+
+// Pair-snapshot grid: x-axis is the pair span [0, span] with numeric ticks.
+function drawSpanGrid(ctx, g, yMax, span) {
+  const { padL, padT, pw, ph } = g
+  const X = (x) => padL + (x / span) * pw
+  const Y = (y) => padT + ph / 2 - (y / yMax) * (ph / 2)
+  ctx.lineWidth = 1
+  ctx.strokeStyle = '#e5dcc0'
+  ctx.fillStyle = '#715f43'
+  ctx.font = '10px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'center'
+  for (let i = 0; i <= 4; i++) {
+    const gx = (i / 4) * span
+    ctx.beginPath()
+    ctx.moveTo(X(gx), padT)
+    ctx.lineTo(X(gx), padT + ph)
+    ctx.stroke()
+    ctx.fillText(fmt(gx, 1), X(gx), padT + ph + 16)
+  }
+  ctx.textAlign = 'right'
+  for (const frac of [-1, -0.5, 0.5, 1]) {
+    const gy = frac * yMax
+    ctx.beginPath()
+    ctx.moveTo(padL, Y(gy))
+    ctx.lineTo(padL + pw, Y(gy))
+    ctx.stroke()
+  }
+  ctx.strokeStyle = '#a99760'
+  ctx.beginPath()
+  ctx.moveTo(padL, Y(0))
+  ctx.lineTo(X(span), Y(0))
+  ctx.stroke()
+  ctx.textAlign = 'right'
+  ctx.fillText('λ (pair span)', padL + pw, padT + ph + 30)
+  return { X, Y }
+}
+
+// Three-body pair snapshot — STATIC, τ = 0. Re(waveA) blue, Re(waveB) orange.
+function renderTBPairFrame(ctx, canvas, pairIdx) {
+  const g = frameSetup(ctx, canvas)
+  const pair = TB_SOLVED[pairIdx]
+  const yMax = Math.max((pair.P.A1 + pair.P.A2) * 1.15, 0.5)
+  const { X, Y } = drawSpanGrid(ctx, g, yMax, pair.span)
+  trace(ctx, X, Y, (x) => tbWave(pair, 'a', x, 0).re, C1, 1.75, [], pair.span)
+  trace(ctx, X, Y, (x) => tbWave(pair, 'b', x, 0).re, C2, 1.75, [], pair.span)
+}
+
+// Three-body wobble — STATIC snapshot over [0, 4π]. X₁ blue, X₂ orange, X₃ green.
+function renderTBWobbleFrame(ctx, canvas) {
+  const g = frameSetup(ctx, canvas)
+  const { T, NT, X } = threeBodyWobble()
+  const all = [...X[0], ...X[1], ...X[2]]
+  const yMax = Math.max(Math.abs(Math.min(...all)) * 1.15, Math.abs(Math.max(...all)) * 1.15, 0.1)
+  const { X: GX, Y } = drawTimeGrid(ctx, g, yMax, T)
+  const cols = [C1, C2, TB_C3]
+  X.forEach((arr, n) => {
+    trace(ctx, GX, Y, (t) => samplePeriodic(arr, T, NT, t), cols[n], 2.5, [], T)
+  })
+}
+
 // Wobble vs time — STATIC snapshot of one full cycle (both directions).
 // X₁(t) blue, X₂(t) orange. No animation: this is the trajectory, not a frame.
 // The window is body 1's period; body 2 is shown over the same window via its
 // own periodic extension, exactly as the live dots draw it.
-function renderWobbleTimeFrame(ctx, canvas, s) {
-  const g = frameSetup(ctx, canvas)
+function renderWobbleTimeFrame(ctx, canvas, s) {  const g = frameSetup(ctx, canvas)
   const P = gravityParams(s.M1, s.M2)
   const { tauMax, T2, NT, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
   const all = [...x1, ...x2]
@@ -1107,6 +1231,10 @@ export default function WaveLab() {
   const canvasOrbitTrueRef = useRef(null)
   const canvasPushPullRef = useRef(null)
   const canvasPushPullTimeRef = useRef(null)
+  const canvasTBWobbleRef = useRef(null)
+  const canvasTBPair0Ref = useRef(null)
+  const canvasTBPair1Ref = useRef(null)
+  const canvasTBPair2Ref = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
   stateRef.current = { subtab, M1, M2, playing, speed, showSum, waveDisplay, ppDisplay, orbitZoom }
@@ -1174,6 +1302,12 @@ export default function WaveLab() {
         const ppt = canvasPushPullTimeRef.current
         if (ppt) renderPushPullTimeFrame(ppt.getContext('2d'), ppt, s, s.ppDisplay)
       }
+      if (s.subtab === 'threebody') {
+        const tw = canvasTBWobbleRef.current
+        if (tw) renderTBWobbleFrame(tw.getContext('2d'), tw)
+        const pcs = [canvasTBPair0Ref.current, canvasTBPair1Ref.current, canvasTBPair2Ref.current]
+        pcs.forEach((c, i) => { if (c) renderTBPairFrame(c.getContext('2d'), c, i) })
+      }
       raf = requestAnimationFrame(draw)
     }
     raf = requestAnimationFrame(draw)
@@ -1223,10 +1357,44 @@ export default function WaveLab() {
           >
             Motion
           </button>
+          <button
+            className="sim-item"
+            role="tab"
+            aria-selected={subtab === 'threebody'}
+            onClick={() => setSubtab('threebody')}
+          >
+            Three-body
+          </button>
         </div>
       </nav>
       <div className="lab-side">
       <div className="lab-controls">
+        {subtab === 'threebody' ? (
+        <>
+        <div className="control-group">
+          <h3>M₁ = 3 · M₂ = 4 · M₃ = 5</h3>
+          <p className="graph-note">Masses are fixed for the three-body problem — the 3-4-5 problem.</p>
+        </div>
+
+        <div className="control-group">
+          <h3>Solved pair values</h3>
+          {TB_SOLVED.map((p) => (
+            <div key={p.tag} className="tb-pair-block">
+              <p className="tb-pair-label">{p.tag} · {p.sub}</p>
+              <div className="derived-grid">
+                <div className="derived-box"><span>k₂</span><b>{fmt(p.P.k2)}</b></div>
+                <div className="derived-box"><span>ω₂</span><b>{fmt(p.P.w2)}</b></div>
+                <div className="derived-box"><span>A₁</span><b>{fmt(p.P.A1)}</b></div>
+                <div className="derived-box"><span>A₂</span><b>{fmt(p.P.A2)}</b></div>
+                <div className="derived-box"><span>β</span><b>{fmt(p.P.beta, 3)}</b></div>
+                <div className="derived-box"><span>span</span><b>{fmt(p.span, 1)}</b></div>
+              </div>
+            </div>
+          ))}
+        </div>
+        </>
+        ) : (
+        <>
 
         <div className="control-group">
           <h3>M₁</h3>
@@ -1259,6 +1427,8 @@ export default function WaveLab() {
             <div className="derived-box"><span>|λ₂|</span><b>{lam ? `${sci(cAbs(lam.l2))} m` : '—'}</b></div>
           </div>
         </div>
+        </>
+        )}
       </div>
       </div>
 
@@ -1660,6 +1830,38 @@ export default function WaveLab() {
           </div>
           )}
           </>
+        ) : subtab === 'threebody' ? (
+          <>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Three-Body Wobble Over Time</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="X_1(t)" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="X_2(t)" /></span>
+                <span><i className="swatch" style={{ background: TB_C3 }} /><Tex tex="X_3(t)" /></span>
+                <span><Tex tex="\text{static snapshot — each body's pair impulses summed, then integrated}" /></span>
+              </div>
+            </div>
+            <canvas ref={canvasTBWobbleRef} className="wave-canvas" />
+          </div>
+          {[canvasTBPair0Ref, canvasTBPair1Ref, canvasTBPair2Ref].map((ref, i) => (
+          <div className="graph-box" key={TB_PAIRS[i].tag}>
+            <div className="graph-title-row">
+              <h2 className="graph-title">Pair {TB_PAIRS[i].tag} — {TB_PAIRS[i].sub}</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex={TB_PAIRS[i].legA} /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex={TB_PAIRS[i].legB} /></span>
+                <span><Tex tex="\text{static snapshot at } \tau = 0" /></span>
+              </div>
+            </div>
+            <canvas ref={ref} className="wave-canvas" />
+          </div>
+          ))}
+          </>
         ) : null}
 
         <div className="eq-panel">
@@ -1865,6 +2067,27 @@ export default function WaveLab() {
                   <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{The period squared goes as the semi-major axis cubed: larger orbits take longer, steeply.}" /></div>
                   <div className="eq-box wide"><span className="eq-label">True: separation split at λ*</span><Tex tex="\mathbf{r}_1(\phi) = -\lambda^*(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +(L-\lambda^*)(\cos\phi, \sin\phi)" /></div>
                   <div className="eq-box wide"><span className="eq-label">Force direction</span><Tex tex="\text{along the line joining the masses (grey)}" /></div>
+                </div>
+              </div>
+            </>
+          ) : subtab === 'threebody' ? (
+            <>
+              <div className="eq-group">
+                <h4>The six waves <span className="eq-note">— plotted · static snapshots · display units</span></h4>
+                <div className="eq-list">
+                  <div className="eq-box wide"><span className="eq-label">Pair ψ — M₁ = 3, M₂ = 4, span 5</span><span className="eq-line"><Tex tex="\psi_1 = A_1 e^{-\beta\lambda} [\cos(\lambda - 4\tau) + i\sin(\lambda - 4\tau)]" /></span><span className="eq-line"><Tex tex="\psi_2 = A_2 e^{-\beta(5-\lambda)} [\cos(-k_2\lambda - \omega_2 \cdot 3\tau) + i\sin(-k_2\lambda - \omega_2 \cdot 3\tau)]" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Pair φ — M₁ = 3, M₃ = 5, span 4</span><span className="eq-line"><Tex tex="\phi_1 = A_1 e^{-\beta\lambda} [\cos(\lambda - 5\tau) + i\sin(\lambda - 5\tau)]" /></span><span className="eq-line"><Tex tex="\phi_3 = A_3 e^{-\beta(4-\lambda)} [\cos(-k_3\lambda - \omega_3 \cdot 3\tau) + i\sin(-k_3\lambda - \omega_3 \cdot 3\tau)]" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Pair χ — M₂ = 4, M₃ = 5, span 3</span><span className="eq-line"><Tex tex="\chi_2 = A_2 e^{-\beta\lambda} [\cos(\lambda - 5\tau) + i\sin(\lambda - 5\tau)]" /></span><span className="eq-line"><Tex tex="\chi_3 = A_3 e^{-\beta(3-\lambda)} [\cos(-k_3\lambda - \omega_3 \cdot 4\tau) + i\sin(-k_3\lambda - \omega_3 \cdot 4\tau)]" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Solved pair values</span><span className="eq-line"><Tex tex="\text{each pair: } k_1 = \omega_1 = 1, \quad k_2 = \omega_2 = \sqrt{M_b/M_a}, \quad \beta = \dfrac{|M_a - M_b|}{M_a + M_b}" /></span><span className="eq-line"><Tex tex="\text{see the right panel for the solved numbers}" /></span></div>
+                </div>
+              </div>
+              <div className="eq-group">
+                <h4>Impulses and wobble <span className="eq-note">— plotted · static snapshot</span></h4>
+                <div className="eq-list">
+                  <div className="eq-box wide"><span className="eq-label">Pair impulses at time t</span><span className="eq-line"><Tex tex="F_1^{(12)}(t) = \int_0^5 [\mathrm{Im}(\psi_1) - \mathrm{Re}(\psi_1)] \, d\lambda, \quad F_2^{(12)}(t) = \int_0^5 [\mathrm{Im}(\psi_2) - \mathrm{Re}(\psi_2)] \, d\lambda" /></span><span className="eq-line"><Tex tex="F_1^{(13)}(t) = \int_0^4 [\mathrm{Im}(\phi_1) - \mathrm{Re}(\phi_1)] \, d\lambda, \quad F_3^{(13)}(t) = \int_0^4 [\mathrm{Im}(\phi_3) - \mathrm{Re}(\phi_3)] \, d\lambda" /></span><span className="eq-line"><Tex tex="F_2^{(23)}(t) = \int_0^3 [\mathrm{Im}(\chi_2) - \mathrm{Re}(\chi_2)] \, d\lambda, \quad F_3^{(23)}(t) = \int_0^3 [\mathrm{Im}(\chi_3) - \mathrm{Re}(\chi_3)] \, d\lambda" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Net impulse per body (Idea 1 — straight sum)</span><span className="eq-line"><Tex tex="F_1(t) = F_1^{(12)}(t) + F_1^{(13)}(t)" /></span><span className="eq-line"><Tex tex="F_2(t) = F_2^{(12)}(t) + F_2^{(23)}(t)" /></span><span className="eq-line"><Tex tex="F_3(t) = F_3^{(13)}(t) + F_3^{(23)}(t)" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Wobble per body</span><span className="eq-line"><Tex tex="X_1(t) = \int_0^t F_1(t') \, dt', \quad X_2(t) = \int_0^t F_2(t') \, dt', \quad X_3(t) = \int_0^t F_3(t') \, dt'" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{The quantum tech stack's definite integrals, integrated over time per body. The net impulse is the straight vector sum of each body's two pair-impulses (idea 1); subtracting the unmatched pair's vector is still open (note \S7).}" /></div>
                 </div>
               </div>
             </>

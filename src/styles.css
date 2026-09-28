@@ -284,6 +284,17 @@ body {
   margin-top: 18px;
 }
 
+.tb-pair-block + .tb-pair-block {
+  margin-top: 12px;
+}
+
+.tb-pair-label {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
 .derived-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
