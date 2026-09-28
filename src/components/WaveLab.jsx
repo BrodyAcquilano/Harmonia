@@ -671,22 +671,32 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
   ctx.fillStyle = '#fffdf4'
   ctx.fillRect(0, 0, S, S)
 
-  const r = S * 0.095                 // phasor radius
-  const tl = { x: S * 0.155, y: S * 0.155 }
-  const br = { x: S * 0.845, y: S * 0.845 }
-  const bh = S * 0.062                // banner half-height
-  const gap = 8                       // phasor-to-banner clearance
-  const far = S * 0.70, near = S * 0.30
+  // Amplitude-matched phasors: each circle's radius is proportional to its
+  // body-wave's wobble amplitude, and every banner shares one global
+  // pixels-per-unit scale K, so a banner's peak can never exceed its
+  // phasor's radius and the three squares stay comparable.
+  const R_MAX = S * 0.085
+  const tl = { x: S * 0.16, y: S * 0.16 }
+  const br = { x: S * 0.84, y: S * 0.84 }
+  const far = S * 0.72, near = S * 0.28
   const sub = ['₁', '₂', '₃']
   const colA = pair.colA, colB = pair.colB
 
   // Branch wobbles: pair-line wobble projected by the direction cosines.
-  // Shared vertical scale across the pair's four banners.
   const bx = (s) => slots[s].X.map((v) => pair.ux * v)
   const by = (s) => slots[s].X.map((v) => pair.uy * v)
-  let yMax = 0.1
-  for (const arr of [bx(0), by(0), bx(1), by(1)])
-    for (const v of arr) yMax = Math.max(yMax, Math.abs(v))
+  const bArr = [bx(0), by(0), bx(1), by(1)]
+  const peak = (arr) => arr.reduce((m, v) => Math.max(m, Math.abs(v)), 0)
+  // Global scale: the largest branch wobble across all three squares sets
+  // K, so circle sizes mean the same thing in every square.
+  let ampMax = 0.1
+  pairs.forEach((q, i) => {
+    const m = Math.max(Math.abs(TB_SOLVED[i].ux), Math.abs(TB_SOLVED[i].uy))
+    q.slots.forEach((s) => { for (const v of s.X) ampMax = Math.max(ampMax, Math.abs(v) * m) })
+  })
+  const K = R_MAX / ampMax
+  const rA = Math.max(K * Math.max(peak(bArr[0]), peak(bArr[1])), 4)
+  const rB = Math.max(K * Math.max(peak(bArr[2]), peak(bArr[3])), 4)
 
   const N = 120
   const samp = (arr) => {
@@ -695,16 +705,19 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
     return out
   }
 
-  const drawPhasor = (cx, cy, slotIdx, color, label, labelPos) => {
+  // Phasor snapshot. Returns the tip — each banner starts at t=0 on the
+  // tip's projection, so the wave is visibly connected to the phasor.
+  const drawPhasor = (cx, cy, r, slotIdx, color, label, labelPos) => {
     ctx.lineWidth = 2
     ctx.strokeStyle = color
     ctx.beginPath()
     ctx.arc(cx, cy, r, 0, 2 * Math.PI)
     ctx.stroke()
     const th = slots[slotIdx].theta
+    const tx = cx + r * Math.cos(th), ty = cy - r * Math.sin(th)
     ctx.beginPath()
     ctx.moveTo(cx, cy)
-    ctx.lineTo(cx + r * Math.cos(th), cy - r * Math.sin(th))
+    ctx.lineTo(tx, ty)
     ctx.stroke()
     ctx.fillStyle = color
     ctx.beginPath()
@@ -720,24 +733,39 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
       ctx.textBaseline = 'alphabetic'
       ctx.fillText(label, cx, cy - r - 8)
     }
+    return { tx, ty }
   }
 
-  // Horizontal banner: time runs x0 → x1 (either direction), wobble
-  // displaces vertically around yc.
-  const drawBannerH = (x0, x1, yc, arr, color, axisLabel) => {
+  // Dashed projection: phasor tip -> banner t=0. The wave starts where the
+  // tip projects, perpendicular to the wave's oscillation axis.
+  const project = (x0, y0, x1, y1) => {
+    ctx.save()
+    ctx.setLineDash([4, 3])
+    ctx.strokeStyle = '#a89a72'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(x0, y0)
+    ctx.lineTo(x1, y1)
+    ctx.stroke()
+    ctx.restore()
+  }
+
+  // Horizontal banner: t=0 at (x0, y0) — the tip's projection — time runs
+  // toward x1, wobble displaces vertically on the shared scale K.
+  const drawBannerH = (x0, x1, y0, arr, color, axisLabel, r) => {
     const vals = samp(arr)
     ctx.lineWidth = 1
     ctx.strokeStyle = '#e5dcc0'
     ctx.beginPath()
-    ctx.moveTo(Math.min(x0, x1), yc)
-    ctx.lineTo(Math.max(x0, x1), yc)
+    ctx.moveTo(Math.min(x0, x1), y0)
+    ctx.lineTo(Math.max(x0, x1), y0)
     ctx.stroke()
     ctx.lineWidth = 1.5
     ctx.strokeStyle = color
     ctx.beginPath()
     vals.forEach((v, k) => {
       const x = x0 + (k / N) * (x1 - x0)
-      const y = yc - (v / yMax) * (bh - 2)
+      const y = y0 - K * v
       if (k === 0) ctx.moveTo(x, y)
       else ctx.lineTo(x, y)
     })
@@ -746,24 +774,24 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
     ctx.font = '11px "IBM Plex Mono", monospace'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'bottom'
-    ctx.fillText(axisLabel, x1, yc - bh - 4)
+    ctx.fillText(axisLabel, x1, y0 - r - 6)
   }
 
-  // Vertical banner: time runs y0 → y1 (either direction), wobble displaces
-  // horizontally around xc.
-  const drawBannerV = (xc, y0, y1, arr, color, axisLabel) => {
+  // Vertical banner: t=0 at (x0, y0) — the tip's projection — time runs
+  // toward y1, wobble displaces horizontally on the shared scale K.
+  const drawBannerV = (x0, y0, y1, arr, color, axisLabel, r) => {
     const vals = samp(arr)
     ctx.lineWidth = 1
     ctx.strokeStyle = '#e5dcc0'
     ctx.beginPath()
-    ctx.moveTo(xc, Math.min(y0, y1))
-    ctx.lineTo(xc, Math.max(y0, y1))
+    ctx.moveTo(x0, Math.min(y0, y1))
+    ctx.lineTo(x0, Math.max(y0, y1))
     ctx.stroke()
     ctx.lineWidth = 1.5
     ctx.strokeStyle = color
     ctx.beginPath()
     vals.forEach((v, k) => {
-      const x = xc + (v / yMax) * (bh - 2)
+      const x = x0 + K * v
       const y = y0 + (k / N) * (y1 - y0)
       if (k === 0) ctx.moveTo(x, y)
       else ctx.lineTo(x, y)
@@ -773,17 +801,23 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
     ctx.font = '11px "IBM Plex Mono", monospace'
     ctx.textAlign = 'left'
     ctx.textBaseline = 'middle'
-    ctx.fillText(axisLabel, xc + bh + 4, y1)
+    ctx.fillText(axisLabel, x0 + r + 6, y1)
   }
 
-  // Top-left phasor: banners run right (x) and down (y) — the top/left L.
-  drawPhasor(tl.x, tl.y, 0, colA, 'M' + sub[pair.a], 'top')
-  drawBannerH(tl.x + r + gap, far, tl.y, bx(0), colA, 'x')
-  drawBannerV(tl.x, tl.y + r + gap, far, by(0), colA, 'y')
-  // Bottom-right phasor: banners run left (x) and up (y) — the bottom/right L.
-  drawPhasor(br.x, br.y, 1, colB, 'M' + sub[pair.b], 'right')
-  drawBannerH(br.x - r - gap, near, br.y, bx(1), colB, 'x')
-  drawBannerV(br.x, br.y - r - gap, near, by(1), colB, 'y')
+  // Top-left phasor: x-banner runs right from the circle's edge at the
+  // tip's height; y-banner runs down from the circle's edge at the tip's
+  // x. Dashed lines tie each banner's t=0 back to the tip.
+  const tA = drawPhasor(tl.x, tl.y, rA, 0, colA, 'M' + sub[pair.a], 'top')
+  project(tA.tx, tA.ty, tl.x + rA, tA.ty)
+  drawBannerH(tl.x + rA, far, tA.ty, bArr[0], colA, 'x', rA)
+  project(tA.tx, tA.ty, tA.tx, tl.y + rA)
+  drawBannerV(tA.tx, tl.y + rA, far, bArr[1], colA, 'y', rA)
+  // Bottom-right phasor, mirrored: x-banner runs left, y-banner runs up.
+  const tB = drawPhasor(br.x, br.y, rB, 1, colB, 'M' + sub[pair.b], 'right')
+  project(tB.tx, tB.ty, br.x - rB, tB.ty)
+  drawBannerH(br.x - rB, near, tB.ty, bArr[2], colB, 'x', rB)
+  project(tB.tx, tB.ty, tB.tx, br.y - rB)
+  drawBannerV(tB.tx, br.y - rB, near, bArr[3], colB, 'y', rB)
 
   // Wave names in the open center.
   ctx.font = '15px "IBM Plex Mono", monospace'
@@ -1945,7 +1979,7 @@ export default function WaveLab() {
               <div className="legend">
                 <span><i className="swatch" style={{ background: TB_PAIRS[i].colA }} /><Tex tex={`X_{${TB_PAIRS[i].a + 1},x},\\,X_{${TB_PAIRS[i].a + 1},y}`} /></span>
                 <span><i className="swatch" style={{ background: TB_PAIRS[i].colB }} /><Tex tex={`X_{${TB_PAIRS[i].b + 1},x},\\,X_{${TB_PAIRS[i].b + 1},y}`} /></span>
-                <span><Tex tex="\text{static snapshot --- one phasor per body-wave}" /></span>
+                <span style={{ textAlign: 'center' }}><Tex tex="\text{static snapshot --- one phasor per body-wave}" /><br /><Tex tex="\text{two branches: } x \text{ and } y" /></span>
               </div>
             </div>
             <div className="tb-square-wrap">
