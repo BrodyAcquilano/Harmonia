@@ -11,8 +11,8 @@
 - [3. Facts and takeaways](#3-facts-and-takeaways)
 - [4. Layer by layer](#4-layer-by-layer)
 - [5. The abstracted stack](#5-the-abstracted-stack)
-- [6. The spatial dimension addition principle](#6-the-spatial-dimension-addition-principle)
-- [7. The span principle](#7-the-span-principle)
+- [6. The span principle](#6-the-span-principle)
+- [7. The spatial dimension addition principle](#7-the-spatial-dimension-addition-principle)
 - [8. Conclusion: what the rotation means](#8-conclusion-what-the-rotation-means)
 
 
@@ -157,7 +157,7 @@ $W_n$, $J_n = \int \psi_n\,d\lambda_n$: integrate over the restored space; the w
 
 ### h. The second time integral
 
-$X_n(t) = \int_0^t F_n(t')\,dt'$. Integrate over the second time dimension and motion appears: displacement, the wobble, the trajectory. The general form: **the second time dimension is where motion lives.** One time dimension rotates the phase; the other accumulates the result into movement. A new spatial direction adds no new time dimensions — it adds a branch through the same two, rotated into the new direction (see §6).
+$X_n(t) = \int_0^t F_n(t')\,dt'$. Integrate over the second time dimension and motion appears: displacement, the wobble, the trajectory. The general form: **the second time dimension is where motion lives.** One time dimension rotates the phase; the other accumulates the result into movement. A new spatial direction adds no new time dimensions — it adds a branch through the same two, rotated into the new direction (see §7).
 
 ### i. Closure (top, returned)
 
@@ -185,7 +185,17 @@ Any conservation law with known boundary conditions, a dispersion relation, and 
 
 ---
 
-## 6. The spatial dimension addition principle
+## 6. The span principle
+
+Boundary conditions confine motion to the space its forces span. Two bodies with no initial velocity, whose forces act along one dimension, cannot leave that line: with no velocity and no energy in any other direction, there is nowhere else for the motion to go — the resultant motion from that force is confined to one dimension. But the stack's resultant motion comes out perpendicular to the direction of the force, so the two-body object moves in a 2D plane: the line of force crossed with the perpendicular wobble.
+
+Three bodies with no initial velocity, whose forces span a plane, are confined the same way: force and resultant motion stay in the plane. But the resultant motion is perpendicular to the force — and perpendicular to a plane points into the third dimension. So the three-body object moves through 3D space, assuming the three bodies carry some equal velocity relative to some other frame of reference: the common drift gives the perpendicular motion its third axis.
+
+The straight-line force matters here too: because each pair stays connected by a straight line, the resultants still come in six circles — the branches resolve the geometry, and the resultants collapse it back down.
+
+---
+
+## 7. The spatial dimension addition principle
 
 The stack as described is five layers high because the problem it was built for has one spatial dimension — and five is where it stays. Adding a spatial dimension does not add new dimensions at all: it adds *branches* through the same machinery. The dimensions are the same five fundamental dimensions of the tech stack; what multiplies is the integration path. This is the spatial dimension addition principle, stated correctly.
 
@@ -195,13 +205,7 @@ One more rule, borrowed from linear algebra, fixes the branch count: $xx$ and $y
 
 Concretely, the branches just add an extra spatial phase term to the existing equation — $\lambda_j$, $k_{a,j}$ alongside $\lambda$, $k_a$ — and additional branches to integrate or differentiate over at the last node of the five-layer stack: where the stack integrates or differentiates, it now does so once per branch. Still one phase angle per wave; the rest of the equation does not change. That is the whole of the addition principle: same equation, extra spatial term, and the final node run once per branch.
 
----
-
-## 7. The span principle
-
-Boundary conditions confine motion to the space its forces span. Two bodies with no initial velocity, whose forces act along one dimension, cannot leave that line: with no velocity and no energy in any other direction, there is nowhere else for the motion to go — the resultant motion from that force is confined to one dimension. But the stack's resultant motion comes out perpendicular to the direction of the force, so the two-body object moves in a 2D plane: the line of force crossed with the perpendicular wobble.
-
-Three bodies with no initial velocity, whose forces span a plane, are confined the same way: force and resultant motion stay in the plane. But the resultant motion is perpendicular to the force — and perpendicular to a plane points into the third dimension. So the three-body object moves through 3D space, assuming the three bodies carry some equal velocity relative to some other frame of reference: the common drift gives the perpendicular motion its third axis.
+Finding the center is part of the addition process. Technically we need the resultant of each branch — the line between each pair of bodies, which defines their relative motion as perpendicular to their direction of travel, given that relative to one another they have a constant velocity, even if it is zero. In our case the center comes straight from ratios, which makes it even easier — and the reason that works is that those ratios define the span of the vector space. And because each resultant pair is still connected by a straight-line force, we still expect six circles for the resultants: twelve branch-circles collapsing through resultant vectors, per the three-body program.
 
 ---
 
@@ -215,7 +219,7 @@ The open question is what the fifth dimension — and the second time dimension 
 
 **Both.** The mathematics is the trace left by the passage — symbolic because we only see the trace, real because the trace is so clean.
 
-One more consideration, and it weighs against the first reading. A new spatial dimension does not extend the stack — it branches the integration path through the same five dimensions, and the stack rotates the branches relative to one another while keeping their relative orientation (see §6). A mere artifact of calculus would not know how to do that: bookkeeping does not rotate. The five lower dimensions behave like part of some higher-dimensional geometry — they are the room the branches rotate in, not the residue the integrals leave behind.
+One more consideration, and it weighs against the first reading. A new spatial dimension does not extend the stack — it branches the integration path through the same five dimensions, and the stack rotates the branches relative to one another while keeping their relative orientation (see §7). A mere artifact of calculus would not know how to do that: bookkeeping does not rotate. The five lower dimensions behave like part of some higher-dimensional geometry — they are the room the branches rotate in, not the residue the integrals leave behind.
 
 The applications follow whichever reading is right. If the rotation is real, the stack is a machine for turning forces: feed a signal in along one direction, run it down to the ground floor and back up, and collect it pointing somewhere it could never have pointed on its own — gravity in, perpendicular force out. That is already what the simulation does to produce the wobble from the radial pull. Whether it can be pushed further — signals sent *into* another dimension and recovered, rather than merely turned within the ones we have — is the experiment this stack is waiting for.
 

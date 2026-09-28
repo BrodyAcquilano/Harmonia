@@ -14,7 +14,8 @@
 - [6. Throughput](#6-throughput)
 - [7. Finding the actual center](#7-finding-the-actual-center)
 - [8. The resultant of the two circles](#8-the-resultant-of-the-two-circles)
-- [9. Wave Lab setup](#9-wave-lab-setup)
+- [9. Conic sections](#9-conic-sections)
+- [10. Wave Lab setup](#10-wave-lab-setup)
 
 
 ## 1. Why three bodies
@@ -111,7 +112,7 @@ $$\chi_2 = \sum_j A_{\chi2}\, e^{-\beta_{\chi}\lambda_j}\left[\cos\left(\lambda_
 
 $$\chi_3 = \sum_j A_{\chi3}\, e^{-\beta_{\chi}(3-\lambda_j)}\left[\cos\left(-k_{\chi3,j}\lambda_j - \omega_{\chi3,j}M_2\tau\right) + i\sin\left(-k_{\chi3,j}\lambda_j - \omega_{\chi3,j}M_2\tau\right)\right]$$
 
-The 3-4-5 boundary conditions fix every constant — nothing is free:
+The 3-4-5 boundary conditions fix every constant up to one overall scale — nothing is free except the ruler:
 
 | Pair | Bodies | $L_{ab}$ | $A_a$ | $A_b$ | $\beta_{ab}$ | $k_b = \omega_b$ |
 |---|---|---|---|---|---|---|
@@ -119,7 +120,7 @@ The 3-4-5 boundary conditions fix every constant — nothing is free:
 | $\phi$ | $(3,5)$ | $4$ | $\sqrt{5/8}$ | $\sqrt{3/8}$ | $1/4$ | $\sqrt{5/3}$ |
 | $\chi$ | $(4,5)$ | $3$ | $\sqrt{5/9}$ | $\sqrt{4/9}$ | $1/9$ | $\sqrt{5/4}$ |
 
-($k_{a,j} = \omega_{a,j} = 1$ on each branch for the first-listed body of each pair.) Six equations, twelve branches — the input side of the machine.
+($k_{a,j} = \omega_{a,j} = 1$ on each branch for the first-listed body of each pair is the *normalization* — the chosen reference scale, not a result the boundary conditions derive. What the 3-4-5 data fix are the *relative* values: $k_{b,j}/k_{a,j} = \omega_{b,j}/\omega_{a,j} = \sqrt{M_b/M_a}$, plus the amplitudes, $\beta_{ab}$, and the spans. An absolute wavelength/frequency scale would need another datum.) Six equations, twelve branches — the input side of the machine.
 
 Recomputed under the branched stack of §4: nothing here changes. The branches — the wobble integral split in two directions on the way up, the initial conditions split in two on the way down — run through the same five-dimensional machinery; they do not touch the pair's own constants. The table above stands as written.
 
@@ -165,6 +166,8 @@ It is identically 1 — for *any* three masses, not just 3-4-5. The three balanc
 
 So the favourite idea is proved, not conjectured: draw the pairs, mark the three balance points, draw the three lines — one point. The six circles' three pair-centers rectify to a single center, and it is the system's center of mass. The visual is exactly as advertised: three pairs → three lines → one point, and the orbits get re-referred to that center to produce circles.
 
+A note on why this survives the branches of §4–§6: it is kind of special. Despite the extra branches, each body still acts on the other *radially* — the pair force is still a straight line between the two bodies — so there are still exactly three balance points, one per pair, and Ceva still concurs them at one center. The branches change how the motion is integrated, not where the pairs balance. This section does not change.
+
 ---
 
 ## 8. The resultant of the two circles
@@ -183,10 +186,24 @@ The pair-impulses of §6 drive them; the balance points of §2/§7 locate them; 
 
 The execution is left here, open for inspection: the machine produces pairs, the triangle produces balance points, Ceva produces the center — and the resultant is the last operation. Intersections, vectors, or ratios; the note will record whichever one the working chooses.
 
+The 6-circle rule still holds: because each resultant pair is still connected by a straight-line force, we still expect six circles for the resultants — one per pair-wave. Technically it is twelve circles, one per branch, but they collapse through resultant vectors: twelve branch-circles into six pair-circles (branches combined per pair), and then into three circles in the end, one per body. The branches do not multiply the geometry; they resolve it, and the resultants collapse it back down.
+
 ---
 
-## 9. Wave Lab setup
+## 9. Conic sections
 
-The Wave Lab's three-body tab is where the impulses get used. It jumps straight to three-body motion: no per-level graphs, no per-body descent — the quantum tech stack's definite integrals are taken as given, integrated, and plotted. The three pair graphs are static snapshots at $\tau = 0$, one per pair, each showing its two waves in the bodies' colors plus the pair's standing wave as a black line — so the six waves can be inspected the way the gravity tab inspects two. There is deliberately no combined wobble graph: the wobble gets three graphs, one per body — each body's pair-impulses summed (idea 1, the straight sum) and integrated over time — because the three wobbles point in different directions, so they share no common axis and one plot would mislead. Masses are fixed at 3, 4, 5 — the 3-4-5 problem — and the right panel shows the solved pair values instead of sliders.
+For the 3-4-5 problem we should expect the possibility that one body flies off — and a body that escapes does not orbit in a circle. It leaves on an orbit with eccentricity: an ellipse stretched toward escape, or a hyperbola. That matters for how we project the wobbles later, when we wrap an axis into an orbit: we usually choose a circle, but the projection surface may actually be something else. A wobble wrapped into a circle is a bound orbit; wrapped into an ellipse with eccentricity approaching one, it is an escape. The conic section is therefore not a detail to fix at the end — it is a parameter of the projection, and the 3-4-5 problem may demand we read our wobbles off something other than a circle.
+
+---
+
+## 10. Wave Lab setup
+
+Twelve wobbles, no combined graph — and no pair graphs either: the tab goes straight to the wobbles. Each wobble belongs to a plane (its branch direction), so the tab shows three squares, one per pair, each square holding that pair's four wobbles.
+
+The square is a phasor diagram with the wobble graphs drawn off it, and it exists to show how the phasor entangles $x$ and $y$ through rotation. Two phasors per square, one per body, placed in diagonal corners (top-left and bottom-right). Off each phasor run two thin banner graphs — the body's $x$ wobble and $y$ wobble — forming an L: the top-left phasor's banners run right ($x$) and down ($y$) along the top and left edges; the bottom-right phasor's banners run left ($x$) and up ($y$) along the bottom and right edges. The two Ls never touch. The center of the square stays empty for the phasor names, and the other two corners stay empty so it is always clear which banners belong to which phasor. Each square keeps a title bar up top — "Wobbles for pair $M_1$ $M_2$", and so on — and stays square by layout design, comparable in size to the other graphs.
+
+Everything is a static snapshot — nothing rotates. The phasor is drawn as a circle with the phasor frozen at its snapshot angle: one phasor tells both $x$ and $y$, because the phase angle is the same on both branches and the branches differ only in the direction they integrate over. The wobble banners are static graphs drawn off that snapshot. Twelve wobbles retrieved through three phasor squares — the whole of §6, visible at once.
+
+The Wave Lab's three-body tab is where the impulses get used: no per-level graphs, no per-body descent — the quantum tech stack's definite integrals are taken as given, integrated, and plotted as the squares above. Masses are fixed at 3, 4, 5 — the 3-4-5 problem — and the right panel shows the solved pair values, now including the branch direction cosines, instead of sliders.
 
 From there the reconstruction follows the two-body procedure: analyze the orthographic projections on each plane, take the apparent projection onto the plane we don't know, and draw the six circles — each body's two pair-circles about the pair balance points, re-referred to the single center of §7. Once the problem can be visualized — six circles, three balance points, one center — the summation of §8 has something to work on.

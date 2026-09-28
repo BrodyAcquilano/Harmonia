@@ -486,6 +486,12 @@ body {
   background: transparent;
 }
 
+/* Constrain the three-body phasor squares: square footprint, centered */
+.tb-square-wrap {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
 /* Wide canvas for the full-width orbit diagrams */
 .wave-canvas-orbit {
   width: 100%;
