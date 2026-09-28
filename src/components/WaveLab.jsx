@@ -853,13 +853,13 @@ function renderEllipseFrame(ctx, canvas, s, tau) {
   const c = a * e
   const b = a * Math.sqrt(1 - e * e)
   const { padT, pw, ph } = g
-  // Occupied focus at the canvas center; fit the apoapsis distance a(1+e).
-  const fx = g.padL + pw / 2, fy = padT + ph / 2
-  const sc = (((Math.min(pw, ph) / 2) * 0.78) / (a * (1 + e)))
+  // Ellipse center at the canvas center; fit the semi-major axis a.
+  // The foci sit one focal length on either side of it.
+  const ex = g.padL + pw / 2, ey = padT + ph / 2
+  const sc = (((Math.min(pw, ph) / 2) * 0.78) / a)
   const phi = 2 * Math.PI * (((tau % tauMax) + tauMax) % tauMax) / tauMax
-  // Ellipse center sits one focal length behind the occupied focus
-  // (periapsis points along +x).
-  const ex = fx - c * sc, ey = fy
+  // Occupied focus one focal length ahead of center (periapsis along +x).
+  const fx = ex + c * sc, fy = ey
   const m1IsMax = s.M1 >= s.M2
   const fixColor = m1IsMax ? C1 : C2, fixLabel = m1IsMax ? 'm₁' : 'm₂'
   const movColor = m1IsMax ? C2 : C1, movLabel = m1IsMax ? 'm₂' : 'm₁'
