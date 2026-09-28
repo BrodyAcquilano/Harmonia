@@ -16,21 +16,46 @@ The stack has five levels. That number is not a choice: Kepler's third law says 
 
 ---
 
-## 2. The stack, as a table
+## 2. The stack, in full
 
-Each row is a level. The left column is the descent (differentiation, ↓); the right column is the ascent (integration, ↑); the middle column is the indicator — the sign at that level that this is the quantum tech stack and not an ordinary calculation. Read the left column top to bottom, then the right column bottom to top.
+Two tables: the way down, then the way back up — each with four columns: the layer and what it means, the equation, the indicator read off that equation, and the operation that moves us one level. Between them, the fundamental equation. After them, the whole trip in shorthand.
 
-| ↓ Descent — differentiate | Indicator | Ascent — integrate ↑ |
-|---|---|---|
-| **d1.** State the conservation law: $d\psi_s = 0$. Inertia-energy is conserved; the total differential vanishes. | A conservation law is the signature that a stack exists — something is being carried through every transformation unchanged. | **u5.** Close the loop: the definite integral $F_n(\tau) = J_n(L,\tau) - W_n(L,\tau)$. The same conservation law, evaluated between bounds — work and impulse, balanced. The force has been rotated perpendicular. |
-| **d2.** Expand into the wave solutions: $\psi_1(M_1,M_2)$, $\psi_2(M_2,M_1)$ — the complex exponentials the conserved quantity demands. | The solution carries a complex $i$, born of relative directions and relative velocities. $i$ means rotation: a hidden phasor is present. | **u4.** Second time integral: $X_n(t) = \int_0^t F_n(t')\,dt'$. Displacement accumulates in the second time dimension — the wobble, the trajectory. |
-| **d3.** Differentiate in the mass coordinates: $\frac{\partial\psi_n}{\partial M_m} = \pm i(k,\omega)\psi_n$. Absolute phase is stripped; only the local response remains. | Every $+i$ is matched by a $-i$. The symmetry is visible, and the relative phases are untouched. | **u3.** First time integral: $F_n(t) = J_n(L,t) - W_n(L,t)$. The whole spatial line collapsed to one number per instant — the net released impulse. The 90° rotation happens here: radial in, perpendicular out. |
-| **d4.** Contract space and time via $v = f\lambda$. Write $t$ in terms of $\lambda$ — a limit over the linear relative motion, fixed by the boundary conditions $m_1$, $m_2$. | Space and time can always be contracted this way: one written in terms of the other. That contractibility *is* the phasor, deconstructed. A limit taken quietly counts as a derivative. | **u2.** Evaluate at the boundary: $W_n(L,t)$, $J_n(L,t)$. The accumulated line, read at its far end, one value per instant. |
-| **d5.** Ground out: $L_n = PE_n - KE_n = 0$. No space, no time — only $m_1$ and $m_2$. | The equation equals zero and the symmetry is restored. The bottom is found: nothing left to remove. | **u1.** Integrate over space: $W_n = \int_0^L \mathrm{Re}(\psi_n)\,d\lambda_n$, $J_n = \int_0^L \mathrm{Im}(\psi_n)\,d\lambda_n$. Work and impulse accumulate along the line. |
+### The descent — signal in ↓
 
-**Bottom of the stack:** $L_n = PE_n - KE_n = 0$ — the Lagrangian ground floor, depending only on $m_1$ and $m_2$.
+| ↓ Layer | Equation | Indicator | Operation |
+|---|---|---|---|
+| **d1.** The conservation law: inertia-energy is conserved; the total differential vanishes. | $d\psi_s = 0$ | A conservation law is the signature that a stack exists — something is carried through every transformation unchanged. | State the invariant. |
+| **d2.** The wave solutions: the complex exponentials the conserved quantity demands. | $\psi_1 = A_1 e^{i(k_1M_1-\omega_1M_2)}$, $\psi_2 = A_2 e^{i(k_2M_2-\omega_2M_1)}$ | The $i$, born of relative directions and relative velocities, means rotation: a hidden phasor is present. | Expand the invariant into its waves. |
+| **d3.** The local response: differentiate in the mass coordinates; absolute phase is stripped. | $\frac{\partial\psi_n}{\partial M_m} = \pm i(k,\omega)\psi_n$ | Every $+i$ matched by a $-i$: the symmetry made local; relative phases untouched. | Differentiate (chain through the phase). |
+| **d4.** The contraction: write $t$ in terms of $\lambda$ — a limit over the linear relative motion, fixed by the boundary conditions $m_1$, $m_2$. | $v = f\lambda$ | Space and time contractible one into the other *is* the phasor, deconstructed; a quiet limit does a derivative's work. | Take the limit (spend the dispersion relation). |
+| **d5.** The ground floor: no space, no time — only $m_1$ and $m_2$. | $L_n = PE_n - KE_n = 0$ | Equals zero, symmetry restored, depends only on boundary conditions: the bottom is found. | Set equal to zero. |
 
-The arrows say the method: ↓ differentiate down, ↑ integrate up. The middle column says why it worked.
+*signal deconstructed:*
+
+$$
+L_n = PE_n - KE_n = 0
+$$
+
+### The ascent — signal recovered ↑
+
+| Layer ↑ | Equation | Indicator | Operation |
+|---|---|---|---|
+| **u1.** Accumulate over space: the wave becomes its own accumulation. | $W_n = \int_0^L \mathrm{Re}(\psi_n)\,d\lambda_n$, $J_n = \int_0^L \mathrm{Im}(\psi_n)\,d\lambda_n$ | Oscillation turns into accounts: work (what the field could do) and impulse (what it has done). | Integrate over the contracted coordinate. |
+| **u2.** Read the boundary: the whole line collapsed to its endpoints. | $W_n(L,t)$, $J_n(L,t)$ | Start conditions known (full strength at the source), end conditions known (decayed by $e^{-\beta L}$): the values converge. | Evaluate at the boundary. |
+| **u3.** First time integral: one number per instant — the net released impulse. | $F_n(t) = J_n(L,t) - W_n(L,t)$ | The quarter-turns begin to compose: radial in, perpendicular out. The rotation happens here. | Integrate over the hidden time. |
+| **u4.** Second time integral: displacement appears. | $X_n(t) = \int_0^t F_n(t')\,dt'$ | The second time dimension is where motion lives: the wobble, the trajectory. | Integrate over the second time. |
+| **u5.** Closure: the invariant reappears, evaluated between bounds. | $F_n(\tau) = J_n(L,\tau) - W_n(L,\tau)$ | The conservation law returns as a definite integral — the trip is over when it reappears. | Evaluate between bounds. |
+
+### Shorthand
+
+| signal in ↓ | signal recovered ↑ |
+|---|---|
+| $d\psi_s = 0$ | $F_n(\tau) = J_n(L,\tau) - W_n(L,\tau)$ |
+| $\psi_1$, $\psi_2$ | $X_n(t) = \int_0^t F_n(t')\,dt'$ |
+| $\frac{\partial\psi_n}{\partial M_m}$ | $F_n(t) = J_n(L,t) - W_n(L,t)$ |
+| $v = f\lambda$ | $W_n(L,t)$, $J_n(L,t)$ |
+| $L_n = PE_n - KE_n$ | $W_n$, $J_n = \int_0^L \psi_n\,d\lambda_n$ |
+| *signal deconstructed:* $L_n = PE_n - KE_n = 0$ | |
 
 ---
 
@@ -46,6 +71,8 @@ The arrows say the method: ↓ differentiate down, ↑ integrate up. The middle 
 Given all four, the outcome was nearly forced: integrate back up the other side, and the symmetry guarantees a phasor there too — hence the complex exponential.
 
 **Coherence.** The information stays coherent the whole way down and back up because the relative phases never change. Every operation on the trip — differentiation, contraction, integration — multiplies all components by the same phase factor. Absolute phase shifts; relative phase is invariant. The signal that returns is the signal that left, rotated but intact.
+
+**The chain rule is the deconstruction.** "Signal deconstructed" is not just the formula $L_n = 0$ — it is the *result of the chain rule*: differentiating down through every dependency, the same number of times over the same variables, and integrating back up in reverse order. That exact reversal is what stays coherent — $D^{-1}D$ is the identity on everything the chain touched — and it is what lets us recover the signal. The chain is the mechanism; coherence is its guarantee; recovery is its consequence. Anything the chain didn't touch (the amplitude) waits at the boundary conditions and is fixed at closure.
 
 **Which level rotates, and why.** Every integration is a quarter-turn: integrating $e^{i\phi}$ multiplies by $1/i = -i$, a 90° rotation in the complex plane. Five integrations make $5 \times 90° = 450° \equiv 90°$ — an odd number of quarter-turns nets a single quarter-turn. That is why the force that went down radial comes back perpendicular: the arithmetic of the stack leaves one unmatched rotation. The rotation is concentrated on the ascent, at the time-integration levels (u3, u4), where the phasor — the hidden time dimension — does the turning.
 
