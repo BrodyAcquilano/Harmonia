@@ -2128,30 +2128,28 @@ export default function WaveLab() {
             <div className="graph-title-row">
               <h2 className="graph-title"><Tex tex="\text{Resultant wobbles}" /></h2>
             </div>
-            <div className="tb-square-wrap">
-              <div className="tb-math-square">
-                <div className="tb-math-line"><Tex tex={`\\small \\text{phasor sum: } \\mathbf{R} = \\sum_k r_k e^{i\\theta_k}`} /></div>
-                <div className="tb-math-line"><Tex tex={`\\small R = \\sqrt{r_1^2 + r_2^2 + 2r_1r_2\\cos(\\theta_1-\\theta_2)},\\;\\; \\Theta = \\operatorname{atan2}\\!\\left(\\sum r_k\\sin\\theta_k,\\, \\sum r_k\\cos\\theta_k\\right)`} /></div>
-                <div className="tb-math-body" style={{ borderLeftColor: C1 }}>
-                  <span className="tb-math-tag" style={{ color: C1 }}>M₁</span>
-                  <div className="tb-math-line"><Tex tex={`\\small Z_{1x} = 0.156\\angle{-1.21} \\quad (\\psi)`} /></div>
-                  <div className="tb-math-line"><Tex tex={`\\small Z_{1y} = 0.207\\angle{-1.21} + 0.275\\angle{-1.59} = 0.474\\angle{-1.43} \\quad (\\psi+\\phi)`} /></div>
-                </div>
-                <div className="tb-math-body" style={{ borderLeftColor: C2 }}>
-                  <span className="tb-math-tag" style={{ color: C2 }}>M₂</span>
-                  <div className="tb-math-line"><Tex tex={`\\small Z_{2x} = 0.085\\angle{-0.79} + 0.359\\angle{1.40} = 0.317\\angle{1.18} \\quad (\\psi+\\chi)`} /></div>
-                  <div className="tb-math-line"><Tex tex={`\\small Z_{2y} = 0.114\\angle{-0.79} \\quad (\\psi)`} /></div>
-                </div>
-                <div className="tb-math-body" style={{ borderLeftColor: TB_C3 }}>
-                  <span className="tb-math-tag" style={{ color: TB_C3 }}>M₃</span>
-                  <div className="tb-math-line"><Tex tex={`\\small Z_{3x} = 0.322\\angle{-1.79} \\quad (\\chi)`} /></div>
-                  <div className="tb-math-line"><Tex tex={`\\small Z_{3y} = 0.157\\angle{-0.26} \\quad (\\phi)`} /></div>
-                </div>
-                <div className="tb-math-line" style={{ color: C1 }}><Tex tex={`\\small W_1 = (0.156\\angle{-1.21},\\, 0.474\\angle{-1.43})`} /></div>
-                <div className="tb-math-line" style={{ color: C2 }}><Tex tex={`\\small W_2 = (0.317\\angle{1.18},\\, 0.114\\angle{-0.79})`} /></div>
-                <div className="tb-math-line" style={{ color: TB_C3 }}><Tex tex={`\\small W_3 = (0.322\\angle{-1.79},\\, 0.157\\angle{-0.26})`} /></div>
-                <div className="tb-math-line"><Tex tex={`\\small C = (0,\\,0) \\quad \\text{(center of mass)}`} /></div>
+            <div className="tb-math">
+              <div className="tb-math-line"><Tex tex={`\\text{phasor sum: } \\mathbf{R} = \\sum_k r_k e^{i\\theta_k}`} /></div>
+              <div className="tb-math-line"><Tex tex={`R = \\sqrt{r_1^2 + r_2^2 + 2r_1r_2\\cos(\\theta_1-\\theta_2)},\\;\\; \\Theta = \\operatorname{atan2}\\!\\left(\\sum r_k\\sin\\theta_k,\\, \\sum r_k\\cos\\theta_k\\right)`} /></div>
+              <div className="tb-math-body" style={{ borderLeftColor: C1 }}>
+                <span className="tb-math-tag" style={{ color: C1 }}>M₁</span>
+                <div className="tb-math-line"><Tex tex={`Z_{1x} = 0.156\\angle{-1.21} \\quad (\\psi)`} /></div>
+                <div className="tb-math-line"><Tex tex={`Z_{1y} = 0.207\\angle{-1.21} + 0.275\\angle{-1.59} = 0.474\\angle{-1.43} \\quad (\\psi+\\phi)`} /></div>
               </div>
+              <div className="tb-math-body" style={{ borderLeftColor: C2 }}>
+                <span className="tb-math-tag" style={{ color: C2 }}>M₂</span>
+                <div className="tb-math-line"><Tex tex={`Z_{2x} = 0.085\\angle{-0.79} + 0.359\\angle{1.40} = 0.317\\angle{1.18} \\quad (\\psi+\\chi)`} /></div>
+                <div className="tb-math-line"><Tex tex={`Z_{2y} = 0.114\\angle{-0.79} \\quad (\\psi)`} /></div>
+              </div>
+              <div className="tb-math-body" style={{ borderLeftColor: TB_C3 }}>
+                <span className="tb-math-tag" style={{ color: TB_C3 }}>M₃</span>
+                <div className="tb-math-line"><Tex tex={`Z_{3x} = 0.322\\angle{-1.79} \\quad (\\chi)`} /></div>
+                <div className="tb-math-line"><Tex tex={`Z_{3y} = 0.157\\angle{-0.26} \\quad (\\phi)`} /></div>
+              </div>
+              <div className="tb-math-line" style={{ color: C1 }}><Tex tex={`W_1 = (0.156\\angle{-1.21},\\, 0.474\\angle{-1.43})`} /></div>
+              <div className="tb-math-line" style={{ color: C2 }}><Tex tex={`W_2 = (0.317\\angle{1.18},\\, 0.114\\angle{-0.79})`} /></div>
+              <div className="tb-math-line" style={{ color: TB_C3 }}><Tex tex={`W_3 = (0.322\\angle{-1.79},\\, 0.157\\angle{-0.26})`} /></div>
+              <div className="tb-math-line"><Tex tex={`C = (0,\\,0) \\quad \\text{(center of mass)}`} /></div>
             </div>
           </div>
           </>

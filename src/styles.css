@@ -492,30 +492,23 @@ body {
   margin: 0 auto;
 }
 
-/* Math square: typeset phasor derivations in the same square footprint */
-.tb-math-square {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background: #fffdf4;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 10px 14px;
+/* Resultant math: full-width left-aligned equations, no square constraint */
+.tb-math {
+  padding: 4px 18px 12px;
   text-align: left;
 }
 .tb-math-line {
-  margin: 5px 0;
-  overflow-x: auto;
-  white-space: nowrap;
+  margin: 7px 0;
 }
 .tb-math-body {
   border-left: 3px solid;
-  padding: 2px 0 2px 8px;
-  margin: 7px 0;
+  padding: 3px 0 3px 10px;
+  margin: 9px 0;
 }
 .tb-math-tag {
   font-weight: 700;
-  font-size: 13px;
-  margin-right: 6px;
+  font-size: 14px;
+  margin-right: 8px;
 }
 
 /* Wide canvas for the full-width orbit diagrams */
