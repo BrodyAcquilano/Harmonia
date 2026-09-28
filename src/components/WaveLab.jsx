@@ -229,55 +229,6 @@ function renderFrame(ctx, canvas, s, tau) {
     }
     trace(ctx, X, Y, c.fn, c.color, c.width, c.dash)
   })
-  // For gravity main graph: shade area between ψ₁ and ψ₂,
-  // blue left of balance point, orange right
-  if (s.subtab === 'gravity' && (s.waveDisplay === 'waves' || s.waveDisplay === 'all') && curves.length >= 2 && s.M1 + s.M2 > 0) {
-    const xStar = (X_MAX * s.M2) / (s.M1 + s.M2)
-    const fn1 = curves[0].fn
-    const fn2 = curves[1].fn
-    ctx.save()
-    ctx.globalAlpha = 0.15
-    const n = 200
-    // Left side (blue)
-    ctx.fillStyle = C1
-    ctx.beginPath()
-    let first = true
-    for (let i = 0; i <= n; i++) {
-      const x = (i / n) * xStar
-      if (first) {
-        ctx.moveTo(X(x), Y(fn1(x)))
-        first = false
-      } else {
-        ctx.lineTo(X(x), Y(fn1(x)))
-      }
-    }
-    for (let i = n; i >= 0; i--) {
-      const x = (i / n) * xStar
-      ctx.lineTo(X(x), Y(fn2(x)))
-    }
-    ctx.closePath()
-    ctx.fill()
-    // Right side (orange)
-    ctx.fillStyle = C2
-    ctx.beginPath()
-    first = true
-    for (let i = 0; i <= n; i++) {
-      const x = xStar + (i / n) * (X_MAX - xStar)
-      if (first) {
-        ctx.moveTo(X(x), Y(fn1(x)))
-        first = false
-      } else {
-        ctx.lineTo(X(x), Y(fn1(x)))
-      }
-    }
-    for (let i = n; i >= 0; i--) {
-      const x = xStar + (i / n) * (X_MAX - xStar)
-      ctx.lineTo(X(x), Y(fn2(x)))
-    }
-    ctx.closePath()
-    ctx.fill()
-    ctx.restore()
-  }
   if ((s.subtab === 'gravity' || s.subtab === 'integ') && s.M1 + s.M2 > 0) {
     // Balance point: mass-weighted center x* = L·M₂/(M₁+M₂).
     // M₁·x* = M₂·(L−x*); equal masses → middle, M₂=3M₁ → 3L/4.
