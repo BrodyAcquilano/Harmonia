@@ -20,6 +20,7 @@ const NOTE_ORDER = [
   '../../notes/hidden-phasor.md',
   '../../notes/keplers-laws.md',
   '../../notes/quantum-tech-stack.md',
+  '../../notes/three-body-problem.md',
 ]
 
 function titleFromPath(path) {
