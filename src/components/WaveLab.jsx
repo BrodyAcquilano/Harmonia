@@ -297,6 +297,134 @@ function renderFrame(ctx, canvas, s, tau) {
   }
 }
 
+// Gravity tab, second graph: the reflected wave (exploratory).
+// Mirror image of ψ₁ in the λ axis about the domain center:
+//   ψ₁^refl(λₙ) = ψ₁(L − λₙ).
+// Drawn so the reflection can be inspected before deciding what it means.
+function renderReflectFrame(ctx, canvas, s, tau) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  const yMax = Math.max((P.A1 + P.A2) * 1.15, 0.5)
+  const { X, Y } = drawGrid(ctx, g, yMax)
+  trace(ctx, X, Y, (x) => psi1(x, tau, P, s.M2).re, C1, 1.75, [])
+  trace(ctx, X, Y, (x) => psi1(X_MAX - x, tau, P, s.M2).re, C1, 1.75, [6, 4])
+}
+
+// Gravity tab, third graph: The Envelope.
+// ψ₁ and ψ₂ with the region between them filled by the local push-pull
+// sign: green where D(λₙ) = P₁−P₂ > 0 (push), red where D(λₙ) < 0 (pull).
+// Pₙ(λₙ) = Wₙ(λₙ) − Jₙ(λₙ) are the cumulative work/impulse integrals —
+// the same pair state as the Motion tab's spatial push-pull density.
+// Also draws the envelope bounds ±A₁e^{−βλₙ}, ±A₂e^{−β(L−λₙ)} (the decay
+// with the oscillation stripped off) and the balance-point line λ*.
+function renderEnvelopeFrame(ctx, canvas, s, tau) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  const N = 200
+  // Cumulative work/impulse (trapezoidal), same construction as the
+  // Motion tab's spatial push-pull frame.
+  const work1 = [], work2 = [], imp1 = [], imp2 = []
+  let w1 = 0, w2 = 0, j1 = 0, j2 = 0
+  let prevX = 0
+  let prevW1 = psi1(0, tau, P, s.M2).re
+  let prevW2 = psi2(0, tau, P, s.M1).re
+  let prevJ1 = psi1(0, tau, P, s.M2).im
+  let prevJ2 = psi2(0, tau, P, s.M1).im
+  for (let i = 0; i <= N; i++) {
+    const x = (i / N) * X_MAX
+    const p1 = psi1(x, tau, P, s.M2)
+    const p2 = psi2(x, tau, P, s.M1)
+    if (i > 0) {
+      const dx = x - prevX
+      w1 += ((prevW1 + p1.re) / 2) * dx
+      w2 += ((prevW2 + p2.re) / 2) * dx
+      j1 += ((prevJ1 + p1.im) / 2) * dx
+      j2 += ((prevJ2 + p2.im) / 2) * dx
+    }
+    work1.push(w1); work2.push(w2); imp1.push(j1); imp2.push(j2)
+    prevX = x
+    prevW1 = p1.re; prevW2 = p2.re; prevJ1 = p1.im; prevJ2 = p2.im
+  }
+  const dArr = work1.map((w, i) => (w - imp1[i]) - (work2[i] - imp2[i]))
+  const fn1 = (x) => psi1(x, tau, P, s.M2).re
+  const fn2 = (x) => psi2(x, tau, P, s.M1).re
+  const yMax = Math.max((P.A1 + P.A2) * 1.15, 0.5)
+  const { X, Y } = drawGrid(ctx, g, yMax)
+  const interpD = (x) => {
+    const idx = Math.min(Math.floor((x / X_MAX) * N), N - 1)
+    const t = ((x / X_MAX) * N) - idx
+    return dArr[idx] * (1 - t) + dArr[idx + 1] * t
+  }
+  // Fill between the waves: green = push (D > 0), red = pull (D < 0).
+  // Alternates at each zero crossing of D.
+  const CGREEN = '#16a34a'
+  const CRED = '#dc2626'
+  ctx.save()
+  ctx.globalAlpha = 0.18
+  const n = 400
+  let segStart = 0
+  let segPush = null
+  const fillSeg = (x0, x1, push) => {
+    if (x1 <= x0) return
+    ctx.fillStyle = push ? CGREEN : CRED
+    ctx.beginPath()
+    const m = 50
+    let first = true
+    for (let i = 0; i <= m; i++) {
+      const x = x0 + (i / m) * (x1 - x0)
+      if (first) { ctx.moveTo(X(x), Y(fn1(x))); first = false }
+      else ctx.lineTo(X(x), Y(fn1(x)))
+    }
+    for (let i = m; i >= 0; i--) {
+      const x = x0 + (i / m) * (x1 - x0)
+      ctx.lineTo(X(x), Y(fn2(x)))
+    }
+    ctx.closePath()
+    ctx.fill()
+  }
+  for (let i = 0; i <= n; i++) {
+    const x = (i / n) * X_MAX
+    const push = interpD(x) >= 0
+    if (segPush === null) segPush = push
+    if (push !== segPush) {
+      const xp = ((i - 1) / n) * X_MAX
+      const dPrev = interpD(xp), dNow = interpD(x)
+      const denom = Math.abs(dPrev) + Math.abs(dNow)
+      const xc = denom > 0 ? xp + (Math.abs(dPrev) / denom) * (x - xp) : x
+      fillSeg(segStart, xc, segPush)
+      segStart = xc
+      segPush = push
+    }
+  }
+  fillSeg(segStart, X_MAX, segPush)
+  ctx.restore()
+  // Envelope bounds: the decay with the oscillation stripped off.
+  ctx.save()
+  ctx.globalAlpha = 0.45
+  const e1 = (x) => P.A1 * Math.exp(-P.beta * x)
+  const e2 = (x) => P.A2 * Math.exp(-P.beta * (X_MAX - x))
+  trace(ctx, X, Y, e1, C1, 1, [6, 4])
+  trace(ctx, X, Y, (x) => -e1(x), C1, 1, [6, 4])
+  trace(ctx, X, Y, e2, C2, 1, [6, 4])
+  trace(ctx, X, Y, (x) => -e2(x), C2, 1, [6, 4])
+  ctx.restore()
+  trace(ctx, X, Y, fn1, C1, 1.75, [])
+  trace(ctx, X, Y, fn2, C2, 1.75, [])
+  // Balance-point line.
+  if (s.M1 + s.M2 > 0) {
+    const xStar = (X_MAX * s.M2) / (s.M1 + s.M2)
+    ctx.save()
+    ctx.strokeStyle = '#9a9a9a'
+    ctx.lineWidth = 1.5
+    ctx.setLineDash([6, 4])
+    ctx.beginPath()
+    ctx.moveTo(X(xStar), g.padT)
+    ctx.lineTo(X(xStar), g.padT + g.ph)
+    ctx.stroke()
+    ctx.restore()
+  }
+}
+
 // Derivatives tab, lower graph: the summed total on its own, drawn on the
 // same vertical scale as the component graph so the cancellation reads directly.
 function renderTotalFrame(ctx, canvas, s, tau) {
@@ -881,6 +1009,8 @@ export default function WaveLab() {
   }
 
   const canvasRef = useRef(null)
+  const canvasReflectRef = useRef(null)
+  const canvasEnvelopeRef = useRef(null)
   const canvasHalfRef = useRef(null)
   const canvasTotalRef = useRef(null)
   const canvasAreaRef = useRef(null)
@@ -919,6 +1049,12 @@ export default function WaveLab() {
       // keep drawing to the detached node after a tab switch.
       const canvas = canvasRef.current
       if (canvas) renderFrame(canvas.getContext('2d'), canvas, s, tauRef.current)
+      if (s.subtab === 'gravity') {
+        const rc = canvasReflectRef.current
+        if (rc) renderReflectFrame(rc.getContext('2d'), rc, s, tauRef.current)
+        const ec = canvasEnvelopeRef.current
+        if (ec) renderEnvelopeFrame(ec.getContext('2d'), ec, s, tauRef.current)
+      }
       if (s.subtab === 'deriv') {
         const hc = canvasHalfRef.current
         if (hc) renderHalfFrame(hc.getContext('2d'), hc, s, tauRef.current)
@@ -1100,6 +1236,7 @@ export default function WaveLab() {
           )}
         </div>
         {subtab === 'gravity' ? (
+          <>
           <div className="graph-box">
             <div className="graph-title-row">
               <h2 className="graph-title">Gravity Waves Inertia-Energy</h2>
@@ -1126,6 +1263,34 @@ export default function WaveLab() {
             </div>
             <canvas ref={canvasRef} className="wave-canvas" />
           </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Reflected Wave</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="\psi_1(\lambda_n)" /></span>
+                <span><i className="swatch" style={{ background: `repeating-linear-gradient(90deg, ${C1} 0 5px, transparent 5px 9px)` }} /><Tex tex="\psi_1^{\mathrm{refl}}(\lambda_n) = \psi_1(L - \lambda_n)" /></span>
+              </div>
+            </div>
+            <canvas ref={canvasReflectRef} className="wave-canvas" />
+          </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">The Envelope</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="\psi_1" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="\psi_2" /></span>
+                <span><i className="swatch" style={{ background: '#16a34a', opacity: 0.5 }} /><Tex tex="\text{push } (D > 0)" /></span>
+                <span><i className="swatch" style={{ background: '#dc2626', opacity: 0.5 }} /><Tex tex="\text{pull } (D < 0)" /></span>
+                <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
+              </div>
+            </div>
+            <canvas ref={canvasEnvelopeRef} className="wave-canvas" />
+          </div>
+          </>
         ) : subtab === 'deriv' ? (
           <>
             <div className="graph-box">
@@ -1437,6 +1602,21 @@ export default function WaveLab() {
                   <div className="eq-box"><span className="eq-label">(λₙ span)</span><Tex tex="L = 4\pi" /></div>
                   <div className="eq-box"><span className="eq-label">Amplitudes</span><span className="eq-line"><Tex tex="A_1 = \sqrt{\dfrac{M_2}{M_1+M_2}}" /></span><span className="eq-line"><Tex tex="A_2 = \sqrt{\dfrac{M_1}{M_1+M_2}}" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Inertia Balance Point</span><span className="eq-line"><Tex tex="\lambda^* = L\dfrac{M_2}{M_1+M_2}" /></span><span className="eq-line"><Tex tex="M_1 \lambda^* = M_2 (L - \lambda^*)" /></span></div>
+                </div>
+              </div>
+
+              <div className="eq-group">
+                <h4>Reflected wave <span className="eq-note">— exploratory · display units</span></h4>
+                <div className="eq-list">
+                  <div className="eq-box wide"><span className="eq-label">λ-mirror of ψ₁</span><Tex tex="\psi_1^{\mathrm{refl}}(\lambda_n) = \psi_1(L - \lambda_n)" /></div>
+                </div>
+              </div>
+
+              <div className="eq-group">
+                <h4>The envelope <span className="eq-note">— plotted · display units</span></h4>
+                <div className="eq-list">
+                  <div className="eq-box wide"><span className="eq-label">Envelope bounds (decay without oscillation)</span><span className="eq-line"><Tex tex="E_1^{\pm} = \pm A_1 e^{-\beta\lambda_n}" /></span><span className="eq-line"><Tex tex="E_2^{\pm} = \pm A_2 e^{-\beta(L-\lambda_n)}" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Push-pull sign rule (pair state)</span><span className="eq-line"><Tex tex="D(\lambda_n) = P_1(\lambda_n) - P_2(\lambda_n), \quad P_n = W_n - J_n" /></span><span className="eq-line"><Tex tex="\text{green (push): } D > 0 \qquad \text{red (pull): } D < 0" /></span></div>
                 </div>
               </div>
             </>
