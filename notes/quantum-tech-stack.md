@@ -11,7 +11,8 @@
 - [3. Facts and takeaways](#3-facts-and-takeaways)
 - [4. Layer by layer](#4-layer-by-layer)
 - [5. The abstracted stack](#5-the-abstracted-stack)
-- [6. Conclusion: what the rotation means](#6-conclusion-what-the-rotation-means)
+- [6. The spatial dimension addition principle](#6-the-spatial-dimension-addition-principle)
+- [7. Conclusion: what the rotation means](#7-conclusion-what-the-rotation-means)
 
 
 ## 1. What the stack is
@@ -183,7 +184,15 @@ Any conservation law with known boundary conditions, a dispersion relation, and 
 
 ---
 
-## 6. Conclusion: what the rotation means
+## 6. The spatial dimension addition principle
+
+The stack as described is five layers high because the problem it was built for has one spatial dimension. Adding a spatial dimension costs two time dimensions — this is the spatial dimension addition principle. One time integration carries the conservation law in energy over into the new space; then integrating over that space carries it back to a boundary condition in energy. The symmetry of the stack demands the pair: the descent contracts a dimension per level, so the ascent must restore a dimension per level, and a spatial dimension is restored by two integrations — time, then space. Two more integrals on the way up for every spatial dimension added, and the two-body five-layer stack becomes a seven-layer stack for the plane.
+
+This suggests the extra dimensions are merely mechanical residue of multivariable calculus and partial derivatives: each new independent direction in the boundary conditions forces another differentiate-on-the-way-down, integrate-on-the-way-up pair, and the "dimensions" are the bookkeeping those operations leave behind.
+
+---
+
+## 7. Conclusion: what the rotation means
 
 The open question is what the fifth dimension — and the second time dimension generally — *is*. Three readings are on the table.
 

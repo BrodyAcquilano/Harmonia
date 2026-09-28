@@ -9,11 +9,11 @@
 - [1. Why three bodies](#1-why-three-bodies)
 - [2. The problem, stated](#2-the-problem-stated)
 - [3. The challenge — summing the pairs](#3-the-challenge--summing-the-pairs)
-- [4. The six equations — $\psi$, $\phi$, $\chi$](#4-the-six-equations--psi-phi-chi)
-- [5. Through the quantum tech stack](#5-through-the-quantum-tech-stack)
-- [6. Finding the actual center](#6-finding-the-actual-center)
-- [7. The resultant of the two circles](#7-the-resultant-of-the-two-circles)
-- [8. Convergence and divergence](#8-convergence-and-divergence)
+- [4. Higher dimensions and the quantum tech stack](#4-higher-dimensions-and-the-quantum-tech-stack)
+- [5. The six equations — $\psi$, $\phi$, $\chi$](#5-the-six-equations--psi-phi-chi)
+- [6. Throughput](#6-throughput)
+- [7. Finding the actual center](#7-finding-the-actual-center)
+- [8. The resultant of the two circles](#8-the-resultant-of-the-two-circles)
 - [9. Wave Lab setup](#9-wave-lab-setup)
 
 
@@ -59,11 +59,23 @@ We know the system works for two bodies. Will it work for three? The obstacle is
 
 **Idea 3 — Kepler's error, repaired geometrically.** Take what we learned from Kepler's error about ellipses and build a geometrical theory of overlapping circles: find what the difference in apparent motion rectifies to. Our first pass gives 6 circles and 3 center points, but we know there can only be one center and three circles. Rectify by circle intersections — or better: draw the lines connecting each pair and find the single point that all three balance-point lines pass through. This is the favourite: it gives a visual proof of the whole reduction, three pairs → three lines → one point, and then the orbits are adjusted relative to that center to produce circles. **Intersections are the operation here.**
 
-§6 attempts Idea 3 now. §7 sets up the resultant for each mass, with the method left as a choice.
+§7 attempts Idea 3 now. §8 sets up the resultant for each mass, with the method left as a choice.
 
 ---
 
-## 4. The six equations — $\psi$, $\phi$, $\chi$
+## 4. Higher dimensions and the quantum tech stack
+
+A thought experiment first, because it names the mistake. The expected result of the 3-4-5 problem is known: the lighter body is ejected. Read it in our language: the three bodies spiral inward and converge — the pair-waves pile into the same region, the released energy has nowhere left to go, and the configuration becomes unstable. Energy must go somewhere, and by symmetry the third body is expelled: it diverges, its motion increasing without bound, and one mass is ejected. That picture carries a warning — it suggests acceleration is at play — and a question: can the stack generate convergence and divergence and still be coherent? The 3-4-5 acceleration problem is a clue, and it points at the real mistake: we started at least one layer too low.
+
+The mistake is dimensional. We built the quantum tech stack for two bodies on a line — one spatial dimension — and carried it over to three bodies unchanged. But three bodies live in a plane, not a line: two spatial dimensions, not one. The original energy-conservation form is not wrong, but it is incomplete — it must be read as multivariable energy conservation, differentiated in $y$ and $x$ (partial derivatives), because the boundary conditions now span a plane.
+
+From the quantum tech stack we know the price of a new spatial dimension: two more time dimensions. One time integration carries the conservation law in energy over into space; then integrating over that space carries it back to a boundary condition in energy. The symmetry of the stack demands it — two more integrals on the way up for every spatial dimension added — so the stack grows from five layers to seven. The boundary conditions for the second spatial dimension should look much like the ones we already have: known positions at rest, the same free-fall start, now read in two directions. We start, then, with known boundary conditions, a seven-layer quantum tech stack, and energy conserved from the boundary conditions.
+
+We suspect the acceleration is not the real problem: the boundary conditions say energy is conserved, and we can expect the same symmetry on the other side. The real issue may be convergence and divergence — whether the stack generates them. But divergence does not imply incoherence: even divergent signals follow coherent rules, and the stack's whole record is coherence preserved through every turn. The old question — whether we may climb another level of time to recover something stable and finite — is answered here: yes, two levels, one per new spatial dimension, and the symmetry is what they are for.
+
+---
+
+## 5. The six equations — $\psi$, $\phi$, $\chi$
 
 One opposing wave-pair per body-pair, in the display form. For a pair $(a,b)$, with $\lambda$ measured along the pair line from body $a$ and $\tau$ the clock:
 
@@ -105,9 +117,11 @@ The 3-4-5 boundary conditions fix every constant — nothing is free:
 
 ($k_a = \omega_a = 1$ for the first-listed body of each pair.) Six equations, six unknowns' worth of wave — the input side of the machine.
 
+Recomputed under the seven-layer stack of §4: nothing here changes. The two new layers — the time integration into the second spatial dimension and the space integration back to the energy boundary condition — wrap around each pair's descent and ascent; they do not touch the pair's own constants. The table above stands as written.
+
 ---
 
-## 5. Through the quantum tech stack
+## 6. Throughput
 
 Now the trivial part: run each pair through the quantum tech stack. The descent is the same five levels — limits, differentiation, the vanishing total differential per pair:
 
@@ -121,11 +135,11 @@ $$F_1^{(13)}(t) = \int_0^{4}\!\left[\mathrm{Im}(\phi_1) - \mathrm{Re}(\phi_1)\ri
 
 $$F_2^{(23)}(t) = \int_0^{3}\!\left[\mathrm{Im}(\chi_2) - \mathrm{Re}(\chi_2)\right]d\lambda, \qquad F_3^{(23)}(t) = \int_0^{3}\!\left[\mathrm{Im}(\chi_3) - \mathrm{Re}(\chi_3)\right]d\lambda.$$
 
-Six impulse equations — two per pair, one per body per pair. Each is the pair's doing, expressed as the motion it imprints on each of its bodies. This is the far end of the quantum tech stack: six solutions satisfying the 3-4-5 boundary conditions. What the quantum tech stack does *not* give us is how $F_1^{(12)}$ and $F_1^{(13)}$ combine into the motion of $M_1$. That is §3's problem, and §6–§7's work.
+Six impulse equations — two per pair, one per body per pair. Each is the pair's doing, expressed as the motion it imprints on each of its bodies. This is the far end of the quantum tech stack: six solutions satisfying the 3-4-5 boundary conditions. What the quantum tech stack does *not* give us is how $F_1^{(12)}$ and $F_1^{(13)}$ combine into the motion of $M_1$. That is §3's problem, and §7–§8's work.
 
 ---
 
-## 6. Finding the actual center
+## 7. Finding the actual center
 
 Attempt at Idea 3 — and it works. Each pair has its two-body balance point, dividing its triangle side in the mass ratio (from §2 of the two-body work, $\lambda^*_{ab} = L_{ab}M_b/(M_a+M_b)$ measured from body $a$):
 
@@ -143,7 +157,7 @@ So the favourite idea is proved, not conjectured: draw the pairs, mark the three
 
 ---
 
-## 7. The resultant of the two circles
+## 8. The resultant of the two circles
 
 With the center found, each body now owns two circular components, one per pair it belongs to — each referred to the single center instead of its pair's balance point:
 
@@ -151,7 +165,7 @@ With the center found, each body now owns two circular components, one per pair 
 - $M_2$: the $\psi$-circle (from pair 12) and the $\chi$-circle (from pair 23),
 - $M_3$: the $\phi$-circle (from pair 13) and the $\chi$-circle (from pair 23).
 
-The pair-impulses of §5 drive them; the balance points of §2/§6 locate them; the center of §6 anchors them. Everything needed is on the table. How the two circles per body combine into the one true circle is now a choice between §3's methods:
+The pair-impulses of §6 drive them; the balance points of §2/§7 locate them; the center of §7 anchors them. Everything needed is on the table. How the two circles per body combine into the one true circle is now a choice between §3's methods:
 
 1. **Vector sum** — add the two pair-vectors per body about the common center (the §3 subtraction of the unmatched pair's vector stands as a fallback, but the symmetry says the straight sum should hold); the resultant is the body's motion, and the paths are reconstructed from the three resultants.
 2. **Ratio average** — the statistical route: weight the two components by the same mass ratios that placed the balance points.
@@ -161,16 +175,8 @@ The execution is left here, open for inspection: the machine produces pairs, the
 
 ---
 
-## 8. Convergence and divergence
-
-The expected result of the 3-4-5 problem is known: the lighter body is ejected. In our language the story reads as convergence and divergence. The three bodies spiral inward and converge — the pair-waves pile into the same region, the released energy has nowhere left to go, and the configuration becomes unstable. Energy must go somewhere, and by symmetry the third body is expelled: it diverges, its motion increasing without bound, and one mass is ejected.
-
-This may pose a problem for us, because it suggests acceleration is at play — and from what we know of the quantum tech stack, recovering something conserved after an acceleration may require another layer of integration, a sixth layer. But our boundary conditions exist at layer 5 on the incoming side, and we are unsure whether we are allowed to go up another level: the other side has no sixth layer, because all three bodies start from free fall. The question becomes: can we go up one more level of time to recover something stable and finite, or would that break the symmetry? It may be possible to extend up one more layer and simply account for the rotation. This idea makes sense because we have added another spatial dimension to the problem — three bodies need the full plane where two needed a line, and the extra layer may be where the rotation lives.
-
----
-
 ## 9. Wave Lab setup
 
-The Wave Lab's three-body tab is where the impulses get used. It jumps straight to three-body motion: no per-level graphs, no per-body descent — the quantum tech stack's definite integrals are taken as given, integrated, and plotted. The three pair graphs are static snapshots at $\tau = 0$, one per pair, each showing its two waves in the bodies' colors plus the pair's standing wave as a black line — so the six waves can be inspected the way the gravity tab inspects two. There is deliberately no combined wobble graph: the three bodies' wobbles point in different directions, so they share no common axis and one plot would mislead. Masses are fixed at 3, 4, 5 — the 3-4-5 problem — and the right panel shows the solved pair values instead of sliders.
+The Wave Lab's three-body tab is where the impulses get used. It jumps straight to three-body motion: no per-level graphs, no per-body descent — the quantum tech stack's definite integrals are taken as given, integrated, and plotted. The three pair graphs are static snapshots at $\tau = 0$, one per pair, each showing its two waves in the bodies' colors plus the pair's standing wave as a black line — so the six waves can be inspected the way the gravity tab inspects two. There is deliberately no combined wobble graph: the wobble gets three graphs, one per body — each body's pair-impulses summed (idea 1, the straight sum) and integrated over time — because the three wobbles point in different directions, so they share no common axis and one plot would mislead. Masses are fixed at 3, 4, 5 — the 3-4-5 problem — and the right panel shows the solved pair values instead of sliders.
 
-From there the reconstruction follows the two-body procedure: analyze the orthographic projections on each plane, take the apparent projection onto the plane we don't know, and draw the six circles — each body's two pair-circles about the pair balance points, re-referred to the single center of §6. Once the problem can be visualized — six circles, three balance points, one center — the summation of §7 has something to work on.
+From there the reconstruction follows the two-body procedure: analyze the orthographic projections on each plane, take the apparent projection onto the plane we don't know, and draw the six circles — each body's two pair-circles about the pair balance points, re-referred to the single center of §7. Once the problem can be visualized — six circles, three balance points, one center — the summation of §8 has something to work on.
