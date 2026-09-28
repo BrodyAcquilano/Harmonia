@@ -80,6 +80,7 @@ The Motion tab's push-pull density is this same machinery, differenced per body:
 | **Boundary conditions** | Known at the top (the PE/KE equations), contracted to pure mass proportions at the bottom, rebuilt from mass on the return. | d1 (given), d5 (contracted), u1 (restored) |
 | **Symmetry → coherence** | Every $+i$ matched by a $-i$; relative phases invariant under every operation. The signal survives because the symmetry protects it. | d3 (the $i$ drops from the ratio); the whole trip |
 | **Conservation → rotation count** | Five integrations, five quarter-turns $\equiv 90°$: the force that went down radial comes back perpendicular. | u2–u4 (the integrations); the turn composes at u3 |
+| **4D → 5D → 4D** | The trip leaves ordinary 4D spacetime, rotates into a fifth frequency-phase domain — a hidden timelike dimension — and comes back out. | The whole round trip; Kepler's third law is the indicator: $T^2 \propto a^3$ counts two times (one seen, one hidden) and three spaces |
 
 ---
 
