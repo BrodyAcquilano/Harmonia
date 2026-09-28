@@ -910,21 +910,27 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
       ctx.textBaseline = 'alphabetic'
       ctx.fillText(label, cx, cy - maxR - 8)
     }
-    // x-banner toward sx.
+    // x-banner toward sx. The baseline is shifted by the branch wobble's
+    // t=0 value so the wave's t=0 point lands exactly on the tip's
+    // projection (on the circle edge) -- the wave visibly starts at the
+    // phasor instead of floating a full wobble-value away from it.
     if (bX.zero) {
       drawBannerH(cx + sx * maxR, xEnd, cy, bX.arr, color, 'x', 0)
     } else {
       const x0 = cx + sx * bX.r * Math.abs(Math.cos(bX.th))
+      const yBase = bX.ty + K * bX.arr[0]
       project(bX.tx, bX.ty, x0, bX.ty)
-      drawBannerH(x0, xEnd, bX.ty, bX.arr, color, 'x', bX.r)
+      drawBannerH(x0, xEnd, yBase, bX.arr, color, 'x', bX.r)
     }
-    // y-banner toward sy.
+    // y-banner toward sy. Same t=0 anchoring: the wave starts at the tip's
+    // projection on the circle edge.
     if (bY.zero) {
       drawBannerV(cx, cy + sy * maxR, yEnd, bY.arr, color, 'y', 0)
     } else {
       const y0 = cy + sy * bY.r * Math.abs(Math.sin(bY.th))
+      const xBase = bY.tx - K * bY.arr[0]
       project(bY.tx, bY.ty, bY.tx, y0)
-      drawBannerV(bY.tx, y0, yEnd, bY.arr, color, 'y', bY.r)
+      drawBannerV(xBase, y0, yEnd, bY.arr, color, 'y', bY.r)
     }
   }
 
@@ -2118,6 +2124,36 @@ export default function WaveLab() {
             </div>
           </div>
           ))}
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title"><Tex tex="\text{Resultant wobbles}" /></h2>
+            </div>
+            <div className="tb-square-wrap">
+              <div className="tb-math-square">
+                <div className="tb-math-line"><Tex tex={`\\small \\text{phasor sum: } \\mathbf{R} = \\sum_k r_k e^{i\\theta_k}`} /></div>
+                <div className="tb-math-line"><Tex tex={`\\small R = \\sqrt{r_1^2 + r_2^2 + 2r_1r_2\\cos(\\theta_1-\\theta_2)},\\;\\; \\Theta = \\operatorname{atan2}\\!\\left(\\sum r_k\\sin\\theta_k,\\, \\sum r_k\\cos\\theta_k\\right)`} /></div>
+                <div className="tb-math-body" style={{ borderLeftColor: C1 }}>
+                  <span className="tb-math-tag" style={{ color: C1 }}>M₁</span>
+                  <div className="tb-math-line"><Tex tex={`\\small Z_{1x} = 0.156\\angle{-1.21} \\quad (\\psi)`} /></div>
+                  <div className="tb-math-line"><Tex tex={`\\small Z_{1y} = 0.207\\angle{-1.21} + 0.275\\angle{-1.59} = 0.474\\angle{-1.43} \\quad (\\psi+\\phi)`} /></div>
+                </div>
+                <div className="tb-math-body" style={{ borderLeftColor: C2 }}>
+                  <span className="tb-math-tag" style={{ color: C2 }}>M₂</span>
+                  <div className="tb-math-line"><Tex tex={`\\small Z_{2x} = 0.085\\angle{-0.79} + 0.359\\angle{1.40} = 0.317\\angle{1.18} \\quad (\\psi+\\chi)`} /></div>
+                  <div className="tb-math-line"><Tex tex={`\\small Z_{2y} = 0.114\\angle{-0.79} \\quad (\\psi)`} /></div>
+                </div>
+                <div className="tb-math-body" style={{ borderLeftColor: TB_C3 }}>
+                  <span className="tb-math-tag" style={{ color: TB_C3 }}>M₃</span>
+                  <div className="tb-math-line"><Tex tex={`\\small Z_{3x} = 0.322\\angle{-1.79} \\quad (\\chi)`} /></div>
+                  <div className="tb-math-line"><Tex tex={`\\small Z_{3y} = 0.157\\angle{-0.26} \\quad (\\phi)`} /></div>
+                </div>
+                <div className="tb-math-line" style={{ color: C1 }}><Tex tex={`\\small W_1 = (0.156\\angle{-1.21},\\, 0.474\\angle{-1.43})`} /></div>
+                <div className="tb-math-line" style={{ color: C2 }}><Tex tex={`\\small W_2 = (0.317\\angle{1.18},\\, 0.114\\angle{-0.79})`} /></div>
+                <div className="tb-math-line" style={{ color: TB_C3 }}><Tex tex={`\\small W_3 = (0.322\\angle{-1.79},\\, 0.157\\angle{-0.26})`} /></div>
+                <div className="tb-math-line"><Tex tex={`\\small C = (0,\\,0) \\quad \\text{(center of mass)}`} /></div>
+              </div>
+            </div>
+          </div>
           </>
         ) : null}
 
