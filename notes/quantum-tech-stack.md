@@ -190,6 +190,8 @@ The stack as described is five layers high because the problem it was built for 
 
 It is the first time the path splits. On the way up, the wobble integral divides into two separate branches — the wobble computed in one direction, then in the other — and the resultant wobbles are summed. It is not two new time dimensions; it is the same time dimensions used to rotate into different directions: figure out the wobble in one direction, then another, then sum the resultant wobbles. On the way down, the split runs in reverse: the derivative does not climb into higher dimensions but divides into two initial-condition branches. Call them A and B incoming, Y and Z outgoing — we never have to track A-on-Y, A-on-Z, B-on-Y, B-on-Z separately, because the quantum tech stack handles the rotations for us, keeping the relative orientation of the branches on the outside and rotating them relative to one another.
 
+One more rule, borrowed from linear algebra, fixes the branch count: $xx$ and $yy$ already span the plane. Two perpendicular directions define any other direction of the plane by combining them in different proportions, so the branches needed are exactly two — no $xy$ or $yx$ cross terms. Any cross direction is already a linear combination of the perpendicular pair; writing it separately would double-count.
+
 ---
 
 ## 7. Conclusion: what the rotation means

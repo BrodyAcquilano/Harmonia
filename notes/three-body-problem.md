@@ -10,7 +10,7 @@
 - [2. The problem, stated](#2-the-problem-stated)
 - [3. The challenge — summing the pairs](#3-the-challenge--summing-the-pairs)
 - [4. Higher dimensions and the quantum tech stack](#4-higher-dimensions-and-the-quantum-tech-stack)
-- [5. The six equations — $\psi$, $\phi$, $\chi$](#5-the-six-equations--psi-phi-chi)
+- [5. The six equations — $\psi$, $\phi$, $\chi$ (twelve branches)](#5-the-six-equations--psi-phi-chi-twelve-branches)
 - [6. Throughput](#6-throughput)
 - [7. Finding the actual center](#7-finding-the-actual-center)
 - [8. The resultant of the two circles](#8-the-resultant-of-the-two-circles)
@@ -71,41 +71,43 @@ The mistake is dimensional. We built the quantum tech stack for two bodies on a 
 
 From the quantum tech stack we now know the price of a new spatial dimension — and it is not new dimensions. The stack's five fundamental dimensions are fixed; what a new spatial direction adds is *branches* through the same machinery. On the way up, the wobble integral splits into two separate branches: the wobble in one direction, then the wobble in the other, and the resultant wobbles are summed. It is the first time the integration path has split — not two new time dimensions, but the same time dimensions used to rotate into different directions. On the way down, the split runs in reverse: the derivative does not climb into higher dimensions but divides into two initial-condition branches. Call them A and B incoming, Y and Z outgoing — we never track A-on-Y, A-on-Z, B-on-Y, B-on-Z separately, because the quantum tech stack handles the rotations for us, keeping the relative orientation of the branches on the outside and rotating them relative to one another. The boundary conditions for the second spatial direction should look much like the ones we already have: known positions at rest, the same free-fall start, now read in two directions. We start, then, with known boundary conditions, the five-layer quantum tech stack run in branches, and energy conserved from the boundary conditions.
 
+That fixes the problem-solving approach, and there are two ways to write it: keep the six equations and make each one long, with both directions written out — or split each equation into branches and let a summation sign do the work of the repetition. We take the branches. And the branch count is fixed by a rule borrowed from linear algebra: $xx$ and $yy$ already span the plane. Two perpendicular directions define any other direction of the plane by combining them in different proportions, so a pair line pointing along $\hat{u}_{ab} = c_x\hat{x} + c_y\hat{y}$ is recovered as $c_x W^{(x)} + c_y W^{(y)}$ — no $xy$ or $yx$ cross terms, since any cross direction is already a combination of the perpendicular pair.
+
 We suspect the acceleration is not the real problem: the boundary conditions say energy is conserved, and we can expect the same symmetry on the other side. The real issue may be convergence and divergence — whether the stack generates them. But divergence does not imply incoherence: even divergent signals follow coherent rules, and the stack's whole record is coherence preserved through every turn. The old question — whether we may climb another level of time to recover something stable and finite — is answered here: not by new levels but by branches, the same five dimensions doing the rotating, and the symmetry is what the branches are for.
 
 ---
 
-## 5. The six equations — $\psi$, $\phi$, $\chi$
+## 5. The six equations — $\psi$, $\phi$, $\chi$ (twelve branches)
 
-One opposing wave-pair per body-pair, in the display form. For a pair $(a,b)$, with $\lambda$ measured along the pair line from body $a$ and $\tau$ the clock:
+One opposing wave-pair per body-pair, in the display form — each wave now the sum of its two branches. Write $j \in \{x, y\}$ for the branch; the wave is $\sum_j$ of its branches:
 
-$$W_a^{(ab)}(\lambda,\tau) = A_a^{(ab)} e^{-\beta_{ab}\lambda}\left[\cos\left(k_a^{(ab)}\lambda - \omega_a^{(ab)}M_b\tau\right) + i\sin\left(k_a^{(ab)}\lambda - \omega_a^{(ab)}M_b\tau\right)\right]$$
+$$W_a^{(ab)} = \sum_j W_{a,j}^{(ab)}, \qquad W_{a,j}^{(ab)}(\lambda_j,\tau) = A_a^{(ab)} e^{-\beta_{ab}\lambda_j}\left[\cos\left(k_{a,j}^{(ab)}\lambda_j - \omega_{a,j}^{(ab)}M_b\tau\right) + i\sin\left(k_{a,j}^{(ab)}\lambda_j - \omega_{a,j}^{(ab)}M_b\tau\right)\right]$$
 
-$$W_b^{(ab)}(\lambda,\tau) = A_b^{(ab)} e^{-\beta_{ab}(L_{ab}-\lambda)}\left[\cos\left(-k_b^{(ab)}\lambda - \omega_b^{(ab)}M_a\tau\right) + i\sin\left(-k_b^{(ab)}\lambda - \omega_b^{(ab)}M_a\tau\right)\right]$$
+$$W_b^{(ab)} = \sum_j W_{b,j}^{(ab)}, \qquad W_{b,j}^{(ab)}(\lambda_j,\tau) = A_b^{(ab)} e^{-\beta_{ab}(L_{ab}-\lambda_j)}\left[\cos\left(-k_{b,j}^{(ab)}\lambda_j - \omega_{b,j}^{(ab)}M_a\tau\right) + i\sin\left(-k_{b,j}^{(ab)}\lambda_j - \omega_{b,j}^{(ab)}M_a\tau\right)\right]$$
 
-with, per pair, $k_a^{(ab)} = \omega_a^{(ab)} = 1$, $k_b^{(ab)} = \omega_b^{(ab)} = \sqrt{M_b/M_a}$, $A_a^{(ab)} = \sqrt{M_b/(M_a+M_b)}$, $A_b^{(ab)} = \sqrt{M_a/(M_a+M_b)}$, $\beta_{ab} = |M_a-M_b|/(M_a+M_b)$, and span $L_{ab}$ the pair's separation. Name them:
+with, per pair and on each branch, $k_{a,j}^{(ab)} = \omega_{a,j}^{(ab)} = 1$, $k_{b,j}^{(ab)} = \omega_{b,j}^{(ab)} = \sqrt{M_b/M_a}$, $A_a^{(ab)} = \sqrt{M_b/(M_a+M_b)}$, $A_b^{(ab)} = \sqrt{M_a/(M_a+M_b)}$, $\beta_{ab} = |M_a-M_b|/(M_a+M_b)$, and span $L_{ab}$ the pair's separation. The branch touches nothing but the direction: the pair's constants are the pair's, identical on $x$ and $y$. (The alternative — one long equation per wave with both directions written out — is the same mathematics; the branch form is just easier to carry.) The branch count follows the rule of §4: $xx$ and $yy$ span the plane, so two branches per wave and no cross terms. Name them:
 
 - **$\psi$** for $(M_1,M_2)$: $\psi_1 = W_1^{(12)}$, $\psi_2 = W_2^{(12)}$, span $L_{12} = 5$;
 - **$\phi$** for $(M_1,M_3)$: $\phi_1 = W_1^{(13)}$, $\phi_3 = W_3^{(13)}$, span $L_{13} = 4$;
 - **$\chi$** for $(M_2,M_3)$: $\chi_2 = W_2^{(23)}$, $\chi_3 = W_3^{(23)}$, span $L_{23} = 3$.
 
-In full, the $\psi$ pair:
+In full — each wave summed over its two branches — the $\psi$ pair:
 
-$$\psi_1 = A_{\psi1}\, e^{-\beta_{\psi}\lambda}\left[\cos\left(\lambda - M_2\tau\right) + i\sin\left(\lambda - M_2\tau\right)\right]$$
+$$\psi_1 = \sum_j A_{\psi1}\, e^{-\beta_{\psi}\lambda_j}\left[\cos\left(\lambda_j - M_2\tau\right) + i\sin\left(\lambda_j - M_2\tau\right)\right]$$
 
-$$\psi_2 = A_{\psi2}\, e^{-\beta_{\psi}(5-\lambda)}\left[\cos\left(-k_{\psi2}\lambda - \omega_{\psi2}M_1\tau\right) + i\sin\left(-k_{\psi2}\lambda - \omega_{\psi2}M_1\tau\right)\right]$$
+$$\psi_2 = \sum_j A_{\psi2}\, e^{-\beta_{\psi}(5-\lambda_j)}\left[\cos\left(-k_{\psi2,j}\lambda_j - \omega_{\psi2,j}M_1\tau\right) + i\sin\left(-k_{\psi2,j}\lambda_j - \omega_{\psi2,j}M_1\tau\right)\right]$$
 
 the $\phi$ pair:
 
-$$\phi_1 = A_{\phi1}\, e^{-\beta_{\phi}\lambda}\left[\cos\left(\lambda - M_3\tau\right) + i\sin\left(\lambda - M_3\tau\right)\right]$$
+$$\phi_1 = \sum_j A_{\phi1}\, e^{-\beta_{\phi}\lambda_j}\left[\cos\left(\lambda_j - M_3\tau\right) + i\sin\left(\lambda_j - M_3\tau\right)\right]$$
 
-$$\phi_3 = A_{\phi3}\, e^{-\beta_{\phi}(4-\lambda)}\left[\cos\left(-k_{\phi3}\lambda - \omega_{\phi3}M_1\tau\right) + i\sin\left(-k_{\phi3}\lambda - \omega_{\phi3}M_1\tau\right)\right]$$
+$$\phi_3 = \sum_j A_{\phi3}\, e^{-\beta_{\phi}(4-\lambda_j)}\left[\cos\left(-k_{\phi3,j}\lambda_j - \omega_{\phi3,j}M_1\tau\right) + i\sin\left(-k_{\phi3,j}\lambda_j - \omega_{\phi3,j}M_1\tau\right)\right]$$
 
 the $\chi$ pair:
 
-$$\chi_2 = A_{\chi2}\, e^{-\beta_{\chi}\lambda}\left[\cos\left(\lambda - M_3\tau\right) + i\sin\left(\lambda - M_3\tau\right)\right]$$
+$$\chi_2 = \sum_j A_{\chi2}\, e^{-\beta_{\chi}\lambda_j}\left[\cos\left(\lambda_j - M_3\tau\right) + i\sin\left(\lambda_j - M_3\tau\right)\right]$$
 
-$$\chi_3 = A_{\chi3}\, e^{-\beta_{\chi}(3-\lambda)}\left[\cos\left(-k_{\chi3}\lambda - \omega_{\chi3}M_2\tau\right) + i\sin\left(-k_{\chi3}\lambda - \omega_{\chi3}M_2\tau\right)\right]$$
+$$\chi_3 = \sum_j A_{\chi3}\, e^{-\beta_{\chi}(3-\lambda_j)}\left[\cos\left(-k_{\chi3,j}\lambda_j - \omega_{\chi3,j}M_2\tau\right) + i\sin\left(-k_{\chi3,j}\lambda_j - \omega_{\chi3,j}M_2\tau\right)\right]$$
 
 The 3-4-5 boundary conditions fix every constant — nothing is free:
 
@@ -115,7 +117,7 @@ The 3-4-5 boundary conditions fix every constant — nothing is free:
 | $\phi$ | $(3,5)$ | $4$ | $\sqrt{5/8}$ | $\sqrt{3/8}$ | $1/4$ | $\sqrt{5/3}$ |
 | $\chi$ | $(4,5)$ | $3$ | $\sqrt{5/9}$ | $\sqrt{4/9}$ | $1/9$ | $\sqrt{5/4}$ |
 
-($k_a = \omega_a = 1$ for the first-listed body of each pair.) Six equations, six unknowns' worth of wave — the input side of the machine.
+($k_{a,j} = \omega_{a,j} = 1$ on each branch for the first-listed body of each pair.) Six equations, twelve branches — the input side of the machine.
 
 Recomputed under the branched stack of §4: nothing here changes. The branches — the wobble integral split in two directions on the way up, the initial conditions split in two on the way down — run through the same five-dimensional machinery; they do not touch the pair's own constants. The table above stands as written.
 
