@@ -1,53 +1,34 @@
-# Decay and Amplitude: Finishing the Wave Equation
+# Decay and Amplitude: A Worked Example of the Stack
 
-*Companion to "Symmetric Inertia Transfer" and "Lambda Derivation." Those two notes derive the form of the inertia waves and the structural wavelengths. This note picks up where they stop: the exponential decay and the amplitudes were never derived there. The equation as derived had neither — the waves rang forever, lossless, and their amplitudes sat as undetermined constants. Both were added afterward, by hand. This is the honest account of where they came from, and the math that now fixes them.*
+*This note is a worked example of the quantum tech stack: deriving the decay and the amplitudes step by step, in order, with the actual math. The stack note describes the machine; this note runs it. Read the stack note first if the level names (d1–d5, u1–u5) are unfamiliar.*
 
 ---
 
-## 1. What the derivation gave — and what it didn't
+## 1. What the derivation owes us
 
-The first two notes end with the fundamental waves:
-
-$$
-W_1(M_1,M_2) = A_1 e^{i(k_1 M_1 - \omega_1 M_2)}
-$$
+The wave form is
 
 $$
-W_2(M_2,M_1) = A_2 e^{i(k_2 M_2 - \omega_2 M_1)}
+\psi_n = A_n e^{-\beta x_n} e^{i\phi_n}
 $$
 
-They gave the *form*: two reciprocal complex exponentials, the masses themselves as coordinates, the phase structure, the symmetry of the derivatives. What they did not give was the *envelope*: nothing said how fast the wave should die away with distance, and nothing fixed $A_1$ and $A_2$.
+Three pieces: an amplitude $A_n$, a decay envelope $e^{-\beta x_n}$, and a phase $e^{i\phi_n}$. The phase was derived — it falls out of the symmetry. The other two were not. So the stack owes us two computations:
 
-The intuition that carried the derivation that far is worth restating, because everything in this note stands on it. Start from the Hamiltonian — the total energy of the system — and deconstruct it by taking derivatives, removing variables one at a time, until nothing remains but the fundamental conservation law of inertia: the equation that equals zero. That stripping-down is a contraction in the tensor sense, or near enough that the analogy holds: each derivative sums away a degree of freedom the system does not independently possess, until only the conserved quantity is left.
+1. **The decay rate** $\beta$: how fast the wave dies with distance, and why it dies at all.
+2. **The amplitude** $A_n$: the absolute scale, fixed — not chosen.
 
-What made the contraction possible was spotting the symmetry *inside* the Hamiltonian before differentiating. Energy and mass are opposites in the relativistic sense: energy is timelike inertia, mass is spacelike inertia, and inertia as a whole has to be conserved — which meant the derivatives had to come in symmetric pairs, every $+i$ matched by a $-i$. Once that was seen, the ratios did the rest. Einstein gives $E = mc^2$ and $E = hf$; de Broglie gives $\lambda = h/p$; with $v = \lambda f$ they fix the ratios between energy, mass, wavelength, and frequency with no freedom left over. Time dilation then did the quiet work: a moving clock runs slow, which is the same as saying position is measured in wavelengths — $x$, or $h$, or whatever anyone wants to call it, is actually wavelengths, and $t$ can be eliminated through $v = \lambda f$. So position and time could both be rewritten as functions of $m_1$ and $m_2$: writing the energy through Einstein's relations made the symmetry visible, the free variables collapsed, and the contraction went through. The final derivative itself was never known in advance — only the ratios were, and the ratios were enough.
+What the Wave Lab shows is a window onto these values, not the values themselves: it samples $\lambda_n$ over $0$ to $4\pi$ and normalizes $|A_1|^2 + |A_2|^2 = 1$, so only ratios are visible. §4 below gives the true computation; §5 explains the window.
 
-There is a postscript to the intuition, learned after the fact. The amplitudes and the decay *could* be fixed afterward because the boundary conditions were always known: each wave leaves its own mass at full strength, and it must converge at the far end — a decaying wave over a finite span with a known rate has no freedom left. Start conditions, end conditions, rate of decay: with all three known, the values converge, and the envelope is forced.
+---
 
-And there is a suspicion about the contraction itself — the move of writing variables in terms of other variables. It may have been a limit taken without realizing it: a derivative over a finite space, which works because the relative motion is linear. The limit just happened, quietly, and counted as a derivative. The cleanest candidate is the difference in lambdas: with linear relative motion the limit is simple — wavelength for velocity — and it is fixed entirely by the boundary conditions, which are $m_1$ and $m_2$. Whether it was proportionality all the way down or a quiet limit at one step, the wavelength-for-velocity limit with known endpoints did the work.
+## 2. Decay: exponential dissipation and finite energy
 
-One more thing, also learned after the fact. Waves have hidden phasors when you integrate them — but the phasor was already in the Hamiltonian before any integration happened. It went unrecognized at the time: using Einstein's and de Broglie's equations to relate space and time through $v = f\lambda$ *was* the deconstruction of the phasor, performed on the way down the stack without naming it. The phasor was being taken apart before the wave was ever written down.
+Nothing acting over a distance keeps all of its energy. Each slice of distance takes its proportional cut, and proportional cutting is the exponential — this is the same decay in the telegrapher's equations, where the transmission line loses energy to resistance. A coupled first-order system in space and time gives complex exponentials *with* envelopes; the inertia waves are that system in mass coordinates, so they get the envelope too.
 
-## 2. Guessing the form
-
-With the conservation law in hand, the way back up was integration, alternating space and time — the ladder the Kepler note describes. But the *form* of the wave, the complex exponential itself, was not derived. It was recognized.
-
-The recognition came from electronics. A transmission line — the telegrapher's equations — gives voltage and current as coupled first-order equations in space and time, and their solutions are complex exponentials: oscillation with a possible decay envelope, the $i$ rotating between the two coupled quantities exactly the way the real and imaginary parts of the inertia wave rotate between spatial and temporal inertia. The inertia equations had the same coupled structure, so they deserved the same solution. It was an educated guess, and the appearance of the complex $i$ in the derivation's intermediate steps was the confirmation: the $i$ was already there, hiding in the ratios, before the guess was made. Many natural processes are governed by differential equations with the same exponential or complex-exponential solutions; this was one more of them.
-
-Two deliberate swaps turned the transmission-line form into the inertia-wave form. First, $x$ and $t$ were traded for mass: the coordinates became $M_1$ and $M_2$ themselves — $M_1$ the spatial coordinate of $W_1$, $M_2$ its temporal coordinate, the roles reversed for $W_2$. Second, the masses were swapped between the equations: $W_1$ reads $(M_1, M_2)$ while $W_2$ reads $(M_2, M_1)$, so each wave carries its own mass as space and the companion's as time. With those swaps, differentiating the guessed form reproduced the fundamental building block — the symmetric derivative pairs — and the guess closed into a derivation. From there it could be integrated back up, and the perpendicular application of the force fell out the far end.
-
-## 3. Adding the decay
-
-The guess had no decay, and that was luck, not physics: the telegrapher's equations *have* a decay term — the line loses energy to resistance — and the inertia waves were written down without one. It was added because nothing acting over a distance keeps all of its energy. Dissipation is exponential, always: each slice of distance takes its proportional cut, and proportional cutting is the exponential.
-
-So each wave got its envelope, decaying away from its source. $\psi_1$ is emitted at body 1 ($\lambda_n = 0$) and fades toward $+\lambda_n$; $\psi_2$ is emitted at body 2 ($\lambda_n = L$) and fades toward $-\lambda_n$:
+Each wave decays away from its source. $\psi_1$ is emitted at body 1 ($\lambda_n = 0$) and fades toward $+\lambda_n$; $\psi_2$ is emitted at body 2 ($\lambda_n = L$) and fades toward $-\lambda_n$:
 
 $$
-\psi_1 = A_1 e^{-\beta\lambda_n} e^{i(k_1\lambda_n - \omega_1 M_2 \tau)}
-$$
-
-$$
-\psi_2 = A_2 e^{-\beta(L-\lambda_n)} e^{i(-k_2\lambda_n - \omega_2 M_1 \tau)}
+\psi_1 = A_1 e^{-\beta\lambda_n} e^{i(k_1\lambda_n - \omega_1 M_2 \tau)}, \qquad \psi_2 = A_2 e^{-\beta(L-\lambda_n)} e^{i(-k_2\lambda_n - \omega_2 M_1 \tau)}
 $$
 
 with
@@ -56,77 +37,107 @@ $$
 \beta = \frac{|M_1 - M_2|}{M_1 + M_2}
 $$
 
-The form of $\beta$ is the asymmetry made quantitative. Equal masses give $\beta = 0$ — the symmetric case, lossless, both waves pure sinusoids. The more lopsided the pair, the harder each wave decays toward the other. It is the same $\beta$ that tilts the envelopes in the simulation, and the same normalized difference that sets the orbital eccentricity $e$ in the Motion tab. One number, three jobs: decay rate, envelope tilt, orbital shape.
+$\beta$ is the boundary asymmetry made quantitative, and it comes from the ground floor of the stack (d5): the only data left there are the boundary conditions $m_1$, $m_2$, so the decay rate can only be built from them. Equal masses give $\beta = 0$ — the symmetric case, lossless. The more lopsided the pair, the harder each wave decays toward the other. It is the same $\beta$ that tilts the envelopes in the simulation and the same normalized difference that sets the orbital eccentricity in the Motion tab.
 
-There is a physical reason the decay had to be there, beyond the electronics analogy. A wave that never decays carries infinite energy — integrate a pure sinusoid over all space and the integral does not converge. Photons are the cleanest example: they arrive in discrete, finite packets precisely because their waves decay and close off. Quantization *is* decay, seen from the energy side. The inertia waves needed the same finiteness, so they got the same envelope.
+The decay is what makes the energy finite, and finiteness is what makes the amplitude computable. The energy carried by wave $n$ is the integral of $|\psi_n|^2$ over its line of travel:
 
-## 4. The amplitudes
+$$
+E_n = \int_0^{\infty} A_n^2 e^{-2\beta x}\,dx = \frac{A_n^2}{2\beta}, \qquad \beta > 0
+$$
 
-With decay in place, the last undetermined piece was the scale: $A_1$ and $A_2$. These were solved the relativistic way — not from absolute units but from ratios, the same way the rest of the derivation worked.
+This converges if and only if $\beta > 0$ — the decay is the convergence. A pure sinusoid ($\beta = 0$) integrated over all space diverges: infinite energy, amplitude unfixable. Photons are the physical precedent: they arrive in discrete, finite packets precisely because their waves decay and close off. Quantization is decay, seen from the energy side.
 
-The simulation samples the wave over the span $L = 4\pi$: two full wavelengths at the normalized $k_1 = 1$, the smallest window that shows the oscillation and its structure together. That window is one segment of a repeating, decaying train, and its boundary conditions are known: each wave leaves its own body's end at full strength and arrives at the far end diminished by $e^{-\beta L}$. Within such a segment the absolute scale is unknowable and unnecessary; what matters is the *ratio* of the amplitudes — the harmony between the two waves, in Kepler's language.
+---
 
-The ratio comes from the conservation law, applied to the finished form. Demand that the total differential vanish — $d\psi_s = 0$, inertia conserved — and read it through the mass derivatives:
+## 3. Amplitude: the stack's integration constant
+
+### 3a. Why the descent cannot see it
+
+Differentiate $\psi_n = A_n e^{-\beta x_n} e^{i\phi_n}$ with respect to any mass coordinate: $A_n$ is a constant factor, so $dA_n/dM_m = 0$ and it rides through every gradient untouched. Contract via $v = f\lambda$: $A_n$ is still there, still untouched. Ground out at $L_n = PE_n - KE_n = 0$: $A_n$ is gone from the equations entirely.
+
+This is not a failure of the derivation. It is what constants do. The descent differentiates, and differentiation kills constants — the amplitude's information is not destroyed, it is *held by the boundary conditions*, waiting at the bottom while the phase structure goes through the stack. It returns on the ascent as the undetermined constant of integration, and the closure — the definite integral evaluated between known bounds — is what fixes it.
+
+### 3b. The computation
+
+Three facts, each from a different level of the stack:
+
+**The envelope integral (u1–u2).** From §2, the energy in wave $n$ is $E_n = A_n^2/(2\beta)$.
+
+**The ratio (d3, via the chain rule).** Demand the total differential vanish — $d\psi_s = 0$, inertia conserved — and read it through the mass derivatives:
 
 $$
 \frac{\partial\psi_1}{\partial M_1} + \frac{\partial\psi_2}{\partial M_1} = ik_1\psi_1 - i\omega_2\psi_2 = 0
 $$
 
-At matched phase this gives $k_1 A_1 = \omega_2 A_2$. The symmetry condition of the theory is $k_1 k_2 = \omega_1 \omega_2$, and with the display normalization $k_1 = \omega_1 = 1$ and the wavelength ratio $k_2/k_1 = \sqrt{M_2/M_1}$:
+At matched phase, $k_1 A_1 = \omega_2 A_2$. With the symmetry condition $k_1 k_2 = \omega_1 \omega_2$ and the wavelength ratio $k_2/k_1 = \sqrt{M_2/M_1}$:
 
 $$
-\frac{A_1}{A_2} = \frac{\omega_2}{k_1} = k_2 = \sqrt{\frac{M_2}{M_1}}
+\frac{A_1^2}{A_2^2} = \frac{M_2}{M_1}, \qquad\text{hence}\qquad \frac{E_1}{E_2} = \frac{M_2}{M_1}
 $$
 
-Probability-style normalization, $|A_1|^2 + |A_2|^2 = 1$, then fixes the scale:
+Note the cross-coupling: body 1's amplitude is set by body 2's mass. Each wave's strength is fixed by the companion — the reciprocal structure runs all the way down.
+
+**The budget (d1).** The Hamiltonian only rotates its energy — what goes in comes out. Total energy is the invariant the whole stack carries:
 
 $$
-A_1 = \sqrt{\frac{M_2}{M_1+M_2}}, \qquad A_2 = \sqrt{\frac{M_1}{M_1+M_2}}
+E_1 + E_2 = E_{\text{total}}
 $$
 
-Note the cross-coupling: $A_1$, body 1's amplitude, is set by $M_2$, the companion's mass — and vice versa. Each wave's strength is fixed by the other body. The reciprocal structure runs all the way down.
-
-This is also where the standing waves enter. The summed field $\psi_s = \psi_1 + \psi_2$ is two counter-propagating decaying waves superposed: a standing-wave structure with nodes where they cancel. The balance point $\lambda^*$ is the mass-weighted node of that structure — the negotiation point of the mutual pull, the same point the lever arms balance on. Only certain ratios lock stably into that structure; the rest beat against each other and wash out. Those stable ratios are the harmonies — integer relations between the waves, the music Kepler was chasing in *Harmonices Mundi*, now sitting inside the amplitude ratio $A_1/A_2 = \sqrt{M_2/M_1}$.
-
-## 5. The chain rule, revisited
-
-Now that the form of the equations is understood, the amplitude problem can be redone as a chain-rule computation — and this is the general version of what §4 did in the display normalization.
-
-The mass derivatives $\partial\psi_n/\partial M_m$ are themselves chain rules: the phase depends on mass directly, as a coordinate, and indirectly, through $k_n$ and $\omega_n$, which are functions of the masses via the wavelength relations. Write the total differential and expand every partial through its chain:
+Solve the three together:
 
 $$
-d\psi_s = \left(\frac{\partial\psi_1}{\partial M_1} + \frac{\partial\psi_2}{\partial M_1}\right)dM_1 + \left(\frac{\partial\psi_1}{\partial M_2} + \frac{\partial\psi_2}{\partial M_2}\right)dM_2 = 0
+E_1 = E_{\text{total}}\frac{M_2}{M_1+M_2}, \qquad E_2 = E_{\text{total}}\frac{M_1}{M_1+M_2}
 $$
 
 $$
-\frac{\partial\psi_1}{\partial M_1} = \frac{\partial\psi_1}{\partial\phi_1}\frac{\partial\phi_1}{\partial k_1}\frac{dk_1}{dM_1} + \cdots
+A_1 = \sqrt{2\beta E_{\text{total}}\,\frac{M_2}{M_1+M_2}}, \qquad A_2 = \sqrt{2\beta E_{\text{total}}\,\frac{M_1}{M_1+M_2}}
 $$
 
-The amplitude ratio is whatever the chains require for the two bracketed sums to vanish independently — the condition that every path by which $M_1$ can move the field is cancelled by a matching path. In the display normalization the chains collapse to the simple $k_1 A_1 = \omega_2 A_2$ of §4. But the chain form is the honest general statement, and it is the route by which $A_1$ and $A_2$ would be re-solved if the model ever leaves the display normalization — with physical wavenumbers $k_n = 2\pi/\lambda_n$ and Planck–Einstein frequencies $\omega_n = 2\pi M_n c^2/h$, the chains lengthen but the requirement is unchanged: the total differential must vanish, and the amplitudes are whatever makes it vanish.
+That is the true amplitude: envelope integral, symmetry ratio, energy budget. No guessing.
 
-## 6. Conclusion: the finished equations
+### 3c. The chain rule in reverse
 
-The complete wave, as simulated:
+Why this is trustworthy: the descent applies $D = d/dM$ (chained through the phase), and the ascent applies $D^{-1} = \int dM$ — the same operations, the same variables, in reverse order. $D^{-1}D$ is the identity on everything the chain touched, and the only things it didn't touch are the constants. So the constant fixed at closure *is* the constant that was there at the start. By symmetry, the values at the bottom are known from the values at either end of the chain. You can find $A$ any time you want: evaluate the definite integral.
 
-$$
-\psi_1(\lambda_n,\tau) = A_1 e^{-\beta\lambda_n} e^{i(k_1\lambda_n - \omega_1 M_2\tau)}
-$$
+### 3d. The edge case that proves it
 
-$$
-\psi_2(\lambda_n,\tau) = A_2 e^{-\beta(L-\lambda_n)} e^{i(-k_2\lambda_n - \omega_2 M_1\tau)}
-$$
+When $\beta = 0$ (equal masses), the envelope integral diverges and the computation above has nothing to grip — the symmetric case genuinely does not fix its own amplitude. That is why the Wave Lab normalizes by convention: $|A_1|^2 + |A_2|^2 = 1$, probability-style. The convention is not arbitrary either — it corresponds to the energy budget $E_{\text{total}} = 1/(2\beta)$, the finite total the waves would carry. For every $\beta > 0$, though, the amplitude is physical, not conventional: pick the system's energy scale for $E_{\text{total}}$ and $A_n$ follows.
 
-Every symbol, and how to solve for it:
+---
 
-- **$M_1, M_2$** — the two masses. Display units; only the ratio matters, the absolute scale drops out.
-- **$\lambda_n$** — the spatial coordinate along the line between the bodies, $0$ to $L$.
-- **$\tau$** — the phasor clock: a knob for the phase angle, not for either mass.
-- **$L = 4\pi$** — the span. Chosen as the sampling window: two full wavelengths at $k_1 = 1$, one segment of the repeating decaying train.
-- **$k_1 = 1$, $\omega_1 = 1$** — display normalization: unit phase velocity. (Physical form: $k_n = 2\pi/\lambda_n$, $\omega_n = 2\pi M_n c^2/h$.)
-- **$k_2 = \sqrt{M_2/M_1}$** — from the wavelength ratio $|\lambda_2|/|\lambda_1| = \sqrt{M_1/M_2}$.
-- **$\omega_2 = k_1 k_2/\omega_1$** — from the symmetry condition $k_1 k_2 = \omega_1 \omega_2$.
-- **$\beta = |M_1-M_2|/(M_1+M_2)$** — the decay rate, from the mass asymmetry. Zero when the masses are equal: the symmetric case is lossless. Also the envelope tilt and the orbital eccentricity.
-- **$A_1 = \sqrt{M_2/(M_1+M_2)}$, $A_2 = \sqrt{M_1/(M_1+M_2)}$** — from the vanishing total differential ($k_1A_1 = \omega_2A_2$ at matched phase) plus $|A_1|^2+|A_2|^2 = 1$. Cross-coupled: each amplitude is set by the companion mass.
-- **$\lambda^* = L\,M_2/(M_1+M_2)$** — the balance point, the mass-weighted node: $M_1\lambda^* = M_2(L-\lambda^*)$.
+## 4. The worked example: decay and amplitude through the stack
 
-The derivation gave the form. Electronics gave the guess its confidence. Exponential decay made the energy finite. The conservation law, read through the chain rule, fixed the amplitudes. What remains undetermined is nothing structural — only the absolute scale, which the theory, being a theory of ratios, never needed.
+| Level | What happens to decay and amplitude |
+|---|---|
+| **d1.** Conservation: $d\psi_s = 0$ | The invariant is declared. Total energy $E_{\text{total}}$ enters here — it is the budget that will fix $A_n$ at the end. Nothing yet about decay. |
+| **d2.** Wave solutions: $\psi_1$, $\psi_2$ | $A_n$ enters as an undetermined scale factor; the $i$ enters from relative motion. The form is Ae^{i\phi}: scale unknown, rotation known. |
+| **d3.** Gradients: $\partial\psi_n/\partial M_m$ | $A_n$ passes through untouched ($dA_n/dM_m = 0$). The chain rule gives the ratio $A_1^2/A_2^2 = M_2/M_1$ at matched phase. |
+| **d4.** Contraction: $v = f\lambda$ | Coordinates collapse; $A_n$ still untouched. The limit over linear motion does a derivative's work — one variable fewer, scale unaffected. |
+| **d5.** Ground: $L_n = PE_n - KE_n = 0$ | $A_n$ vanishes from the equations. Its information is held by the boundary conditions $m_1$, $m_2$ — and those same conditions dictate $\beta = \|M_1-M_2\|/(M_1+M_2)$. |
+| **u1.** Space integrals: $W_n$, $J_n$ | $A_n$ returns as the unknown scale of the accumulation. The envelope $e^{-\beta x}$ is integrated: $\int e^{-2\beta x}dx = 1/(2\beta)$. |
+| **u2.** Boundary evaluation | The line collapses to its endpoints — start conditions (full strength at the source) and end conditions (decayed by $e^{-\beta L}$) are read off. |
+| **u3–u4.** Time integrals: $F_n$, $X_n$ | $A_n$ rides along, still undetermined, through the rotation and the wobble. |
+| **u5.** Closure: $F_n(\tau) = J_n(L,\tau) - W_n(L,\tau)$ | The definite integral is evaluated between the known bounds. Envelope integral + symmetry ratio + energy budget: $A_n$ is solved. The stack hands back everything it was owed. |
+
+---
+
+## 5. Standing waves, nodes, and harmonies
+
+The summed field $\psi_s = \psi_1 + \psi_2$ is two counter-propagating decaying waves superposed: a standing-wave structure with nodes where they cancel. The balance point $\lambda^*$ is the mass-weighted node of that structure — the negotiation point of the mutual pull, where the lever arms balance ($M_1\lambda^* = M_2(L-\lambda^*)$). Only certain ratios lock stably into the structure; the rest beat against each other and wash out. Those stable ratios are the harmonies — the integer relations Kepler was chasing in *Harmonices Mundi*, now sitting inside $A_1/A_2 = \sqrt{M_2/M_1}$.
+
+---
+
+## 6. Every symbol, and the level that fixes it
+
+- **$M_1, M_2$** — the masses; boundary conditions. Fixed at **d5** (the only data at the ground floor). Display units; only the ratio matters.
+- **$\lambda_n$** — spatial coordinate, $0$ to $L$. Fixed at **d4** (the contraction).
+- **$\tau$** — the phasor clock. Fixed at **d2** (the $i$ in the solution).
+- **$L = 4\pi$** — the span: the Wave Lab's sampling window, two wavelengths at $k_1 = 1$. A display choice (§5 of this note), not a derived quantity.
+- **$k_1 = 1$, $\omega_1 = 1$** — display normalization, unit phase velocity. (Physical: $k_n = 2\pi/\lambda_n$, $\omega_n = 2\pi M_n c^2/h$.)
+- **$k_2 = \sqrt{M_2/M_1}$** — fixed at **d3** (wavelength ratio).
+- **$\omega_2 = k_1k_2/\omega_1$** — fixed at **d3** (symmetry condition $k_1k_2 = \omega_1\omega_2$).
+- **$\beta = |M_1-M_2|/(M_1+M_2)$** — fixed at **d5**, from the boundary asymmetry. Three jobs: decay rate, envelope tilt, orbital eccentricity.
+- **$A_1, A_2$** — fixed at **u5**, by envelope integral + symmetry ratio + energy budget: $A_n = \sqrt{2\beta E_{\text{total}}\,M_{\text{companion}}/(M_1+M_2)}$. Cross-coupled: each set by the companion mass.
+- **$\lambda^* = L\,M_2/(M_1+M_2)$** — the balance point, the mass-weighted node.
+
+The stack owes nothing it hasn't paid: the phase was derived from the symmetry, the decay from the boundary conditions, and the amplitude — the integration constant of the whole trip — from the definite integral at closure.
