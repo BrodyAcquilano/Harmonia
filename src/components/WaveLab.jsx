@@ -695,7 +695,7 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
     return out
   }
 
-  const drawPhasor = (cx, cy, slotIdx, color, label) => {
+  const drawPhasor = (cx, cy, slotIdx, color, label, labelPos) => {
     ctx.lineWidth = 2
     ctx.strokeStyle = color
     ctx.beginPath()
@@ -711,9 +711,15 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
     ctx.arc(cx, cy, 2.5, 0, 2 * Math.PI)
     ctx.fill()
     ctx.font = '13px "IBM Plex Mono", monospace'
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'alphabetic'
-    ctx.fillText(label, cx, cy - r - 8)
+    if (labelPos === 'right') {
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(label, cx + r + 10, cy)
+    } else {
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'alphabetic'
+      ctx.fillText(label, cx, cy - r - 8)
+    }
   }
 
   // Horizontal banner: time runs x0 → x1 (either direction), wobble
@@ -771,11 +777,11 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
   }
 
   // Top-left phasor: banners run right (x) and down (y) — the top/left L.
-  drawPhasor(tl.x, tl.y, 0, colA, 'M' + sub[pair.a])
+  drawPhasor(tl.x, tl.y, 0, colA, 'M' + sub[pair.a], 'top')
   drawBannerH(tl.x + r + gap, far, tl.y, bx(0), colA, 'x')
   drawBannerV(tl.x, tl.y + r + gap, far, by(0), colA, 'y')
   // Bottom-right phasor: banners run left (x) and up (y) — the bottom/right L.
-  drawPhasor(br.x, br.y, 1, colB, 'M' + sub[pair.b])
+  drawPhasor(br.x, br.y, 1, colB, 'M' + sub[pair.b], 'right')
   drawBannerH(br.x - r - gap, near, br.y, bx(1), colB, 'x')
   drawBannerV(br.x, br.y - r - gap, near, by(1), colB, 'y')
 
@@ -1939,7 +1945,7 @@ export default function WaveLab() {
               <div className="legend">
                 <span><i className="swatch" style={{ background: TB_PAIRS[i].colA }} /><Tex tex={`X_{${TB_PAIRS[i].a + 1},x},\\,X_{${TB_PAIRS[i].a + 1},y}`} /></span>
                 <span><i className="swatch" style={{ background: TB_PAIRS[i].colB }} /><Tex tex={`X_{${TB_PAIRS[i].b + 1},x},\\,X_{${TB_PAIRS[i].b + 1},y}`} /></span>
-                <span><Tex tex="\\text{static snapshot --- one phasor per body-wave}" /></span>
+                <span><Tex tex="\text{static snapshot --- one phasor per body-wave}" /></span>
               </div>
             </div>
             <div className="tb-square-wrap">
@@ -2161,20 +2167,20 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>Six reciprocal waves <span className="eq-note">— static snapshots · display units</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Pair ψ — M₁ = 3, M₂ = 4, span 5</span><span className="eq-line"><Tex tex="\\psi_1 = \\sum_j A_1 e^{-\\beta\\lambda_j} [\\cos(\\lambda_j - 4\\tau) + i\\sin(\\lambda_j - 4\\tau)]" /></span><span className="eq-line"><Tex tex="\\psi_2 = \\sum_j A_2 e^{-\\beta(5-\\lambda_j)} [\\cos(-k_2\\lambda_j - \\omega_2 \\cdot 3\\tau) + i\\sin(-k_2\\lambda_j - \\omega_2 \\cdot 3\\tau)]" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Pair φ — M₁ = 3, M₃ = 5, span 4</span><span className="eq-line"><Tex tex="\\phi_1 = \\sum_j A_1 e^{-\\beta\\lambda_j} [\\cos(\\lambda_j - 5\\tau) + i\\sin(\\lambda_j - 5\\tau)]" /></span><span className="eq-line"><Tex tex="\\phi_3 = \\sum_j A_3 e^{-\\beta(4-\\lambda_j)} [\\cos(-k_3\\lambda_j - \\omega_3 \\cdot 3\\tau) + i\\sin(-k_3\\lambda_j - \\omega_3 \\cdot 3\\tau)]" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Pair χ — M₂ = 4, M₃ = 5, span 3</span><span className="eq-line"><Tex tex="\\chi_2 = \\sum_j A_2 e^{-\\beta\\lambda_j} [\\cos(\\lambda_j - 5\\tau) + i\\sin(\\lambda_j - 5\\tau)]" /></span><span className="eq-line"><Tex tex="\\chi_3 = \\sum_j A_3 e^{-\\beta(3-\\lambda_j)} [\\cos(-k_3\\lambda_j - \\omega_3 \\cdot 4\\tau) + i\\sin(-k_3\\lambda_j - \\omega_3 \\cdot 4\\tau)]" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Normalization</span><span className="eq-line"><Tex tex="\\text{each pair: } k_1 = \\omega_1 = 1 \\text{ is the normalized reference scale, not derived}" /></span><span className="eq-line"><Tex tex="k_2 = \\omega_2 = \\sqrt{M_b/M_a} \\text{ is the relative value the 3-4-5 data fix} \\;\\cdot\\; \\text{see the right panel for the solved numbers}" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Pair ψ — M₁ = 3, M₂ = 4, span 5</span><span className="eq-line"><Tex tex="\psi_1 = \sum_j A_1 e^{-\beta\lambda_j} [\cos(\lambda_j - 4\tau) + i\sin(\lambda_j - 4\tau)]" /></span><span className="eq-line"><Tex tex="\psi_2 = \sum_j A_2 e^{-\beta(5-\lambda_j)} [\cos(-k_2\lambda_j - \omega_2 \cdot 3\tau) + i\sin(-k_2\lambda_j - \omega_2 \cdot 3\tau)]" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Pair φ — M₁ = 3, M₃ = 5, span 4</span><span className="eq-line"><Tex tex="\phi_1 = \sum_j A_1 e^{-\beta\lambda_j} [\cos(\lambda_j - 5\tau) + i\sin(\lambda_j - 5\tau)]" /></span><span className="eq-line"><Tex tex="\phi_3 = \sum_j A_3 e^{-\beta(4-\lambda_j)} [\cos(-k_3\lambda_j - \omega_3 \cdot 3\tau) + i\sin(-k_3\lambda_j - \omega_3 \cdot 3\tau)]" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Pair χ — M₂ = 4, M₃ = 5, span 3</span><span className="eq-line"><Tex tex="\chi_2 = \sum_j A_2 e^{-\beta\lambda_j} [\cos(\lambda_j - 5\tau) + i\sin(\lambda_j - 5\tau)]" /></span><span className="eq-line"><Tex tex="\chi_3 = \sum_j A_3 e^{-\beta(3-\lambda_j)} [\cos(-k_3\lambda_j - \omega_3 \cdot 4\tau) + i\sin(-k_3\lambda_j - \omega_3 \cdot 4\tau)]" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Normalization</span><span className="eq-line"><Tex tex="\text{each pair: } k_1 = \omega_1 = 1 \text{ is the normalized reference scale, not derived}" /></span><span className="eq-line"><Tex tex="k_2 = \omega_2 = \sqrt{M_b/M_a} \text{ is the relative value the 3-4-5 data fix} \;\cdot\; \text{see the right panel for the solved numbers}" /></span></div>
                 </div>
               </div>
               <div className="eq-group">
                 <h4>Twelve wobbles <span className="eq-note">— plotted · static snapshots</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Pair-line impulse and wobble</span><span className="eq-line"><Tex tex="F_n^{(ab)}(t) = \\int_0^{L_{ab}} [\\mathrm{Im}(W_n^{(ab)}) - \\mathrm{Re}(W_n^{(ab)})] \\, d\\lambda" /></span><span className="eq-line"><Tex tex="X_n^{(ab)}(t) = \\int_0^t F_n^{(ab)}(t') \\, dt'" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Branch components (direction cosines)</span><span className="eq-line"><Tex tex="X_{n,x}^{(ab)} = c_x^{(ab)} X_n^{(ab)}, \\qquad X_{n,y}^{(ab)} = c_y^{(ab)} X_n^{(ab)}" /></span><span className="eq-line"><Tex tex="(c_x, c_y): \\; \\psi\\,(-0.6, -0.8), \\; \\phi\\,(0, -1), \\; \\chi\\,(1, 0) \\text{ --- from the Burrau coordinates}" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Pair-line impulse and wobble</span><span className="eq-line"><Tex tex="F_n^{(ab)}(t) = \int_0^{L_{ab}} [\mathrm{Im}(W_n^{(ab)}) - \mathrm{Re}(W_n^{(ab)})] \, d\lambda" /></span><span className="eq-line"><Tex tex="X_n^{(ab)}(t) = \int_0^t F_n^{(ab)}(t') \, dt'" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Branch components (direction cosines)</span><span className="eq-line"><Tex tex="X_{n,x}^{(ab)} = c_x^{(ab)} X_n^{(ab)}, \qquad X_{n,y}^{(ab)} = c_y^{(ab)} X_n^{(ab)}" /></span><span className="eq-line"><Tex tex="(c_x, c_y): \; \psi\,(-0.6, -0.8), \; \phi\,(0, -1), \; \chi\,(1, 0) \text{ --- from the Burrau coordinates}" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Wobble per body (nested sums)</span><span className="eq-line"><Tex tex="X_1 = (X_{1,x}^{(12)} + X_{1,y}^{(12)}) + (X_{1,x}^{(13)} + X_{1,y}^{(13)})" /></span><span className="eq-line"><Tex tex="X_2 = (X_{2,x}^{(12)} + X_{2,y}^{(12)}) + (X_{2,x}^{(23)} + X_{2,y}^{(23)})" /></span><span className="eq-line"><Tex tex="X_3 = (X_{3,x}^{(13)} + X_{3,y}^{(13)}) + (X_{3,x}^{(23)} + X_{3,y}^{(23)})" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Phasor snapshot</span><Tex tex="\\theta_n^{(ab)} = \\arg \\int_0^{L_{ab}} W_n^{(ab)} \\, d\\lambda \\;\\; \\text{at } \\tau = 0" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\\text{One phasor per body-wave feeds both its } x \\text{ and } y \\text{ banners: the phase angle is shared, and the branches differ only in the direction they integrate over. The machine still computes the radial pair-line version --- the } x/y \\text{ split shown is the working branch projection (note \\S10), not an independent per-branch derivation.}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Phasor snapshot</span><Tex tex="\theta_n^{(ab)} = \arg \int_0^{L_{ab}} W_n^{(ab)} \, d\lambda \;\; \text{at } \tau = 0" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{One phasor per body-wave feeds both its } x \text{ and } y \text{ banners: the phase angle is shared, and the branches differ only in the direction they integrate over. The machine still computes the radial pair-line version --- the } x/y \text{ split shown is the working branch projection (note \S10), not an independent per-branch derivation.}" /></div>
                 </div>
               </div>
             </>

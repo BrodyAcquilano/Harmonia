@@ -207,3 +207,9 @@ Everything is a static snapshot — nothing rotates. The phasor is drawn as a ci
 The Wave Lab's three-body tab is where the impulses get used: no per-level graphs, no per-body descent — the quantum tech stack's definite integrals are taken as given, integrated, and plotted as the squares above. Masses are fixed at 3, 4, 5 — the 3-4-5 problem — and the right panel shows the solved pair values, now including the branch direction cosines, instead of sliders.
 
 From there the reconstruction follows the two-body procedure: analyze the orthographic projections on each plane, take the apparent projection onto the plane we don't know, and draw the six circles — each body's two pair-circles about the pair balance points, re-referred to the single center of §7. Once the problem can be visualized — six circles, three balance points, one center — the summation of §8 has something to work on.
+
+### What the wobbles should look like
+
+The three masses (3, 4, 5) are close together and the starting separations are comparable (spans 5, 4, 3), and the boundary conditions put the bodies on near-circular paths — so the wobbles *should* look alike: similar frequencies, similar amplitudes, near-uniform across the three pairs. The uniformity in the lab is the expectation, not a bug.
+
+Two of the three pairs drive only one branch direction: the $\phi$ pair's $x$ banners are flat, and the $\chi$ pair's $y$ banners are flat. That is the right triangle speaking. The $\phi$ side runs vertically ($M_1 \to M_3$ at $x = 1$), so the pair pulls purely in $y$; the $\chi$ side runs horizontally ($M_2 \to M_3$ at $y = -1$), so it pulls purely in $x$. Only the hypotenuse $\psi$ meets its bodies at a slant, with both $x$ and $y$ components — direction cosines $(-0.6, -0.8)$. The flat banners are the boundary conditions' own prediction, confirmed by the $(0,-1)$ and $(1,0)$ cosines in the right panel.
