@@ -653,9 +653,98 @@ function threeBodyBranchData() {
 // phasor snapshots in diagonal corners (top-left = first body, bottom-right
 // = second body), each with thin x/y wobble banners forming an L. The center
 // carries the wave names; the other two corners stay empty so banner
-// ownership is always clear. One phasor feeds both its x and y banners —
-// the phase angle is shared, and the branches differ only in the direction
-// they integrate over.
+// ownership is always clear. Each nonzero branch gets its own phasor —
+// a negative direction cosine flips that branch's phase by pi.
+// Initial boundary conditions, drawn as the first square: the 3-4-5 right
+// triangle at tau = 0, the three masses released from rest at the vertices.
+// Burrau coordinates from the note (center of mass at the origin), plotted
+// y-up. Disc area is proportional to mass; span brackets label each side
+// length with the pair-wave that lives on it.
+function renderTBBoundarySquare(ctx, canvas) {
+  const dpr = window.devicePixelRatio || 1
+  const S = Math.max(canvas.clientWidth, 50)
+  const W = Math.round(S * dpr)
+  if (canvas.width !== W || canvas.height !== W) {
+    canvas.width = W
+    canvas.height = W
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  ctx.fillStyle = '#fffdf4'
+  ctx.fillRect(0, 0, S, S)
+
+  // Math coords (y up): M1 = (1, 3), M2 = (-2, -1), M3 = (1, -1).
+  const u = S / 6.5
+  const X = (mx) => S * 0.30 + (mx + 2) * u
+  const Y = (my) => S * 0.16 + (3 - my) * u
+  const M1 = { x: X(1), y: Y(3), m: 3, c: C1, tag: 'M\u2081' }
+  const M2 = { x: X(-2), y: Y(-1), m: 4, c: C2, tag: 'M\u2082' }
+  const M3 = { x: X(1), y: Y(-1), m: 5, c: TB_C3, tag: 'M\u2083' }
+
+  // Triangle sides first; discs drawn on top cover the ends.
+  ctx.lineWidth = 1.5
+  ctx.strokeStyle = '#5a4a2f'
+  ctx.beginPath()
+  ctx.moveTo(M1.x, M1.y)
+  ctx.lineTo(M2.x, M2.y)
+  ctx.lineTo(M3.x, M3.y)
+  ctx.closePath()
+  ctx.stroke()
+
+  // Span brackets: dimension lines offset outward from each side, with end
+  // ticks. Outward normals: chi below the base, phi right of the leg,
+  // psi off the hypotenuse away from M3.
+  const gap = S * 0.045, tick = S * 0.012
+  ctx.lineWidth = 1
+  ctx.strokeStyle = '#a89a72'
+  const bracket = (ax, ay, bx, by, nx, ny) => {
+    const x0 = ax + nx * gap, y0 = ay + ny * gap
+    const x1 = bx + nx * gap, y1 = by + ny * gap
+    ctx.beginPath()
+    ctx.moveTo(x0, y0)
+    ctx.lineTo(x1, y1)
+    ctx.moveTo(x0 - nx * tick, y0 - ny * tick)
+    ctx.lineTo(x0 + nx * tick, y0 + ny * tick)
+    ctx.moveTo(x1 - nx * tick, y1 - ny * tick)
+    ctx.lineTo(x1 + nx * tick, y1 + ny * tick)
+    ctx.stroke()
+    return [(x0 + x1) / 2 + nx * S * 0.042, (y0 + y1) / 2 + ny * S * 0.042]
+  }
+  const dimLabel = (x, y, text, angle) => {
+    ctx.save()
+    ctx.translate(x, y)
+    ctx.rotate(angle)
+    ctx.fillStyle = '#715f43'
+    ctx.font = '13px "IBM Plex Mono", monospace'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(text, 0, 0)
+    ctx.restore()
+  }
+  let p = bracket(M2.x, M2.y, M3.x, M3.y, 0, 1)
+  dimLabel(p[0], p[1], '\u03c7 \u00b7 3', 0)
+  p = bracket(M3.x, M3.y, M1.x, M1.y, 1, 0)
+  dimLabel(p[0], p[1], '\u03d5 \u00b7 4', -Math.PI / 2)
+  p = bracket(M2.x, M2.y, M1.x, M1.y, -0.6, -0.8)
+  dimLabel(p[0], p[1], '\u03c8 \u00b7 5', Math.atan2(M1.y - M2.y, M1.x - M2.x))
+
+  // Mass discs: area proportional to mass, body color, M-label in body color.
+  ctx.font = 'bold 14px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  for (const b of [M1, M2, M3]) {
+    const r = S * 0.05 * Math.sqrt(b.m / 3)
+    ctx.fillStyle = '#fffdf4'
+    ctx.strokeStyle = b.c
+    ctx.lineWidth = 3
+    ctx.beginPath()
+    ctx.arc(b.x, b.y, r, 0, 2 * Math.PI)
+    ctx.fill()
+    ctx.stroke()
+    ctx.fillStyle = b.c
+    ctx.fillText(b.tag, b.x, b.y + 1)
+  }
+}
+
 function renderTBPhasorSquare(ctx, canvas, pairIdx) {
   const { T, NT, pairs } = threeBodyBranchData()
   const pair = TB_SOLVED[pairIdx]
@@ -1396,6 +1485,7 @@ export default function WaveLab() {
   const canvasTBSq0Ref = useRef(null)
   const canvasTBSq1Ref = useRef(null)
   const canvasTBSq2Ref = useRef(null)
+  const canvasTBBdryRef = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
   stateRef.current = { subtab, M1, M2, playing, speed, showSum, waveDisplay, ppDisplay, orbitZoom }
@@ -1464,6 +1554,8 @@ export default function WaveLab() {
         if (ppt) renderPushPullTimeFrame(ppt.getContext('2d'), ppt, s, s.ppDisplay)
       }
       if (s.subtab === 'threebody') {
+        const bd = canvasTBBdryRef.current
+        if (bd) renderTBBoundarySquare(bd.getContext('2d'), bd)
         const sqs = [canvasTBSq0Ref.current, canvasTBSq1Ref.current, canvasTBSq2Ref.current]
         sqs.forEach((c, i) => { if (c) renderTBPhasorSquare(c.getContext('2d'), c, i) })
       }
@@ -1993,6 +2085,22 @@ export default function WaveLab() {
           </>
         ) : subtab === 'threebody' ? (
           <>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title"><Tex tex="\text{Initial boundary conditions}" /></h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="M_1 = 3" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="M_2 = 4" /></span>
+                <span><i className="swatch" style={{ background: TB_C3 }} /><Tex tex="M_3 = 5" /></span>
+                <span style={{ textAlign: 'center' }}><Tex tex="\text{released from rest --- } \tau = 0" /></span>
+              </div>
+            </div>
+            <div className="tb-square-wrap">
+              <canvas ref={canvasTBBdryRef} className="wave-canvas-sq" />
+            </div>
+          </div>
           {[canvasTBSq0Ref, canvasTBSq1Ref, canvasTBSq2Ref].map((ref, i) => (
           <div className="graph-box" key={TB_PAIRS[i].tag}>
             <div className="graph-title-row">
