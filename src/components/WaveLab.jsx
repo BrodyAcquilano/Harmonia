@@ -1542,7 +1542,7 @@ export default function WaveLab() {
           <>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Push-Pull Density (spatial)</h2>
+              <h2 className="graph-title">Push-Pull Density (spatial) · not used at this layer</h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
