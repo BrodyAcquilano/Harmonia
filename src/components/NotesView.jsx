@@ -17,6 +17,7 @@ const NOTE_ORDER = [
   '../../notes/symmetric-inertia-transfer.md',
   '../../notes/lambda-derivation.md',
   '../../notes/hidden-phasor.md',
+  '../../notes/keplers-laws.md',
 ]
 
 function titleFromPath(path) {

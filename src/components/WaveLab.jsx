@@ -335,6 +335,151 @@ function renderEnvelopeFrame(ctx, canvas, s, tau) {
   }
 }
 
+// Derivatives tab, lower graph: the summed total on its own, drawn on the
+// same vertical scale as the component graph so the cancellation reads directly.
+function renderTotalFrame(ctx, canvas, s, tau) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  const tot = P.k1 * P.A1 + P.w2 * P.A2 + P.w1 * P.A1 + P.k2 * P.A2
+  const yMax = Math.max(tot * 1.15, 0.2)
+  const totalFn = (x) =>
+    dPsi_dM(1, x, tau, P, s.M1, s.M2).sum.re +
+    dPsi_dM(2, x, tau, P, s.M1, s.M2).sum.re
+  const { X, Y } = drawGrid(ctx, g, yMax)
+  trace(ctx, X, Y, totalFn, CS, 2.75, [])
+}
+
+// Derivatives tab, middle graph: the two half-waves.
+//   dM₁ half = ∂ψ₁/∂M₁ + ∂ψ₂/∂M₁  (sum of the solid pair)
+//   dM₂ half = ∂ψ₁/∂M₂ + ∂ψ₂/∂M₂  (sum of the dashed pair)
+// They are exact opposites (S₁ = −S₂), hence the flat total below.
+function renderHalfFrame(ctx, canvas, s, tau) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  const tot = P.k1 * P.A1 + P.w2 * P.A2 + P.w1 * P.A1 + P.k2 * P.A2
+  const yMax = Math.max(tot * 1.15, 0.2)
+  const { X, Y } = drawGrid(ctx, g, yMax)
+  trace(ctx, X, Y, (x) => dPsi_dM(1, x, tau, P, s.M1, s.M2).sum.re, C1, 2, [])
+  trace(ctx, X, Y, (x) => dPsi_dM(2, x, tau, P, s.M1, s.M2).sum.re, C2, 2, [6, 4])
+}
+
+// Integration tab: Work/Impulse cross pairs (with respect to M₁).
+//   Pair 1: W₁ (work of ψ₁) + J₂ (impulse of ψ₂)
+//   Pair 2: W₂ (work of ψ₂) + J₁ (impulse of ψ₁)
+//   Work: Wₙ(x) = ∫₀ˣ Re(ψₙ(t)) dt (spatial, solid)
+//   Impulse: Jₙ(x) = ∫₀ˣ Im(ψₙ(t)) dt (temporal, dashed)
+//   Shading: green where work is on top (inertia stored),
+//   red where impulse is on top (inertia released); alternates at crossings.
+function renderPairFrame(ctx, canvas, s, tau, pair) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  // Precompute work and impulse via trapezoidal rule
+  const N = 200
+  const work1 = []
+  const work2 = []
+  const imp1 = []
+  const imp2 = []
+  let w1 = 0, w2 = 0, j1 = 0, j2 = 0
+  let prevX = 0
+  let prevW1 = psi1(0, tau, P, s.M2).re
+  let prevW2 = psi2(0, tau, P, s.M1).re
+  let prevJ1 = psi1(0, tau, P, s.M2).im
+  let prevJ2 = psi2(0, tau, P, s.M1).im
+  for (let i = 0; i <= N; i++) {
+    const x = (i / N) * X_MAX
+    const p1 = psi1(x, tau, P, s.M2)
+    const p2 = psi2(x, tau, P, s.M1)
+    if (i > 0) {
+      const dx = x - prevX
+      w1 += ((prevW1 + p1.re) / 2) * dx
+      w2 += ((prevW2 + p2.re) / 2) * dx
+      j1 += ((prevJ1 + p1.im) / 2) * dx
+      j2 += ((prevJ2 + p2.im) / 2) * dx
+    }
+    work1.push(w1)
+    work2.push(w2)
+    imp1.push(j1)
+    imp2.push(j2)
+    prevX = x
+    prevW1 = p1.re
+    prevW2 = p2.re
+    prevJ1 = p1.im
+    prevJ2 = p2.im
+  }
+  // Select the pair: pair=1 → W₁+J₁, pair=2 → W₂+J₂
+  // Wₙ = potential work of Mₙ, Jₙ = impulse generated, Wₙ−Jₙ = inertia remaining.
+  const arr1 = pair === 1 ? work1 : work2
+  const arr2 = pair === 1 ? imp1 : imp2
+  const color1 = pair === 1 ? C1 : C2
+  const color2 = pair === 1 ? C1 : C2
+  // For pair 1: W₁ solid blue, J₁ dashed blue. For pair 2: W₂ solid orange, J₂ dashed orange.
+  const dash1 = []
+  const dash2 = [6, 4]
+  const diffArr = arr1.map((v, i) => v - arr2[i])
+  const all = s.waveDisplay === 'sum' ? diffArr : [...arr1, ...arr2, ...diffArr]
+  const yMax = Math.max(Math.abs(Math.min(...all)) * 1.15, Math.abs(Math.max(...all)) * 1.15, 0.1)
+  const { X, Y } = drawGrid(ctx, g, yMax)
+  const interp = (arr) => (x) => {
+    const idx = Math.min(Math.floor((x / X_MAX) * N), N - 1)
+    const t = ((x / X_MAX) * N) - idx
+    return arr[idx] * (1 - t) + arr[idx + 1] * t
+  }
+  if (s.waveDisplay === 'waves' || s.waveDisplay === 'all') {
+    // Shade area between the curves: green where work is on top (inertia stored),
+    // red where impulse is on top (inertia released).
+    // Alternates at each crossing point.
+    const CGREEN = '#16a34a'
+    const CRED = '#dc2626'
+    ctx.save()
+    ctx.globalAlpha = 0.18
+    const n = 400
+    let segStart = 0
+    let segAbove = null // true if arr1 (work) is above arr2 (impulse)
+    const fillSeg = (x0, x1, workOnTop) => {
+      if (x1 <= x0) return
+      ctx.fillStyle = workOnTop ? CGREEN : CRED
+      ctx.beginPath()
+      const m = 50
+      let first = true
+      for (let i = 0; i <= m; i++) {
+        const x = x0 + (i / m) * (x1 - x0)
+        if (first) { ctx.moveTo(X(x), Y(interp(arr1)(x))); first = false }
+        else ctx.lineTo(X(x), Y(interp(arr1)(x)))
+      }
+      for (let i = m; i >= 0; i--) {
+        const x = x0 + (i / m) * (x1 - x0)
+        ctx.lineTo(X(x), Y(interp(arr2)(x)))
+      }
+      ctx.closePath()
+      ctx.fill()
+    }
+    for (let i = 0; i <= n; i++) {
+      const x = (i / n) * X_MAX
+      const d = interp(arr1)(x) - interp(arr2)(x)
+      const above = d >= 0
+      if (segAbove === null) segAbove = above
+      if (above !== segAbove) {
+        // Crossing between previous x and this x — approximate crossing point
+        const xp = ((i - 1) / n) * X_MAX
+        // Linear interpolation for crossing
+        const dPrev = interp(arr1)(xp) - interp(arr2)(xp)
+        const t = Math.abs(dPrev) / (Math.abs(dPrev) + Math.abs(d))
+        const xc = xp + t * (x - xp)
+        fillSeg(segStart, xc, segAbove)
+        segStart = xc
+        segAbove = above
+      }
+    }
+    fillSeg(segStart, X_MAX, segAbove)
+    ctx.restore()
+    trace(ctx, X, Y, interp(arr1), color1, 2, dash1)
+    trace(ctx, X, Y, interp(arr2), color2, 2, dash2)
+  }
+  if (s.waveDisplay === 'sum' || s.waveDisplay === 'all') {
+    trace(ctx, X, Y, interp(diffArr), CS, 2.75, [])
+  }
+}
+
 // Gravity tab, third/fourth graphs: per-body push-pull.
 //   P_n(lambda) = W_n(lambda) - J_n(lambda), body n alone.
 // The sign belongs to one body, not to the pair, so each body gets its
@@ -415,6 +560,87 @@ function renderBodyPushPullFrame(ctx, canvas, s, tau, body) {
   fillSeg(segStart, X_MAX, segPush)
   ctx.restore()
   trace(ctx, X, Y, interp, color, 2, [])
+}
+
+// ---- Motion tab, time domain ----
+// At each phasor time τ, the net released impulse on body n is
+//   Fₙ(τ) = Jₙ(L,τ) − Wₙ(L,τ) = ∫₀ᴸ [Im(ψₙ) − Re(ψₙ)] dλₙ.
+// Integrating over τ gives the wobble: Xₙ(τ) = ∫₀^τ Fₙ(τ′) dτ′.
+// Cached by (M1, M2) since it doesn't depend on the animation frame.
+// Each body's wobble is sampled over its OWN natural period — F₁ oscillates
+// at w₁M₂ = M₂ in τ, F₂ at w₂M₁ = √(M₁M₂) — so each curve closes exactly and
+// the live dots can wrap on their own period with no teleport at the loop.
+let wobbleCache = { key: null }
+function wobbleCurves(M1, M2, P) {
+  const T1 = (2 * Math.PI) / Math.max(M2, 0.05)
+  const w2M1 = P.w2 * Math.max(M1, 0)
+  const T2 = w2M1 > 1e-9 ? (2 * Math.PI) / w2M1 : T1
+  const key = `${M1}|${M2}|${T1}|${T2}`
+  if (wobbleCache.key === key) return wobbleCache
+  const NT = 720, NS = 120
+  const dx = X_MAX / NS
+  // Net impulse + wobble of one body over its own period T.
+  const sampleBody = (T, n) => {
+    const dt = T / NT
+    const f = [], x = []
+    let c = 0
+    for (let i = 0; i <= NT; i++) {
+      const t = (i / NT) * T
+      let s = 0
+      for (let j = 0; j <= NS; j++) {
+        const px = (j / NS) * X_MAX
+        const p = n === 1 ? psi1(px, t, P, M2) : psi2(px, t, P, M1)
+        const w = (j === 0 || j === NS) ? 0.5 : 1
+        s += w * (p.im - p.re)
+      }
+      f.push(s * dx)
+      if (i > 0) c += ((f[i - 1] + f[i]) / 2) * dt
+      x.push(c)
+    }
+    // Center on zero over the body's own full period.
+    const m = x.reduce((a, b) => a + b, 0) / x.length
+    return { f, x: x.map((v) => v - m) }
+  }
+  const b1 = sampleBody(T1, 1), b2 = sampleBody(T2, 2)
+  wobbleCache = { key, tauMax: T1, T1, T2, NT, f1: b1.f, f2: b2.f, x1: b1.x, x2: b2.x }
+  return wobbleCache
+}
+
+// Sample one body's curve array at time t, wrapping on that body's own
+// period so live animations loop seamlessly at any mass ratio.
+function samplePeriodic(arr, T, NT, t) {
+  const tw = ((t % T) + T) % T
+  const idx = Math.min(Math.floor((tw / T) * NT), NT - 1)
+  const f = ((tw / T) * NT) - idx
+  return arr[idx] * (1 - f) + arr[idx + 1] * f
+}
+
+// Wobble vs time — STATIC snapshot of one full cycle (both directions).
+// X₁(t) blue, X₂(t) orange. No animation: this is the trajectory, not a frame.
+// The window is body 1's period; body 2 is shown over the same window via its
+// own periodic extension, exactly as the live dots draw it.
+function renderWobbleTimeFrame(ctx, canvas, s) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  const { tauMax, T2, NT, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
+  const all = [...x1, ...x2]
+  const yMax = Math.max(Math.abs(Math.min(...all)) * 1.15, Math.abs(Math.max(...all)) * 1.15, 0.1)
+  const { X, Y } = drawTimeGrid(ctx, g, yMax, tauMax)
+  trace(ctx, X, Y, (t) => samplePeriodic(x1, tauMax, NT, t), C1, 2.5, [], tauMax)
+  trace(ctx, X, Y, (t) => samplePeriodic(x2, T2, NT, t), C2, 2.5, [], tauMax)
+}
+
+// Net impulse vs time — STATIC snapshot of one full cycle.
+// F₁(t) blue, F₂(t) orange: the driver behind the wobble.
+function renderForceTimeFrame(ctx, canvas, s) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  const { tauMax, T2, NT, f1, f2 } = wobbleCurves(s.M1, s.M2, P)
+  const all = [...f1, ...f2]
+  const yMax = Math.max(Math.abs(Math.min(...all)) * 1.15, Math.abs(Math.max(...all)) * 1.15, 0.1)
+  const { X, Y } = drawTimeGrid(ctx, g, yMax, tauMax)
+  trace(ctx, X, Y, (t) => samplePeriodic(f1, tauMax, NT, t), C1, 2.5, [], tauMax)
+  trace(ctx, X, Y, (t) => samplePeriodic(f2, T2, NT, t), C2, 2.5, [], tauMax)
 }
 
 // Wobble diagram: m₁ dot left (blue), m₂ dot right (orange), each moving
@@ -606,16 +832,23 @@ function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
 // Motion tab: elliptical relative orbit — the step between the circular
 // apparent view and True Motion. Restores distance variance while keeping
 // the larger mass fixed, now at one focus of the ellipse (Kepler's first
-// law); both foci are drawn, the empty one as a cross. Display choices:
-// semi-major axis a = L, eccentricity e = 1/2 (fixed); the phase advances
-// uniformly with tau (Kepler's equation is not solved — this is the shape,
-// not the timing).
+// law); both foci are drawn, the empty one as a cross. The balance point
+// splits the separation L into the lever arms λ* and L−λ*, and their
+// normalized difference sets the eccentricity, so the shape follows the
+// masses: e = |λ*−(L−λ*)|/L = |M₁−M₂|/(M₁+M₂). Semi-major axis a = L,
+// semi-minor axis b = a√(1−e²). Equal masses give e = 0, a circle of
+// radius L — the apparent view returns as a special case. The phase
+// advances uniformly with tau (Kepler's equation is not solved — this is
+// the shape, not the timing).
 function renderEllipseFrame(ctx, canvas, s, tau) {
   const g = frameSetup(ctx, canvas)
   if (!(s.M1 + s.M2 > 0)) return
   const P = gravityParams(s.M1, s.M2)
   const { tauMax } = wobbleCurves(s.M1, s.M2, P)
-  const e = 0.5
+  // Balance point λ* = L·M₂/(M₁+M₂) splits L into λ* and L−λ*; the
+  // eccentricity is their normalized difference.
+  const lamStar = (X_MAX * s.M2) / (s.M1 + s.M2)
+  const e = Math.min(Math.abs(2 * lamStar - X_MAX) / X_MAX, 0.999) // e < 1 keeps r(φ) finite
   const a = X_MAX
   const c = a * e
   const b = a * Math.sqrt(1 - e * e)
@@ -1126,7 +1359,7 @@ export default function WaveLab() {
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Push-Pull of Mâ</h2>
+              <h2 className="graph-title">Push-Pull of M₁</h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
@@ -1139,7 +1372,7 @@ export default function WaveLab() {
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Push-Pull of Mâ</h2>
+              <h2 className="graph-title">Push-Pull of M₂</h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
@@ -1377,7 +1610,7 @@ export default function WaveLab() {
                 <span><Tex tex="M_{\max} \text{ fixed at a focus}" /></span>
               </div>
             </div>
-            <p className="graph-note">Restoring distance variance — the larger mass fixed.</p>
+            <p className="graph-note">Restoring distance variance — the larger mass fixed, the eccentricity set by the balance-point split.</p>
             <canvas ref={canvasEllipseRef} className="wave-canvas-orbit" />
             <div className="graph-caption"><Tex tex="T^2 \propto a^3" /></div>
             <div className="graph-footnote">xy plane</div>
@@ -1601,7 +1834,8 @@ export default function WaveLab() {
                   <div className="eq-box wide"><span className="eq-label">Center: the balance point</span><Tex tex="\lambda^*, \quad \lambda^* = L\frac{M_2}{M_1+M_2} \quad \text{— the center of mass}" /></div>
                   <div className="eq-box wide"><span className="eq-label">Apparent: the larger mass pinned</span><Tex tex="M_{\max} = \max(M_1, M_2)" /></div>
                   <div className="eq-box wide"><span className="eq-label">Apparent orbit (circular)</span><Tex tex="\mathbf{r}(\phi) = L(\cos\phi, \sin\phi) \quad \text{-- full separation}" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Elliptical orbit (M\text{ max} at a focus)</span><Tex tex="r(\phi) = \dfrac{a(1-e^2)}{1+e\cos\phi}, \quad a = L, \quad e = \tfrac{1}{2} \text{-- display choices}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Elliptical orbit (M max at a focus)</span><Tex tex="r(\phi) = \dfrac{a(1-e^2)}{1+e\cos\phi}, \quad a = L, \quad b = a\sqrt{1-e^2}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Eccentricity from the balance-point split</span><span className="eq-line"><Tex tex="e = \dfrac{|\lambda^*-(L-\lambda^*)|}{L} = \dfrac{|M_1-M_2|}{M_1+M_2}" /></span><span className="eq-line"><Tex tex="\text{equal masses } \to e = 0 \text{ (circle); one mass dominant } \to e \to 1" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Kepler's third law</span><Tex tex="T^2 \propto a^3" /></div>
                   <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{The period squared goes as the semi-major axis cubed: larger orbits take longer, steeply.}" /></div>
                   <div className="eq-box wide"><span className="eq-label">True: separation split at λ*</span><Tex tex="\mathbf{r}_1(\phi) = -\lambda^*(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +(L-\lambda^*)(\cos\phi, \sin\phi)" /></div>
@@ -1616,3 +1850,4 @@ export default function WaveLab() {
     </div>
   )
 }
+
