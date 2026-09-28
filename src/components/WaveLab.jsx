@@ -906,6 +906,59 @@ function renderEllipseFrame(ctx, canvas, s, tau) {
   ctx.restore()
 }
 
+// Motion tab: static ellipse geometry diagram, drawn underneath the animated
+// Elliptical Relative Motion. Same a/b/e as the animation; labels the
+// semi-major axis a (center → vertex) and the semi-minor axis b
+// (center → co-vertex), with both foci marked.
+function renderEllipseGeomFrame(ctx, canvas, s) {
+  const g = frameSetup(ctx, canvas)
+  if (!(s.M1 + s.M2 > 0)) return
+  const lamStar = (X_MAX * s.M2) / (s.M1 + s.M2)
+  const e = Math.min(Math.abs(2 * lamStar - X_MAX) / X_MAX, 0.999)
+  const a = X_MAX
+  const c = a * e
+  const b = a * Math.sqrt(1 - e * e)
+  const { padT, pw, ph } = g
+  // Ellipse centered on the canvas; fit the semi-major axis a.
+  const ex = g.padL + pw / 2, ey = padT + ph / 2
+  const sc = (((Math.min(pw, ph) / 2) * 0.78) / a)
+  const asc = a * sc, bsc = b * sc, csc = c * sc
+  ctx.save()
+  // Ellipse outline.
+  ctx.strokeStyle = '#8a7a52'
+  ctx.lineWidth = 1.5
+  ctx.beginPath()
+  ctx.ellipse(ex, ey, asc, bsc, 0, 0, 2 * Math.PI)
+  ctx.stroke()
+  // Dimension lines: a along the major axis (center → vertex),
+  // b up the minor axis (center → co-vertex).
+  ctx.strokeStyle = C2
+  ctx.lineWidth = 1.5
+  ctx.beginPath()
+  ctx.moveTo(ex, ey); ctx.lineTo(ex + asc, ey)
+  ctx.moveTo(ex, ey); ctx.lineTo(ex, ey - bsc)
+  ctx.stroke()
+  // Foci.
+  ctx.strokeStyle = '#a99760'
+  ctx.lineWidth = 1.5
+  for (const fxp of [ex + csc, ex - csc]) {
+    ctx.beginPath()
+    ctx.moveTo(fxp - 6, ey); ctx.lineTo(fxp + 6, ey)
+    ctx.moveTo(fxp, ey - 6); ctx.lineTo(fxp, ey + 6)
+    ctx.stroke()
+  }
+  // Center dot.
+  ctx.fillStyle = '#3a2c1a'
+  ctx.beginPath(); ctx.arc(ex, ey, 3, 0, 2 * Math.PI); ctx.fill()
+  // Labels.
+  ctx.font = '600 14px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'center'
+  ctx.fillText('a', ex + asc / 2, ey - 10)
+  ctx.textAlign = 'left'
+  ctx.fillText('b', ex + 10, ey - bsc / 2 + 5)
+  ctx.restore()
+}
+
 
 // Motion tab, second graph: local push-pull D(λₙ) = [W₁−J₁] − [W₂−J₂].
 // The integrand of the displacement — net push in +λₙ at each point.
@@ -1088,6 +1141,7 @@ export default function WaveLab() {
   const canvasPP1Ref = useRef(null)
   const canvasPP2Ref = useRef(null)
   const canvasEllipseRef = useRef(null)
+  const canvasEllipseGeomRef = useRef(null)
   const canvasHalfRef = useRef(null)
   const canvasTotalRef = useRef(null)
   const canvasAreaRef = useRef(null)
@@ -1159,6 +1213,8 @@ export default function WaveLab() {
         if (oa) renderOrbitFrame(oa.getContext('2d'), oa, s, tauRef.current, false)
         const el = canvasEllipseRef.current
         if (el) renderEllipseFrame(el.getContext('2d'), el, s, tauRef.current)
+        const eg = canvasEllipseGeomRef.current
+        if (eg) renderEllipseGeomFrame(eg.getContext('2d'), eg, s)
         const ot = canvasOrbitTrueRef.current
         if (ot) renderOrbitFrame(ot.getContext('2d'), ot, s, tauRef.current, true)
         const pp = canvasPushPullRef.current
@@ -1595,7 +1651,7 @@ export default function WaveLab() {
             <div className="graph-meta-row">
               <div className="legend">
                 <span><Tex tex="M_{\max} \text{ fixed --- the naive view}" /></span>
-                <span><Tex tex="\lambda_2 - \lambda_1 = \lambda_{1-2} = x" /></span>
+                <span><Tex tex="\lambda_2 - \lambda_1 = \lambda_1 - \lambda_2 = x" /></span>
               </div>
             </div>
             <canvas ref={canvasOrbitApparentRef} className="wave-canvas-orbit" />
@@ -1612,7 +1668,9 @@ export default function WaveLab() {
             </div>
             <p className="graph-note">Restoring distance variance — the larger mass fixed, the eccentricity set by the balance-point split.</p>
             <canvas ref={canvasEllipseRef} className="wave-canvas-orbit" />
-            <div className="graph-caption"><Tex tex="T^2 \propto a^3" /></div>
+            <div className="graph-caption"><Tex tex="T^2 \propto a^3 \text{ --- Kepler's third law}" /></div>
+            <canvas ref={canvasEllipseGeomRef} className="wave-canvas-orbit" />
+            <div className="graph-caption"><Tex tex="\text{static ellipse: } a \text{ semi-major axis, } b \text{ semi-minor axis}" /></div>
             <div className="graph-footnote">xy plane</div>
           </div>
           <div className="graph-box">
