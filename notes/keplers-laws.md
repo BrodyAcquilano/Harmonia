@@ -67,3 +67,50 @@ Nor does the ellipse say *why*. Kepler described; Newton, later, supplied invers
 Kepler invented the ellipse as a description, and it was the right description of the relative motion — $r(\phi)$ exactly as drawn, the focus exactly where $M_{\max}$ sits. His error, if it can be called one, was stopping at the description: mistaking the shadow for the thing. The $a$ and $b$ he measured from the sky are the proportion between the balancing points — $\lambda^*$ and $L-\lambda^*$, the lever arms, their normalized difference the eccentricity. And the harmony he chased through *Harmonices Mundi*, the musical intervals spanning each orbit and the single proportion $T^2 \propto a^3$ beneath them all, is the standing wave: two reciprocal signals locking into integer ratios, the music made physical.
 
 He had the proportions right. The waves are what was resonating.
+
+And one step further — the proportion itself, $T^2 \propto a^3$, is not just a number Kepler measured. Read it as a fingerprint of the integration ladder, because that is what it is: the 2 counts the two time integrations, the 3 counts the three spatial dimensions the path is reconstructed in.
+
+The ladder, stated plainly. Start at the mass equation — the fundamental equation, $W_n(M_1, M_2)$, before space and time have been separated out. Then integrate, alternating:
+
+$$
+\text{space} \;\to\; \text{time} \;\to\; \text{space} \;\to\; \text{time}
+$$
+
+First over space ($\lambda_n$): the cumulative integrals $W_n = \int \mathrm{Re}(\psi_n)\,d\lambda_n$ and $J_n = \int \mathrm{Im}(\psi_n)\,d\lambda_n$ — the energy accounts along the radial line. Then over the hidden time phasor ($\tau$): the phasor turns, work becomes impulse, $F_n(\tau) = J_n(L,\tau) - W_n(L,\tau)$ — the net released impulse at each instant. Then over space again: the indefinite integral for work, computed for the bounds of the system, $0$ and $L$. Then over time again: $X_n(\tau) = \int_0^\tau F_n(\tau')\,d\tau'$ — the wobble, the motion.
+
+Four integrations — and the last one lands back where the ladder started: the indefinite integral for work, evaluated at the bounds of the system. From that evaluated integral, the motion and the path are reconstructed.
+
+This is why the deconstruction has to go all the way down and come back up in reverse. The gravity equation acts in the radial direction — along the line between the bodies. The motion it produces acts parallel — the two wobbles running alongside each other on their own axis. Parallel motion cannot be read off a radial equation directly. So you deconstruct down to the fundamental equation, where the directions have not yet been separated, and build back up in reverse order — and the reversal is what transfers the radial pull into parallel motion.
+
+Then count. Two passages through time: the phasor time, over which the phase rotates and the energy redistributes, and the accumulation time, over which the motion emerges. Three spatial dimensions for the reconstructed path. $T^2 \propto a^3$ — time squared, length cubed — is that count, written as an orbital proportion. Kepler measured the proportion. The ladder is why the proportion is what it is.
+
+The picture sharpens one more level. It is just like light emitting from an antenna.
+
+A force acts on the two bodies — and the pair, taken together, *is* the antenna. What an antenna does is cross a boundary: the signal travels down through the circuit as guided current, and then it is emitted — rebuilt in the perpendicular direction, as a free wave. The two-body system does the same thing. The radial field between the bodies is the guided signal; the parallel motion is the emission. The direction changes at the crossing, and that is why the ladder has to go all the way down and come back up.
+
+Down first: differentiate, level by level, through all five levels, until you reach the fundamental conservation-of-energy relation — the equation that equals zero. In the original derivation this was the Lagrangian:
+
+$$
+L_n = PE_n - KE_n = 0
+$$
+
+That is the ground floor: energy conserved, nothing left over, the whole system accounted for in a single vanishing balance.
+
+Then back up: take that equation of mass and integrate, alternating space and time, five levels down and five levels back up, rebuilding the motion in the perpendicular direction. It is a communication stack, exactly like networking: application down to machine code down to hardware — then across the channel — then the layers built back up in reverse on the far side. Here the channel is the crossing from the radial direction to the perpendicular one, and the layers are the integrals.
+
+Five levels, and the four integrations are the crossings between them: three of space, two of time — the five dimensions themselves.
+
+And at the end of the climb you arrive at a definite integral of work and impulse:
+
+$$
+F_n(\tau) = J_n(L,\tau) - W_n(L,\tau)
+$$
+
+evaluated at the bounds of the system — which is the exact equation the derivation started from. The loop closes: the Lagrangian at the bottom, the Lagrangian at the top, with the wave equations, the phasor, and the motion stacked in between.
+
+Then count the levels, because Kepler already did. $T^2 \propto a^3$: two time dimensions — the phasor time and the accumulation time — and three spatial dimensions for the path. $2 + 3 = 5$. Five levels down, five levels back up. The proportion is the stack, counted.
+
+## References
+
+- Kepler, Johannes. *Astronomia Nova* (1609) — the first and second laws: the elliptical orbit, the focus, the equal areas.
+- Kepler, Johannes. *Harmonices Mundi* (1619) — the third law, $T^2 \propto a^3$, and the cosmic music it was found inside.
