@@ -73,6 +73,8 @@ From the quantum tech stack we now know the price of a new spatial dimension —
 
 That fixes the problem-solving approach, and there are two ways to write it: keep the six equations and make each one long, with both directions written out — or split each equation into branches and let a summation sign do the work of the repetition. We take the branches. And the branch count is fixed by a rule borrowed from linear algebra: $xx$ and $yy$ already span the plane. Two perpendicular directions define any other direction of the plane by combining them in different proportions, so a pair line pointing along $\hat{u}_{ab} = c_x\hat{x} + c_y\hat{y}$ is recovered as $c_x W^{(x)} + c_y W^{(y)}$ — no $xy$ or $yx$ cross terms, since any cross direction is already a combination of the perpendicular pair.
 
+One more question this section must answer: does the 3-4-5 problem introduce any third-dimensional motion? We assume not. All three bodies start in a two-dimensional plane with no initial velocity and no energy in $z$ — and the boundary conditions control that: with nothing to carry them out of the plane, they cannot leave it. Just as the two bodies acted in a line, the three act in a plane. The pairs, branched in $x$ and $y$, can produce any result for a body in a plane — and no result outside it.
+
 We suspect the acceleration is not the real problem: the boundary conditions say energy is conserved, and we can expect the same symmetry on the other side. The real issue may be convergence and divergence — whether the stack generates them. But divergence does not imply incoherence: even divergent signals follow coherent rules, and the stack's whole record is coherence preserved through every turn. The old question — whether we may climb another level of time to recover something stable and finite — is answered here: not by new levels but by branches, the same five dimensions doing the rotating, and the symmetry is what the branches are for.
 
 ---
@@ -85,7 +87,7 @@ $$W_a^{(ab)} = \sum_j W_{a,j}^{(ab)}, \qquad W_{a,j}^{(ab)}(\lambda_j,\tau) = A_
 
 $$W_b^{(ab)} = \sum_j W_{b,j}^{(ab)}, \qquad W_{b,j}^{(ab)}(\lambda_j,\tau) = A_b^{(ab)} e^{-\beta_{ab}(L_{ab}-\lambda_j)}\left[\cos\left(-k_{b,j}^{(ab)}\lambda_j - \omega_{b,j}^{(ab)}M_a\tau\right) + i\sin\left(-k_{b,j}^{(ab)}\lambda_j - \omega_{b,j}^{(ab)}M_a\tau\right)\right]$$
 
-with, per pair and on each branch, $k_{a,j}^{(ab)} = \omega_{a,j}^{(ab)} = 1$, $k_{b,j}^{(ab)} = \omega_{b,j}^{(ab)} = \sqrt{M_b/M_a}$, $A_a^{(ab)} = \sqrt{M_b/(M_a+M_b)}$, $A_b^{(ab)} = \sqrt{M_a/(M_a+M_b)}$, $\beta_{ab} = |M_a-M_b|/(M_a+M_b)$, and span $L_{ab}$ the pair's separation. The branch touches nothing but the direction: the pair's constants are the pair's, identical on $x$ and $y$. (The alternative — one long equation per wave with both directions written out — is the same mathematics; the branch form is just easier to carry.) The branch count follows the rule of §4: $xx$ and $yy$ span the plane, so two branches per wave and no cross terms. Name them:
+with, per pair and on each branch, $k_{a,j}^{(ab)} = \omega_{a,j}^{(ab)} = 1$, $k_{b,j}^{(ab)} = \omega_{b,j}^{(ab)} = \sqrt{M_b/M_a}$, $A_a^{(ab)} = \sqrt{M_b/(M_a+M_b)}$, $A_b^{(ab)} = \sqrt{M_a/(M_a+M_b)}$, $\beta_{ab} = |M_a-M_b|/(M_a+M_b)$, and span $L_{ab}$ the pair's separation. The branch touches nothing but the direction: the pair's constants are the pair's, identical on $x$ and $y$. Still one phase angle per wave — the branch contributes only an extra spatial term ($\lambda_j$, $k_{a,j}^{(ab)}$) per direction. (The alternative — one long equation per wave with both directions written out — is the same mathematics; the branch form is just easier to carry.) The branch count follows the rule of §4: $xx$ and $yy$ span the plane, so two branches per wave and no cross terms. Name them:
 
 - **$\psi$** for $(M_1,M_2)$: $\psi_1 = W_1^{(12)}$, $\psi_2 = W_2^{(12)}$, span $L_{12} = 5$;
 - **$\phi$** for $(M_1,M_3)$: $\phi_1 = W_1^{(13)}$, $\phi_3 = W_3^{(13)}$, span $L_{13} = 4$;
@@ -125,19 +127,25 @@ Recomputed under the branched stack of §4: nothing here changes. The branches �
 
 ## 6. Throughput
 
-Now the trivial part: run each pair through the quantum tech stack. The descent is the same five levels — limits, differentiation, the vanishing total differential per pair:
+Now the trivial part: run each pair through the quantum tech stack. The descent is the same five levels — limits, differentiation (now partial, in $x$ and $y$, per §4), the vanishing total differential per pair per branch:
 
-$$dW_s^{(ab)} = \left(\frac{\partial W_a^{(ab)}}{\partial M_a}+\frac{\partial W_b^{(ab)}}{\partial M_a}\right)dM_a + \left(\frac{\partial W_a^{(ab)}}{\partial M_b}+\frac{\partial W_b^{(ab)}}{\partial M_b}\right)dM_b = 0,$$
+$$dW_{s,j}^{(ab)} = \left(\frac{\partial W_{a,j}^{(ab)}}{\partial M_a}+\frac{\partial W_{b,j}^{(ab)}}{\partial M_a}\right)dM_a + \left(\frac{\partial W_{a,j}^{(ab)}}{\partial M_b}+\frac{\partial W_{b,j}^{(ab)}}{\partial M_b}\right)dM_b = 0,$$
 
-the turn solves each pair's differential equation (the pair's wave, already written above), and the ascent integrates back up. The ascent's definite integrals are the output that matters: per pair, per body, the impulse generated over the pair's span —
+the turn solves each pair's differential equation (the pair's wave, already written above), and the ascent integrates back up. The ascent's definite integrals are the output that matters — now unraveled into branches. Per pair, per body, per branch: twelve impulse equations. With $n$ the body, $(ab)$ the pair — the other body acting — and $j \in \{x, y\}$ the spatial branch:
 
-$$F_1^{(12)}(t) = \int_0^{5}\!\left[\mathrm{Im}(\psi_1) - \mathrm{Re}(\psi_1)\right]d\lambda, \qquad F_2^{(12)}(t) = \int_0^{5}\!\left[\mathrm{Im}(\psi_2) - \mathrm{Re}(\psi_2)\right]d\lambda,$$
+$$F_{n,j}^{(ab)}(t) = \int_0^{L_{ab}}\!\left[\mathrm{Im}\left(W_{n,j}^{(ab)}\right) - \mathrm{Re}\left(W_{n,j}^{(ab)}\right)\right]d\lambda_j.$$
 
-$$F_1^{(13)}(t) = \int_0^{4}\!\left[\mathrm{Im}(\phi_1) - \mathrm{Re}(\phi_1)\right]d\lambda, \qquad F_3^{(13)}(t) = \int_0^{4}\!\left[\mathrm{Im}(\phi_3) - \mathrm{Re}(\phi_3)\right]d\lambda,$$
+Six pair-waves in, twelve impulses out. The wobble integral splits the same way — twelve wobbles:
 
-$$F_2^{(23)}(t) = \int_0^{3}\!\left[\mathrm{Im}(\chi_2) - \mathrm{Re}(\chi_2)\right]d\lambda, \qquad F_3^{(23)}(t) = \int_0^{3}\!\left[\mathrm{Im}(\chi_3) - \mathrm{Re}(\chi_3)\right]d\lambda.$$
+$$X_{n,j}^{(ab)}(t) = \int_0^t F_{n,j}^{(ab)}(t')\,dt'.$$
 
-Six impulse equations — two per pair, one per body per pair. Each is the pair's doing, expressed as the motion it imprints on each of its bodies. This is the far end of the quantum tech stack: six solutions satisfying the 3-4-5 boundary conditions. What the quantum tech stack does *not* give us is how $F_1^{(12)}$ and $F_1^{(13)}$ combine into the motion of $M_1$. That is §3's problem, and §7–§8's work.
+The twelve wobbles come in pairs of two: for each body and each of its pairs, the $x$- and $y$-branch wobbles together define that pair's planar motion. Each body belongs to two pairs, so four wobbles per body — the outer sum over the body's pairs, the inner sum over the two branches:
+
+$$X_1 = \sum_{(ab)\ni 1}\sum_j X_{1,j}^{(ab)} = \big(X_{1,x}^{(12)} + X_{1,y}^{(12)}\big) + \big(X_{1,x}^{(13)} + X_{1,y}^{(13)}\big),$$
+
+and likewise $X_2$ from pairs $(12)$, $(23)$ and $X_3$ from pairs $(13)$, $(23)$. Once the first index is used, the second sum starts on its own index — two sums, two branches.
+
+Twelve impulse equations, twelve wobbles — each the pair's doing, expressed as the motion it imprints on each of its bodies, in each direction. This is the far end of the quantum tech stack: twelve solutions satisfying the 3-4-5 boundary conditions. What the quantum tech stack does *not* give us is how $X_{1,j}^{(12)}$ and $X_{1,j}^{(13)}$ combine into the motion of $M_1$. That is §3's problem, and §7–§8's work.
 
 ---
 

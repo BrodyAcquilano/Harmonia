@@ -12,7 +12,8 @@
 - [4. Layer by layer](#4-layer-by-layer)
 - [5. The abstracted stack](#5-the-abstracted-stack)
 - [6. The spatial dimension addition principle](#6-the-spatial-dimension-addition-principle)
-- [7. Conclusion: what the rotation means](#7-conclusion-what-the-rotation-means)
+- [7. The span principle](#7-the-span-principle)
+- [8. Conclusion: what the rotation means](#8-conclusion-what-the-rotation-means)
 
 
 ## 1. What the stack is
@@ -192,9 +193,19 @@ It is the first time the path splits. On the way up, the wobble integral divides
 
 One more rule, borrowed from linear algebra, fixes the branch count: $xx$ and $yy$ already span the plane. Two perpendicular directions define any other direction of the plane by combining them in different proportions, so the branches needed are exactly two — no $xy$ or $yx$ cross terms. Any cross direction is already a linear combination of the perpendicular pair; writing it separately would double-count.
 
+Concretely, the branches just add an extra spatial phase term to the existing equation — $\lambda_j$, $k_{a,j}$ alongside $\lambda$, $k_a$ — and additional branches to integrate or differentiate over at the last node of the five-layer stack: where the stack integrates or differentiates, it now does so once per branch. Still one phase angle per wave; the rest of the equation does not change. That is the whole of the addition principle: same equation, extra spatial term, and the final node run once per branch.
+
 ---
 
-## 7. Conclusion: what the rotation means
+## 7. The span principle
+
+Boundary conditions confine motion to the space its forces span. Two bodies with no initial velocity, whose forces act along one dimension, cannot leave that line: with no velocity and no energy in any other direction, there is nowhere else for the motion to go — the resultant motion from that force is confined to one dimension. But the stack's resultant motion comes out perpendicular to the direction of the force, so the two-body object moves in a 2D plane: the line of force crossed with the perpendicular wobble.
+
+Three bodies with no initial velocity, whose forces span a plane, are confined the same way: force and resultant motion stay in the plane. But the resultant motion is perpendicular to the force — and perpendicular to a plane points into the third dimension. So the three-body object moves through 3D space, assuming the three bodies carry some equal velocity relative to some other frame of reference: the common drift gives the perpendicular motion its third axis.
+
+---
+
+## 8. Conclusion: what the rotation means
 
 The open question is what the fifth dimension — and the second time dimension generally — *is*. Three readings are on the table.
 
