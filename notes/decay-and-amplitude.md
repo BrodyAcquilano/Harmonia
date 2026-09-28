@@ -53,7 +53,7 @@ This converges if and only if $\beta > 0$ — the decay is the convergence. A pu
 
 ### 3a. Why the descent cannot see it
 
-Differentiate $\psi_n = A_n e^{-\beta x_n} e^{i\phi_n}$ with respect to any mass coordinate: $A_n$ is a constant factor, so $dA_n/dM_m = 0$ and it rides through every gradient untouched. Contract via $v = f\lambda$: $A_n$ is still there, still untouched. Ground out at $L_n = PE_n - KE_n = 0$: $A_n$ is gone from the equations entirely.
+Differentiate $\psi_n = A_n e^{-\beta x_n} e^{i\phi_n}$ with respect to any mass coordinate: $A_n$ is a constant factor, so $dA_n/dM_m = 0$ and it rides through every gradient untouched. Contract via $v = f\lambda$ and $\omega \propto k$: $A_n$ is still there, still untouched. Ground out at the mass proportions, no independent variable left: $A_n$ is gone from the equations entirely.
 
 This is not a failure of the derivation. It is what constants do. The descent differentiates, and differentiation kills constants — the amplitude's information is not destroyed, it is *held by the boundary conditions*, waiting at the bottom while the phase structure goes through the stack. It returns on the ascent as the undetermined constant of integration, and the closure — the definite integral evaluated between known bounds — is what fixes it.
 
@@ -109,11 +109,12 @@ When $\beta = 0$ (equal masses), the envelope integral diverges and the computat
 
 | Level | What happens to decay and amplitude |
 |---|---|
-| **d1.** Conservation: $d\psi_s = 0$ | The invariant is declared. Total energy $E_{\text{total}}$ enters here — it is the budget that will fix $A_n$ at the end. Nothing yet about decay. |
-| **d2.** Wave solutions: $\psi_1$, $\psi_2$ | $A_n$ enters as an undetermined scale factor; the $i$ enters from relative motion. The form is Ae^{i\phi}: scale unknown, rotation known. |
-| **d3.** Gradients: $\partial\psi_n/\partial M_m$ | $A_n$ passes through untouched ($dA_n/dM_m = 0$). The chain rule gives the ratio $A_1^2/A_2^2 = M_2/M_1$ at matched phase. |
-| **d4.** Contraction: $v = f\lambda$ | Coordinates collapse; $A_n$ still untouched. The limit over linear motion does a derivative's work — one variable fewer, scale unaffected. |
-| **d5.** Ground: $L_n = PE_n - KE_n = 0$ | $A_n$ vanishes from the equations. Its information is held by the boundary conditions $m_1$, $m_2$ — and those same conditions dictate $\beta = \|M_1-M_2\|/(M_1+M_2)$. |
+| **d1.** First limit: energy conserved by the boundary conditions | The rate of change of energy over the boundary, with respect to time. Total energy $E_{\text{total}}$ enters here — it is the budget that will fix $A_n$ at the end. Nothing yet about decay. |
+| **d2.** Frequency–velocity limit: $v = f\lambda$ | One spatial variable contracted. The wave form is not yet written — only the relation its phase will obey. |
+| **d3.** Time differentiation: $\partial\psi_n/\partial M_m$ | $A_n$ passes through untouched ($dA_n/dM_m = 0$). The chain rule gives the ratio $A_1^2/A_2^2 = M_2/M_1$ at matched phase — the $i$ drops out of the ratio. |
+| **d4.** Second space limit: $\omega \propto k$ | The dispersion collapses to a proportionality; one $\lambda$ left. $A_n$ still untouched. |
+| **d5.** Ground: mass proportions, no independent variable | $A_n$ vanishes from the equations. Its information is held by the boundary conditions $m_1$, $m_2$ — and those same proportions dictate $\beta = \|M_1-M_2\|/(M_1+M_2)$. |
+| **Turn.** Solve the bottom DE | The stack says the solution is a time- and space-dependent wave: $\psi_1$, $\psi_2$ written; $A_n$ enters as a multiplicative constant, $dA_n/dM_m = 0$. |
 | **u1.** Space integrals: $W_n$, $J_n$ | $A_n$ returns as the unknown scale of the accumulation. The envelope $e^{-\beta x}$ is integrated: $\int e^{-2\beta x}dx = 1/(2\beta)$. |
 | **u2.** Boundary evaluation | The line collapses to its endpoints — start conditions (full strength at the source) and end conditions (decayed by $e^{-\beta L}$) are read off. |
 | **u3–u4.** Time integrals: $F_n$, $X_n$ | $A_n$ rides along, still undetermined, through the rotation and the wobble. |
@@ -130,12 +131,12 @@ The summed field $\psi_s = \psi_1 + \psi_2$ is two counter-propagating decaying 
 ## 6. Every symbol, and the level that fixes it
 
 - **$M_1, M_2$** — the masses; boundary conditions. Fixed at **d5** (the only data at the ground floor). Display units; only the ratio matters.
-- **$\lambda_n$** — spatial coordinate, $0$ to $L$. Fixed at **d4** (the contraction).
-- **$\tau$** — the phasor clock. Fixed at **d2** (the $i$ in the solution).
+- **$\lambda_n$** — spatial coordinate, $0$ to $L$. Contracted at **d2** and **d4** (the space limits); restored on the ascent.
+- **$\tau$** — the phasor clock. Fixed at **d3** (the $i$ in the phase gradients).
 - **$L = 4\pi$** — the span: the Wave Lab's sampling window, two wavelengths at $k_1 = 1$. A display choice (§5 of this note), not a derived quantity.
 - **$k_1 = 1$, $\omega_1 = 1$** — display normalization, unit phase velocity. (Physical: $k_n = 2\pi/\lambda_n$, $\omega_n = 2\pi M_n c^2/h$.)
-- **$k_2 = \sqrt{M_2/M_1}$** — fixed at **d3** (wavelength ratio).
-- **$\omega_2 = k_1k_2/\omega_1$** — fixed at **d3** (symmetry condition $k_1k_2 = \omega_1\omega_2$).
+- **$k_2 = \sqrt{M_2/M_1}$** — fixed at **d5** (mass proportions).
+- **$\omega_2 = k_1k_2/\omega_1$** — fixed at **d4** (chain-rule ratios, $\omega \propto k$).
 - **$\beta = |M_1-M_2|/(M_1+M_2)$** — fixed at **d5**, from the boundary asymmetry. Three jobs: decay rate, envelope tilt, orbital eccentricity.
 - **$A_1, A_2$** — fixed at **u5**, by envelope integral + symmetry ratio + energy budget: $A_n = \sqrt{2\beta E_{\text{total}}\,M_{\text{companion}}/(M_1+M_2)}$. Cross-coupled: each set by the companion mass.
 - **$\lambda^* = L\,M_2/(M_1+M_2)$** — the balance point, the mass-weighted node.
