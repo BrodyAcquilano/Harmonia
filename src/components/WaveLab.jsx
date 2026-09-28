@@ -947,6 +947,71 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
   ctx.fillText(pair.tag + sub[pair.b], S / 2, S / 2 + 11)
 }
 
+// Resultant wobble orbits: one animated station per body, each with its own
+// center cross. Circle radius is proportional to the body's resultant wobble
+// magnitude |W| = sqrt(Rx^2 + Ry^2) from the math square; the solid ball
+// (body color, area proportional to mass) orbits at the resultant phase.
+const TB_WOBBLE = [
+  { mag: 0.499, phi: -1.43, color: C1, mass: 3, sub: '₁' },
+  { mag: 0.337, phi: 1.18, color: C2, mass: 4, sub: '₂' },
+  { mag: 0.358, phi: -1.79, color: TB_C3, mass: 5, sub: '₃' },
+]
+
+function renderTBWobbleFrame(ctx, canvas, tau) {
+  const dpr = window.devicePixelRatio || 1
+  const S = Math.max(canvas.clientWidth, 50)
+  const H = S / 3
+  const W = Math.round(S * dpr), Hh = Math.round(H * dpr)
+  if (canvas.width !== W || canvas.height !== Hh) {
+    canvas.width = W
+    canvas.height = Hh
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  ctx.fillStyle = '#fffdf4'
+  ctx.fillRect(0, 0, S, H)
+
+  const maxMag = Math.max(...TB_WOBBLE.map((b) => b.mag))
+  const Rmax = H * 0.30
+  TB_WOBBLE.forEach((b, i) => {
+    const cx = S * (1 / 6 + i / 3)
+    const cy = H / 2
+    const r = Math.max(4, Rmax * (b.mag / maxMag))
+    // own center cross
+    ctx.strokeStyle = '#4a3f2a'
+    ctx.lineWidth = 1.5
+    const cs = 7
+    ctx.beginPath()
+    ctx.moveTo(cx - cs, cy)
+    ctx.lineTo(cx + cs, cy)
+    ctx.moveTo(cx, cy - cs)
+    ctx.lineTo(cx, cy + cs)
+    ctx.stroke()
+    // wobble circle
+    ctx.strokeStyle = b.color
+    ctx.lineWidth = 1.5
+    ctx.beginPath()
+    ctx.arc(cx, cy, r, 0, 2 * Math.PI)
+    ctx.stroke()
+    // solid ball on the circle at the resultant phase
+    const a = tau * 1.0 + b.phi
+    const bx = cx + r * Math.cos(a)
+    const by = cy - r * Math.sin(a)
+    ctx.fillStyle = b.color
+    ctx.beginPath()
+    ctx.arc(bx, by, 9 * Math.sqrt(b.mass / 3), 0, 2 * Math.PI)
+    ctx.fill()
+    // labels
+    ctx.fillStyle = b.color
+    ctx.font = '13px "IBM Plex Mono", monospace'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'alphabetic'
+    ctx.fillText('M' + b.sub, cx, cy - r - 10)
+    ctx.fillStyle = '#715f43'
+    ctx.font = '11px "IBM Plex Mono", monospace'
+    ctx.fillText('|W|=' + b.mag.toFixed(3), cx, cy + r + 18)
+  })
+}
+
 
 // Wobble vs time — STATIC snapshot of one full cycle (both directions).
 // X₁(t) blue, X₂(t) orange. No animation: this is the trajectory, not a frame.
@@ -1492,6 +1557,7 @@ export default function WaveLab() {
   const canvasTBSq1Ref = useRef(null)
   const canvasTBSq2Ref = useRef(null)
   const canvasTBBdryRef = useRef(null)
+  const canvasTBWobbleRef = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
   stateRef.current = { subtab, M1, M2, playing, speed, showSum, waveDisplay, ppDisplay, orbitZoom }
@@ -1564,6 +1630,8 @@ export default function WaveLab() {
         if (bd) renderTBBoundarySquare(bd.getContext('2d'), bd)
         const sqs = [canvasTBSq0Ref.current, canvasTBSq1Ref.current, canvasTBSq2Ref.current]
         sqs.forEach((c, i) => { if (c) renderTBPhasorSquare(c.getContext('2d'), c, i) })
+        const wb = canvasTBWobbleRef.current
+        if (wb) renderTBWobbleFrame(wb.getContext('2d'), wb, tauRef.current)
       }
       raf = requestAnimationFrame(draw)
     }
@@ -2151,6 +2219,20 @@ export default function WaveLab() {
               <div className="tb-math-line" style={{ color: TB_C3 }}><Tex tex={`W_3 = (0.322\\angle{-1.79},\\, 0.157\\angle{-0.26})`} /></div>
               <div className="tb-math-line"><Tex tex={`C = (0,\\,0) \\quad \\text{(center of mass)}`} /></div>
             </div>
+          </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title"><Tex tex="\text{Wobble orbits}" /></h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="M_1" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="M_2" /></span>
+                <span><i className="swatch" style={{ background: TB_C3 }} /><Tex tex="M_3" /></span>
+                <span style={{ textAlign: 'center' }}><Tex tex="\text{one circle per body --- radius } \propto |W|" /></span>
+              </div>
+            </div>
+            <canvas ref={canvasTBWobbleRef} className="wave-canvas-wobble" />
           </div>
           </>
         ) : null}

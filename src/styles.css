@@ -511,6 +511,17 @@ body {
   margin-right: 8px;
 }
 
+/* Wide canvas for the three-body wobble orbits: three stations side by side */
+.wave-canvas-wobble {
+  width: 100%;
+  aspect-ratio: 3 / 1;
+  height: auto;
+  display: block;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
 /* Wide canvas for the full-width orbit diagrams */
 .wave-canvas-orbit {
   width: 100%;
