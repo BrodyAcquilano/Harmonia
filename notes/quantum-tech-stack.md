@@ -156,7 +156,7 @@ $W_n$, $J_n = \int \psi_n\,d\lambda_n$: integrate over the restored space; the w
 
 ### h. The second time integral
 
-$X_n(t) = \int_0^t F_n(t')\,dt'$. Integrate over the second time dimension and motion appears: displacement, the wobble, the trajectory. The general form: **the second time dimension is where motion lives.** One time dimension rotates the phase; the other accumulates the result into movement. For every spatial dimension, two of time.
+$X_n(t) = \int_0^t F_n(t')\,dt'$. Integrate over the second time dimension and motion appears: displacement, the wobble, the trajectory. The general form: **the second time dimension is where motion lives.** One time dimension rotates the phase; the other accumulates the result into movement. A new spatial direction adds no new time dimensions — it adds a branch through the same two, rotated into the new direction (see §6).
 
 ### i. Closure (top, returned)
 
@@ -186,9 +186,9 @@ Any conservation law with known boundary conditions, a dispersion relation, and 
 
 ## 6. The spatial dimension addition principle
 
-The stack as described is five layers high because the problem it was built for has one spatial dimension. Adding a spatial dimension costs two time dimensions — this is the spatial dimension addition principle. One time integration carries the conservation law in energy over into the new space; then integrating over that space carries it back to a boundary condition in energy. The symmetry of the stack demands the pair: the descent contracts a dimension per level, so the ascent must restore a dimension per level, and a spatial dimension is restored by two integrations — time, then space. Two more integrals on the way up for every spatial dimension added, and the two-body five-layer stack becomes a seven-layer stack for the plane.
+The stack as described is five layers high because the problem it was built for has one spatial dimension — and five is where it stays. Adding a spatial dimension does not add new dimensions at all: it adds *branches* through the same machinery. The dimensions are the same five fundamental dimensions of the tech stack; what multiplies is the integration path. This is the spatial dimension addition principle, stated correctly.
 
-This suggests the extra dimensions are merely mechanical residue of multivariable calculus and partial derivatives: each new independent direction in the boundary conditions forces another differentiate-on-the-way-down, integrate-on-the-way-up pair, and the "dimensions" are the bookkeeping those operations leave behind.
+It is the first time the path splits. On the way up, the wobble integral divides into two separate branches — the wobble computed in one direction, then in the other — and the resultant wobbles are summed. It is not two new time dimensions; it is the same time dimensions used to rotate into different directions: figure out the wobble in one direction, then another, then sum the resultant wobbles. On the way down, the split runs in reverse: the derivative does not climb into higher dimensions but divides into two initial-condition branches. Call them A and B incoming, Y and Z outgoing — we never have to track A-on-Y, A-on-Z, B-on-Y, B-on-Z separately, because the quantum tech stack handles the rotations for us, keeping the relative orientation of the branches on the outside and rotating them relative to one another.
 
 ---
 
@@ -201,6 +201,8 @@ The open question is what the fifth dimension — and the second time dimension 
 **Actually visited.** The information genuinely enters another dimension, rotates there, and comes back out — the signal from gravity transferring into a different direction by passing through a direction we don't move in. The coherence of the signal (relative phases unchanged) is then evidence: something preserved it *through* the rotation, the way a fiber preserves polarization.
 
 **Both.** The mathematics is the trace left by the passage — symbolic because we only see the trace, real because the trace is so clean.
+
+One more consideration, and it weighs against the first reading. A new spatial dimension does not extend the stack — it branches the integration path through the same five dimensions, and the stack rotates the branches relative to one another while keeping their relative orientation (see §6). A mere artifact of calculus would not know how to do that: bookkeeping does not rotate. The five lower dimensions behave like part of some higher-dimensional geometry — they are the room the branches rotate in, not the residue the integrals leave behind.
 
 The applications follow whichever reading is right. If the rotation is real, the stack is a machine for turning forces: feed a signal in along one direction, run it down to the ground floor and back up, and collect it pointing somewhere it could never have pointed on its own — gravity in, perpendicular force out. That is already what the simulation does to produce the wobble from the radial pull. Whether it can be pushed further — signals sent *into* another dimension and recovered, rather than merely turned within the ones we have — is the experiment this stack is waiting for.
 
