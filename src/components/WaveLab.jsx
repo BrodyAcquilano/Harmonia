@@ -1868,11 +1868,11 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>Push-Pull Density <span className="eq-note">— plotted · spatial + temporal</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Remaining inertia per body (spatial) — definite integrals</span><Tex tex="P_1(\lambda_n) = \int_0^{\lambda_n} [\mathrm{Re}(\psi_1) - \mathrm{Im}(\psi_1)] \, d\lambda', \quad P_2(\lambda_n) = \int_0^{\lambda_n} [\mathrm{Re}(\psi_2) - \mathrm{Im}(\psi_2)] \, d\lambda'" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Local push-pull (spatial)</span><Tex tex="D(\lambda_n) = \int_0^{\lambda_n} [(\mathrm{Re}\psi_1 - \mathrm{Im}\psi_1) - (\mathrm{Re}\psi_2 - \mathrm{Im}\psi_2)] \, d\lambda'" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Remaining inertia per body (spatial) — definite integrals · not used at this layer</span><Tex tex="P_1(\lambda_n) = \int_0^{\lambda_n} [\mathrm{Re}(\psi_1) - \mathrm{Im}(\psi_1)] \, d\lambda', \quad P_2(\lambda_n) = \int_0^{\lambda_n} [\mathrm{Re}(\psi_2) - \mathrm{Im}(\psi_2)] \, d\lambda'" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Local push-pull (spatial) · not used at this layer</span><Tex tex="D(\lambda_n) = \int_0^{\lambda_n} [(\mathrm{Re}\psi_1 - \mathrm{Im}\psi_1) - (\mathrm{Re}\psi_2 - \mathrm{Im}\psi_2)] \, d\lambda'" /></div>
                   <div className="eq-box wide"><span className="eq-label">Remaining inertia per body (temporal) — definite integrals</span><Tex tex="P_n(t) = \int_0^L [\mathrm{Re}(\psi_n) - \mathrm{Im}(\psi_n)] \, d\lambda_n = -F_n(t)" /></div>
                   <div className="eq-box wide"><span className="eq-label">Local push-pull (temporal)</span><Tex tex="T(t) = \int_0^L [(\mathrm{Re}\psi_1 - \mathrm{Im}\psi_1) - (\mathrm{Re}\psi_2 - \mathrm{Im}\psi_2)] \, d\lambda_n = F_2(t) - F_1(t)" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{The Integration tab's } W_n - J_n \text{ curves as definite integrals, differenced per body.}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{The Integration tab's } W_n - J_n \text{ curves as definite integrals, differenced per body. The spatial integrals are plotted but not used at this layer --- the motion chain runs on } P_n(t) \text{ and } F_n(t) \text{ (full-span integrals) only.}" /></div>
                 </div>
               </div>
               <div className="eq-group">
