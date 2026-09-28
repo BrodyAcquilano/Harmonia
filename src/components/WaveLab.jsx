@@ -1693,6 +1693,10 @@ export default function WaveLab() {
               </div>
               <div className="graph-footnote">xy plane</div>
             </div>
+            <div className="graph-caption"><Tex tex="a = L \text{ --- the semi-major axis is the full span of the system line}" /></div>
+            <div className="graph-caption"><Tex tex="\lambda^* \text{ splits it into the lever arms } \lambda^* \text{ and } L-\lambda^*" /></div>
+            <div className="graph-caption"><Tex tex="e = \frac{|\lambda^*-(L-\lambda^*)|}{L} = \frac{|M_1-M_2|}{M_1+M_2}, \quad b = a\sqrt{1-e^2}" /></div>
+            <div className="graph-caption"><Tex tex="\text{a and b are the balance-point split, drawn as an ellipse}" /></div>
           </div>
           </>
           ) : (
@@ -1893,8 +1897,11 @@ export default function WaveLab() {
                   <div className="eq-box wide"><span className="eq-label">Center: the balance point</span><Tex tex="\lambda^*, \quad \lambda^* = L\frac{M_2}{M_1+M_2} \quad \text{— the center of mass}" /></div>
                   <div className="eq-box wide"><span className="eq-label">Apparent: the larger mass pinned</span><Tex tex="M_{\max} = \max(M_1, M_2)" /></div>
                   <div className="eq-box wide"><span className="eq-label">Apparent orbit (circular)</span><Tex tex="\mathbf{r}(\phi) = L(\cos\phi, \sin\phi) \quad \text{-- full separation}" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Elliptical orbit (M max at a focus)</span><Tex tex="r(\phi) = \dfrac{a(1-e^2)}{1+e\cos\phi}, \quad a = L, \quad b = a\sqrt{1-e^2}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Balance point and lever arms</span><span className="eq-line"><Tex tex="\lambda^* = L\dfrac{M_2}{M_1+M_2}" /></span><span className="eq-line"><Tex tex="M_1 \lambda^* = M_2 (L - \lambda^*)" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Semi-major axis: the full span</span><Tex tex="a = L = \lambda^* + (L - \lambda^*)" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Elliptical orbit (M max at a focus)</span><Tex tex="r(\phi) = \dfrac{a(1-e^2)}{1+e\cos\phi}" /></div>
                   <div className="eq-box wide"><span className="eq-label">Eccentricity from the balance-point split</span><span className="eq-line"><Tex tex="e = \dfrac{|\lambda^*-(L-\lambda^*)|}{L} = \dfrac{|M_1-M_2|}{M_1+M_2}" /></span><span className="eq-line"><Tex tex="\text{equal masses } \to e = 0 \text{ (circle); one mass dominant } \to e \to 1" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Semi-minor axis and focal distance</span><span className="eq-line"><Tex tex="b = a\sqrt{1-e^2}" /></span><span className="eq-line"><Tex tex="c = ae = |\lambda^*-(L-\lambda^*)| \quad \text{--- focus offset from center}" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Kepler's third law</span><Tex tex="T^2 \propto a^3" /></div>
                   <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{The period squared goes as the semi-major axis cubed: larger orbits take longer, steeply.}" /></div>
                   <div className="eq-box wide"><span className="eq-label">True: separation split at λ*</span><Tex tex="\mathbf{r}_1(\phi) = -\lambda^*(\cos\phi, \sin\phi), \quad \mathbf{r}_2(\phi) = +(L-\lambda^*)(\cos\phi, \sin\phi)" /></div>
