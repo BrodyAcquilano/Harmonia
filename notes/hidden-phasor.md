@@ -82,7 +82,7 @@ $$
 
 The two waves are not two pictures of the same thing. They are the two directions of a conversation. At each point $\lambda_n$ between the bodies, $\psi_1$ reports how much energy body 1 is sending toward body 2, and $\psi_2$ reports how much body 2 is sending back. They are signals — each body telling the other how hard it is pulling, and the pull being answered.
 
-This is why the waves are counter-propagating ($\psi_1$ toward $+\lambda_n$, $\psi_2$ toward $-\lambda_n$) and why they decay in opposite directions. Each wave is strongest at its own body's end and fades toward the other: the signal attenuates with distance. The balance point $\lambda^*$, where the envelopes cross, is where the two signals meet at equal strength — the negotiation point of the mutual pull.
+This is why the waves are counter-propagating ($\psi_1$ toward $+\lambda_n$, $\psi_2$ toward $-\lambda_n$) and why they decay in opposite directions. Each wave is strongest at its own body's end and fades toward the other: the signal attenuates with distance. The balance point $\lambda^*$, where the lever arms balance ($M_1\lambda^* = M_2(L-\lambda^*)$), is the mass-weighted center — the negotiation point of the mutual pull.
 
 The relative velocity stays fixed — the bodies are not accelerating *relative to each other* — but within that fixed frame they wobble back and forth, each tugging the other. The wobble switches direction **every half cycle**: push becomes pull, pull becomes push, at each zero-crossing of the wave. That switching is the heartbeat of the energy transfer.
 

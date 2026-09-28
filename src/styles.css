@@ -545,6 +545,23 @@ body {
   border-radius: 10px;
 }
 
+/* Short note under a graph title */
+.graph-note {
+  margin: 0;
+  padding: 0 20px 6px;
+  font-style: italic;
+  font-size: 12.5px;
+  color: #715f43;
+}
+
+/* Centered caption under a graph canvas (e.g. Kepler\u0027s third law) */
+.graph-caption {
+  text-align: center;
+  padding: 2px 20px 0;
+  color: #5a4a2f;
+  font-size: 15px;
+}
+
 /* Small italic footnote at the bottom corner of a graph box */
 .graph-footnote {
   padding: 6px 20px 12px;
