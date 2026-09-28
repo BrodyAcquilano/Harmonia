@@ -947,68 +947,75 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
   ctx.fillText(pair.tag + sub[pair.b], S / 2, S / 2 + 11)
 }
 
-// Resultant wobble orbits: one animated station per body, each with its own
-// center cross. Circle radius is proportional to the body's resultant wobble
-// magnitude |W| = sqrt(Rx^2 + Ry^2) from the math square; the solid ball
-// (body color, area proportional to mass) orbits at the resultant phase.
-const TB_WOBBLE = [
-  { mag: 0.499, phi: -1.43, color: C1, mass: 3, sub: '₁' },
-  { mag: 0.337, phi: 1.18, color: C2, mass: 4, sub: '₂' },
-  { mag: 0.358, phi: -1.79, color: TB_C3, mass: 5, sub: '₃' },
+// Three Body Motion — ONE common center: the COM at (0,0), centered in the box.
+// Each body gets its own circle centered at the COM, with radius equal to its
+// starting distance from the COM, so each triangle vertex lies on its circle.
+// The body orbits at a shared rate; the resultant wobble modulates its
+// distance from the center (the same trick as the two-body motion tab).
+const TB_MOTION = [
+  { x: 1, y: 3, wob: 0.499, phi: -1.43, color: C1, mass: 3, sub: '\u2081' },
+  { x: -2, y: -1, wob: 0.337, phi: 1.18, color: C2, mass: 4, sub: '\u2082' },
+  { x: 1, y: -1, wob: 0.358, phi: -1.79, color: TB_C3, mass: 5, sub: '\u2083' },
 ]
 
-function renderTBWobbleFrame(ctx, canvas, tau) {
+function renderTBMotionFrame(ctx, canvas, tau) {
   const dpr = window.devicePixelRatio || 1
   const S = Math.max(canvas.clientWidth, 50)
-  const H = S / 3
-  const W = Math.round(S * dpr), Hh = Math.round(H * dpr)
-  if (canvas.width !== W || canvas.height !== Hh) {
+  const W = Math.round(S * dpr)
+  if (canvas.width !== W || canvas.height !== W) {
     canvas.width = W
-    canvas.height = Hh
+    canvas.height = W
   }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   ctx.fillStyle = '#fffdf4'
-  ctx.fillRect(0, 0, S, H)
+  ctx.fillRect(0, 0, S, S)
 
-  const maxMag = Math.max(...TB_WOBBLE.map((b) => b.mag))
-  const Rmax = H * 0.30
-  TB_WOBBLE.forEach((b, i) => {
-    const cx = S * (1 / 6 + i / 3)
-    const cy = H / 2
-    const r = Math.max(4, Rmax * (b.mag / maxMag))
-    // own center cross
-    ctx.strokeStyle = '#4a3f2a'
-    ctx.lineWidth = 1.5
-    const cs = 7
-    ctx.beginPath()
-    ctx.moveTo(cx - cs, cy)
-    ctx.lineTo(cx + cs, cy)
-    ctx.moveTo(cx, cy - cs)
-    ctx.lineTo(cx, cy + cs)
-    ctx.stroke()
-    // wobble circle
+  const cx = S / 2, cy = S / 2
+  // fit the largest (base radius + wobble amplitude), margin for labels
+  const maxR = Math.max(...TB_MOTION.map((b) => Math.hypot(b.x, b.y) + b.wob))
+  const R = (S / 2 - 34) / maxR
+
+  // the one center
+  ctx.strokeStyle = '#3a3125'
+  ctx.lineWidth = 2
+  const cs = 9
+  ctx.beginPath()
+  ctx.moveTo(cx - cs, cy)
+  ctx.lineTo(cx + cs, cy)
+  ctx.moveTo(cx, cy - cs)
+  ctx.lineTo(cx, cy + cs)
+  ctx.stroke()
+  ctx.fillStyle = '#715f43'
+  ctx.font = '11px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'alphabetic'
+  ctx.fillText('C', cx, cy + 24)
+
+  TB_MOTION.forEach((b) => {
+    const d = Math.hypot(b.x, b.y)
+    const th0 = Math.atan2(b.y, b.x)
+    // base circle, centered at C: the starting point lies on it
     ctx.strokeStyle = b.color
-    ctx.lineWidth = 1.5
+    ctx.lineWidth = 1.25
+    ctx.globalAlpha = 0.55
     ctx.beginPath()
-    ctx.arc(cx, cy, r, 0, 2 * Math.PI)
+    ctx.arc(cx, cy, d * R, 0, 2 * Math.PI)
     ctx.stroke()
-    // solid ball on the circle at the resultant phase
-    const a = tau * 1.0 + b.phi
-    const bx = cx + r * Math.cos(a)
-    const by = cy - r * Math.sin(a)
+    ctx.globalAlpha = 1
+    // ball: shared orbital rate, radius = base + wobble at the resultant phase
+    const th = th0 + tau * 1.0
+    const r = d + b.wob * Math.cos(tau + b.phi)
+    const bx = cx + r * R * Math.cos(th)
+    const by = cy - r * R * Math.sin(th)
+    const br = 9 * Math.sqrt(b.mass / 3)
     ctx.fillStyle = b.color
     ctx.beginPath()
-    ctx.arc(bx, by, 9 * Math.sqrt(b.mass / 3), 0, 2 * Math.PI)
+    ctx.arc(bx, by, br, 0, 2 * Math.PI)
     ctx.fill()
-    // labels
-    ctx.fillStyle = b.color
     ctx.font = '13px "IBM Plex Mono", monospace'
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'alphabetic'
-    ctx.fillText('M' + b.sub, cx, cy - r - 10)
-    ctx.fillStyle = '#715f43'
-    ctx.font = '11px "IBM Plex Mono", monospace'
-    ctx.fillText('|W|=' + b.mag.toFixed(3), cx, cy + r + 18)
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('M' + b.sub, bx + br + 5, by)
   })
 }
 
@@ -1557,7 +1564,7 @@ export default function WaveLab() {
   const canvasTBSq1Ref = useRef(null)
   const canvasTBSq2Ref = useRef(null)
   const canvasTBBdryRef = useRef(null)
-  const canvasTBWobbleRef = useRef(null)
+  const canvasTBMotionRef = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
   stateRef.current = { subtab, M1, M2, playing, speed, showSum, waveDisplay, ppDisplay, orbitZoom }
@@ -1630,8 +1637,8 @@ export default function WaveLab() {
         if (bd) renderTBBoundarySquare(bd.getContext('2d'), bd)
         const sqs = [canvasTBSq0Ref.current, canvasTBSq1Ref.current, canvasTBSq2Ref.current]
         sqs.forEach((c, i) => { if (c) renderTBPhasorSquare(c.getContext('2d'), c, i) })
-        const wb = canvasTBWobbleRef.current
-        if (wb) renderTBWobbleFrame(wb.getContext('2d'), wb, tauRef.current)
+        const mo = canvasTBMotionRef.current
+        if (mo) renderTBMotionFrame(mo.getContext('2d'), mo, tauRef.current)
       }
       raf = requestAnimationFrame(draw)
     }
@@ -2222,17 +2229,17 @@ export default function WaveLab() {
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title"><Tex tex="\text{Wobble orbits}" /></h2>
+              <h2 className="graph-title"><Tex tex="\text{Three Body Motion}" /></h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
                 <span><i className="swatch" style={{ background: C1 }} /><Tex tex="M_1" /></span>
                 <span><i className="swatch" style={{ background: C2 }} /><Tex tex="M_2" /></span>
                 <span><i className="swatch" style={{ background: TB_C3 }} /><Tex tex="M_3" /></span>
-                <span style={{ textAlign: 'center' }}><Tex tex="\text{one circle per body --- radius } \propto |W|" /></span>
+                <span style={{ textAlign: 'center' }}><Tex tex="\text{one center } C=(0,0)\text{ --- each start point on its circle}" /></span>
               </div>
             </div>
-            <canvas ref={canvasTBWobbleRef} className="wave-canvas-wobble" />
+            <canvas ref={canvasTBMotionRef} className="wave-canvas-sq" />
           </div>
           </>
         ) : null}
