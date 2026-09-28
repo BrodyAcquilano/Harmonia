@@ -1,6 +1,6 @@
 # The Three Body Problem
 
-*The pair machine works. Two bodies in, closed-form waves out, Kepler recovered, the stack traversed both ways. The next wall is the famous one: three bodies, where every textbook says closed-form solutions without chaos are impossible. This note is the program for proving that assumption false — six pair-equations through the tech stack, and then the one hard problem the stack doesn't solve for us: summing the pairs.*
+*The pair machine works. Two bodies in, closed-form waves out, Kepler recovered, the quantum tech stack traversed both ways. The next wall is the famous one: three bodies, where every textbook says closed-form solutions without chaos are impossible. This note is the program for proving that assumption false — six pair-equations through the quantum tech stack, and then the one hard problem the quantum tech stack doesn't solve for us: summing the pairs.*
 
 ---
 
@@ -10,7 +10,7 @@
 - [2. The problem, stated](#2-the-problem-stated)
 - [3. The challenge — summing the pairs](#3-the-challenge--summing-the-pairs)
 - [4. The six equations — $\psi$, $\phi$, $\chi$](#4-the-six-equations--psi-phi-chi)
-- [5. Through the tech stack](#5-through-the-tech-stack)
+- [5. Through the quantum tech stack](#5-through-the-quantum-tech-stack)
 - [6. Finding the actual center](#6-finding-the-actual-center)
 - [7. The resultant of the two circles](#7-the-resultant-of-the-two-circles)
 
@@ -21,7 +21,7 @@ The three-body problem is the prediction of the motion of three masses under the
 
 Our goal is to prove that assumption false.
 
-We know the tech stack and how to work through it, so that part is trivial: the descent by limits and differentiation, the vanishing total differential at the bottom, the turn, the ascent by integration back to the conservation law. That machinery doesn't care how many bodies there are. What it was built for is *pairs* — and a three-body system contains three pairs: $(M_1,M_2)$, $(M_1,M_3)$, $(M_2,M_3)$. So we write the six equations, one opposing pair of waves per pair of bodies, run each pair through the stack, and get six solutions that satisfy the boundary conditions on the other end. Each pair hands us the motion caused by that pair.
+We know the quantum tech stack and how to work through it, so that part is trivial: the descent by limits and differentiation, the vanishing total differential at the bottom, the turn, the ascent by integration back to the conservation law. That machinery doesn't care how many bodies there are. What it was built for is *pairs* — and a three-body system contains three pairs: $(M_1,M_2)$, $(M_1,M_3)$, $(M_2,M_3)$. So we write the six equations, one opposing pair of waves per pair of bodies, run each pair through the quantum tech stack, and get six solutions that satisfy the boundary conditions on the other end. Each pair hands us the motion caused by that pair.
 
 But then we have to sum them. That is what this note sets out to explain. We built the machine to work on pairs — can it work on more than two bodies? The six pair-solutions are not the answer; they are the raw material. The answer is whatever turns three pair-motions into one three-body motion. Everything below is aimed at that summation.
 
@@ -43,7 +43,7 @@ Three bodies in free fall: all velocities zero, the system released from rest. T
 
 $$L_{12} = 5, \qquad L_{13} = 4, \qquad L_{23} = 3, \qquad 3^2 + 4^2 = 5^2.$$
 
-What must be solved: the positions $\mathbf{r}_1(t)$, $\mathbf{r}_2(t)$, $\mathbf{r}_3(t)$ for all $t \geq 0$. In our language: the six pair-waves, each run through the stack to its impulse equations — and then the summation of §3.
+What must be solved: the positions $\mathbf{r}_1(t)$, $\mathbf{r}_2(t)$, $\mathbf{r}_3(t)$ for all $t \geq 0$. In our language: the six pair-waves, each run through the quantum tech stack to its impulse equations — and then the summation of §3.
 
 ---
 
@@ -53,7 +53,7 @@ We know the system works for two bodies. Will it work for three? The obstacle is
 
 **Idea 1 — vector sum of the paired motions.** The obvious choice. Each body ends up with two linear motions, of different magnitudes and phases — $M_1$ moves under $(M_1,M_2)$ and under $(M_1,M_3)$ — and we sum them. The resultant vector is the body's linear motion, and from the three resultants we reconstruct the paths. Note the shape of the last approach: for two bodies we used 2 circles and one center. Here we are looking at 6 circles and 3 centers (each pair contributes its two body-circles about its own balance point), and then we need the true center — which might be found at the intersection of the circles. There is an old Euclidean trick for finding the center of a circle (two chords, their perpendicular bisectors meet at the center), and it may generalize to the common center of the six. The path a body takes will then be a new circle: its relation to that center plus the sum of its two pair-circles — or, equivalently, the sum of its two pair-vectors referred to that center. It may *appear* to rotate in a figure eight along its two circles somehow. We know not to be fooled by geometry: the figure eight would be the shadow, not the thing.
 
-**Idea 2 — statistical, by ratios.** Find average points through ratios, the way we did with the two-body balance point. Each pair hands us a balance point dividing its side in the mass ratio; the three-body balance is some ratio-weighted average of the three. This would likely produce a valid solution, and it has the virtue of using only quantities the stack already gives us.
+**Idea 2 — statistical, by ratios.** Find average points through ratios, the way we did with the two-body balance point. Each pair hands us a balance point dividing its side in the mass ratio; the three-body balance is some ratio-weighted average of the three. This would likely produce a valid solution, and it has the virtue of using only quantities the quantum tech stack already gives us.
 
 **Idea 3 — Kepler's error, repaired geometrically.** Take what we learned from Kepler's error about ellipses and build a geometrical theory of overlapping circles: find what the difference in apparent motion rectifies to. Our first pass gives 6 circles and 3 center points, but we know there can only be one center and three circles. Rectify by circle intersections — or better: draw the lines connecting each pair and find the single point that all three balance-point lines pass through. This is the favourite: it gives a visual proof of the whole reduction, three pairs → three lines → one point, and then the orbits are adjusted relative to that center to produce circles. **Intersections are the operation here.**
 
@@ -105,9 +105,9 @@ The 3-4-5 boundary conditions fix every constant — nothing is free:
 
 ---
 
-## 5. Through the tech stack
+## 5. Through the quantum tech stack
 
-Now the trivial part: run each pair through the stack. The descent is the same five levels — limits, differentiation, the vanishing total differential per pair:
+Now the trivial part: run each pair through the quantum tech stack. The descent is the same five levels — limits, differentiation, the vanishing total differential per pair:
 
 $$dW_s^{(ab)} = \left(\frac{\partial W_a^{(ab)}}{\partial M_a}+\frac{\partial W_b^{(ab)}}{\partial M_a}\right)dM_a + \left(\frac{\partial W_a^{(ab)}}{\partial M_b}+\frac{\partial W_b^{(ab)}}{\partial M_b}\right)dM_b = 0,$$
 
@@ -119,7 +119,7 @@ $$F_1^{(13)}(t) = \int_0^{4}\!\left[\mathrm{Im}(\phi_1) - \mathrm{Re}(\phi_1)\ri
 
 $$F_2^{(23)}(t) = \int_0^{3}\!\left[\mathrm{Im}(\chi_2) - \mathrm{Re}(\chi_2)\right]d\lambda, \qquad F_3^{(23)}(t) = \int_0^{3}\!\left[\mathrm{Im}(\chi_3) - \mathrm{Re}(\chi_3)\right]d\lambda.$$
 
-Six impulse equations — two per pair, one per body per pair. Each is the pair's doing, expressed as the motion it imprints on each of its bodies. This is the far end of the stack: six solutions satisfying the 3-4-5 boundary conditions. What the stack does *not* give us is how $F_1^{(12)}$ and $F_1^{(13)}$ combine into the motion of $M_1$. That is §3's problem, and §6–§7's work.
+Six impulse equations — two per pair, one per body per pair. Each is the pair's doing, expressed as the motion it imprints on each of its bodies. This is the far end of the quantum tech stack: six solutions satisfying the 3-4-5 boundary conditions. What the quantum tech stack does *not* give us is how $F_1^{(12)}$ and $F_1^{(13)}$ combine into the motion of $M_1$. That is §3's problem, and §6–§7's work.
 
 ---
 
