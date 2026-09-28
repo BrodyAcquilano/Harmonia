@@ -671,15 +671,16 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
   ctx.fillStyle = '#fffdf4'
   ctx.fillRect(0, 0, S, S)
 
-  // Amplitude-matched phasors: each circle's radius is proportional to its
-  // body-wave's wobble amplitude, and every banner shares one global
-  // pixels-per-unit scale K, so a banner's peak can never exceed its
-  // phasor's radius and the three squares stay comparable.
+  // Two branch phasors per body-wave, concentric at the corner. Each branch
+  // gets its own phasor because a negative direction cosine flips that
+  // branch's phase by pi -- the old single radial phasor was wrong-signed
+  // for those branches. Radius is proportional to the branch's own
+  // amplitude, on one global scale K across all three squares.
   const R_MAX = S * 0.085
   const tl = { x: S * 0.16, y: S * 0.16 }
   const br = { x: S * 0.84, y: S * 0.84 }
   const far = S * 0.72, near = S * 0.28
-  const sub = ['₁', '₂', '₃']
+  const sub = ['\u2081', '\u2082', '\u2083']
   const colA = pair.colA, colB = pair.colB
 
   // Branch wobbles: pair-line wobble projected by the direction cosines.
@@ -695,8 +696,17 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
     q.slots.forEach((s) => { for (const v of s.X) ampMax = Math.max(ampMax, Math.abs(v) * m) })
   })
   const K = R_MAX / ampMax
-  const rA = Math.max(K * Math.max(peak(bArr[0]), peak(bArr[1])), 4)
-  const rB = Math.max(K * Math.max(peak(bArr[2]), peak(bArr[3])), 4)
+
+  // One entry per branch: sign-corrected phasor angle (a negative direction
+  // cosine is a pi phase flip), radius from the branch's own amplitude.
+  // A zero direction cosine is a zero branch: no phasor, just the flat banner.
+  const branchDefs = (slotIdx) => {
+    const th = slots[slotIdx].theta
+    return [
+      { arr: bArr[slotIdx * 2], u: pair.ux, axis: 'x', th: th + (pair.ux < 0 ? Math.PI : 0) },
+      { arr: bArr[slotIdx * 2 + 1], u: pair.uy, axis: 'y', th: th + (pair.uy < 0 ? Math.PI : 0) },
+    ].map((d) => ({ ...d, zero: Math.abs(d.u) < 1e-12, r: K * peak(d.arr) }))
+  }
 
   const N = 120
   const samp = (arr) => {
@@ -705,40 +715,10 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
     return out
   }
 
-  // Phasor snapshot. Returns the tip — each banner starts at t=0 on the
-  // tip's projection, so the wave is visibly connected to the phasor.
-  const drawPhasor = (cx, cy, r, slotIdx, color, label, labelPos) => {
-    ctx.lineWidth = 2
-    ctx.strokeStyle = color
-    ctx.beginPath()
-    ctx.arc(cx, cy, r, 0, 2 * Math.PI)
-    ctx.stroke()
-    const th = slots[slotIdx].theta
-    const tx = cx + r * Math.cos(th), ty = cy - r * Math.sin(th)
-    ctx.beginPath()
-    ctx.moveTo(cx, cy)
-    ctx.lineTo(tx, ty)
-    ctx.stroke()
-    ctx.fillStyle = color
-    ctx.beginPath()
-    ctx.arc(cx, cy, 2.5, 0, 2 * Math.PI)
-    ctx.fill()
-    ctx.font = '13px "IBM Plex Mono", monospace'
-    if (labelPos === 'right') {
-      ctx.textAlign = 'left'
-      ctx.textBaseline = 'middle'
-      ctx.fillText(label, cx + r + 10, cy)
-    } else {
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'alphabetic'
-      ctx.fillText(label, cx, cy - r - 8)
-    }
-    return { tx, ty }
-  }
-
-  // Dashed projection: phasor tip -> banner t=0. The wave starts where the
-  // tip projects, perpendicular to the wave's oscillation axis.
+  // Dashed projection: branch tip -> its banner's t=0. Skipped when the tip
+  // already sits on the banner start -- then the wave touches the tip.
   const project = (x0, y0, x1, y1) => {
+    if (Math.hypot(x1 - x0, y1 - y0) < 2) return
     ctx.save()
     ctx.setLineDash([4, 3])
     ctx.strokeStyle = '#a89a72'
@@ -750,8 +730,8 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
     ctx.restore()
   }
 
-  // Horizontal banner: t=0 at (x0, y0) — the tip's projection — time runs
-  // toward x1, wobble displaces vertically on the shared scale K.
+  // Horizontal banner: t=0 at (x0, y0), time toward x1, wobble displaces
+  // vertically on the shared scale K. Drawn after the circles: on top.
   const drawBannerH = (x0, x1, y0, arr, color, axisLabel, r) => {
     const vals = samp(arr)
     ctx.lineWidth = 1
@@ -777,8 +757,8 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
     ctx.fillText(axisLabel, x1, y0 - r - 6)
   }
 
-  // Vertical banner: t=0 at (x0, y0) — the tip's projection — time runs
-  // toward y1, wobble displaces horizontally on the shared scale K.
+  // Vertical banner: t=0 at (x0, y0), time toward y1, wobble displaces
+  // horizontally on the shared scale K. Drawn after the circles: on top.
   const drawBannerV = (x0, y0, y1, arr, color, axisLabel, r) => {
     const vals = samp(arr)
     ctx.lineWidth = 1
@@ -804,20 +784,63 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
     ctx.fillText(axisLabel, x0 + r + 6, y1)
   }
 
-  // Top-left phasor: x-banner runs right from the circle's edge at the
-  // tip's height; y-banner runs down from the circle's edge at the tip's
-  // x. Dashed lines tie each banner's t=0 back to the tip.
-  const tA = drawPhasor(tl.x, tl.y, rA, 0, colA, 'M' + sub[pair.a], 'top')
-  project(tA.tx, tA.ty, tl.x + rA, tA.ty)
-  drawBannerH(tl.x + rA, far, tA.ty, bArr[0], colA, 'x', rA)
-  project(tA.tx, tA.ty, tA.tx, tl.y + rA)
-  drawBannerV(tA.tx, tl.y + rA, far, bArr[1], colA, 'y', rA)
-  // Bottom-right phasor, mirrored: x-banner runs left, y-banner runs up.
-  const tB = drawPhasor(br.x, br.y, rB, 1, colB, 'M' + sub[pair.b], 'right')
-  project(tB.tx, tB.ty, br.x - rB, tB.ty)
-  drawBannerH(br.x - rB, near, tB.ty, bArr[2], colB, 'x', rB)
-  project(tB.tx, tB.ty, tB.tx, br.y - rB)
-  drawBannerV(tB.tx, br.y - rB, near, bArr[3], colB, 'y', rB)
+  // One body-wave's corner: concentric branch phasors at (cx, cy), x-banner
+  // toward sx (+1 right, -1 left), y-banner toward sy (+1 down, -1 up).
+  // Each banner starts at t=0 on its own branch circle's true edge -- right
+  // on the tip when the tip faces the banner -- so the right wave connects
+  // to the right tip. Zero branches draw no circle, just the flat banner.
+  const drawCorner = (cx, cy, slotIdx, color, label, labelPos, sx, sy, xEnd, yEnd) => {
+    const [bX, bY] = branchDefs(slotIdx)
+    const live = [bX, bY].filter((b) => !b.zero)
+    const maxR = Math.max(4, ...live.map((b) => b.r))
+    // Larger circle first so the smaller stays visible; one tip per branch.
+    ctx.lineWidth = 2
+    ctx.strokeStyle = color
+    for (const b of [...live].sort((p2, q2) => q2.r - p2.r)) {
+      ctx.beginPath()
+      ctx.arc(cx, cy, b.r, 0, 2 * Math.PI)
+      ctx.stroke()
+      b.tx = cx + b.r * Math.cos(b.th)
+      b.ty = cy - b.r * Math.sin(b.th)
+      ctx.beginPath()
+      ctx.moveTo(cx, cy)
+      ctx.lineTo(b.tx, b.ty)
+      ctx.stroke()
+    }
+    ctx.fillStyle = color
+    ctx.beginPath()
+    ctx.arc(cx, cy, 2.5, 0, 2 * Math.PI)
+    ctx.fill()
+    ctx.font = '13px "IBM Plex Mono", monospace'
+    if (labelPos === 'right') {
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(label, cx + maxR + 10, cy)
+    } else {
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'alphabetic'
+      ctx.fillText(label, cx, cy - maxR - 8)
+    }
+    // x-banner toward sx.
+    if (bX.zero) {
+      drawBannerH(cx + sx * maxR, xEnd, cy, bX.arr, color, 'x', 0)
+    } else {
+      const x0 = cx + sx * bX.r * Math.abs(Math.cos(bX.th))
+      project(bX.tx, bX.ty, x0, bX.ty)
+      drawBannerH(x0, xEnd, bX.ty, bX.arr, color, 'x', bX.r)
+    }
+    // y-banner toward sy.
+    if (bY.zero) {
+      drawBannerV(cx, cy + sy * maxR, yEnd, bY.arr, color, 'y', 0)
+    } else {
+      const y0 = cy + sy * bY.r * Math.abs(Math.sin(bY.th))
+      project(bY.tx, bY.ty, bY.tx, y0)
+      drawBannerV(bY.tx, y0, yEnd, bY.arr, color, 'y', bY.r)
+    }
+  }
+
+  drawCorner(tl.x, tl.y, 0, colA, 'M' + sub[pair.a], 'top', 1, 1, far, far)
+  drawCorner(br.x, br.y, 1, colB, 'M' + sub[pair.b], 'right', -1, -1, near, near)
 
   // Wave names in the open center.
   ctx.font = '15px "IBM Plex Mono", monospace'
@@ -1979,7 +2002,7 @@ export default function WaveLab() {
               <div className="legend">
                 <span><i className="swatch" style={{ background: TB_PAIRS[i].colA }} /><Tex tex={`X_{${TB_PAIRS[i].a + 1},x},\\,X_{${TB_PAIRS[i].a + 1},y}`} /></span>
                 <span><i className="swatch" style={{ background: TB_PAIRS[i].colB }} /><Tex tex={`X_{${TB_PAIRS[i].b + 1},x},\\,X_{${TB_PAIRS[i].b + 1},y}`} /></span>
-                <span style={{ textAlign: 'center' }}><Tex tex="\text{static snapshot --- one phasor per body-wave}" /><br /><Tex tex="\text{two branches: } x \text{ and } y" /></span>
+                <span style={{ textAlign: 'center' }}><Tex tex="\text{static snapshot --- one phasor per branch}" /><br /><Tex tex="\text{two branches: } x \text{ and } y" /></span>
               </div>
             </div>
             <div className="tb-square-wrap">
@@ -2214,7 +2237,7 @@ export default function WaveLab() {
                   <div className="eq-box wide"><span className="eq-label">Branch components (direction cosines)</span><span className="eq-line"><Tex tex="X_{n,x}^{(ab)} = c_x^{(ab)} X_n^{(ab)}, \qquad X_{n,y}^{(ab)} = c_y^{(ab)} X_n^{(ab)}" /></span><span className="eq-line"><Tex tex="(c_x, c_y): \; \psi\,(-0.6, -0.8), \; \phi\,(0, -1), \; \chi\,(1, 0) \text{ --- from the Burrau coordinates}" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Wobble per body (nested sums)</span><span className="eq-line"><Tex tex="X_1 = (X_{1,x}^{(12)} + X_{1,y}^{(12)}) + (X_{1,x}^{(13)} + X_{1,y}^{(13)})" /></span><span className="eq-line"><Tex tex="X_2 = (X_{2,x}^{(12)} + X_{2,y}^{(12)}) + (X_{2,x}^{(23)} + X_{2,y}^{(23)})" /></span><span className="eq-line"><Tex tex="X_3 = (X_{3,x}^{(13)} + X_{3,y}^{(13)}) + (X_{3,x}^{(23)} + X_{3,y}^{(23)})" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Phasor snapshot</span><Tex tex="\theta_n^{(ab)} = \arg \int_0^{L_{ab}} W_n^{(ab)} \, d\lambda \;\; \text{at } \tau = 0" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{One phasor per body-wave feeds both its } x \text{ and } y \text{ banners: the phase angle is shared, and the branches differ only in the direction they integrate over. The machine still computes the radial pair-line version --- the } x/y \text{ split shown is the working branch projection (note \S10), not an independent per-branch derivation.}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{One phasor per branch: a negative direction cosine flips that branch's phase by } \pi\text{, so each branch gets its own tip and its own banner start. The machine still computes the radial pair-line version --- the } x/y \text{ split shown is the working branch projection (note \S10), not an independent per-branch derivation.}" /></div>
                 </div>
               </div>
             </>
