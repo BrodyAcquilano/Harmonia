@@ -963,7 +963,8 @@ function renderEllipseGeomFrame(ctx, canvas, s) {
 // Motion tab, second graph: local push-pull D(λₙ) = [W₁−J₁] − [W₂−J₂].
 // The integrand of the displacement — net push in +λₙ at each point.
 // Push-pull density: the local remaining-inertia difference between the bodies.
-//   P₁(λₙ) = W₁(λₙ) − J₁(λₙ),   P₂(λₙ) = W₂(λₙ) − J₂(λₙ),   D(λₙ) = P₁ − P₂.
+//   P₁(λₙ) = ∫₀^λₙ[Re(ψ₁)−Im(ψ₁)]dλ′,   P₂(λₙ) = ∫₀^λₙ[Re(ψ₂)−Im(ψ₂)]dλ′,
+//   D(λₙ) = P₁ − P₂ written out as the differenced definite integral.
 // Mode: 'parts' (P₁, P₂), 'diff' (D), 'all' (all three).
 function renderPushPullFrame(ctx, canvas, s, tau, mode) {
   const g = frameSetup(ctx, canvas)
@@ -1547,11 +1548,11 @@ export default function WaveLab() {
               <div className="legend">
                 {(ppDisplay === 'parts' || ppDisplay === 'all') && (
                   <>
-                    <span><i className="swatch" style={{ background: C1 }} /><Tex tex="P_1(\lambda_n)" /></span>
-                    <span><i className="swatch" style={{ background: C2 }} /><Tex tex="P_2(\lambda_n)" /></span>
+                    <span><i className="swatch" style={{ background: C1 }} /><Tex tex="P_1(\lambda_n) = \int_0^{\lambda_n} [\mathrm{Re}(\psi_1) - \mathrm{Im}(\psi_1)] \, d\lambda'" /></span>
+                    <span><i className="swatch" style={{ background: C2 }} /><Tex tex="P_2(\lambda_n) = \int_0^{\lambda_n} [\mathrm{Re}(\psi_2) - \mathrm{Im}(\psi_2)] \, d\lambda'" /></span>
                   </>
                 )}
-                {(ppDisplay === 'diff' || ppDisplay === 'all') && <span><i className="swatch" style={{ background: '#3a2c1a' }} /><Tex tex="D(\lambda_n) = P_1 - P_2" /></span>}
+                {(ppDisplay === 'diff' || ppDisplay === 'all') && <span><i className="swatch" style={{ background: '#3a2c1a' }} /><Tex tex="D(\lambda_n) = \int_0^{\lambda_n} [(\mathrm{Re}\psi_1 - \mathrm{Im}\psi_1) - (\mathrm{Re}\psi_2 - \mathrm{Im}\psi_2)] \, d\lambda'" /></span>}
               </div>
               <label className="check-row graph-check">
                 Display
@@ -1572,11 +1573,11 @@ export default function WaveLab() {
               <div className="legend">
                 {(ppDisplay === 'parts' || ppDisplay === 'all') && (
                   <>
-                    <span><i className="swatch" style={{ background: C1 }} /><Tex tex="P_1(t)" /></span>
-                    <span><i className="swatch" style={{ background: C2 }} /><Tex tex="P_2(t)" /></span>
+                    <span><i className="swatch" style={{ background: C1 }} /><Tex tex="P_1(t) = \int_0^L [\mathrm{Re}(\psi_1) - \mathrm{Im}(\psi_1)] \, d\lambda_n" /></span>
+                    <span><i className="swatch" style={{ background: C2 }} /><Tex tex="P_2(t) = \int_0^L [\mathrm{Re}(\psi_2) - \mathrm{Im}(\psi_2)] \, d\lambda_n" /></span>
                   </>
                 )}
-                {(ppDisplay === 'diff' || ppDisplay === 'all') && <span><i className="swatch" style={{ background: '#3a2c1a' }} /><Tex tex="T(t) = P_1 - P_2" /></span>}
+                {(ppDisplay === 'diff' || ppDisplay === 'all') && <span><i className="swatch" style={{ background: '#3a2c1a' }} /><Tex tex="T(t) = \int_0^L [(\mathrm{Re}\psi_1 - \mathrm{Im}\psi_1) - (\mathrm{Re}\psi_2 - \mathrm{Im}\psi_2)] \, d\lambda_n" /></span>}
               </div>
               <label className="check-row graph-check">
                 Display
@@ -1595,8 +1596,8 @@ export default function WaveLab() {
             </div>
             <div className="graph-meta-row">
               <div className="legend">
-                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="F_1(t)" /></span>
-                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="F_2(t)" /></span>
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="F_1(t) = \int_0^L [\mathrm{Im}(\psi_1) - \mathrm{Re}(\psi_1)] \, d\lambda_n" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="F_2(t) = \int_0^L [\mathrm{Im}(\psi_2) - \mathrm{Re}(\psi_2)] \, d\lambda_n" /></span>
               </div>
             </div>
             <canvas ref={canvasForceTimeRef} className="wave-canvas" />
@@ -1607,8 +1608,8 @@ export default function WaveLab() {
             </div>
             <div className="graph-meta-row">
               <div className="legend">
-                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="X_1(t)" /></span>
-                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="X_2(t)" /></span>
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="X_1(t) = \int_0^t F_1(t') \, dt'" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="X_2(t) = \int_0^t F_2(t') \, dt'" /></span>
               </div>
             </div>
             <canvas ref={canvasWobbleTimeRef} className="wave-canvas" />
@@ -1860,11 +1861,11 @@ export default function WaveLab() {
               <div className="eq-group">
                 <h4>Push-Pull Density <span className="eq-note">— plotted · spatial + temporal</span></h4>
                 <div className="eq-list">
-                  <div className="eq-box wide"><span className="eq-label">Remaining inertia per body (spatial)</span><Tex tex="P_1(\lambda_n) = W_1(\lambda_n) - J_1(\lambda_n), \quad P_2(\lambda_n) = W_2(\lambda_n) - J_2(\lambda_n)" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Local push-pull (spatial)</span><Tex tex="D(\lambda_n) = P_1(\lambda_n) - P_2(\lambda_n)" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Remaining inertia per body (temporal)</span><Tex tex="P_n(t) = W_n(L, t) - J_n(L, t) = -F_n(t)" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Local push-pull (temporal)</span><Tex tex="T(t) = P_1(t) - P_2(t) = F_2(t) - F_1(t)" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{Where body 1's remaining inertia exceeds body 2's, and vice versa.}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Remaining inertia per body (spatial) — definite integrals</span><Tex tex="P_1(\lambda_n) = \int_0^{\lambda_n} [\mathrm{Re}(\psi_1) - \mathrm{Im}(\psi_1)] \, d\lambda', \quad P_2(\lambda_n) = \int_0^{\lambda_n} [\mathrm{Re}(\psi_2) - \mathrm{Im}(\psi_2)] \, d\lambda'" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Local push-pull (spatial)</span><Tex tex="D(\lambda_n) = \int_0^{\lambda_n} [(\mathrm{Re}\psi_1 - \mathrm{Im}\psi_1) - (\mathrm{Re}\psi_2 - \mathrm{Im}\psi_2)] \, d\lambda'" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Remaining inertia per body (temporal) — definite integrals</span><Tex tex="P_n(t) = \int_0^L [\mathrm{Re}(\psi_n) - \mathrm{Im}(\psi_n)] \, d\lambda_n = -F_n(t)" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Local push-pull (temporal)</span><Tex tex="T(t) = \int_0^L [(\mathrm{Re}\psi_1 - \mathrm{Im}\psi_1) - (\mathrm{Re}\psi_2 - \mathrm{Im}\psi_2)] \, d\lambda_n = F_2(t) - F_1(t)" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{The Integration tab's } W_n - J_n \text{ curves as definite integrals, differenced per body.}" /></div>
                 </div>
               </div>
               <div className="eq-group">
@@ -1873,7 +1874,7 @@ export default function WaveLab() {
                   <div className="eq-box wide"><span className="eq-label">Net impulse at time t</span><Tex tex="F_n(t) = J_n(L, t) - W_n(L, t) = \int_0^L [\mathrm{Im}(\psi_n) - \mathrm{Re}(\psi_n)] \, d\lambda_n" /></div>
                   <div className="eq-box wide"><span className="eq-label">Body 1 wobble</span><Tex tex="X_1(t) = \int_0^t F_1(t') \, dt'" /></div>
                   <div className="eq-box wide"><span className="eq-label">Body 2 wobble</span><Tex tex="X_2(t) = \int_0^t F_2(t') \, dt'" /></div>
-                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{Heavy mass wobbles less. Bodies move opposite: one up, the other down.}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{Heavy mass wobbles less. Bodies move opposite: one up, the other down. } F_n(t) \text{ is the Integration tab's released impulse } J_n - W_n \text{, taken over the full span.}" /></div>
                 </div>
               </div>
               <div className="eq-group">

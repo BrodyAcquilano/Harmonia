@@ -46,6 +46,8 @@ $$
 | **u4.** Second time integral: displacement appears. | $X_n(t) = \int_0^t F_n(t')\,dt'$ | The second time dimension is where motion lives: the wobble, the trajectory. | Integrate over the second time. |
 | **u5.** Closure: the invariant reappears, evaluated between bounds. | $F_n(\tau) = J_n(L,\tau) - W_n(L,\tau)$ | The conservation law returns as a definite integral — the trip is over when it reappears. | Evaluate between bounds. |
 
+The Motion tab's push-pull density is this same machinery, differenced per body: $D(\lambda_n) = \int_0^{\lambda_n}[(\mathrm{Re}\psi_1-\mathrm{Im}\psi_1) - (\mathrm{Re}\psi_2-\mathrm{Im}\psi_2)]\,d\lambda'$ — the Integration tab's $W_n - J_n$ areas as definite integrals, one per body, subtracted.
+
 ### Shorthand
 
 | signal in ↓ | signal recovered ↑ |

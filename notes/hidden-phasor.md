@@ -184,14 +184,14 @@ The colors alternate at each crossing, so the graph reads as a ledger: green ban
 Eight graphs, in tab order — and the order is the methodology. It starts from the push-pull density: the local push at each point between the bodies, which is where the whole definition began. Integrate over space and you get each body's net impulse $F_n(t)$; integrate that over time — one full period — and you get the wobble $X_n(t)$. Two integrations, and you are back to motion from the thing you started with: a definite integral over one period recovering the trajectory. Then the live wobble projections, then the axis wrapped around the center, the separation split at the balance point, and you get the true motion. The dot diagrams are live (they animate); the time graphs are static snapshots of one full wobble cycle, both directions, with the axis marked in time ($0$ to $T$). Four quantities are shared across them:
 
 $$
-P_n(\lambda_n) = W_n(\lambda_n) - J_n(\lambda_n), \qquad D(\lambda_n) = P_1(\lambda_n) - P_2(\lambda_n)
+P_n(\lambda_n) = \int_0^{\lambda_n} \big[\mathrm{Re}(\psi_n) - \mathrm{Im}(\psi_n)\big]\,d\lambda', \qquad D(\lambda_n) = \int_0^{\lambda_n} \big[(\mathrm{Re}\psi_1 - \mathrm{Im}\psi_1) - (\mathrm{Re}\psi_2 - \mathrm{Im}\psi_2)\big]\,d\lambda'
 $$
 
 $$
 F_n(t) = \int_0^L \big[\mathrm{Im}(\psi_n) - \mathrm{Re}(\psi_n)\big]\,d\lambda_n, \qquad X_n(t) = \int_0^t F_n(t')\,dt'
 $$
 
-$P_n(\lambda_n)$ is body $n$'s remaining inertia at the point $\lambda_n$ — what is stored minus what has been released — and $D(\lambda_n)$ is the local push: where body 1's remaining inertia exceeds body 2's, and vice versa. $F_n(t)$ is the net released impulse on body $n$ at time $t$ — the whole spatial line collapsed to a single number. $X_n(t)$ is the wobble: body $n$'s displacement from its starting point as a function of time.
+$P_n(\lambda_n)$ is body $n$'s remaining inertia at the point $\lambda_n$ — the definite integral of what is stored minus what has been released, the Integration tab's $W_n - J_n$ curve accumulated — and $D(\lambda_n)$ is the local push: the two definite integrals differenced, where body 1's remaining inertia exceeds body 2's, and vice versa. $F_n(t)$ is the net released impulse on body $n$ at time $t$ — the whole spatial line collapsed to a single number. $X_n(t)$ is the wobble: body $n$'s displacement from its starting point as a function of time.
 
 **"Push-Pull Density (spatial)"** — $D(\lambda_n)$ against the spatial wavelength $\lambda_n$: the starting definition, plotted first. The Display dropdown also shows the two parts separately — $P_1(\lambda_n)$ (blue) and $P_2(\lambda_n)$ (orange) — or all three together.
 
