@@ -335,6 +335,55 @@ function renderEnvelopeFrame(ctx, canvas, s, tau) {
   }
 }
 
+// Gravity tab, second graph: Pull Balance Point.
+// Plots the real (spatial-inertia) parts of both waves — each body's pull
+// profile across the span — with the balance point as a grey dashed line.
+// Blue fill under Re(ψ₁) left of λ*, orange fill under Re(ψ₂) right of λ*:
+// each body's side of the lever-arm balance M₁λ* = M₂(L−λ*).
+function renderPullBalanceFrame(ctx, canvas, s, tau) {
+  const g = frameSetup(ctx, canvas)
+  const P = gravityParams(s.M1, s.M2)
+  const yMax = Math.max((P.A1 + P.A2) * 1.15, 0.5)
+  const { X, Y } = drawGrid(ctx, g, yMax)
+  const r1 = (x) => psi1(x, tau, P, s.M2).re
+  const r2 = (x) => psi2(x, tau, P, s.M1).re
+  if (s.M1 + s.M2 > 0) {
+    const xStar = (X_MAX * s.M2) / (s.M1 + s.M2)
+    // Side fills: blue under ψ₁ left of the balance point,
+    // orange under ψ₂ right of it.
+    ctx.save()
+    ctx.globalAlpha = 0.15
+    const n = 200
+    const fillUnder = (fn, x0, x1, color) => {
+      ctx.fillStyle = color
+      ctx.beginPath()
+      ctx.moveTo(X(x0), Y(0))
+      for (let i = 0; i <= n; i++) {
+        const x = x0 + (i / n) * (x1 - x0)
+        ctx.lineTo(X(x), Y(fn(x)))
+      }
+      ctx.lineTo(X(x1), Y(0))
+      ctx.closePath()
+      ctx.fill()
+    }
+    fillUnder(r1, 0, xStar, C1)
+    fillUnder(r2, xStar, X_MAX, C2)
+    ctx.restore()
+    // Balance-point line.
+    ctx.save()
+    ctx.strokeStyle = '#9a9a9a'
+    ctx.lineWidth = 1.5
+    ctx.setLineDash([6, 4])
+    ctx.beginPath()
+    ctx.moveTo(X(xStar), g.padT)
+    ctx.lineTo(X(xStar), g.padT + g.ph)
+    ctx.stroke()
+    ctx.restore()
+  }
+  trace(ctx, X, Y, r1, C1, 1.75, [])
+  trace(ctx, X, Y, r2, C2, 1.75, [])
+}
+
 // Derivatives tab, lower graph: the summed total on its own, drawn on the
 // same vertical scale as the component graph so the cancellation reads directly.
 function renderTotalFrame(ctx, canvas, s, tau) {
@@ -1139,6 +1188,7 @@ export default function WaveLab() {
 
   const canvasRef = useRef(null)
   const canvasEnvelopeRef = useRef(null)
+  const canvasPullRef = useRef(null)
   const canvasPP1Ref = useRef(null)
   const canvasPP2Ref = useRef(null)
   const canvasEllipseRef = useRef(null)
@@ -1184,6 +1234,8 @@ export default function WaveLab() {
       if (s.subtab === 'gravity') {
         const ec = canvasEnvelopeRef.current
         if (ec) renderEnvelopeFrame(ec.getContext('2d'), ec, s, tauRef.current)
+        const pb = canvasPullRef.current
+        if (pb) renderPullBalanceFrame(pb.getContext('2d'), pb, s, tauRef.current)
         const p1 = canvasPP1Ref.current
         if (p1) renderBodyPushPullFrame(p1.getContext('2d'), p1, s, tauRef.current, 1)
         const p2 = canvasPP2Ref.current
@@ -1400,6 +1452,28 @@ export default function WaveLab() {
               </label>
             </div>
             <canvas ref={canvasRef} className="wave-canvas" />
+          </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Balance Point — Where Pull Is Equal</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="\text{pull of } M_1 = \mathrm{Re}(\psi_1)" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="\text{pull of } M_2 = \mathrm{Re}(\psi_2)" /></span>
+                <span><i className="swatch swatch-dashed" /><Tex tex="\text{balance point } \lambda^*" /></span>
+              </div>
+            </div>
+            <canvas ref={canvasPullRef} className="wave-canvas" />
+            <div style={{ padding: '8px 20px 12px' }}>
+              <div className="eq-box">
+                <span className="eq-label">Pull balance — plotted</span>
+                <span className="eq-line"><Tex tex="\mathrm{Re}(\psi_1) = A_1 e^{-\beta\lambda_n} \cos(k_1\lambda_n - \omega_1 M_2 \tau)" /></span>
+                <span className="eq-line"><Tex tex="\mathrm{Re}(\psi_2) = A_2 e^{-\beta(L-\lambda_n)} \cos(-k_2\lambda_n - \omega_2 M_1 \tau)" /></span>
+                <span className="eq-line"><Tex tex="\lambda^* = L\dfrac{M_2}{M_1+M_2}, \qquad M_1 \lambda^* = M_2 (L - \lambda^*)" /></span>
+              </div>
+            </div>
+            <p className="graph-note">Left of λ* is body 1's side, right of λ* body 2's — the line is the lever-arm balance, M₁λ* = M₂(L−λ*).</p>
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
@@ -1780,6 +1854,13 @@ export default function WaveLab() {
                 <h4>The envelope <span className="eq-note">— plotted · display units</span></h4>
                 <div className="eq-list">
                   <div className="eq-box wide"><span className="eq-label">Envelope bounds (decay without oscillation)</span><span className="eq-line"><Tex tex="E_1^{\pm} = \pm A_1 e^{-\beta\lambda_n}" /></span><span className="eq-line"><Tex tex="E_2^{\pm} = \pm A_2 e^{-\beta(L-\lambda_n)}" /></span></div>
+                </div>
+              </div>
+              <div className="eq-group">
+                <h4>Imaginary-part balance <span className="eq-note">— defining equation · display units</span></h4>
+                <div className="eq-list">
+                  <div className="eq-box wide"><span className="eq-label">Where the imaginary parts meet</span><span className="eq-line"><Tex tex="\mathrm{Im}(\psi_1) = \mathrm{Im}(\psi_2)" /></span><span className="eq-line"><Tex tex="A_1 e^{-\beta\lambda} \sin(k_1\lambda - \omega_1 M_2 \tau) = A_2 e^{-\beta(L-\lambda)} \sin(-k_2\lambda - \omega_2 M_1 \tau)" /></span><span className="eq-line"><Tex tex="\text{transcendental in } \lambda \text{ — no closed form; solve numerically}" /></span></div>
+                  <div className="eq-box wide"><span className="eq-label">Equal masses (M₁ = M₂)</span><span className="eq-line"><Tex tex="\lambda = n\pi, \quad n = 0, 1, 2, 3, 4" /></span><span className="eq-line"><Tex tex="\text{the real parts meet at the same points; } \lambda^* = 2\pi \text{ is the middle one}" /></span></div>
                 </div>
               </div>
               <div className="eq-group">
