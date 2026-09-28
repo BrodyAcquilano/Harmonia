@@ -947,15 +947,15 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
   ctx.fillText(pair.tag + sub[pair.b], S / 2, S / 2 + 11)
 }
 
-// Three Body Motion — the elliptical wobble paths implied by the directional
-// resultants. Each body rides an ellipse centered at its triangle vertex:
-//   x = Rx·cos(τ+Θx),  y = Ry·cos(τ+Θy)
-// Equal frequencies with an x/y phase split: that split is what makes it an
-// ellipse instead of a straight line. COM at (0,0), centered in the box.
+// Three Body Motion — ONE common center: the COM at (0,0), centered in the box.
+// Each body rides an ellipse centered at the COM. Splitting the resultant
+// wobble into x/y components gives the semi-axes: a ∝ Rx, b ∝ Ry, scaled so
+// the major axis equals the body's starting distance from the COM (the circle
+// we had before, deformed by the wobble's eccentricity).
 const TB_ELLIPSE = [
-  { vx: 1, vy: 3, rx: 0.156, px: -1.21, ry: 0.474, py: -1.43, color: C1, mass: 3, sub: '\u2081' },
-  { vx: -2, vy: -1, rx: 0.317, px: 1.18, ry: 0.114, py: -0.79, color: C2, mass: 4, sub: '\u2082' },
-  { vx: 1, vy: -1, rx: 0.322, px: -1.79, ry: 0.157, py: -0.26, color: TB_C3, mass: 5, sub: '\u2083' },
+  { d: Math.hypot(1, 3), th0: Math.atan2(3, 1), rx: 0.156, ry: 0.474, color: C1, mass: 3, sub: '\u2081' },
+  { d: Math.hypot(-2, -1), th0: Math.atan2(-1, -2), rx: 0.317, ry: 0.114, color: C2, mass: 4, sub: '\u2082' },
+  { d: Math.hypot(1, -1), th0: Math.atan2(-1, 1), rx: 0.322, ry: 0.157, color: TB_C3, mass: 5, sub: '\u2083' },
 ]
 
 function renderTBMotionFrame(ctx, canvas, tau) {
@@ -971,25 +971,8 @@ function renderTBMotionFrame(ctx, canvas, tau) {
   ctx.fillRect(0, 0, S, S)
 
   const cx = S / 2, cy = S / 2
-  // fit triangle + wobble extents around the centered COM
-  let maxR = 0
-  TB_ELLIPSE.forEach((b) => {
-    maxR = Math.max(maxR, Math.hypot(b.vx, b.vy) + Math.hypot(b.rx, b.ry))
-  })
-  const R = (S / 2 - 30) / maxR
-  const X = (x) => cx + x * R
-  const Y = (y) => cy - y * R
-
-  // mean triangle (thin grey)
-  ctx.strokeStyle = '#b9a77f'
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  TB_ELLIPSE.forEach((b, i) => {
-    if (i === 0) ctx.moveTo(X(b.vx), Y(b.vy))
-    else ctx.lineTo(X(b.vx), Y(b.vy))
-  })
-  ctx.closePath()
-  ctx.stroke()
+  const maxD = Math.max(...TB_ELLIPSE.map((b) => b.d))
+  const R = (S / 2 - 34) / maxD
 
   // the one center
   ctx.strokeStyle = '#3a3125'
@@ -1008,38 +991,31 @@ function renderTBMotionFrame(ctx, canvas, tau) {
   ctx.fillText('C', cx, cy + 24)
 
   TB_ELLIPSE.forEach((b) => {
-    const ex = X(b.vx), ey = Y(b.vy)
-    // vertex marker
-    ctx.fillStyle = b.color
-    ctx.globalAlpha = 0.35
-    ctx.beginPath()
-    ctx.arc(ex, ey, 3, 0, 2 * Math.PI)
-    ctx.fill()
-    ctx.globalAlpha = 1
-    // wobble ellipse (sampled parametric curve)
+    // semi-axes from the x/y resultant components; major axis = starting distance
+    const mx = Math.max(b.rx, b.ry)
+    const a = (b.d * b.rx) / mx
+    const e = (b.d * b.ry) / mx
+    // wobble ellipse, centered at C
     ctx.strokeStyle = b.color
     ctx.lineWidth = 1.25
+    ctx.globalAlpha = 0.6
     ctx.beginPath()
-    for (let i = 0; i <= 72; i++) {
-      const t = (i / 72) * 2 * Math.PI
-      const px = ex + b.rx * R * Math.cos(t + b.px)
-      const py = ey - b.ry * R * Math.cos(t + b.py)
-      if (i === 0) ctx.moveTo(px, py)
-      else ctx.lineTo(px, py)
-    }
+    ctx.ellipse(cx, cy, a * R, e * R, 0, 0, 2 * Math.PI)
     ctx.stroke()
-    // ball on the ellipse at time tau
-    const bx = ex + b.rx * R * Math.cos(tau + b.px)
-    const by = ey - b.ry * R * Math.cos(tau + b.py)
-    const br = 6 * Math.sqrt(b.mass / 3)
+    ctx.globalAlpha = 1
+    // ball rides the ellipse; starts in the starting-point direction
+    const t0 = Math.atan2(a * Math.sin(b.th0), e * Math.cos(b.th0))
+    const bx = cx + a * R * Math.cos(tau + t0)
+    const by = cy - e * R * Math.sin(tau + t0)
+    const br = 8 * Math.sqrt(b.mass / 3)
     ctx.fillStyle = b.color
     ctx.beginPath()
     ctx.arc(bx, by, br, 0, 2 * Math.PI)
     ctx.fill()
-    // label above the wobble
     ctx.font = '13px "IBM Plex Mono", monospace'
-    ctx.textAlign = 'center'
-    ctx.fillText('M' + b.sub, ex, ey - Math.max(b.rx, b.ry) * R - 12)
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('M' + b.sub, bx + br + 5, by)
   })
 }
 
@@ -2260,7 +2236,7 @@ export default function WaveLab() {
                 <span><i className="swatch" style={{ background: C1 }} /><Tex tex="M_1" /></span>
                 <span><i className="swatch" style={{ background: C2 }} /><Tex tex="M_2" /></span>
                 <span><i className="swatch" style={{ background: TB_C3 }} /><Tex tex="M_3" /></span>
-                <span style={{ textAlign: 'center' }}><Tex tex="\text{wobble ellipses at the triangle vertices}" /></span>
+                <span style={{ textAlign: 'center' }}><Tex tex="\text{one center } C=(0,0)\text{ --- } a \propto R_x,\; b \propto R_y" /></span>
               </div>
             </div>
             <canvas ref={canvasTBMotionRef} className="wave-canvas-sq" />
