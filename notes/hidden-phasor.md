@@ -4,6 +4,21 @@
 
 ---
 
+## Table of Contents
+
+- [1. The phase-angle knob](#1-the-phase-angle-knob)
+- [2. Where time is — and where it stays hidden](#2-where-time-is--and-where-it-stays-hidden)
+- [3. Why the spatial part stays fixed](#3-why-the-spatial-part-stays-fixed)
+- [4. Proportional masses: only the ratio matters](#4-proportional-masses-only-the-ratio-matters)
+- [5. The Moon, projected onto a plane](#5-the-moon-projected-onto-a-plane)
+- [5c. The mutual pull: two equations, two directions](#5c-the-mutual-pull-two-equations-two-directions)
+- [5d. From energy at a point to distance moved](#5d-from-energy-at-a-point-to-distance-moved)
+- [6. Why the axis runs $0$ to $4\pi$](#6-why-the-axis-runs-0-to-4pi)
+- [7. Reading the graphs](#7-reading-the-graphs)
+- [8. What this simulation does not show](#8-what-this-simulation-does-not-show)
+- [9. Conclusion: a chirp function in five dimensions](#9-conclusion-a-chirp-function-in-five-dimensions)
+
+
 ## 1. The phase-angle knob
 
 The field equations from the main paper are

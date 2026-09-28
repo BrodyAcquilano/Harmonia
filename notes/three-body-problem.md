@@ -4,6 +4,17 @@
 
 ---
 
+## Table of Contents
+
+- [1. Why three bodies](#1-why-three-bodies)
+- [2. The problem, stated](#2-the-problem-stated)
+- [3. The challenge — summing the pairs](#3-the-challenge--summing-the-pairs)
+- [4. The six equations — $\psi$, $\phi$, $\chi$](#4-the-six-equations--psi-phi-chi)
+- [5. Through the tech stack](#5-through-the-tech-stack)
+- [6. Finding the actual center](#6-finding-the-actual-center)
+- [7. The resultant of the two circles](#7-the-resultant-of-the-two-circles)
+
+
 ## 1. Why three bodies
 
 The three-body problem is the prediction of the motion of three masses under their mutual gravity, given initial positions and velocities. It is the next logical step because it is the problem other theories cannot explain: since Poincaré, the accepted position is that no closed-form solution exists — that any attempt introduces chaos, and the only way forward is numerical integration, step by step, with the error growing as you go.

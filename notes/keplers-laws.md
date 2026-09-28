@@ -4,6 +4,18 @@
 
 ---
 
+## Table of Contents
+
+- [1. What Kepler was hunting](#1-what-kepler-was-hunting)
+- [2. The First Law — the ellipse, and the focus](#2-the-first-law--the-ellipse-and-the-focus)
+- [3. a and b are the balancing points' proportion](#3-a-and-b-are-the-balancing-points-proportion)
+- [4. The Second Law — equal areas, and the timing we don't yet have](#4-the-second-law--equal-areas-and-the-timing-we-dont-yet-have)
+- [5. The Third Law — the harmonic law, and the music](#5-the-third-law--the-harmonic-law-and-the-music)
+- [6. What the ellipse can't say](#6-what-the-ellipse-cant-say)
+- [7. Conclusion: the right description, and what lies beneath it](#7-conclusion-the-right-description-and-what-lies-beneath-it)
+- [References](#references)
+
+
 ## 1. What Kepler was hunting
 
 Kepler inherited Tycho Brahe's observations of Mars — the best naked-eye data ever taken — and found that no circle, however cleverly compounded, could fit them. The discrepancy was eight arcminutes: a sliver of sky, and it broke two thousand years of circles. From that sliver he drew the first two laws (*Astronomia Nova*, 1609) and, a decade later, the third (*Harmonices Mundi*, 1619).

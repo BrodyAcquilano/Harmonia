@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
+import rehypeSlug from 'rehype-slug'
 import 'katex/dist/katex.min.css'
 
 // Notes live in /notes as plain markdown files; Vite inlines them as strings.
@@ -62,7 +63,7 @@ export default function NotesView() {
         {current && (
           <ReactMarkdown
             remarkPlugins={[remarkGfm, remarkMath]}
-            rehypePlugins={[rehypeKatex]}
+            rehypePlugins={[rehypeSlug, rehypeKatex]}
           >
             {current.text}
           </ReactMarkdown>

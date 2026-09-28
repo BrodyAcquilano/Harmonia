@@ -4,6 +4,16 @@
 
 ---
 
+## Table of Contents
+
+- [1. What the stack is](#1-what-the-stack-is)
+- [2. The stack, in full](#2-the-stack-in-full)
+- [3. Facts and takeaways](#3-facts-and-takeaways)
+- [4. Layer by layer](#4-layer-by-layer)
+- [5. The abstracted stack](#5-the-abstracted-stack)
+- [6. Conclusion: what the rotation means](#6-conclusion-what-the-rotation-means)
+
+
 ## 1. What the stack is
 
 A tech stack is layers with a direction: you go down through them to the thing everything stands on, and back up to the thing the user sees. The derivation of the inertia waves turns out to have exactly this shape.

@@ -4,6 +4,16 @@
 
 ---
 
+## Table of Contents
+
+- [1. What the derivation owes us](#1-what-the-derivation-owes-us)
+- [2. Decay: exponential dissipation and finite energy](#2-decay-exponential-dissipation-and-finite-energy)
+- [3. Amplitude: the stack's integration constant](#3-amplitude-the-stacks-integration-constant)
+- [4. The worked example: decay and amplitude through the stack](#4-the-worked-example-decay-and-amplitude-through-the-stack)
+- [5. Standing waves, nodes, and harmonies](#5-standing-waves-nodes-and-harmonies)
+- [6. Every symbol, and the level that fixes it](#6-every-symbol-and-the-level-that-fixes-it)
+
+
 ## 1. What the derivation owes us
 
 The wave form is

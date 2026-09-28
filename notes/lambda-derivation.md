@@ -8,6 +8,17 @@ The key idea is simple even though the final formulas look complicated. The earl
 
 ---
 
+## Table of Contents
+
+- [1. Starting Relations from the Two-Body Derivation](#1-starting-relations-from-the-two-body-derivation)
+- [2. Isolating $\lambda_2$ in Terms of $\lambda_1$](#2-isolating-lambda_2-in-terms-of-lambda_1)
+- [3. Substituting into the Gravitational Branch Equation](#3-substituting-into-the-gravitational-branch-equation)
+- [4. Rewriting $\lambda_1$ in the Symmetric Factorized Form](#4-rewriting-lambda_1-in-the-symmetric-factorized-form)
+- [5. Deriving $\lambda_2$](#5-deriving-lambda_2)
+- [6. Why the Two Final Expressions Have the Same Internal Bracket](#6-why-the-two-final-expressions-have-the-same-internal-bracket)
+- [7. Derivation in One Chain](#7-derivation-in-one-chain)
+
+
 ## 1. Starting Relations from the Two-Body Derivation
 
 For the reciprocal branch associated with Body 1, the closed-form solution carries forward the wavelength-product relation
