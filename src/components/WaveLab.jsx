@@ -572,9 +572,9 @@ function samplePeriodic(arr, T, NT, t) {
 // separation: 5, 4, 3). All graphs here are static snapshots — no animation.
 const TB_C3 = '#1e9e6a' // M₃ — green
 const TB_PAIRS = [
-  { tag: 'ψ', a: 0, b: 1, Ma: 3, Mb: 4, span: 5, sub: 'M₁ = 3, M₂ = 4', legA: '\\mathrm{Re}(\\psi_1)', legB: '\\mathrm{Re}(\\psi_2)' },
-  { tag: 'φ', a: 0, b: 2, Ma: 3, Mb: 5, span: 4, sub: 'M₁ = 3, M₃ = 5', legA: '\\mathrm{Re}(\\phi_1)', legB: '\\mathrm{Re}(\\phi_3)' },
-  { tag: 'χ', a: 1, b: 2, Ma: 4, Mb: 5, span: 3, sub: 'M₂ = 4, M₃ = 5', legA: '\\mathrm{Re}(\\chi_2)', legB: '\\mathrm{Re}(\\chi_3)' },
+  { tag: 'ψ', a: 0, b: 1, Ma: 3, Mb: 4, span: 5, sub: 'M₁ = 3, M₂ = 4', legA: '\\mathrm{Re}(\\psi_1)', legB: '\\mathrm{Re}(\\psi_2)', colA: C1, colB: C2 },
+  { tag: 'φ', a: 0, b: 2, Ma: 3, Mb: 5, span: 4, sub: 'M₁ = 3, M₃ = 5', legA: '\\mathrm{Re}(\\phi_1)', legB: '\\mathrm{Re}(\\phi_3)', colA: C1, colB: TB_C3 },
+  { tag: 'χ', a: 1, b: 2, Ma: 4, Mb: 5, span: 3, sub: 'M₂ = 4, M₃ = 5', legA: '\\mathrm{Re}(\\chi_2)', legB: '\\mathrm{Re}(\\chi_3)', colA: C2, colB: TB_C3 },
 ]
 // Solved pair parameters: the 3-4-5 boundary conditions fix everything,
 // so this is computed once at module load.
@@ -668,14 +668,14 @@ function drawSpanGrid(ctx, g, yMax, span) {
   return { X, Y }
 }
 
-// Three-body pair snapshot — STATIC, τ = 0. Re(waveA) blue, Re(waveB) orange.
+// Three-body pair snapshot — STATIC, τ = 0. Each wave in its body's color.
 function renderTBPairFrame(ctx, canvas, pairIdx) {
   const g = frameSetup(ctx, canvas)
   const pair = TB_SOLVED[pairIdx]
   const yMax = Math.max((pair.P.A1 + pair.P.A2) * 1.15, 0.5)
   const { X, Y } = drawSpanGrid(ctx, g, yMax, pair.span)
-  trace(ctx, X, Y, (x) => tbWave(pair, 'a', x, 0).re, C1, 1.75, [], pair.span)
-  trace(ctx, X, Y, (x) => tbWave(pair, 'b', x, 0).re, C2, 1.75, [], pair.span)
+  trace(ctx, X, Y, (x) => tbWave(pair, 'a', x, 0).re, pair.colA, 1.75, [], pair.span)
+  trace(ctx, X, Y, (x) => tbWave(pair, 'b', x, 0).re, pair.colB, 1.75, [], pair.span)
 }
 
 // Three-body wobble — STATIC snapshot over [0, 4π]. X₁ blue, X₂ orange, X₃ green.
@@ -1832,6 +1832,21 @@ export default function WaveLab() {
           </>
         ) : subtab === 'threebody' ? (
           <>
+          {[canvasTBPair0Ref, canvasTBPair1Ref, canvasTBPair2Ref].map((ref, i) => (
+          <div className="graph-box" key={TB_PAIRS[i].tag}>
+            <div className="graph-title-row">
+              <h2 className="graph-title">Pair {TB_PAIRS[i].tag} — {TB_PAIRS[i].sub}</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: TB_PAIRS[i].colA }} /><Tex tex={TB_PAIRS[i].legA} /></span>
+                <span><i className="swatch" style={{ background: TB_PAIRS[i].colB }} /><Tex tex={TB_PAIRS[i].legB} /></span>
+                <span><Tex tex="\text{static snapshot at } \tau = 0" /></span>
+              </div>
+            </div>
+            <canvas ref={ref} className="wave-canvas" />
+          </div>
+          ))}
           <div className="graph-box">
             <div className="graph-title-row">
               <h2 className="graph-title">Three-Body Wobble Over Time</h2>
@@ -1846,21 +1861,6 @@ export default function WaveLab() {
             </div>
             <canvas ref={canvasTBWobbleRef} className="wave-canvas" />
           </div>
-          {[canvasTBPair0Ref, canvasTBPair1Ref, canvasTBPair2Ref].map((ref, i) => (
-          <div className="graph-box" key={TB_PAIRS[i].tag}>
-            <div className="graph-title-row">
-              <h2 className="graph-title">Pair {TB_PAIRS[i].tag} — {TB_PAIRS[i].sub}</h2>
-            </div>
-            <div className="graph-meta-row">
-              <div className="legend">
-                <span><i className="swatch" style={{ background: C1 }} /><Tex tex={TB_PAIRS[i].legA} /></span>
-                <span><i className="swatch" style={{ background: C2 }} /><Tex tex={TB_PAIRS[i].legB} /></span>
-                <span><Tex tex="\text{static snapshot at } \tau = 0" /></span>
-              </div>
-            </div>
-            <canvas ref={ref} className="wave-canvas" />
-          </div>
-          ))}
           </>
         ) : null}
 
@@ -2087,7 +2087,7 @@ export default function WaveLab() {
                   <div className="eq-box wide"><span className="eq-label">Pair impulses at time t</span><span className="eq-line"><Tex tex="F_1^{(12)}(t) = \int_0^5 [\mathrm{Im}(\psi_1) - \mathrm{Re}(\psi_1)] \, d\lambda, \quad F_2^{(12)}(t) = \int_0^5 [\mathrm{Im}(\psi_2) - \mathrm{Re}(\psi_2)] \, d\lambda" /></span><span className="eq-line"><Tex tex="F_1^{(13)}(t) = \int_0^4 [\mathrm{Im}(\phi_1) - \mathrm{Re}(\phi_1)] \, d\lambda, \quad F_3^{(13)}(t) = \int_0^4 [\mathrm{Im}(\phi_3) - \mathrm{Re}(\phi_3)] \, d\lambda" /></span><span className="eq-line"><Tex tex="F_2^{(23)}(t) = \int_0^3 [\mathrm{Im}(\chi_2) - \mathrm{Re}(\chi_2)] \, d\lambda, \quad F_3^{(23)}(t) = \int_0^3 [\mathrm{Im}(\chi_3) - \mathrm{Re}(\chi_3)] \, d\lambda" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Net impulse per body (Idea 1 — straight sum)</span><span className="eq-line"><Tex tex="F_1(t) = F_1^{(12)}(t) + F_1^{(13)}(t)" /></span><span className="eq-line"><Tex tex="F_2(t) = F_2^{(12)}(t) + F_2^{(23)}(t)" /></span><span className="eq-line"><Tex tex="F_3(t) = F_3^{(13)}(t) + F_3^{(23)}(t)" /></span></div>
                   <div className="eq-box wide"><span className="eq-label">Wobble per body</span><span className="eq-line"><Tex tex="X_1(t) = \int_0^t F_1(t') \, dt', \quad X_2(t) = \int_0^t F_2(t') \, dt', \quad X_3(t) = \int_0^t F_3(t') \, dt'" /></span></div>
-                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{The quantum tech stack's definite integrals, integrated over time per body. The net impulse is the straight vector sum of each body's two pair-impulses (idea 1); subtracting the unmatched pair's vector is still open (note \S7).}" /></div>
+                  <div className="eq-box wide"><span className="eq-label">Reading</span><Tex tex="\text{The quantum tech stack's definite integrals, integrated over time per body. The net impulse is the straight vector sum of each body's two pair-impulses (idea 1); subtracting the unmatched pair's vector remains a fallback (note \S7).}" /></div>
                 </div>
               </div>
             </>
