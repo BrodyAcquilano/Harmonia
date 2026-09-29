@@ -2291,6 +2291,7 @@ export default function WaveLab() {
                 <span><Tex tex="\lambda_2 - \lambda_1 = \lambda_1 - \lambda_2 = x" /></span>
               </div>
             </div>
+            <p className="graph-note">Motion here is perceived motion: the apparent background shift and the angular changes of the stars. There is no absolute frame in this view — only the naive reading.</p>
             <canvas ref={canvasOrbitApparentRef} className="wave-canvas-orbit" />
             <div className="graph-footnote">xy plane</div>
           </div>
@@ -2334,7 +2335,7 @@ export default function WaveLab() {
             <div className="graph-meta-row">
               <div className="legend">
                 <span><Tex tex="\text{the m1--m2 line stretches and contracts --- the mass ratio stays fixed}" /></span>
-                <span><Tex tex="\text{yellow dot: the balance point, riding its own small ellipse" /></span>
+                <span><Tex tex="\text{yellow dot: the balance point, riding its own small ellipse}" /></span>
               </div>
             </div>
             <p className="graph-note">The symmetric balance point shifts at a constant rate — our clock. Its back-and-forth along the eigen line, read against the external reference, tells how much time dilation occurs when a third body acts.</p>
