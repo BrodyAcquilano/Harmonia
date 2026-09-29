@@ -3,13 +3,15 @@
 
 *This note updates the theory. The earlier notes stand as the derivation path — the route by which the stack was found — and are not rewritten. What follows extends the Quantum Tech Stack upward: two new layers, two new symmetry rules, and a new account of what time is. Where this note and an earlier note disagree about what moves, this note is the current statement.*
 
+*(Corrected 2026-09-29: what was called "turbulence" is renamed **wavelength expansion and contraction** — the center is fixed; only an external force stretches the orbit, and only when velocity is not constant.)*
+
 ---
 
 ## Table of Contents
 
 - [1. What the animation showed](#1-what-the-animation-showed)
-- [2. The turbulence picture](#2-the-turbulence-picture)
-- [3. Lock the bodies, move the center](#3-lock-the-bodies-move-the-center)
+- [2. Wavelength expansion and contraction](#2-wavelength-expansion-and-contraction)
+- [3. Add the frame's motion — don't move into a new frame](#3-add-the-frames-motion-dont-move-into-a-new-frame)
 - [4. The new symmetry rules](#4-the-new-symmetry-rules)
 - [5. The new layers](#5-the-new-layers)
 - [6. The balance point is a clock ratio](#6-the-balance-point-is-a-clock-ratio)
@@ -29,26 +31,26 @@ Watching the two-body motion, something becomes clear that the equations had bee
 
 The old picture had each body riding its own wobble — $X_1(t)$ carrying $M_1$, $X_2(t)$ carrying $M_2$, each displaced from its mean. Fix the center between the two circles and let the configuration rotate, and part of the truth comes out: the bodies are rocking back and forth *together*, locked at their separation by gravity. The wobble does not separate them — they hand their relative motion to the point they share.
 
-But that is only half. The center itself travels — turbulently, shaken by the same field of colliding mass-waves (§2). So each body sits at $C(t) + p_n + X_n(t)$: the turbulent center, plus its locked position in the configuration, plus its own branch wobble relative to the center. The bodies move relative to the center, and the center moves relative to everything else. Both motions are real, and the time we are trying to build has to count both.
+But the second half, as I wrote it, was wrong. The center does not travel — it is fixed, the 1D eigenpoint the motion is read against. The bodies move around it: rocking back and forth together, locked at their separation, each riding its own branch wobble about the center point. So each body sits at $p_n + X_n(t)$: its locked position in the configuration plus its wobble relative to the fixed center. The motion belongs to the bodies; the center is the point it is measured against.
 
 
-## 2. The turbulence picture
+## 2. Wavelength expansion and contraction
 
-Think of the two bodies as hurtling through space, locked together at distance $L$, immersed in a field of gravity waves — a turbulent sea. Mass causes the waves: every mass broadcasts its spatial frequencies in every direction, and every body sits in the collision of all of them.
+There is no turbulent sea shaking the center. What I was calling turbulence is **wavelength expansion and contraction** — and it only happens when an external force is stretching the system.
 
-Each collision pushes. The pushes arrive as wobbles — $X_{n,j}(t)$, body $n$, branch $j$ — the same wobbles the stack computes at u4. But because the bodies are locked, the wobbles cannot separate them. Instead the wobbles *add*. The turbulence shakes the pair, and the pair, being rigid, hands all of that shaking to the one point it shares: the center.
+Picture the two bodies circling their fixed center. Now let an external force pull on one side — say the left. The bodies no longer circle the center; the circular swing is stretched into an ellipse: the wavelength expands on the pulled side and contracts on the other. The difference is applied to the left side.
 
-So the center vibrates in the turbulent field — and that vibration is the sum of a great many mass-wave spatial frequencies colliding from different directions, caused by mass, unified at a point.
+Two conditions, both required: there must be an external force doing the stretching, and the velocity must not be constant — the stretching adds acceleration. Without an external force, or at constant velocity, there is no expansion and contraction; the orbit simply closes. That is why this graph stands apart from the others in the Motion tab: it is the one that adds acceleration.
 
 
 ## 3. Add the frame's motion — don't move into a new frame
 
-The math is a change of what the wobbles are *for*. An earlier version of this section stated it wrong: lock the bodies rigid, sum the wobbles, move the center. That made the turbulence point sound like an isolated thing — as if the integration lifted the motion into a new reference frame and left the bodies behind. The correction: **the integration adds the reference frame's own motion; it does not move into a new frame.**
+The math is a change of what the wobbles are *for*. Two earlier versions of this section stated it wrong: first lock the bodies rigid, sum the wobbles, move the center; then the integration adds the frame's own motion. Both made the same mistake — they moved the center. The correction: **the center is fixed; what the merge computes is the stretch.**
 
 Both things are true at once:
 
-- The **resultant velocity acts on the bodies in branches** — each body keeps its wobble $\mathbf{X}_n(t)$, riding it relative to the center.
-- The **relative motion acts on the center** — the wobbles summed, vector-sum over bodies and over branches, into the turbulent motion of the center itself:
+- The **resultant velocity acts on the bodies in branches** — each body keeps its wobble $\mathbf{X}_n(t)$, riding it relative to the fixed center.
+- The **merged resultant is the wavelength stretch** — the wobbles summed, vector-sum over bodies and over branches, into the expansion and contraction the external force applies to the orbit:
 
 $$
 \mathbf{C}(t) = \sum_{n=1}^{2}\sum_{j\in\{x,y\}} X_{n,j}(t)\,\hat{e}_j,
@@ -60,28 +62,28 @@ $$
 C_x(t) = X_{1,x}(t) + X_{2,x}(t), \qquad C_y(t) = X_{1,y}(t) + X_{2,y}(t).
 $$
 
-So $M_n$ sits at $\mathbf{C}(t) + \mathbf{p}_n + \mathbf{X}_n(t)$: the body wobbles relative to the center, and the center itself moves turbulently — because the reference frame wobbles in space too. The turbulence point is not some isolated thing; it is the center carrying the summed wobbles, with the bodies still wobbling on it in branches.
+So $M_n$ sits at $\mathbf{p}_n + \mathbf{X}_n(t)$ about the fixed center, and $\mathbf{C}(t)$ — the merged resultant — stretches that swing: expansion on the pulled side, contraction on the other. The stretch is not some isolated thing; it is the summed wobbles, applied to the orbit by the external force, with the bodies still wobbling in branches.
 
-**The plane direction, in the math.** Let $\hat{e}_F$ be the force-line unit vector (along the separation) and $\hat{e}_\perp$ the perpendicular resultant — the direction the transform rotated the force into. The pair's plane of motion is $\mathrm{span}(\hat{e}_F, \hat{e}_\perp)$. The turbulence eigen line is that perpendicular direction:
+**The plane direction, in the math.** Let $\hat{e}_F$ be the force-line unit vector (along the separation) and $\hat{e}_\perp$ the perpendicular resultant — the direction the transform rotated the force into. The pair's plane of motion is $\mathrm{span}(\hat{e}_F, \hat{e}_\perp)$. The eigen line is that perpendicular direction:
 
 $$
 \hat{e}_{\mathrm{eigen}} = \hat{e}_\perp, \qquad \mathbf{C}(t) = C(t)\,\hat{e}_\perp.
 $$
 
-So the eigen line resides **parallel** to the plane of motion — it lies in the plane, along the in-plane perpendicular — while the force line crosses it. The turbulence is never out of the plane; it is the plane's own perpendicular axis, moving.
+So the eigen line resides **parallel** to the plane of motion — it lies in the plane, along the in-plane perpendicular — while the force line crosses it. The stretch is never out of the plane; it is the plane's own perpendicular axis, fixed at the center.
 
 Finding this resultant wobble is not switching coordinate references or viewing the motion a new way. It is inferring another property from the system: how much we are moving relative to an external force. The velocity integral is the acceleration from the external force — and from it we know not only how much each body wobbles relative to one another in each direction, but how much each one stretches time relative to some third reference point. Two uses for the same acceleration: find the velocity over space, or find the time difference over space relative to the energy difference caused by mass.
 
-$\mathbf{C}(t)$ is the *resultant* — the vector sum of the branch wobbles. It is the whole pair's answer to the turbulence, delivered at the one point the pair shares. This is the math the Motion tab's "The Turbulence: The Next Eigenstate" box is built on: the bodies wobbling relative to the center at the balance-point split, the eigen line through them moving turbulently with the resultant, the center drawn as a cross — the bodies wobbling in the plane of the line, the line itself turbulent relative to the external reference.
+$\mathbf{C}(t)$ is the *resultant* — the vector sum of the branch wobbles. It is the whole pair’s answer to the external force, delivered as a stretch of the orbit. This is the math the Motion tab’s "Wavelength Expansion and Contraction: External Force" box is built on: the bodies wobbling about the fixed center at the balance-point split, the external force pulling on the left, the circular swing stretched into an ellipse — expansion on one side, contraction on the other — read against the external reference.
 
 
 ## 4. The new symmetry rules
 
-The Quantum Tech Stack had one branching rule: **space splits** — a new spatial dimension branches the integration path, and the stack runs once per branch (§7 of that note). Watching the center move reveals the mirror rule:
+The Quantum Tech Stack had one branching rule: **space splits** — a new spatial dimension branches the integration path, and the stack runs once per branch (§7 of that note). Watching the branches merge reveals the mirror rule:
 
 **Time unifies.** A time integration cannot be taken branch by branch. The next layer up after the wobbles is a time dimension in the integration, and it *demands* that it act on both spatial dimensions at once — by the symmetry rules. Time is what the branches have in common; the symmetry forbids integrating it piecemeal. Where space split the path, time merges it back.
 
-**The center is the clock.** The merged vector $\mathbf{C}(t)$ — the sum of all branch wobbles at the shared center — is what we perceive as time passing. We perceive a *single* time for all the motions because the merge fuses the colliding frequencies into one motion of one point. The singleness of time is not a background assumption; it is the *result* of the merge.
+**The merged resultant is the clock.** The merged vector $\mathbf{C}(t)$ — the sum of all branch wobbles, the one stretch they agree on — is what we perceive as time passing. We perceive a *single* time for all the motions because the merge fuses the colliding frequencies into one stretch. The singleness of time is not a background assumption; it is the *result* of the merge.
 
 In short: **space splits the branches; time merges them back.** Splitting is how space acts; unifying is how time acts. That is the new symmetry.
 
@@ -92,12 +94,12 @@ The ascent of the tech stack gains two layers. (The descent is unchanged — the
 
 | Layer ↑ | Equation | Indicator | Operation |
 |---|---|---|---|
-| **u6. Merge the branches.** The time layer demands the whole: sum every branch wobble into one center vector. | $\mathbf{C}(t) = \sum_n\sum_j X_{n,j}(t)\,\hat{e}_j$ | The branches reunite — one center, vibrating in space. The merge is not optional; it is the symmetry rule for time layers, the mirror of the split. | Vector-sum over bodies and branches. Add the center's turbulent motion to the bodies' branch wobbles — the frame's own motion, not a new frame. |
-| **u7. Integrate the center.** One more integration — another time part. | $\boldsymbol{\tau}(t) = \int_0^t \mathbf{C}(t')\,dt'$ | The stretching of time, accumulated from the center's vibration. How hard the bodies pull the center is how much time stretches. | Integrate the center motion over time. |
+| **u6. Merge the branches.** The time layer demands the whole: sum every branch wobble into one resultant stretch. | $\mathbf{C}(t) = \sum_n\sum_j X_{n,j}(t)\,\hat{e}_j$ | The branches reunite — one resultant stretch. The merge is not optional; it is the symmetry rule for time layers, the mirror of the split. | Vector-sum over bodies and branches. Apply the merged resultant stretch to the bodies' branch wobbles — the external force's doing, not a new frame. |
+| **u7. Integrate the center.** One more integration — another time part. | $\boldsymbol{\tau}(t) = \int_0^t \mathbf{C}(t')\,dt'$ | The stretching of time, accumulated from the resultant stretch. How hard the external force stretches the orbit is how much time stretches. | Integrate the resultant stretch over time. |
 
 The rule for adding branches to a time integration is now explicit: **a time integral takes all branches at once.** u6 is not one more branch — it is the layer where branches end. Any future time layer merges first, then integrates. Space adds branches; time collects them.
 
-And every added integral is another body. To include one more body, integrate over another pair of phasors and add the resultant values: take pairs and branches, merge them into one resultant acceleration by summing, then integrate over space or over time to get the motion of their center relative to some other point. We can always merge any $n$ bodies treated as one resultant with any $m$ bodies treated as one resultant — pairs and branches into one resultant, by summation.
+And every added integral is another body. To include one more body, integrate over another pair of phasors and add the resultant values: take pairs and branches, merge them into one resultant acceleration by summing, then integrate over space or over time to get the stretch of their orbit relative to some other point. We can always merge any $n$ bodies treated as one resultant with any $m$ bodies treated as one resultant — pairs and branches into one resultant, by summation.
 
 The round trip is a coordinate transform both ways: the descent rewrites position and time in the frequency domain — frequency and wavelength — and the ascent transforms back into motion. The rotation is the transform.
 
@@ -120,14 +122,14 @@ $$
 
 The lighter body, on the longer lever arm, runs through more time; the heavier body, on the shorter arm, runs through less. Mass dilates time — read straight off the balance point, no new constants. The balance point was never just a spatial divider; it is the clock ratio of the pair.
 
-And the *amount* of time-stretch — how much time dilates moment to moment — is the pull on the center: the magnitude of $\mathbf{C}(t)$, accumulated by u7. How much the locked bodies pull their shared center is the motion, and the stretching, of time.
+And the *amount* of time-stretch — how much time dilates moment to moment — is the stretch of the orbit: the magnitude of $\mathbf{C}(t)$, accumulated by u7. How much the external force stretches the locked pair's orbit is the motion, and the stretching, of time.
 
 
 ## 7. A clock relative to an external body
 
 Fix the frame. Don't let anything move but the point. Now watch: a solid golden point rocking back and forth on a light grey line — the line fits inside the graph, and the point is all there is.
 
-The point is the turbulence point, read as a clock. Its rest position sits at the balance-point split — the mass ratio already said where, $T_1/T_2 = M_2/M_1$ — and it rocks around that rest position with the merged resultant $\mathbf{C}(t)$. The rocking is motion with external force and perpendicular velocity: the point answers the field of some external body, and its position on the line is the time reading.
+The point is the merged resultant, read as a clock. Its rest position sits at the balance-point split — the mass ratio already said where, $T_1/T_2 = M_2/M_1$ — and it rocks around that rest position with the merged resultant $\mathbf{C}(t)$. The rocking is motion with external force and perpendicular velocity: the point answers the field of some external body, and its position on the line is the time reading.
 
 Integrate that rocking in time and you get the clock ratio — the apparent time difference between the two bodies in space. The balance point already said so. The animation is that ratio made visible: the golden point is the excitation of frequencies at that point in space.
 
@@ -138,17 +140,17 @@ Time, at a point, is the rate of change of frequency in the field of gravitation
 
 Here is the correction to §7: the clock is not between the two bodies. It is the pair's **shared clock**, and it is read against an **external third reference** — a third body, or the background field beyond the boundary. Two bodies alone have a ratio (the balance point, $T_1/T_2 = M_2/M_1$) but no reading: a ratio is not a clock. The reading needs something outside the pair to be read against. The golden point's position on the line is the time — but the line itself is anchored to the external reference. Move the reference and the reading moves; that is what "relative" means.
 
-**How to compute it.** The pair's merged resultant is $\mathbf{C}(t) = \sum_n\sum_j X_{n,j}(t)\,\hat{e}_j$ — the turbulence point, the one motion the locked bodies agree on. The clock reading is the component of that motion along the direction to the external reference — the projection of $\mathbf{C}(t)$ onto the pair–reference axis, integrated in time:
+**How to compute it.** The pair's merged resultant is $\mathbf{C}(t) = \sum_n\sum_j X_{n,j}(t)\,\hat{e}_j$ — the merged resultant, the one stretch the locked bodies agree on. The clock reading is the component of that motion along the direction to the external reference — the projection of $\mathbf{C}(t)$ onto the pair–reference axis, integrated in time:
 
 $$\tau(t) = \int_0^t \mathbf{C}(t') \cdot \hat{e}_{\text{ref}}\,dt'.$$
 
 The balance point sets the zero — the rest position, the ratio — and the integrated projection sets the reading. Two computations, two jobs: the ratio is internal (mass proportions); the reading is external (reference projection).
 
-**Two bodies in 3D space.** The pair's force acts along their separation line; the resultant motion comes back perpendicular — rotated ninety degrees from the force direction, the transform's doing. So the pair lives on a plane: the line of force crossed with the perpendicular resultant velocity. The external third reference sits off that plane — or rather, the plane is *defined* against it: pick the reference, and the perpendicular direction the resultant takes is the one orthogonal to the pair–reference axis. This is the resultant velocity rotated from the direction of the force, and it must be considered: the clock does not read the radial pull, it reads the rotated resultant. Compute $\mathbf{C}(t)$, take the component perpendicular to the force line in the plane containing the reference, integrate — that is the pair's time. The turbulence eigen line — the line $\mathbf{C}(t)$ travels — resides parallel to this plane, running along the perpendicular-resultant direction; the force line crosses it (§3 states this in the math: $\hat{e}_{\mathrm{eigen}} = \hat{e}_\perp$).
+**Two bodies in 3D space.** The pair's force acts along their separation line; the resultant motion comes back perpendicular — rotated ninety degrees from the force direction, the transform's doing. So the pair lives on a plane: the line of force crossed with the perpendicular resultant velocity. The external third reference sits off that plane — or rather, the plane is *defined* against it: pick the reference, and the perpendicular direction the resultant takes is the one orthogonal to the pair–reference axis. This is the resultant velocity rotated from the direction of the force, and it must be considered: the clock does not read the radial pull, it reads the rotated resultant. Compute $\mathbf{C}(t)$, take the component perpendicular to the force line in the plane containing the reference, integrate — that is the pair's time. The eigen line — the perpendicular direction the stretch acts along — resides parallel to this plane, running along the perpendicular-resultant direction; the force line crosses it (§3 states this in the math: $\hat{e}_{\mathrm{eigen}} = \hat{e}_\perp$).
 
-**Three bodies in 3D space.** Three pairs, three resultants, three planes — unless the bodies share a plane, in which case the planes coincide and one clock serves. In general: compute each pair's turbulence point against the external reference (the field beyond the three-body boundary — there is always more field), merge the three readings at the common center (u6: time acts on all branches at once), integrate (u7). The merged reading is the triple's shared clock — still relative, still anchored outside.
+**Three bodies in 3D space.** Three pairs, three resultants, three planes — unless the bodies share a plane, in which case the planes coincide and one clock serves. In general: compute each pair's merged resultant against the external reference (the field beyond the three-body boundary — there is always more field), merge the three readings at the common center (u6: time acts on all branches at once), integrate (u7). The merged reading is the triple's shared clock — still relative, still anchored outside.
 
-**There is always some other external force.** The boundary never closes: whatever system you draw, the field beyond it acts on the inside. That is not a flaw in the computation — it is what the computation is *of*. The clock ratio $T_1/T_2 = M_2/M_1$ is exact within the boundary; the reading $\tau(t)$ is exact relative to the chosen reference. Choose a larger boundary — include the third body, recompute the plane, merge a new center — and you get a new clock, exact relative to the new outside. The background energy of §11 is the limit of this process: integrate over all space and all time, and the "external reference" becomes the field itself.
+**There is always some other external force.** The boundary never closes: whatever system you draw, the field beyond it acts on the inside. That is not a flaw in the computation — it is what the computation is *of*. The clock ratio $T_1/T_2 = M_2/M_1$ is exact within the boundary; the reading $\tau(t)$ is exact relative to the chosen reference. Choose a larger boundary — include the third body, recompute the plane, merge a new resultant — and you get a new clock, exact relative to the new outside. The background energy of §11 is the limit of this process: integrate over all space and all time, and the "external reference" becomes the field itself.
 
 So the rule: **no clock without a third reference, no reference without an outside, no outside that ever ends.** The rotated resultant is the hand of the clock; the external body is the face it reads against.
 
@@ -167,7 +169,7 @@ It is not the true motion. It is the projection onto the eigenplane. Kepler drew
 
 Add another body and you get a new vector in a new direction: back to 3D, recompute the vectors for all the bodies, collapse to a new 2D plane, repeat. Really it is just changing the coordinate system to a new flat plane in three-dimensional space — one plane per boundary condition.
 
-And the amount that collapsed point moves between the bodies — the center's motion on the plane — is the rate of change of time. Integrate it and you get the time difference between two points. Integrate again over space and you learn nothing new, because the plane is always constructed in 3D spacetime: re-integrating the same boundary rebuilds the same plane. A new spatial integration only ever tells you how to compute a new relative clock for a *larger* boundary condition.
+And the stretch of that collapsed point between the bodies — the wavelength expansion and contraction on the plane — is the rate of change of time. Integrate it and you get the time difference between two points. Integrate again over space and you learn nothing new, because the plane is always constructed in 3D spacetime: re-integrating the same boundary rebuilds the same plane. A new spatial integration only ever tells you how to compute a new relative clock for a *larger* boundary condition.
 
 
 ## 10. The infinite field
@@ -206,14 +208,14 @@ Which clarifies what the wave equation was doing all along: it rewrote the equat
 
 Putting it together:
 
-- The gravity-wave field is turbulent: mass-wave spatial frequencies colliding from every direction, caused by mass.
-- Locked bodies cannot answer the collisions separately, so the wobbles sum at their shared center: $\mathbf{C}(t)$.
-- The merge is demanded by symmetry — time acts on all space at once — so the many collisions become one vibration.
-- We perceive a single time because there is a single center motion. Time is not the background the collisions happen *in*; time is the *resultant of the collisions*.
+- The gravity-wave field is full of mass-wave spatial frequencies colliding from every direction, caused by mass.
+- Locked bodies cannot answer the collisions separately, so the wobbles sum into one merged resultant: $\mathbf{C}(t)$.
+- The merge is demanded by symmetry — time acts on all space at once — so the many collisions become one stretch.
+- We perceive a single time because there is a single merged stretch. Time is not the background the collisions happen *in*; time is the *resultant of the collisions*.
 - The balance point sets the ratio of time between the bodies; the integrated pull sets the stretch.
-- The motion being read is the hidden law's product: the transform converted the radial force between the bodies into relative velocity in the perpendicular direction, and the locked pair handed that perpendicular motion to the center.
+- The motion being read is the hidden law's product: the transform converted the radial force between the bodies into relative velocity in the perpendicular direction, and the locked pair's orbit carries that perpendicular motion as a stretch.
 
-**What we perceive as time is really the motion of the center point of a mass vibrating in a field of gravity waves.** The bodies are locked together and they act on the center between them — and how much they pull the center is the motion and the stretching of time.
+**What we perceive as time is really the wavelength expansion and contraction of a locked pair under an external force.** The bodies are locked together and the external force stretches their orbit — and how much it stretches is the motion and the stretching of time.
 
 The dimensions, as we can see them: relative motion we see in 3D; absolute motion in a system we can only see in 2D; absolute time we can only see in 1D; symmetry we don't see at all, because it is dimensionless — but we can infer it from context. Time stretching is what motion in the 2D eigenplane looks like from inside it: on the eigenplane things don't stretch relative to one another in time, but there is always another external force stretching or compressing things more.
 
@@ -222,10 +224,10 @@ The dimensions, as we can see them: relative motion we see in 3D; absolute motio
 
 The Quantum Tech Stack now climbs seven layers up (u1–u7), and the new top of the stack is time itself — not assumed, but built: branched by space, merged by symmetry, vibrated by collision, integrated into stretch, ratioed by the balance point.
 
-The open question from the tech stack's conclusion — what the phasor's rotation *is* — has its answer: it is the phase of the motion wave, turning in the complex plane. There was never a hidden dimension as a place; the complex plane is a representation, a coordinate choice — it is just how the coordinate transform writes motion as a wave, broken into components in each direction. The hidden fifth dimension is the frequency domain the transform enters — the symmetric phase domain, creating the symmetry between space and time, held up by the invariant of the conservation law. The center, moving — the turbulence point the locked bodies share, the center of the wave, the third external reference point the symmetric frequency domain gives us, doing the one motion they can all agree on — is what the merged frame's clock reads. And that reading is what we call time. The motion the clock reads is the hidden law's output: force turned perpendicular, arriving as motion — the transform converted the radial pull between the bodies into perpendicular relative velocity, the locked pair handed it to the center, and the center carries it through the field. Time is the reading of the converted force, measured against a third reference.
+The open question from the tech stack's conclusion — what the phasor's rotation *is* — has its answer: it is the phase of the motion wave, turning in the complex plane. There was never a hidden dimension as a place; the complex plane is a representation, a coordinate choice — it is just how the coordinate transform writes motion as a wave, broken into components in each direction. The hidden fifth dimension is the frequency domain the transform enters — the symmetric phase domain, creating the symmetry between space and time, held up by the invariant of the conservation law. The merged resultant — the stretch the locked bodies share, the one expansion and contraction they can all agree on — is what the merged frame's clock reads. And that reading is what we call time. The motion the clock reads is the hidden law's output: force turned perpendicular, arriving as motion — the transform converted the radial pull between the bodies into perpendicular relative velocity, and the external force stretches the locked pair's orbit with it. Time is the reading of the converted force, measured against a third reference.
 
 But the agreement is always local. Every clock belongs to the boundary that merged it: the apparent time between two bodies is well-defined, and within that boundary the integrations close and return the conservation law. Beyond the boundary there is always more field — more collisions, more frequencies, another body — and to include it you redraw the boundary, recompute the plane, and merge a new center. There is no final reference, no clock of the whole. The stack does not end at the top; it ends at the edge of whatever you chose to include — the motion is still always relative to the boundary conditions we set, which never account for the full system. That is not a failure of the theory. It is what time is.
 
-We cannot set a boundary condition such that there will be no outside turbulence or chaos in the underlying system — that would need an infinite boundary, and knowing the individual motion of every body in it. There are an infinite number of branches we can't account for, so we only ever see the apparent motion in an eigenplane — unless we add another branch to give us our velocity relative to something else.
+We cannot set a boundary condition such that there will be no outside stretching or chaos in the underlying system — that would need an infinite boundary, and knowing the individual motion of every body in it. There are an infinite number of branches we can't account for, so we only ever see the apparent motion in an eigenplane — unless we add another branch to give us our velocity relative to something else.
 
 The final thing left in the stack is the time difference between two points, or the change in the position. Both are information of the system — the inputs and the outputs of the signal we put in. The system is the boundary conditions and the symmetry between them in the phase domain.

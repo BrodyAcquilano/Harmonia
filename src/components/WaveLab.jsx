@@ -1233,41 +1233,41 @@ function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
   }
   ctx.restore()
 }
-// The Turbulence: The Next Eigenstate. The resultant velocity acts on the
-// bodies in branches — each body wobbles relative to the center with its own
-// Xₙ(t) — AND the relative motion acts on the center: the wobbles sum to the
-// turbulent center motion C(t) = X₁(t) + X₂(t), read against the external
-// reference. The integration adds the reference frame's own motion; it does
-// not shift into a new frame. The eigen line through the bodies runs parallel
-// to the plane of motion, along the perpendicular-resultant direction; the
-// force line crosses it. The center is drawn as a gold cross: the clock.
+// Wavelength Expansion and Contraction: External Force. The center is FIXED —
+// the 1D eigenpoint (balance point / center of mass). An external force pulls
+// on the left side at its own arbitrary rate (1 unit, not set by the masses),
+// so the bodies no longer circle the center: the circular swing is stretched
+// into an ellipse — wavelength expansion on the pulled side, contraction on
+// the other. This adds acceleration (velocity not constant), unlike the other
+// Motion graphs. yz plane: the horizontal axis is the line of centers.
 function renderUnifiedCenterFrame(ctx, canvas, s, tau) {
   const g = frameSetup(ctx, canvas)
   if (!(s.M1 + s.M2 > 0)) return
   const P = gravityParams(s.M1, s.M2)
-  const { T1, T2, NT, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
+  const { T1, T2, NT, x1, x2, tauMax } = wobbleCurves(s.M1, s.M2, P)
   const v1 = samplePeriodic(x1, T1, NT, tau)
   const v2 = samplePeriodic(x2, T2, NT, tau)
-  const c = v1 + v2
-  let cMax = 0.1, vMax = 0.1
-  for (let i = 0; i < NT; i++) {
-    cMax = Math.max(cMax, Math.abs(x1[i] + x2[i]))
-    vMax = Math.max(vMax, Math.abs(x1[i]), Math.abs(x2[i]))
-  }
+  let vMax = 0.1
+  for (let i = 0; i < NT; i++) vMax = Math.max(vMax, Math.abs(x1[i]), Math.abs(x2[i]))
   const lamStar = Math.min(Math.max((X_MAX * s.M2) / (s.M1 + s.M2), 0), X_MAX)
   const R1 = lamStar, R2 = X_MAX - lamStar
   const { padL, padT, pw, ph } = g
   const cx = padL + pw / 2, cy = padT + ph / 2
   const sc = ((Math.min(pw, ph) / 2) * 0.78) / X_MAX
-  // The center moves turbulently with the resultant; the bodies wobble on
-  // the moving line relative to the center — the frame's motion added to
-  // the branch wobbles, not a shift into a new frame.
-  const ccx = cx + (c / cMax) * (pw * 0.30)
+  // External force: arbitrary 1-unit rate — not derived from the masses.
+  // Scaled with the body motion so the whole swing fits in the box.
+  const extAmp = pw * 0.05
+  const phi = 2 * Math.PI * (((tau % tauMax) + tauMax) % tauMax) / tauMax
+  const fExt = extAmp * Math.sin(phi)
+  // Bodies wobble about the FIXED center; the external pull stretches the
+  // swing — expansion on the pulled (left) side, contraction on the right.
   const wobAmp = pw * 0.05
-  const p1x = ccx - R1 * sc + (v1 / vMax) * wobAmp
-  const p2x = ccx + R2 * sc + (v2 / vMax) * wobAmp
+  const p1x = cx - R1 * sc + (v1 / vMax) * wobAmp + fExt
+  const p2x = cx + R2 * sc + (v2 / vMax) * wobAmp + fExt
+  const r1 = dotRadius(s.M1, s.M1, s.M2)
+  const r2 = dotRadius(s.M2, s.M1, s.M2)
   ctx.save()
-  // External reference: the static rest line the turbulence is read against.
+  // External reference: the static rest line the stretch is read against.
   ctx.strokeStyle = '#e5dcc0'
   ctx.lineWidth = 1
   ctx.setLineDash([4, 4])
@@ -1277,29 +1277,41 @@ function renderUnifiedCenterFrame(ctx, canvas, s, tau) {
   ctx.font = '11px "IBM Plex Mono", monospace'
   ctx.textAlign = 'left'
   ctx.fillText('external reference', padL + 6, cy - 8)
-  // The eigen line through the bodies — moving turbulently with the center.
+  // The eigen line through the center — fixed; bodies ride it left and right.
+  const span = X_MAX * sc + wobAmp + extAmp
   ctx.strokeStyle = '#b3a684'
   ctx.lineWidth = 2
-  ctx.beginPath(); ctx.moveTo(p1x, cy); ctx.lineTo(p2x, cy); ctx.stroke()
-  // Axis label: the plane direction, riding the moving eigen line.
+  ctx.beginPath(); ctx.moveTo(cx - span, cy); ctx.lineTo(cx + span, cy); ctx.stroke()
   ctx.fillStyle = '#715f43'
   ctx.font = '11px "IBM Plex Mono", monospace'
   ctx.textAlign = 'center'
-  ctx.fillText('eigen line \u2016 plane of motion', ccx, cy - 14)
-  // Bodies (heavier larger), wobbling relative to the center.
-  const r1 = dotRadius(s.M1, s.M1, s.M2)
-  const r2 = dotRadius(s.M2, s.M1, s.M2)
+  ctx.fillText('eigen line \u2016 plane of motion', cx, cy - 14)
+  // Bodies (heavier larger), wobbling about the fixed center.
   ctx.fillStyle = C1
   ctx.beginPath(); ctx.arc(p1x, cy, r1, 0, 2 * Math.PI); ctx.fill()
   ctx.fillStyle = C2
   ctx.beginPath(); ctx.arc(p2x, cy, r2, 0, 2 * Math.PI); ctx.fill()
-  // The center: a gold cross — the clock.
+  // The center: a gold cross — fixed, the 1D eigenpoint.
   ctx.strokeStyle = '#d9a441'
   ctx.lineWidth = 2
   ctx.beginPath()
-  ctx.moveTo(ccx - 8, cy); ctx.lineTo(ccx + 8, cy)
-  ctx.moveTo(ccx, cy - 8); ctx.lineTo(ccx, cy + 8)
+  ctx.moveTo(cx - 8, cy); ctx.lineTo(cx + 8, cy)
+  ctx.moveTo(cx, cy - 8); ctx.lineTo(cx, cy + 8)
   ctx.stroke()
+  // External force arrows on the left side.
+  ctx.strokeStyle = '#8a6d3b'
+  ctx.fillStyle = '#8a6d3b'
+  ctx.lineWidth = 2
+  for (const ay of [cy - 22, cy, cy + 22]) {
+    const ax = padL + 14
+    ctx.beginPath(); ctx.moveTo(ax + 18, ay); ctx.lineTo(ax, ay); ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(ax, ay); ctx.lineTo(ax + 7, ay - 4); ctx.lineTo(ax + 7, ay + 4)
+    ctx.closePath(); ctx.fill()
+  }
+  ctx.font = '11px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'left'
+  ctx.fillText('external force', padL + 38, cy - 24)
   // Labels.
   ctx.fillStyle = '#3a2c1a'
   ctx.font = '600 13px "IBM Plex Mono", monospace'
@@ -2211,6 +2223,33 @@ export default function WaveLab() {
           {/* Orbits need at least one nonzero mass; with both at zero the
               radii are 0/0, so hide the diagrams instead of drawing NaN.
               They remount automatically once a mass is nonzero again. */}
+          {M1 + M2 > 0 && (
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Our View: Space Branches Split</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><Tex tex="\text{axis wrapped around the center, split at } \lambda^*" /></span>
+              </div>
+            </div>
+            <p className="graph-note">Relative to an external reference on the force eigenvector — the balance point, the 1D eigenpoint (center of mass); constant velocity, no external force.</p>
+            <canvas ref={canvasOrbitTrueRef} className="wave-canvas-orbit-lg" />
+            <div className="graph-foot-row">
+              <div className="zoom-controls">
+                <button className="zoom-btn" onClick={() => setOrbitZoom(z => Math.max(0.5, z / 1.25))} aria-label="Zoom out">−</button>
+                <span className="zoom-level">{Math.round(orbitZoom * 100)}%</span>
+                <button className="zoom-btn" onClick={() => setOrbitZoom(z => Math.min(4, z * 1.25))} aria-label="Zoom in">+</button>
+                {orbitZoom !== 1 && <button className="zoom-btn" onClick={() => setOrbitZoom(1)} aria-label="Reset zoom">reset</button>}
+              </div>
+              <div className="graph-footnote">xy plane</div>
+            </div>
+            <div className="graph-caption"><Tex tex="a = L \text{ --- the semi-major axis is the full span of the system line}" /></div>
+            <div className="graph-caption"><Tex tex="\lambda^* \text{ splits it into the lever arms } \lambda^* \text{ and } L-\lambda^*" /></div>
+            <div className="graph-caption"><Tex tex="e = \frac{|\lambda^*-(L-\lambda^*)|}{L} = \frac{|M_1-M_2|}{M_1+M_2}, \quad b = a\sqrt{1-e^2}" /></div>
+            <div className="graph-caption"><Tex tex="\text{a and b are the balance-point split, drawn as an ellipse}" /></div>
+          </div>
+          )}
           {M1 + M2 > 0 ? (
           <>
           <div className="graph-box">
@@ -2236,7 +2275,7 @@ export default function WaveLab() {
                 <span><Tex tex="M_{\max} \text{ fixed at a focus}" /></span>
               </div>
             </div>
-            <p className="graph-note">Kepler's projected view — acceleration restored in the 2D plane; the eccentricity is set by the balance-point split.</p>
+            <p className="graph-note">External force with constant velocity — but velocity and force are not balanced: an additional unknown force from a 4th body contracts the circle into an ellipse.</p>
             <canvas ref={canvasEllipseRef} className="wave-canvas-orbit" />
             <canvas ref={canvasEllipseGeomRef} className="wave-canvas-orbit" />
             <div className="graph-caption"><Tex tex="\text{static ellipse: } a \text{ semi-major axis, } b \text{ semi-minor axis}" /></div>
@@ -2246,42 +2285,18 @@ export default function WaveLab() {
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Our View: Space Branches Split</h2>
+              <h2 className="graph-title">Wavelength Expansion and Contraction: External Force</h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
-                <span><Tex tex="\text{axis wrapped around the center, split at } \lambda^*" /></span>
-              </div>
-            </div>
-            <canvas ref={canvasOrbitTrueRef} className="wave-canvas-orbit-lg" />
-            <div className="graph-foot-row">
-              <div className="zoom-controls">
-                <button className="zoom-btn" onClick={() => setOrbitZoom(z => Math.max(0.5, z / 1.25))} aria-label="Zoom out">−</button>
-                <span className="zoom-level">{Math.round(orbitZoom * 100)}%</span>
-                <button className="zoom-btn" onClick={() => setOrbitZoom(z => Math.min(4, z * 1.25))} aria-label="Zoom in">+</button>
-                {orbitZoom !== 1 && <button className="zoom-btn" onClick={() => setOrbitZoom(1)} aria-label="Reset zoom">reset</button>}
-              </div>
-              <div className="graph-footnote">xy plane</div>
-            </div>
-            <div className="graph-caption"><Tex tex="a = L \text{ --- the semi-major axis is the full span of the system line}" /></div>
-            <div className="graph-caption"><Tex tex="\lambda^* \text{ splits it into the lever arms } \lambda^* \text{ and } L-\lambda^*" /></div>
-            <div className="graph-caption"><Tex tex="e = \frac{|\lambda^*-(L-\lambda^*)|}{L} = \frac{|M_1-M_2|}{M_1+M_2}, \quad b = a\sqrt{1-e^2}" /></div>
-            <div className="graph-caption"><Tex tex="\text{a and b are the balance-point split, drawn as an ellipse}" /></div>
-          </div>
-          <div className="graph-box">
-            <div className="graph-title-row">
-              <h2 className="graph-title">The Turbulence: The Next Eigenstate</h2>
-            </div>
-            <div className="graph-meta-row">
-              <div className="legend">
-                <span><Tex tex="\mathbf{C}(t) = X_1(t) + X_2(t) \text{ --- the resultant}" /></span>
-                <span><Tex tex="\text{turbulence point moving on the eigen line, relative to an external body}" /></span>
+                <span><Tex tex="\text{external force --- arbitrary 1-unit rate, not set by the masses}" /></span>
+                <span><Tex tex="\text{center fixed --- the 1D eigenpoint}" /></span>
               </div>
             </div>
             <canvas ref={canvasUnifiedRef} className="wave-canvas-orbit-lg" />
-            <div className="graph-caption"><Tex tex="\text{the line moves turbulently; the bodies wobble on it relative to the center}" /></div>
-            <div className="graph-caption"><Tex tex="\text{turbulence is relative to an external reference --- acceleration referred from the relative velocity}" /></div>
-            <div className="graph-footnote">xy plane</div>
+            <div className="graph-caption"><Tex tex="\text{the bodies no longer circle the center --- pulled on the left, the swing stretches into an ellipse}" /></div>
+            <div className="graph-caption"><Tex tex="\text{expansion and contraction need an external force and non-constant velocity --- this graph adds acceleration, unlike the others}" /></div>
+            <div className="graph-footnote">yz plane</div>
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
