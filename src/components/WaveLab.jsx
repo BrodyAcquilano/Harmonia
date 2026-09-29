@@ -2291,7 +2291,7 @@ export default function WaveLab() {
                 <span><Tex tex="\lambda_2 - \lambda_1 = \lambda_1 - \lambda_2 = x" /></span>
               </div>
             </div>
-            <p className="graph-note">Motion here is perceived motion: the apparent background shift and the angular changes of the stars. The constant velocity comes from an external force in the eigen plane — no force, no velocity, no circular motion.</p>
+            <p className="graph-note">Motion here is perceived motion: the apparent background shift and the angular changes of the stars, read from the frame of reference of M1 — not the eigen point. The constant velocity comes from an external force in the eigen plane — no force, no velocity, no circular motion.</p>
             <canvas ref={canvasOrbitApparentRef} className="wave-canvas-orbit" />
             <div className="graph-footnote">xy plane</div>
           </div>
