@@ -1,6 +1,6 @@
 # Kepler's Laws: The Right Proportion
 
-*Companion to "Symmetric Inertia Transfer," "Lambda Derivation," and "The Hidden Phasor." On what Kepler got right — the proportions, the harmony — and where the ellipse stops: it carries the correct relative motion, but it is not the actual motion.*
+*Companion to "Symmetric Inertia Transfer," "Lambda Derivation," "The Hidden Phasor," and "Time from Collisions." On what Kepler got right — the proportions, the harmony, and the projection itself: the ellipse is the 2D relative motion on the eigenplane, the same operation the three-body construction performs. He was not wrong; he was doing exactly this.*
 
 ---
 
@@ -32,7 +32,7 @@ $$
 
 The Wave Lab's "Elliptical Relative Motion" does exactly this: the larger mass $M_{\max}$ fixed at a focus, the companion tracing $r(\phi)$ around it. **The relative motion is correct.** The separation between the bodies really does vary this way — nearest at periapsis, farthest at apoapsis, the exact curve above.
 
-But the ellipse is not the actual motion. It answers one question — *how far apart are they?* — and is silent on everything else. It has no center: it describes $r(\phi)$, the relative separation, and says nothing about how either body moves against an impartial point. The actual motion, in this framework, is the two waves: $\psi_1$ reporting body 1's pull toward body 2, $\psi_2$ reporting the answer back, counter-propagating, push switching to pull every half cycle, their sum $\psi_s = \psi_1 + \psi_2$ the standing wave of the whole exchange. The ellipse is the shadow those waves cast — the relative distance, projected out of the full picture. Kepler drew the shadow with perfect fidelity. He stopped at the shadow.
+The ellipse is the relative motion on the eigenplane: the 3D system collapsed to the 2D plane where the bodies stay relatively locked, and the relative separation drawn there. That collapse — compute the vectors in 3D spacetime, project to the flat plane, draw the relative motion — is exactly what the three-body tab does when it produces its ellipses. Kepler performed the same operation four hundred years earlier, by hand, from Tycho's tables. It is not the true motion through the field — no 2D projection is — but it was never meant to be. It is the 2D relative motion, and it is correct as far as it goes. What neither Kepler nor the early version of this theory had was the center's own motion through the field: the clock (see "Time from Collisions").
 
 ## 3. a and b are the balancing points' proportion
 
@@ -68,15 +68,15 @@ The graph carries the law as its caption — $T^2 \propto a^3$ beneath the orbit
 
 ## 6. What the ellipse can't say
 
-Set the three laws side by side and notice what none of them contains: a center. Every one is relative — the planet relative to the Sun-at-focus, the area relative to the radius vector, the period relative to the axis. Kepler's system has no impartial point; there is nowhere to stand that belongs to neither body.
+Set the three laws side by side and notice what none of them contains: the center's motion. Every one is relative — the planet relative to the Sun-at-focus, the area relative to the radius vector, the period relative to the axis. Kepler's system has no moving center; there is nowhere the shared point itself travels.
 
-The waves supply one. The double integral of the Hidden Phasor — collapse the spatial line to the net released impulse $F_n(t)$, integrate over time — gives $X_n(t)$: each body's wobble *against the balance point* $\lambda^*$, the center that belongs to neither body. Not just "how far apart," but how far each moves from center, one wobbling one way and the other the other, the heavier moving less. That information is nowhere in the ellipse. It is in the waves, and the integrals pull it out.
+The waves supply one. The double integral of the Hidden Phasor — collapse the spatial line to the net released impulse $F_n(t)$, integrate over time — gives $X_n(t)$: each body's wobble *against the balance point* $\lambda^*$, the center that belongs to neither body. And the new reading goes one step further: lock the bodies rigid, sum the wobbles, and the *center itself* moves — $\mathbf{C}(t) = \sum_n\sum_j X_{n,j}(t)\,\hat{e}_j$, the unified center vibration, the clock (see "Time from Collisions"). That information — the shared point traveling through the field, carrying time with it — is nowhere in the ellipse. It is in the waves, and the integrals pull it out.
 
-Nor does the ellipse say *why*. Kepler described; Newton, later, supplied inverse-square attraction as the cause. Here the mechanism is the mutual pull itself — the two directions of the conversation, $\psi_1 \longleftrightarrow \psi_2$, each body answering the other's tug, the push-pull switching every half cycle. The ellipse is what that conversation looks like from the outside, with the participants removed.
+Nor does the ellipse say *why* the projection holds. Kepler described; Newton, later, supplied inverse-square attraction as the cause. Here the mechanism is the mutual pull itself — the two directions of the conversation, $\psi_1 \longleftrightarrow \psi_2$, each body answering the other's tug, the push-pull switching every half cycle. The ellipse is what that conversation looks like from the eigenplane, with the center's own travel removed.
 
 ## 7. Conclusion: the right description, and what lies beneath it
 
-Kepler invented the ellipse as a description, and it was the right description of the relative motion — $r(\phi)$ exactly as drawn, the focus exactly where $M_{\max}$ sits. His error, if it can be called one, was stopping at the description: mistaking the shadow for the thing. The $a$ and $b$ he measured from the sky are the proportion between the balancing points — $\lambda^*$ and $L-\lambda^*$, the lever arms, their normalized difference the eccentricity. And the harmony he chased through *Harmonices Mundi*, the musical intervals spanning each orbit and the single proportion $T^2 \propto a^3$ beneath them all, is the standing wave: two reciprocal signals locking into integer ratios, the music made physical.
+Kepler invented the ellipse as a description, and it was the right description of the relative motion — $r(\phi)$ exactly as drawn, the focus exactly where $M_{\max}$ sits. The earlier version of this note called that a shadow he stopped at. That was wrong, and it is retracted: the ellipse is the 2D relative motion on the eigenplane — the 3D system computed in full, collapsed to the flat plane where the bodies stay locked — and it is exactly what the three-body construction does when it draws its ellipses. He did the same thing we did. The $a$ and $b$ he measured from the sky are the proportion between the balancing points — $\lambda^*$ and $L-\lambda^*$, the lever arms, their normalized difference the eccentricity. And the harmony he chased through *Harmonices Mundi*, the musical intervals spanning each orbit and the single proportion $T^2 \propto a^3$ beneath them all, is the standing wave: two reciprocal signals locking into integer ratios, the music made physical.
 
 He had the proportions right. The waves are what was resonating.
 

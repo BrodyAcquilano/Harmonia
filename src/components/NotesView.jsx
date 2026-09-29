@@ -22,6 +22,7 @@ const NOTE_ORDER = [
   '../../notes/keplers-laws.md',
   '../../notes/quantum-tech-stack.md',
   '../../notes/three-body-problem.md',
+  '../../notes/time-from-collisions.md',
 ]
 
 function titleFromPath(path) {

@@ -19,14 +19,14 @@
 - [11. Resultants from phasors](#11-resultants-from-phasors)
 - [12. The resultant wobble](#12-the-resultant-wobble)
 - [13. Center, balance points, and why the motion is elliptical](#13-center-balance-points-and-why-the-motion-is-elliptical)
-- [14. Conclusion — the 3-4-5 problem, solved](#14-conclusion--the-3-4-5-problem-solved)
+- [14. Conclusion — the 3-4-5 projection](#14-conclusion--the-3-4-5-projection)
 
 
 ## 1. Why three bodies
 
 The three-body problem is the prediction of the motion of three masses under their mutual gravity, given initial positions and velocities. It is the next logical step because it is the problem other theories cannot explain: since Poincaré, the accepted position is that no closed-form solution exists — that any attempt introduces chaos, and the only way forward is numerical integration, step by step, with the error growing as you go.
 
-Our goal is to prove that assumption false.
+Our goal is to push the pair machinery as far as it goes: run each pair through the stack, sum the resultants, and draw the relative motion on the plane the three bodies share. What comes out are ellipses — the eigenplane projection, Kepler's operation performed by machine. It is not a closed-form solution to the three-body problem, and this note does not claim it is. The field beyond the boundary does not close, and no projection can close it. What the construction gives — honestly stated — is the 2D relative motion for one boundary condition: the plane, the center, and the clock for the 3-4-5 system.
 
 We know the quantum tech stack and how to work through it, so that part is trivial: the descent by limits and differentiation, the vanishing total differential at the bottom, the turn, the ascent by integration back to the conservation law. That machinery doesn't care how many bodies there are. What it was built for is *pairs* — and a three-body system contains three pairs: $(M_1,M_2)$, $(M_1,M_3)$, $(M_2,M_3)$. So we write the six equations, one opposing pair of waves per pair of bodies, run each pair through the quantum tech stack, and get six solutions that satisfy the boundary conditions on the other end. Each pair hands us the motion caused by that pair.
 
@@ -277,7 +277,7 @@ The Wave Lab's "Three Body Motion" is this section drawn: one center $C = (0,0)$
 
 ---
 
-## 14. Conclusion — the 3-4-5 problem, solved
+## 14. Conclusion — the 3-4-5 projection
 
 The chain, end to end:
 
@@ -289,6 +289,12 @@ The chain, end to end:
 6. **Center** (§7, §13): three balance points, Ceva's concurrence, one center of mass.
 7. **Paths** (§12–§13): the directional resultants project to ellipses — $a \propto R_x$, $b \propto R_y$ — centered at the common center.
 
-The summation problem of §3, the thing the textbooks say forces numerical integration, is resolved by phasor arithmetic: Idea 1 (vector sum) for the resultants, Idea 3 (Ceva) for the center, and the projection surface read off the resultant instead of assumed. No trajectory was numerically integrated. No chaos was invoked. Twelve branches went in; three elliptical wobbles came out — one per body, each referred to the single center the balance points prove.
+What this chain computes is the eigenplane projection for the Burrau boundary — not a solution to the three-body problem. The three bodies released from rest at Burrau's coordinates are a boundary condition: a choice of how much energy to include. Inside that boundary, the pair-waves go through the stack, the resultants sum by phasor arithmetic, Ceva gives the common center, and the directional resultants project to ellipses on the 2D plane where the three bodies stay relatively locked. Twelve branches went in; three elliptical wobbles came out — the 2D relative motion, drawn on the eigenplane. Kepler's operation, four hundred years later, by machine.
 
-That is the 3-4-5 problem solved by this method: closed-form pair-waves, phasor-summed resultants, and the motion each body executes — not a step-by-step integration but the sum the machine was built to compute.
+It was never a solution, because the problem as stated — the positions for all $t \geq 0$, in the real field — does not close. The wave field extends infinitely far beyond the 3-4-5 boundary, and there is always more energy coming from outside it: more masses, more frequencies, more collisions than the twelve branches include. That outside is what appears as chaos. What the textbooks call chaotic motion is the larger system leaking through the boundary we drew.
+
+And the boundary is redrawn every time: add a fourth body and you get new vectors in new directions — back to 3D, recompute everything, collapse to a new 2D plane, merge a new center, compute a new clock. Each plane belongs to its boundary; each clock belongs to its plane.
+
+So this was never a question of the physics. The force law is not missing. It is a math problem: underdetermination. With four bodies or more there are more independent variables than equations — $x$, $y$, $z$ for four or more vectors each — and even with three there is always unknown field outside the boundary. There is always at least one more body — always more field — than the equations close over.
+
+The honest statement, then: the 3-4-5 construction computes the relative motion on the eigenplane for one boundary condition — the plane, the center, the clock ratio for that system. The true motion, the centers moving through the infinite field each carrying their own time, was never on the plane. It was underneath it all along.
