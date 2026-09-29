@@ -19,7 +19,12 @@
 - [9. Observers at the resultant](#9-observers-at-the-resultant)
 - [10. Non-perpendicular motion and the broken symmetry](#10-non-perpendicular-motion-and-the-broken-symmetry)
 - [11. The quark alternative](#11-the-quark-alternative)
-- [12. Conclusion: trapped light](#12-conclusion-trapped-light)
+- [12. Interim conclusion: trapped light](#12-interim-conclusion-trapped-light)
+- [13. Where protons come from: stars as the forge](#13-where-protons-come-from-stars-as-the-forge)
+- [14. The arithmetic of stability: 2/3 + 2/3 − 1/3 = 1](#14-the-arithmetic-of-stability-23-23-13-1)
+- [15. The resonator excited at 2/3](#15-the-resonator-excited-at-23)
+- [16. Next: formation, decay, and the charge field](#16-next-formation-decay-and-the-charge-field)
+- [17. Conclusion: 2:3, the ratio of symmetry](#17-conclusion-23-the-ratio-of-symmetry)
 
 ## 1. The balanced case: 180 degrees out of phase
 
@@ -88,6 +93,44 @@ This 2:3 seems to relate to quarks themselves inside protons, because they essen
 
 The key insight in that case would be that the fluctuations are caused by paired excitations — all of which are likely perpendicular — however they cancel in such a way that rotates them 2/3 or 3/2 out of phase. For something like quarks: quarks creating a perpendicular force at the same magnitude, since they are equivalent particles — but due to the antisymmetry, the one wave pushes the opposite way. The released energy would mean the resultant wave is 2/3 out of phase.
 
-## 12. Conclusion: trapped light
+## 12. Interim conclusion: trapped light
 
 Of the two readings — a geometrical 2:3 from a rotated 4D source, or a particle 2:3 from quarks — the quark reading is the better one. Quarks are trapped light energy: paired perpendicular excitations, antisymmetric, canceling into a resultant 2/3 out of phase. That is the signature the universe keeps writing — in $T^2/a^3$, in the background radiation, in the proton itself. The ratio was never about an angle we can't see. It was about the smallest locked system we can see: three quarks, two and one, holding light still.
+
+## 13. Where protons come from: stars as the forge
+
+Protons are trapped — trapped light. Where do they come from? Well, stars fuse matter by compressing it. They can also release excitation. So really every bit of light is the resultant energy of something being released in 2:3 proportion. That's what we see.
+
+But the components — they should all be 90 degrees, perpendicular. Each excitation leaves at right angles to the mass that released it; the 2:3 only appears when they combine into a resultant.
+
+## 14. The arithmetic of stability: 2/3 + 2/3 − 1/3 = 1
+
+If we have two waves at 2/3, that's 4/3 — and we subtract 1/3, we get 3/3, which is 1. But we have to multiply each of those by the amount they produce — but the amount produced is relative, so the resultant amplitude is one unit of energy. That assumes they are all equal.
+
+Most likely, if the three quarks are stable, then that is the ratio at which mass cancels with light energy for these particles. The charges are +2/3 and −1/3, so they balance in the mass field, keeping them stable. Their total energy is 1, which makes their combined energy equivalent to one mass with one resultant force — but not in time, because in time they release different amounts of energy.
+
+So the excitation is the mass-to-energy ratio. Which means: if we lose an up quark, we gain 2/3 of the energy — of light — that is out of phase by the exact amount. If we lose two up quarks, then we gain 4/3 — we get 1.333, but that doesn't seem to be what we'd expect. It's 1 and then another third — but that is the same as 2 − 2/3, so it still could be seen as a resultant fluctuation of two mass-to-energy changes and then a loss of 2/3 of energy going to mass. Same with the one third.
+
+And 2/3 + 2/3 − 1/3 = 1: the pair of up quarks produces twice as much energy as a single up quark, in the opposite phase to the down quark's third.
+
+## 15. The resonator excited at 2/3
+
+So that absolutely explains it — and that is the conclusion about what causes the fluctuations: the increasing entropy in the universe is these 2/3 fluctuations. And that is why there is symmetry: because all mass and energy comes from quarks, which are trapped light.
+
+The universe is a resonator excited by fluctuations in a ratio of 2/3. All the chaos in the universe and all motion is in this ratio. That is why we have symmetry in our equations, and why Kepler observed this ratio in the motion of planets.
+
+It also gives us a place to direct future enquiries about what the dimensions mean. It gives us insight into why we can convert time and position into symmetrical frequency domains — because the excitations that built the resonator were themselves the conversion of mass to energy at 2/3. It tells us why light is the opposite of mass in this interaction, and why we have the four properties of mass and energy and time and space as proportional, and why this ratio explains all motion.
+
+And it can direct us in how to filter noise: look for excitations structured at 2/3. If there is a geometrical interpretation, we will have to root it in this idea — the angle, if there is one, has to come from the quark, not the other way around.
+
+## 16. Next: formation, decay, and the charge field
+
+We might also want to consider, in a next note, how this energy is released and how it is stored — and what causes proton formation and proton decay — to understand what causes the resonator to vibrate, and if there is any way to uncover it.
+
+For example, we know that the charge field also interacts with mass and causes them to vibrate. And there is a ratio of mass there. So if we know how much the field excites due to charges as well, then we can construct a unified mass field that contains contributions from both charge energy and light energy — and filter the excitations in the field into those two components. Thus we can then do the integration to convert local fluctuations in energy to universal mass fluctuation in space from two resultant forces, charge and light. But there may still be additional energy coming from an external source.
+
+## 17. Conclusion: 2:3, the ratio of symmetry
+
+The geometrical reading is kept above as reference — a rotation ratio between spaces, a specific angle for the external force. But the preferred theory is the particle one: 2:3 is the ratio of symmetry because it is the ratio at which trapped light becomes mass. Quarks are trapped light energy; their charges (+2/3, −1/3) are the excitation amplitudes; their sum (2/3 + 2/3 − 1/3 = 1) is one stable mass, one resultant force. Every fluctuation in the universe, every increase in entropy, is this excitation happening again — mass to energy at 2/3, energy to mass at 2/3. The resonator rings at the frequency of its own construction.
+
+That is why the equations are symmetric, why time and position fold into the same frequency domain, why light stands opposite mass — and why Kepler, watching planets and not quarks, found the same ratio written across the sky.
