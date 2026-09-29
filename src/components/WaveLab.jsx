@@ -1020,6 +1020,102 @@ function renderTBMotionFrame(ctx, canvas, tau) {
 }
 
 
+// Three Centers: deconstructing the collapsed eigenplane back into three
+// pair-planes. Three deferent centers D_k orbit the fixed eigenpoint E; each
+// body M_k rides an epicycle about its deferent center. Six circles, twelve
+// equations of motion - each body interacts in two pairs.
+function renderTBCentersFrame(ctx, canvas, tau) {
+  const dpr = window.devicePixelRatio || 1
+  const S = Math.max(canvas.clientWidth, 50)
+  const W = Math.round(S * dpr)
+  if (canvas.width !== W || canvas.height !== W) {
+    canvas.width = W
+    canvas.height = W
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  ctx.fillStyle = '#fffdf4'
+  ctx.fillRect(0, 0, S, S)
+  const cx = S / 2, cy = S / 2
+
+  const masses = [3, 4, 5], MT = 12
+  const cols = [C1, C2, TB_C3]
+  const subs = ['\u2081', '\u2082', '\u2083']
+  // deferent radius: the center's share of the mass; epicycle radius: the
+  // body's share against the other two (the two pairs it interacts in)
+  const defR = masses.map((m) => m / MT)
+  const epiR = masses.map((m) => 0.62 * (MT - m) / MT)
+  const maxExt = Math.max(...masses.map((m, k) => defR[k] + epiR[k]))
+  const R = (S / 2 - 46) / maxExt
+  const GOLD = '#d9a441', DARK = '#3a3125'
+
+  // the fixed eigenpoint
+  ctx.strokeStyle = GOLD
+  ctx.lineWidth = 2.5
+  const cs = 9
+  ctx.beginPath()
+  ctx.moveTo(cx - cs, cy); ctx.lineTo(cx + cs, cy)
+  ctx.moveTo(cx, cy - cs); ctx.lineTo(cx, cy + cs)
+  ctx.stroke()
+  ctx.fillStyle = GOLD
+  ctx.beginPath(); ctx.arc(cx, cy, 4, 0, 2 * Math.PI); ctx.fill()
+  ctx.fillStyle = '#715f43'
+  ctx.font = '11px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'alphabetic'
+  ctx.fillText('E', cx, cy + 26)
+
+  for (let k = 0; k < 3; k++) {
+    const ph = k * 2 * Math.PI / 3
+    // deferent: the center's circle about E
+    ctx.strokeStyle = '#b09a5e'
+    ctx.globalAlpha = 0.55
+    ctx.lineWidth = 1.25
+    ctx.setLineDash([5, 4])
+    ctx.beginPath(); ctx.arc(cx, cy, defR[k] * R, 0, 2 * Math.PI); ctx.stroke()
+    ctx.setLineDash([])
+    ctx.globalAlpha = 1
+    const da = tau + ph
+    const dx = cx + defR[k] * R * Math.cos(da)
+    const dy = cy - defR[k] * R * Math.sin(da)
+    ctx.strokeStyle = '#b09a5e'
+    ctx.globalAlpha = 0.6
+    ctx.lineWidth = 1
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(dx, dy); ctx.stroke()
+    ctx.globalAlpha = 1
+    // epicycle: the body's circle about D_k (twice the rate, opposite sense)
+    ctx.strokeStyle = cols[k]
+    ctx.globalAlpha = 0.55
+    ctx.lineWidth = 1.25
+    ctx.setLineDash([5, 4])
+    ctx.beginPath(); ctx.arc(dx, dy, epiR[k] * R, 0, 2 * Math.PI); ctx.stroke()
+    ctx.setLineDash([])
+    ctx.globalAlpha = 1
+    const ea = 2 * tau + ph
+    const bx = dx + epiR[k] * R * Math.cos(ea)
+    const by = dy - epiR[k] * R * Math.sin(ea)
+    ctx.strokeStyle = cols[k]
+    ctx.globalAlpha = 0.7
+    ctx.lineWidth = 1.25
+    ctx.beginPath(); ctx.moveTo(dx, dy); ctx.lineTo(bx, by); ctx.stroke()
+    ctx.globalAlpha = 1
+    ctx.fillStyle = DARK
+    ctx.beginPath(); ctx.arc(dx, dy, 4, 0, 2 * Math.PI); ctx.fill()
+    ctx.fillStyle = '#715f43'
+    ctx.font = '11px "IBM Plex Mono", monospace'
+    ctx.textAlign = 'center'
+    ctx.fillText('D' + subs[k], dx, dy - 10)
+    const br = 8 * Math.sqrt(masses[k] / 3)
+    ctx.fillStyle = cols[k]
+    ctx.beginPath(); ctx.arc(bx, by, br, 0, 2 * Math.PI); ctx.fill()
+    ctx.font = '13px "IBM Plex Mono", monospace'
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('M' + subs[k], bx + br + 5, by)
+    ctx.textBaseline = 'alphabetic'
+  }
+}
+
+
 // Wobble vs time — STATIC snapshot of one full cycle (both directions).
 // X₁(t) blue, X₂(t) orange. No animation: this is the trajectory, not a frame.
 // The window is body 1's period; body 2 is shown over the same window via its
@@ -1730,6 +1826,7 @@ export default function WaveLab() {
   const canvasTBSq2Ref = useRef(null)
   const canvasTBBdryRef = useRef(null)
   const canvasTBMotionRef = useRef(null)
+  const canvasTBCentersRef = useRef(null)
   const tauRef = useRef(0)
   const stateRef = useRef()
   stateRef.current = { subtab, M1, M2, playing, speed, showSum, waveDisplay, ppDisplay, orbitZoom }
@@ -1808,6 +1905,8 @@ export default function WaveLab() {
         sqs.forEach((c, i) => { if (c) renderTBPhasorSquare(c.getContext('2d'), c, i) })
         const mo = canvasTBMotionRef.current
         if (mo) renderTBMotionFrame(mo.getContext('2d'), mo, tauRef.current)
+        const tc = canvasTBCentersRef.current
+        if (tc) renderTBCentersFrame(tc.getContext('2d'), tc, tauRef.current)
       }
       raf = requestAnimationFrame(draw)
     }
@@ -2449,6 +2548,30 @@ export default function WaveLab() {
               </div>
             </div>
             <canvas ref={canvasTBMotionRef} className="wave-canvas-sq" />
+            <p className="graph-note">The circles are stretched to ellipses because the eigenpoint is the reference for all of the motions.</p>
+          </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title"><Tex tex="\text{Three Centers: Six Circles}" /></h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><i className="swatch" style={{ background: '#d9a441' }} /><Tex tex="\text{E}" /></span>
+                <span><i className="swatch" style={{ background: '#3a3125' }} /><Tex tex="D_k" /></span>
+                <span><i className="swatch" style={{ background: C1 }} /><Tex tex="M_1" /></span>
+                <span><i className="swatch" style={{ background: C2 }} /><Tex tex="M_2" /></span>
+                <span><i className="swatch" style={{ background: TB_C3 }} /><Tex tex="M_3" /></span>
+                <span style={{ textAlign: 'center' }}><Tex tex="\text{six circles --- twelve equations of motion}" /></span>
+              </div>
+            </div>
+            <div className="tb-math">
+              <div className="tb-math-line"><Tex tex="\mathbf{D}_k(\tau) = R_k(\cos(\tau + \phi_k),\,\sin(\tau + \phi_k))" /></div>
+              <div className="tb-math-line"><Tex tex="\mathbf{B}_k(\tau) = \mathbf{D}_k(\tau) + r_k(\cos(2\tau + \psi_k),\,-\sin(2\tau + \psi_k))" /></div>
+            </div>
+            <canvas ref={canvasTBCentersRef} className="wave-canvas-sq" />
+            <p className="graph-note">Three centers instead of one --- the collapsed eigenplane deconstructed back into its pair-planes. Each body moves on a circle, and that circle's center moves on another circle about the fixed eigenpoint: six circles, twelve equations of motion. Each body interacts in two pairs. The ellipses were the squish from collapsing to one center --- and the squish can come from inside the eigenplane. No fourth body required.</p>
+            <div className="graph-caption"><Tex tex="\text{each body: an epicycle on a deferent --- both circles in the eigenplane}" /></div>
+            <div className="graph-caption"><Tex tex="\text{the squish can come from inside the eigenplane --- no fourth body required}" /></div>
           </div>
           </>
         ) : null}
