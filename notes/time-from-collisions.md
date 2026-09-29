@@ -40,13 +40,14 @@ Each collision pushes. The pushes arrive as wobbles — $X_{n,j}(t)$, body $n$, 
 So the center vibrates in the turbulent field — and that vibration is the sum of a great many mass-wave spatial frequencies colliding from different directions, caused by mass, unified at a point.
 
 
-## 3. Lock the bodies, move the center
+## 3. Add the frame's motion — don't move into a new frame
 
-The math is a change of what the wobbles are *for*.
+The math is a change of what the wobbles are *for*. An earlier version of this section stated it wrong: lock the bodies rigid, sum the wobbles, move the center. That made the turbulence point sound like an isolated thing — as if the integration lifted the motion into a new reference frame and left the bodies behind. The correction: **the integration adds the reference frame's own motion; it does not move into a new frame.**
 
-**Old:** each body rides its wobble. $M_n$ sits at $p_n + \mathbf{X}_n(t)$.
+Both things are true at once:
 
-**New:** the bodies are rigid. $M_1$ and $M_2$ hold separation $L$ fixed. The wobbles are summed — vector sum, over bodies and over branches — into the motion of the center:
+- The **resultant velocity acts on the bodies in branches** — each body keeps its wobble $\mathbf{X}_n(t)$, riding it relative to the center.
+- The **relative motion acts on the center** — the wobbles summed, vector-sum over bodies and over branches, into the turbulent motion of the center itself:
 
 $$
 \mathbf{C}(t) = \sum_{n=1}^{2}\sum_{j\in\{x,y\}} X_{n,j}(t)\,\hat{e}_j,
@@ -58,9 +59,17 @@ $$
 C_x(t) = X_{1,x}(t) + X_{2,x}(t), \qquad C_y(t) = X_{1,y}(t) + X_{2,y}(t).
 $$
 
-The rigid pair rides on $\mathbf{C}(t)$: both bodies displaced by the same center vector. The relative motion the old picture showed was the center moving under the bodies, misread as the bodies moving under themselves.
+So $M_n$ sits at $\mathbf{C}(t) + \mathbf{p}_n + \mathbf{X}_n(t)$: the body wobbles relative to the center, and the center itself moves turbulently — because the reference frame wobbles in space too. The turbulence point is not some isolated thing; it is the center carrying the summed wobbles, with the bodies still wobbling on it in branches.
 
-$\mathbf{C}(t)$ is the *resultant* — the vector sum of the branch wobbles. It is the whole pair's answer to the turbulence, delivered at the one point the pair shares. This is the math the Motion tab's "The Turbulence: The Next Eigenstate" box is built on: bodies locked to each other at the balance-point split, the center drawn as a cross, the whole rigid configuration moving with the resultant vector — a turbulence point moving in a line relative to some external body.
+**The plane direction, in the math.** Let $\hat{e}_F$ be the force-line unit vector (along the separation) and $\hat{e}_\perp$ the perpendicular resultant — the direction the transform rotated the force into. The pair's plane of motion is $\mathrm{span}(\hat{e}_F, \hat{e}_\perp)$. The turbulence eigen line is that perpendicular direction:
+
+$$
+\hat{e}_{\mathrm{eigen}} = \hat{e}_\perp, \qquad \mathbf{C}(t) = C(t)\,\hat{e}_\perp.
+$$
+
+So the eigen line resides **parallel** to the plane of motion — it lies in the plane, along the in-plane perpendicular — while the force line crosses it. The turbulence is never out of the plane; it is the plane's own perpendicular axis, moving.
+
+$\mathbf{C}(t)$ is the *resultant* — the vector sum of the branch wobbles. It is the whole pair's answer to the turbulence, delivered at the one point the pair shares. This is the math the Motion tab's "The Turbulence: The Next Eigenstate" box is built on: the bodies wobbling relative to the center at the balance-point split, the eigen line through them moving turbulently with the resultant, the center drawn as a cross — the bodies wobbling in the plane of the line, the line itself turbulent relative to the external reference.
 
 
 ## 4. The new symmetry rules
@@ -80,7 +89,7 @@ The ascent of the tech stack gains two layers. (The descent is unchanged — the
 
 | Layer ↑ | Equation | Indicator | Operation |
 |---|---|---|---|
-| **u6. Merge the branches.** The time layer demands the whole: sum every branch wobble into one center vector. | $\mathbf{C}(t) = \sum_n\sum_j X_{n,j}(t)\,\hat{e}_j$ | The branches reunite — one center, vibrating in space. The merge is not optional; it is the symmetry rule for time layers, the mirror of the split. | Vector-sum over bodies and branches. Lock the bodies rigid; move the center with the resultant. |
+| **u6. Merge the branches.** The time layer demands the whole: sum every branch wobble into one center vector. | $\mathbf{C}(t) = \sum_n\sum_j X_{n,j}(t)\,\hat{e}_j$ | The branches reunite — one center, vibrating in space. The merge is not optional; it is the symmetry rule for time layers, the mirror of the split. | Vector-sum over bodies and branches. Add the center's turbulent motion to the bodies' branch wobbles — the frame's own motion, not a new frame. |
 | **u7. Integrate the center.** One more integration — another time part. | $\boldsymbol{\tau}(t) = \int_0^t \mathbf{C}(t')\,dt'$ | The stretching of time, accumulated from the center's vibration. How hard the bodies pull the center is how much time stretches. | Integrate the center motion over time. |
 
 The rule for adding branches to a time integration is now explicit: **a time integral takes all branches at once.** u6 is not one more branch — it is the layer where branches end. Any future time layer merges first, then integrates. Space adds branches; time collects them.
@@ -130,7 +139,7 @@ $$\tau(t) = \int_0^t \mathbf{C}(t') \cdot \hat{e}_{\text{ref}}\,dt'.$$
 
 The balance point sets the zero — the rest position, the ratio — and the integrated projection sets the reading. Two computations, two jobs: the ratio is internal (mass proportions); the reading is external (reference projection).
 
-**Two bodies in 3D space.** The pair's force acts along their separation line; the resultant motion comes back perpendicular — rotated ninety degrees from the force direction, the transform's doing. So the pair lives on a plane: the line of force crossed with the perpendicular resultant velocity. The external third reference sits off that plane — or rather, the plane is *defined* against it: pick the reference, and the perpendicular direction the resultant takes is the one orthogonal to the pair–reference axis. This is the resultant velocity rotated from the direction of the force, and it must be considered: the clock does not read the radial pull, it reads the rotated resultant. Compute $\mathbf{C}(t)$, take the component perpendicular to the force line in the plane containing the reference, integrate — that is the pair's time.
+**Two bodies in 3D space.** The pair's force acts along their separation line; the resultant motion comes back perpendicular — rotated ninety degrees from the force direction, the transform's doing. So the pair lives on a plane: the line of force crossed with the perpendicular resultant velocity. The external third reference sits off that plane — or rather, the plane is *defined* against it: pick the reference, and the perpendicular direction the resultant takes is the one orthogonal to the pair–reference axis. This is the resultant velocity rotated from the direction of the force, and it must be considered: the clock does not read the radial pull, it reads the rotated resultant. Compute $\mathbf{C}(t)$, take the component perpendicular to the force line in the plane containing the reference, integrate — that is the pair's time. The turbulence eigen line — the line $\mathbf{C}(t)$ travels — resides parallel to this plane, running along the perpendicular-resultant direction; the force line crosses it (§3 states this in the math: $\hat{e}_{\mathrm{eigen}} = \hat{e}_\perp$).
 
 **Three bodies in 3D space.** Three pairs, three resultants, three planes — unless the bodies share a plane, in which case the planes coincide and one clock serves. In general: compute each pair's turbulence point against the external reference (the field beyond the three-body boundary — there is always more field), merge the three readings at the common center (u6: time acts on all branches at once), integrate (u7). The merged reading is the triple's shared clock — still relative, still anchored outside.
 
@@ -204,6 +213,6 @@ Putting it together:
 
 The Quantum Tech Stack now climbs seven layers up (u1–u7), and the new top of the stack is time itself — not assumed, but built: branched by space, merged by symmetry, vibrated by collision, integrated into stretch, ratioed by the balance point.
 
-The open question from the tech stack's conclusion — what the phasor's rotation *is* — has its answer: it is the phase of the motion wave, turning in the complex plane. There was never a hidden dimension as a place; the complex plane is a representation, a coordinate choice — it is just how the coordinate transform writes motion as a wave, broken into components in each direction. The hidden fifth dimension is the frequency domain the transform enters — the symmetric phase domain, creating the symmetry between space and time, held up by the invariant of the conservation law. The center, moving — the turbulence point the locked bodies share, doing the one motion they can all agree on — is what the merged frame's clock reads. And that reading is what we call time. The motion the clock reads is the hidden law's output: force turned perpendicular, arriving as motion — the transform converted the radial pull between the bodies into perpendicular relative velocity, the locked pair handed it to the center, and the center carries it through the field. Time is the reading of the converted force, measured against a third reference.
+The open question from the tech stack's conclusion — what the phasor's rotation *is* — has its answer: it is the phase of the motion wave, turning in the complex plane. There was never a hidden dimension as a place; the complex plane is a representation, a coordinate choice — it is just how the coordinate transform writes motion as a wave, broken into components in each direction. The hidden fifth dimension is the frequency domain the transform enters — the symmetric phase domain, creating the symmetry between space and time, held up by the invariant of the conservation law. The center, moving — the turbulence point the locked bodies share, the center of the wave, the third external reference point the symmetric frequency domain gives us, doing the one motion they can all agree on — is what the merged frame's clock reads. And that reading is what we call time. The motion the clock reads is the hidden law's output: force turned perpendicular, arriving as motion — the transform converted the radial pull between the bodies into perpendicular relative velocity, the locked pair handed it to the center, and the center carries it through the field. Time is the reading of the converted force, measured against a third reference.
 
-But the agreement is always local. Every clock belongs to the boundary that merged it: the apparent time between two bodies is well-defined, and within that boundary the integrations close and return the conservation law. Beyond the boundary there is always more field — more collisions, more frequencies, another body — and to include it you redraw the boundary, recompute the plane, and merge a new center. There is no final reference, no clock of the whole. The stack does not end at the top; it ends at the edge of whatever you chose to include. That is not a failure of the theory. It is what time is.
+But the agreement is always local. Every clock belongs to the boundary that merged it: the apparent time between two bodies is well-defined, and within that boundary the integrations close and return the conservation law. Beyond the boundary there is always more field — more collisions, more frequencies, another body — and to include it you redraw the boundary, recompute the plane, and merge a new center. There is no final reference, no clock of the whole. The stack does not end at the top; it ends at the edge of whatever you chose to include — the motion is still always relative to the boundary conditions we set, which never account for the full system. That is not a failure of the theory. It is what time is.

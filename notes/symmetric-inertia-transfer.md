@@ -61,7 +61,7 @@ The symbols, fixed once:
 - $\tau$ — the phasor clock: time as read in the transformed domain.
 - $i$ — the quarter-turn. Multiplication by $i$ rotates 90° in the complex plane. It is the transform's way of writing "perpendicular."
 
-Breaking the motion into components in each direction is part of the transform, not an addition to it. A velocity in three dimensions is three waves — one per direction — each with its own amplitude and phase, each through the same machinery. That is what the branches of the tech stack are: directional components of the motion wave.
+Breaking the motion into components in each direction is part of the transform, not an addition to it. We deconstruct motion into its directional parts and we get waves: a velocity in three dimensions is three waves — one per direction — each with its own amplitude and phase, each through the same machinery. That is what the branches of the tech stack are: directional components of the motion wave. Underneath them we imagine a structural wave. With a fixed mass, we gain information about the energy in the system at each point — but we lose information about the actual motion. That is the contraction process: we give up information so that we can rotate force into velocity.
 
 ---
 
@@ -77,7 +77,7 @@ And it is somewhere **symmetric in space and time**. In ordinary coordinates, sp
 
 What holds it up — what makes the fifth dimension legitimate rather than a trick — is the **invariant of the conservation law**. The transform stands on the invariant: the conservation law $dW_s = 0$ is read off the boundary at the top, vanishes at the bottom, and returns on the ascent; the relative phases never change under any operation. A coordinate change is only honest if what it claims to preserve is actually preserved. Here it is: the invariant holds, so the domain holds.
 
-So: the fifth dimension is the hidden fifth dimension that creates the symmetry — the frequency domain, reached by the coordinate change, symmetric in space and time, held up by the invariant of the conservation law. Hidden because it is the transformed coordinates, not the time and space we started in — and the invariant is what they stand on.
+So: the fifth dimension is the hidden fifth dimension that creates the symmetry — the symmetric wave frequency domain of mass, reached by the coordinate change, symmetric in space and time, held up by the invariant of the conservation law. And the fifth dimension is a result of the coordinate transform: the transform lets us base the coordinate system around the symmetry. Hidden because it is the transformed coordinates, not the time and space we started in — and the invariant is what they stand on.
 
 ---
 
@@ -270,5 +270,7 @@ The massless companion supplies a uniform real baseline; the massive field carri
 3. **Relative phases are invariant.** Absolute phase shifts under every operation; relative phase never changes. The information survives the transform.
 4. **The conserved quantity is read off the boundary and recovered at closure.** $dW_s = 0$ at the top, at the bottom, and on the return — one fact, three writings.
 5. **The fifth dimension is the frequency domain.** It is entered by the coordinate change, it is symmetric in space and time, and it holds up over the invariant of the conservation law — the hidden fifth dimension that creates the symmetry: hidden because it is the transformed coordinates, not the time and space we started in, and the invariant is what they stand on.
+6. **The transform is a contraction.** We deconstruct motion into its directional parts and we get waves; underneath them we imagine a structural wave. With a fixed mass, we gain information about the energy in the system at each point — but we lose information about the actual motion. We give up information so that we can rotate force into velocity.
+7. **The symmetry relates force as the input signal and velocity as the output.** The transform bases the coordinate system around the symmetry and deconstructs motion into an eigen plane — the plane the boundary's bodies share — with the wave influencing their motions. That wave describes the symmetry between mass and velocity perfectly, and integrating in the hidden fifth dimension tells how much velocity is rotated relative to the force, because there they are related by symmetry. But the motion is still always relative to the boundary conditions we set, which never account for the full system.
 
 The name says what it is: the symmetric transfer of the inertial state between the coupled fields — and the transfer is the coordinate change. What goes in as velocity and time comes out as phase in a symmetric domain, and the conservation law is what that domain holds up over.

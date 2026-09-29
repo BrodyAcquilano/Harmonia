@@ -1233,38 +1233,60 @@ function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
   }
   ctx.restore()
 }
-// The Turbulence: The Next Eigenstate. The bodies are locked rigid at the
-// balance-point split — m₁ a distance λ* left of center, m₂ a distance
-// L−λ* right — and the CENTER moves with the resultant vector
-// C(t) = X₁(t) + X₂(t), the vector sum of the two branch wobbles. The whole
-// rigid pair translates as one; the relative separation never changes.
-// The center is drawn as a gold cross: the clock.
+// The Turbulence: The Next Eigenstate. The resultant velocity acts on the
+// bodies in branches — each body wobbles relative to the center with its own
+// Xₙ(t) — AND the relative motion acts on the center: the wobbles sum to the
+// turbulent center motion C(t) = X₁(t) + X₂(t), read against the external
+// reference. The integration adds the reference frame's own motion; it does
+// not shift into a new frame. The eigen line through the bodies runs parallel
+// to the plane of motion, along the perpendicular-resultant direction; the
+// force line crosses it. The center is drawn as a gold cross: the clock.
 function renderUnifiedCenterFrame(ctx, canvas, s, tau) {
   const g = frameSetup(ctx, canvas)
   if (!(s.M1 + s.M2 > 0)) return
   const P = gravityParams(s.M1, s.M2)
   const { T1, T2, NT, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
-  const c = samplePeriodic(x1, T1, NT, tau) + samplePeriodic(x2, T2, NT, tau)
-  let cMax = 0.1
-  for (let i = 0; i < NT; i++) cMax = Math.max(cMax, Math.abs(x1[i] + x2[i]))
+  const v1 = samplePeriodic(x1, T1, NT, tau)
+  const v2 = samplePeriodic(x2, T2, NT, tau)
+  const c = v1 + v2
+  let cMax = 0.1, vMax = 0.1
+  for (let i = 0; i < NT; i++) {
+    cMax = Math.max(cMax, Math.abs(x1[i] + x2[i]))
+    vMax = Math.max(vMax, Math.abs(x1[i]), Math.abs(x2[i]))
+  }
   const lamStar = Math.min(Math.max((X_MAX * s.M2) / (s.M1 + s.M2), 0), X_MAX)
   const R1 = lamStar, R2 = X_MAX - lamStar
   const { padL, padT, pw, ph } = g
   const cx = padL + pw / 2, cy = padT + ph / 2
   const sc = ((Math.min(pw, ph) / 2) * 0.78) / X_MAX
-  // The center rides the resultant; the bodies ride the center, locked.
+  // The center moves turbulently with the resultant; the bodies wobble on
+  // the moving line relative to the center — the frame's motion added to
+  // the branch wobbles, not a shift into a new frame.
   const ccx = cx + (c / cMax) * (pw * 0.30)
-  const p1x = ccx - R1 * sc, p2x = ccx + R2 * sc
+  const wobAmp = pw * 0.05
+  const p1x = ccx - R1 * sc + (v1 / vMax) * wobAmp
+  const p2x = ccx + R2 * sc + (v2 / vMax) * wobAmp
   ctx.save()
-  // Center track: the line the clock travels.
+  // External reference: the static rest line the turbulence is read against.
   ctx.strokeStyle = '#e5dcc0'
   ctx.lineWidth = 1
+  ctx.setLineDash([4, 4])
   ctx.beginPath(); ctx.moveTo(padL, cy); ctx.lineTo(padL + pw, cy); ctx.stroke()
-  // Rigid lock: the bar joining the two bodies through the center.
+  ctx.setLineDash([])
+  ctx.fillStyle = '#a99760'
+  ctx.font = '11px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'left'
+  ctx.fillText('external reference', padL + 6, cy - 8)
+  // The eigen line through the bodies — moving turbulently with the center.
   ctx.strokeStyle = '#b3a684'
   ctx.lineWidth = 2
   ctx.beginPath(); ctx.moveTo(p1x, cy); ctx.lineTo(p2x, cy); ctx.stroke()
-  // Bodies (heavier larger).
+  // Axis label: the plane direction, riding the moving eigen line.
+  ctx.fillStyle = '#715f43'
+  ctx.font = '11px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'center'
+  ctx.fillText('eigen line \u2016 plane of motion', ccx, cy - 14)
+  // Bodies (heavier larger), wobbling relative to the center.
   const r1 = dotRadius(s.M1, s.M1, s.M2)
   const r2 = dotRadius(s.M2, s.M1, s.M2)
   ctx.fillStyle = C1
@@ -1282,8 +1304,8 @@ function renderUnifiedCenterFrame(ctx, canvas, s, tau) {
   ctx.fillStyle = '#3a2c1a'
   ctx.font = '600 13px "IBM Plex Mono", monospace'
   ctx.textAlign = 'center'
-  ctx.fillText('m₁', p1x, cy + 28)
-  ctx.fillText('m₂', p2x, cy + 28)
+  ctx.fillText('m\u2081', p1x, cy + 28)
+  ctx.fillText('m\u2082', p2x, cy + 28)
   ctx.restore()
 }
 // A Clock Relative to an External Body. No bodies are drawn — just a light
@@ -2253,11 +2275,12 @@ export default function WaveLab() {
             <div className="graph-meta-row">
               <div className="legend">
                 <span><Tex tex="\mathbf{C}(t) = X_1(t) + X_2(t) \text{ --- the resultant}" /></span>
-                <span><Tex tex="\text{a turbulence point moving in a line relative to some external body}" /></span>
+                <span><Tex tex="\text{turbulence point moving on the eigen line, relative to an external body}" /></span>
               </div>
             </div>
             <canvas ref={canvasUnifiedRef} className="wave-canvas-orbit-lg" />
-            <div className="graph-caption"><Tex tex="\text{both bodies move as one --- the relative separation never changes}" /></div>
+            <div className="graph-caption"><Tex tex="\text{the line moves turbulently; the bodies wobble on it relative to the center}" /></div>
+            <div className="graph-caption"><Tex tex="\text{turbulence is relative to an external reference --- acceleration referred from the relative velocity}" /></div>
             <div className="graph-footnote">xy plane</div>
           </div>
           <div className="graph-box">
