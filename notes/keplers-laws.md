@@ -72,7 +72,7 @@ The graph carries the law as its caption — $T^2 \propto a^3$ beneath the orbit
 
 Set the three laws side by side and notice what none of them contains: the center's motion. Every one is relative — the planet relative to the Sun-at-focus, the area relative to the radius vector, the period relative to the axis. Kepler's system has no moving center; there is nowhere the shared point itself travels.
 
-The waves supply one. The double integral of the Hidden Phasor — collapse the spatial line to the net released impulse $F_n(t)$, integrate over time — gives $X_n(t)$: each body's wobble *against the balance point* $\lambda^*$, the center that belongs to neither body. And the new reading goes one step further: lock the bodies rigid, sum the wobbles, and the *center itself* moves — $\mathbf{C}(t) = \sum_n\sum_j X_{n,j}(t)\,\hat{e}_j$, the turbulence point, the eigen point relative to the center, moving in a line relative to some external body — and the clock relative to that body (see "Time from Collisions"). That information — the shared point traveling through the field, carrying time with it — is nowhere in the ellipse. It is in the waves, and the integrals pull it out.
+The waves supply one. The double integral of the Hidden Phasor — collapse the spatial line to the net released impulse $F_n(t)$, integrate over time — gives $X_n(t)$: each body's wobble *against the balance point* $\lambda^*$, the center that belongs to neither body. And the new reading goes one step further: lock the bodies rigid, sum the wobbles, and the *center itself* moves — $\mathbf{C}(t) = \sum_n\sum_j X_{n,j}(t)\,\hat{e}_j$, the turbulence point, moving relative to some external third reference — and the clock relative to that reference (see "Time from Collisions"). That information — the shared point traveling through the field, carrying time with it — is nowhere in the ellipse. It is in the waves, and the integrals pull it out.
 
 Nor does the ellipse say *why* the projection holds. Kepler described; Newton, later, supplied inverse-square attraction as the cause. Here the mechanism is the mutual pull itself — the two directions of the conversation, $\psi_1 \longleftrightarrow \psi_2$, each body answering the other's tug, the push-pull switching every half cycle. The ellipse is what that conversation looks like from the eigenplane, with the center's own travel removed.
 
@@ -90,13 +90,13 @@ $$
 \text{space} \;\to\; \text{time} \;\to\; \text{space} \;\to\; \text{time}
 $$
 
-First over space ($\lambda_n$): the cumulative integrals $W_n = \int \mathrm{Re}(\psi_n)\,d\lambda_n$ and $J_n = \int \mathrm{Im}(\psi_n)\,d\lambda_n$ — the energy accounts along the radial line. Then over the hidden time phasor ($\tau$): the phasor turns, work becomes impulse, $F_n(\tau) = J_n(L,\tau) - W_n(L,\tau)$ — the net released impulse at each instant. Then over space again: the indefinite integral for work, computed for the bounds of the system, $0$ and $L$. Then over time again: $X_n(\tau) = \int_0^\tau F_n(\tau')\,d\tau'$ — the wobble, the motion.
+First over space ($\lambda_n$): the cumulative integrals $W_n = \int \mathrm{Re}(\psi_n)\,d\lambda_n$ and $J_n = \int \mathrm{Im}(\psi_n)\,d\lambda_n$ — the energy accounts along the radial line. Then over the transformed time — the frequency phase ($\tau$): the phasor turns, work becomes impulse, $F_n(\tau) = J_n(L,\tau) - W_n(L,\tau)$ — the net released impulse at each instant. Then over space again: the indefinite integral for work, computed for the bounds of the system, $0$ and $L$. Then over time again: $X_n(\tau) = \int_0^\tau F_n(\tau')\,d\tau'$ — the wobble, the motion.
 
 Four integrations — and the last one lands back where the ladder started: the indefinite integral for work, evaluated at the bounds of the system. From that evaluated integral, the motion and the path are reconstructed.
 
 This is why the deconstruction has to go all the way down and come back up in reverse. The gravity equation acts in the radial direction — along the line between the bodies. The motion it produces acts parallel — the two wobbles running alongside each other on their own axis. Parallel motion cannot be read off a radial equation directly. So you deconstruct down to the fundamental equation, where the directions have not yet been separated, and build back up in reverse order — and the reversal is what transfers the radial pull into parallel motion.
 
-Then count. Two passages through time: the phasor time, over which the phase rotates and the energy redistributes, and the accumulation time, over which the motion emerges. Three spatial dimensions for the reconstructed path. $T^2 \propto a^3$ — time squared, length cubed — is that count, written as an orbital proportion. Kepler measured the proportion. The ladder is why the proportion is what it is.
+Then count. Two passages through time: the transformed time — time rewritten as frequency phase, over which the phase rotates and the energy redistributes — and the accumulation time, over which the motion emerges. Three spatial dimensions for the reconstructed path. $T^2 \propto a^3$ — time squared, length cubed — is that count, written as an orbital proportion. Kepler measured the proportion. The ladder is why the proportion is what it is.
 
 The picture sharpens one more level. It is just like light emitting from an antenna.
 
@@ -112,7 +112,7 @@ That is the ground floor: energy conserved, nothing left over, the whole system 
 
 Then back up: take that equation of mass and integrate, alternating space and time, five levels down and five levels back up, rebuilding the motion in the perpendicular direction. It is a communication stack, exactly like networking: application down to machine code down to hardware — then across the channel — then the layers built back up in reverse on the far side. Here the channel is the crossing from the radial direction to the perpendicular one, and the layers are the integrals.
 
-Five levels, and the four integrations are the crossings between them: three of space, two of time — the five dimensions themselves.
+Five levels, and the four integrations are the crossings between them: three of space, two of time — the five levels of the stack.
 
 And at the end of the climb you arrive at a definite integral of work and impulse:
 
@@ -122,7 +122,7 @@ $$
 
 evaluated at the bounds of the system — which is the exact equation the derivation started from. The loop closes: the Lagrangian at the bottom, the Lagrangian at the top, with the wave equations, the phasor, and the motion stacked in between.
 
-Then count the levels, because Kepler already did. $T^2 \propto a^3$: two time dimensions — the phasor time and the accumulation time — and three spatial dimensions for the path. $2 + 3 = 5$. Five levels down, five levels back up. The proportion is the stack, counted.
+Then count the levels, because Kepler already did. $T^2 \propto a^3$: two handlings of time — the transformed time (the frequency phase) and the accumulation time — and three spatial dimensions for the path. $2 + 3 = 5$. Five levels down, five levels back up. The proportion is the stack, counted — and the fifth dimension, the hidden one the transform enters, is the frequency domain itself: the symmetric phase domain where space and time stand on equal footing, held up by the invariant of the conservation law.
 
 ## References
 

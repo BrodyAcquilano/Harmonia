@@ -1,6 +1,6 @@
 # The Quantum Tech Stack
 
-*This note is the effect of which the previous note's intuition was the cause. "Decay and Amplitude" records how the wave equation was found — the contraction, the guess, the decay, the amplitudes — as it was understood at the time. This note records what that process looks like from above, once the whole round trip is visible: a stack with five levels, a conservation law at the top, the same conservation law at the bottom, and a return trip that comes back rotated ninety degrees.*
+*This note is the engine of which the previous note's theory is the principle. "Symmetric Inertia Transfer" states what the coordinate transform is — a way of changing velocity and time into a symmetric phase domain: the move from time and space into a relative frequency domain, the limits at each step, the invariant they stand on. This note is the same principles written as a machine: the five levels down, the seven up. They were written in parallel and they say the same thing.*
 
 ---
 
@@ -13,7 +13,9 @@
 - [5. The abstracted stack](#5-the-abstracted-stack)
 - [6. The span principle](#6-the-span-principle)
 - [7. The spatial dimension addition principle](#7-the-spatial-dimension-addition-principle)
-- [8. Conclusion: what the rotation means](#8-conclusion-what-the-rotation-means)
+- [8. Planes and coordinate transforms](#8-planes-and-coordinate-transforms)
+- [9. Time integrates over all branches — the turbulence point](#9-time-integrates-over-all-branches--the-turbulence-point)
+- [10. Conclusion: the rotation is a change of frame](#10-conclusion-the-rotation-is-a-change-of-frame)
 
 
 ## 1. What the stack is
@@ -25,6 +27,8 @@ Going **down** is limits and differentiation: each level removes a variable — 
 The trip is a round trip. We started with a conservation law read off the boundary conditions, worked down to a fully contracted differential equation, solved it — the stack tells us the solution is a time- and space-dependent wave — and integrated back up to *the same conservation law*. We knew we had hit the bottom because no independent variable remained and the total differential vanished. We knew the trip was over when the law we started from reappeared.
 
 The stack has five levels. That number is not a choice: Kepler's third law says so — $T^2 \propto a^3$, two of time, three of space, $2 + 3 = 5$.
+
+**What the fifth dimension is.** It has been called a hidden timelike place. It is the frequency domain itself — entered by the coordinate change. When the transform moves $(t, x) \to (\omega, \lambda)$, the physics goes somewhere new: the domain of frequency and wavelength, somewhere symmetric in space and time — the phase $kM - \omega M$ treats the spatial gradient $k$ and the temporal gradient $\omega$ as the same kind of thing. That domain is the fifth dimension — the hidden fifth dimension that creates the symmetry: hidden because it is the transformed coordinates, not the time and space we started in. That is where it comes in — because we do a coordinate change. And it holds up over the invariant of the conservation law: the law $d\psi_s = 0$ is read at the top, vanishes at the bottom, and returns on the ascent, and the relative phases never change under any operation. A coordinate change is only honest if what it claims to preserve is actually preserved. Here it is — the invariant holds, so the domain holds. The stack itself doesn't speculate; what the hidden fifth dimension might *mean* — time as readout, conservation as shadow, mass as winding, gravity as phase gradient — is theorized in §4 of *The Theory of Symmetric Inertia Transfer*.
 
 ---
 
@@ -66,8 +70,8 @@ Each level undoes one level of the descent, in reverse order.
 |---|---|---|---|
 | **u1.** Undo d5: expand the mass-proportion substitution — one $\lambda$ becomes two. | $\frac{k_2}{k_1} = \sqrt{\frac{M_2}{M_1}}$ | The proportions are the boundary conditions' memory: they survive the round trip, so the rebuild is exact. | Expand: restore the eliminated variable. |
 | **u2.** Undo d4: expand the space limit — $\omega$ un-collapses from $k$. Accumulate over the restored space. | $W_n = \int_0^L \mathrm{Re}(\psi_n)\,d\lambda_n$, $J_n = \int_0^L \mathrm{Im}(\psi_n)\,d\lambda_n$ | Oscillation turns into accounts: work (what the field could do) and impulse (what it has done). | Integrate over space. |
-| **u3.** Undo d3: integrate with respect to time — the $i$ returns. Collapse to the boundary, then the first time integral. | $F_n(t) = J_n(L,t) - W_n(L,t)$ | The whole line becomes one number per instant; the quarter-turns begin to compose — radial in, perpendicular out. The rotation happens here. | Evaluate at the boundary; integrate over the hidden time. |
-| **u4.** Undo d2: expand the $v = f\lambda$ contraction. The second time integral. | $X_n(t) = \int_0^t F_n(t')\,dt'$ | The second time dimension is where motion lives: the wobble, the trajectory. | Integrate over the second time. |
+| **u3.** Undo d3: integrate with respect to time — the $i$ returns. Collapse to the boundary, then the first time integral. | $F_n(t) = J_n(L,t) - W_n(L,t)$ | The whole line becomes one number per instant; the quarter-turns begin to compose — radial in, perpendicular out. The rotation happens here. | Evaluate at the boundary; integrate over the transformed time. |
+| **u4.** Undo d2: expand the $v = f\lambda$ contraction. The second time integral. | $X_n(t) = \int_0^t F_n(t')\,dt'$ | The accumulation time is where motion lives: the wobble, the trajectory. | Integrate over the accumulation time. |
 | **u5.** Undo d1: the contracted time dimension is restored — energy is conserved again. | $d\psi_s = 0$ | The conservation law reappears — the trip is over when the equation we started from returns. | Restore the boundary: un-contract the time dimension. |
 
 The Motion tab's push-pull density is this same machinery, differenced per body: $D(\lambda_n) = \int_0^{\lambda_n}[(\mathrm{Re}\psi_1-\mathrm{Im}\psi_1) - (\mathrm{Re}\psi_2-\mathrm{Im}\psi_2)]\,d\lambda'$ — the Integration tab's $W_n - J_n$ areas as definite integrals, one per body, subtracted.
@@ -92,7 +96,7 @@ The Motion tab's push-pull density is this same machinery, differenced per body:
 | **Boundary conditions** | Known at the top (the PE/KE equations), contracted to pure mass proportions at the bottom, rebuilt from mass on the return. | d1 (given), d5 (contracted), u1 (restored) |
 | **Symmetry → coherence** | Every $+i$ matched by a $-i$; relative phases invariant under every operation. The signal survives because the symmetry protects it. | d3 (the $i$ drops from the ratio); the whole trip |
 | **Conservation → rotation count** | Five integrations, five quarter-turns $\equiv 90°$: the force that went down radial comes back perpendicular. | u2–u4 (the integrations); the turn composes at u3 |
-| **4D → 5D → 4D** | The trip leaves ordinary 4D spacetime, rotates into a fifth frequency-phase domain — a hidden timelike dimension — and comes back out. That excursion is why the acting direction of the energy rotates: the force goes down radial, passes through the frequency-phase domain where the quarter-turns compose, and re-emerges acting in the perpendicular direction. | The whole round trip; Kepler's third law is the indicator: $T^2 \propto a^3$ counts two times (one seen, one hidden) and three spaces |
+| **Frame rotation (relativity)** | The descent reads the conservation law in the radial frame; the ascent rebuilds it in the perpendicular frame. The frequency-phase domain is the same physics with the coordinates turned — a change of reference frame, not a new place. That turn is why the acting direction of the energy rotates: the force goes down radial and re-emerges perpendicular, the way a vector's components change when the axes rotate. | The whole round trip; Kepler's third law is the indicator: $T^2 \propto a^3$ counts two times and three spaces |
 
 ---
 
@@ -111,7 +115,7 @@ Given all four, the outcome was nearly forced: solve the bottom equation for a t
 
 **The chain rule is the deconstruction.** "Signal deconstructed" is not just the equation at the bottom — it is the *result of the chain rule*: limits and differentiations down through every dependency, and integrations back up in reverse order. That exact reversal is what stays coherent — $D^{-1}D$ is the identity on everything the chain touched — and it is what lets us recover the signal. The chain is the mechanism; coherence is its guarantee; recovery is its consequence. Anything the chain didn't touch (the amplitude) waits at the boundary conditions and is fixed at closure.
 
-**Which level rotates, and why.** Every integration is a quarter-turn: integrating $e^{i\phi}$ multiplies by $1/i = -i$, a 90° rotation in the complex plane. Five integrations make $5 \times 90° = 450° \equiv 90°$ — an odd number of quarter-turns nets a single quarter-turn. That is why the force that went down radial comes back perpendicular: the arithmetic of the stack leaves one unmatched rotation. The rotation is concentrated on the ascent, at the time-integration levels (u3, u4), where the phasor — the hidden time dimension — does the turning.
+**Which level rotates, and why.** Every integration is a quarter-turn: integrating $e^{i\phi}$ multiplies by $1/i = -i$, a 90° rotation in the complex plane. Five integrations make $5 \times 90° = 450° \equiv 90°$ — an odd number of quarter-turns nets a single quarter-turn. That is why the force that went down radial comes back perpendicular: the arithmetic of the stack leaves one unmatched rotation. The rotation is concentrated on the ascent, at the time-integration levels (u3, u4), where the phasor does the turning — the phase of the velocity wave rotating in the complex plane. That plane is a representation, not a hidden dimension: it is how the coordinate transform writes motion as a wave.
 
 **The frequency connection.** The phasor's rotation rate is tied to mass by the Planck–Einstein relation, $\omega_n = 2\pi M_n c^2/h$. Frequency is mass-energy per quantum of action: the faster the phasor turns, the more massive the body. The $i$ tells you there is rotation; $\omega_n$ tells you how fast, and it is mass all the way down.
 
@@ -153,11 +157,11 @@ The stack says the solution is a time- and space-dependent wave — so solve the
 
 ### g. Accumulation and the first time integral (first way up)
 
-$W_n$, $J_n = \int \psi_n\,d\lambda_n$: integrate over the restored space; the wave becomes its own accumulation — work, impulse. Collapse to the boundary, then $F_n(t) = J_n(L,t) - W_n(L,t)$: the whole line becomes one number per instant, and the quarter-turns begin to compose. The general form: **integrate over each restored coordinate once, then over the hidden time.** This is the level where rotation enters — the force changes direction here.
+$W_n$, $J_n = \int \psi_n\,d\lambda_n$: integrate over the restored space; the wave becomes its own accumulation — work, impulse. Collapse to the boundary, then $F_n(t) = J_n(L,t) - W_n(L,t)$: the whole line becomes one number per instant, and the quarter-turns begin to compose. The general form: **integrate over each restored coordinate once, then over the transformed time.** This is the level where rotation enters — the force changes direction here.
 
 ### h. The second time integral
 
-$X_n(t) = \int_0^t F_n(t')\,dt'$. Integrate over the second time dimension and motion appears: displacement, the wobble, the trajectory. The general form: **the second time dimension is where motion lives.** One time dimension rotates the phase; the other accumulates the result into movement. A new spatial direction adds no new time dimensions — it adds a branch through the same two, rotated into the new direction (see §7).
+$X_n(t) = \int_0^t F_n(t')\,dt'$. Integrate over the accumulation time and motion appears: displacement, the wobble, the trajectory. The general form: **the accumulation time is where motion lives.** The transformed time rotates the phase; the accumulation time gathers the result into movement. A new spatial direction adds no new dimensions — it adds a branch through the same machinery, rotated into the new direction (see §7).
 
 ### i. Closure (top, returned)
 
@@ -177,8 +181,8 @@ At its finest level, the quantum tech stack is this:
 6. **Ground** — substitute the proportions; no independent variable left; the equation equals zero.
 7. **Solve** — the stack says the solution waves in time and space; solve the differential equation.
 8. **Accumulate** — integrate back over each restored coordinate.
-9. **Rotate** — integrate over the hidden time; let the quarter-turns compose.
-10. **Move** — integrate over the second time; read off the trajectory.
+9. **Rotate** — integrate over the transformed time; let the quarter-turns compose.
+10. **Move** — integrate over the accumulation time; read off the trajectory.
 11. **Close** — recover the invariant.
 
 Any conservation law with known boundary conditions, a dispersion relation, and wave solutions can be run through it. Other forms of the stack are possible — different dispersion relations contract different coordinates, and a different count of integrations nets a different rotation — but the shape is the same: down by limits and differentiation, up by integration, the solution's form dictated by the stack, closure by recovery of the invariant.
@@ -197,7 +201,9 @@ The straight-line force matters here too: because each pair stays connected by a
 
 ## 7. The spatial dimension addition principle
 
-The stack as described is five layers high because the problem it was built for has one spatial dimension — and five is where it stays. Adding a spatial dimension does not add new dimensions at all: it adds *branches* through the same machinery. The dimensions are the same five fundamental dimensions of the tech stack; what multiplies is the integration path. This is the spatial dimension addition principle, stated correctly.
+The stack as described is five layers high because the problem it was built for has one spatial dimension — and five is where it stays. Adding a spatial dimension does not add new dimensions at all: it adds *branches* through the same machinery. The stack keeps its five levels; what multiplies is the integration path. This is the spatial dimension addition principle, stated correctly.
+
+The branches are the directional components of the motion wave. The stack treats the velocity as a wave — writes the motion as a complex exponential — and breaks it up into components in each direction: one wave per direction, each through the same five-layer machinery. That is all a branch is.
 
 It is the first time the path splits. On the way up, the wobble integral divides into two separate branches — the wobble computed in one direction, then in the other — and the resultant wobbles are summed. It is not two new time dimensions; it is the same time dimensions used to rotate into different directions: figure out the wobble in one direction, then another, then sum the resultant wobbles. On the way down, the split runs in reverse: the derivative does not climb into higher dimensions but divides into two initial-condition branches. Call them A and B incoming, Y and Z outgoing — we never have to track A-on-Y, A-on-Z, B-on-Y, B-on-Z separately, because the quantum tech stack handles the rotations for us, keeping the relative orientation of the branches on the outside and rotating them relative to one another.
 
@@ -209,18 +215,46 @@ Finding the center is part of the addition process. Technically we need the resu
 
 ---
 
-## 8. Conclusion: what the rotation means
+## 8. Planes and coordinate transforms
 
-The open question is what the fifth dimension — and the second time dimension generally — *is*. Three readings are on the table.
+Motion is always relative to another body in the gravitational field. There is no absolute frame — only bodies, and the planes they share.
 
-**Merely symbolic.** The dimensions are bookkeeping: repeated integration over time and space produces the formal structure of extra dimensions, and the 90° rotation is just what an odd number of integrations does to a phasor. Nothing "goes" anywhere; the force changes direction because the mathematics of accumulation turns it.
+The stack computes in three dimensions and draws in two. Take the 3D motion — the full vectors, all branches — and find the plane the bodies stay relatively locked on. That plane is constructed from the vectors: compute in 3D, collapse to the 2D plane where the locking holds, draw the relative motion there. That plane is the eigenplane: the flat 2D coordinate system, cut through 3D space, on which the boundary's bodies stay relatively locked.
 
-**Actually visited.** The information genuinely enters another dimension, rotates there, and comes back out — the signal from gravity transferring into a different direction by passing through a direction we don't move in. The coherence of the signal (relative phases unchanged) is then evidence: something preserved it *through* the rotation, the way a fiber preserves polarization.
+Two bodies in 3D space, no external force, constant relative velocity: project onto the plane and the axis wraps into a circle. The circle is what constant velocity looks like on the eigenplane — the axis bent around, no acceleration anywhere. Three bodies in 3D space, with external force acting — acceleration relative to something else: the projection needs an ellipse, or a hyperbola for escape. The ellipse is what acceleration looks like on the eigenplane. Kepler drew ellipses because the planets he watched were under external force — the Sun's pull, acceleration relative to something else — and the ellipse is the projection that carries it.
 
-**Both.** The mathematics is the trace left by the passage — symbolic because we only see the trace, real because the trace is so clean.
+Each boundary gets its own plane. Add a body and you get new vectors in new directions: back to 3D, recompute, collapse to a new 2D plane, repeat. It is just changing the coordinate system to a new flat plane in three-dimensional space — one plane per boundary condition. And every change of plane is a coordinate transform, computed from the vectors.
 
-One more consideration, and it weighs against the first reading. A new spatial dimension does not extend the stack — it branches the integration path through the same five dimensions, and the stack rotates the branches relative to one another while keeping their relative orientation (see §7). A mere artifact of calculus would not know how to do that: bookkeeping does not rotate. The five lower dimensions behave like part of some higher-dimensional geometry — they are the room the branches rotate in, not the residue the integrals leave behind.
+This is where the collisions matter. Fresh from a common origin, many bodies travel in the same direction — they share planes, and one coordinate system covers them all. But collisions randomize directions: more and more bodies rotate in different directions relative to each other, fewer and fewer share a plane. Each new relative group needs its own eigenplane, and shifting from one 2D plane view to another costs a coordinate transform — more variables, every time. The older the system, the more planes, the more transforms. That is the price of chaos, counted in coordinate systems.
 
-The applications follow whichever reading is right. If the rotation is real, the stack is a machine for turning forces: feed a signal in along one direction, run it down to the ground floor and back up, and collect it pointing somewhere it could never have pointed on its own — gravity in, perpendicular force out. That is already what the simulation does to produce the wobble from the radial pull. Whether it can be pushed further — signals sent *into* another dimension and recovered, rather than merely turned within the ones we have — is the experiment this stack is waiting for.
+The branch machinery of §7 is what makes the planes computable: the stack rotates the branches relative to one another while keeping their relative orientation, and the eigenplane is where the rotated branches land. The plane is not assumed; it is constructed — from the vectors, per boundary, every time.
 
-What is certain is the coherence. Down five levels and back up, through contraction and limits and five quarter-turns, the relative phases never change. Whatever the dimensions are, the information survives them. A signal that can be rotated through another dimension and come back intact is a signal that can be *sent*.
+And the stack itself is a coordinate transform. What goes in is position and time — where the bodies are, when. What the stack does with them is treat the motion as a wave: the velocity written as a complex exponential — a phasor — and broken up into components in each direction. Each component is a wave; the branches are those components. What the stack works in is the frequency domain: frequency and wavelength — how fast each component turns, how long it is. The descent transforms position-time into frequency-lambda, one wave per direction; the ascent adds the components and transforms back into motion.
+
+There are no hidden dimensions as places. What the old drafts called the fifth dimension is the frequency domain itself — entered by the coordinate change, symmetric in space and time, held up by the invariant of the conservation law (see §1). The complex plane is not a place the signal visits — it is a representation, a coordinate choice, and the phasor's rotation is the phase of the velocity wave turning. That is just how the coordinate transform works. The ninety-degree rotation the round trip is famous for is what a coordinate transform does: the same physics, rewritten in the new coordinates, comes back pointing somewhere new.
+
+## 9. Time integrates over all branches — the turbulence point
+
+A time integration cannot be taken branch by branch. Space splits the integration path — one branch per direction — but a time layer demands the whole: it acts on all spatial branches at once, by symmetry. Time is what the branches have in common, so time is what merges them.
+
+The stack gains two layers on the ascent for this (see "Time from Collisions" §5):
+
+**u6. Merge the branches.** Sum every branch wobble into one center vector:
+
+$$\mathbf{C}(t) = \sum_n\sum_j X_{n,j}(t)\,\hat{e}_j.$$
+
+**u7. Integrate the center.** One more time integral: $\boldsymbol{\tau}(t) = \int_0^t \mathbf{C}(t')\,dt'$.
+
+What the machine computes at the top of the stack is a **turbulence point in the center**: the merged resultant $\mathbf{C}(t)$, the one point the locked bodies share, vibrating in the turbulent field. That is the point moving in the Motion tab's turbulence graph — the eigen point relative to the center, moving in a line relative to some external body. It is not either body's motion; it is the pair's answer to the collisions, delivered at the center.
+
+And this is why there is one time, not many: the merge fuses the branch frequencies into a single motion of a single point. The singleness of time is not assumed at the bottom of the stack — it is built at the top, by the merge.
+
+## 10. Conclusion: the rotation is a change of frame
+
+The stack goes down in the radial frame and comes back up in the perpendicular frame. Read it as a relativity principle: the frequency-phase domain is not a new place the signal visits — it is the same conservation law with the coordinates turned. A vector's components change when you rotate the axes; the force that went down radial comes back perpendicular for the same reason. The round trip turned the frame.
+
+That is what the whole stack is an instance of: **the physics is the invariant; the frame is the choice.** The conservation law at the top, the vanishing differential at the bottom, the recovered law on the return — one statement, read in three frames. The five levels are the turn, counted: two times, three spaces, $T^2 \propto a^3$.
+
+The rest follows the same principle. The branch machinery (§7) splits the frame into directions; the merge (§9) collects them back into one. The eigenplane (§8) is the frame the boundary's bodies share — constructed from the vectors, one per boundary. The turbulence point (§9) is what the merged frame's clock reads: the center, moving.
+
+What is certain is the coherence. Down five levels and back up — through contraction and limits, the branch splits, the merge, the quarter-turns — the relative phases never change. Whatever the frames are, the information survives them.

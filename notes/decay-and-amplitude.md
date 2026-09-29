@@ -1,12 +1,12 @@
 # Decay and Amplitude: A Worked Example of the Stack
 
-*This note is a worked example of the gravitational tech stack: deriving the decay and the amplitudes step by step, in order, with the actual math. The stack note describes the machine; this note runs it. Read the stack note first if the level names (d1–d5, u1–u5) are unfamiliar.*
+*This note is a worked example of the quantum tech stack: deriving the decay and the amplitudes step by step, in order, with the actual math. The stack note describes the machine; this note runs it. The companion note "The Theory of Symmetric Inertia Transfer" states the principles the machine runs on — a way of changing velocity and time into a symmetric phase domain: the coordinate transform from time and space into a relative frequency domain, the limits at each step, the invariant they stand on. Read the stack note first if the level names (d1–d5, u1–u5) are unfamiliar.*
 
 ---
 
 ## Table of Contents
 
-- [1. What the derivation owes us](#1-what-the-derivation-owes-us)
+- [1. What the transform owes us](#1-what-the-transform-owes-us)
 - [2. Decay: exponential dissipation and finite energy](#2-decay-exponential-dissipation-and-finite-energy)
 - [3. Amplitude: the stack's integration constant](#3-amplitude-the-stacks-integration-constant)
 - [4. The worked example: decay and amplitude through the stack](#4-the-worked-example-decay-and-amplitude-through-the-stack)
@@ -14,7 +14,7 @@
 - [6. Every symbol, and the level that fixes it](#6-every-symbol-and-the-level-that-fixes-it)
 
 
-## 1. What the derivation owes us
+## 1. What the transform owes us
 
 The wave form is
 
@@ -22,10 +22,12 @@ $$
 \psi_n = A_n e^{-\beta x_n} e^{i\phi_n}
 $$
 
-Three pieces: an amplitude $A_n$, a decay envelope $e^{-\beta x_n}$, and a phase $e^{i\phi_n}$. The phase was derived — it falls out of the symmetry. The other two were not. So the stack owes us two computations:
+Three pieces: an amplitude $A_n$, a decay envelope $e^{-\beta x_n}$, and a phase $e^{i\phi_n}$. The phase was derived — it falls out of the symmetry: the limits pair each spatial gradient with the companion's temporal gradient, the $i$ drops out of the ratio, and the relative phases are the invariant the transform protects. The other two were not derived. So the transform owes us two computations:
 
 1. **The decay rate** $\beta$: how fast the wave dies with distance, and why it dies at all.
 2. **The amplitude** $A_n$: the absolute scale, fixed — not chosen.
+
+Both are fixed the same way the conservation law is fixed: by the boundary, at closure. The limits strip out everything the boundary doesn't pin down; what the boundary does pin down waits at the bottom and is read back on the ascent. The phase belongs to the symmetry; the envelope and the scale belong to the boundary.
 
 What the Wave Lab shows is a window onto these values, not the values themselves: it samples $\lambda_n$ over $0$ to $4\pi$ and normalizes $|A_1|^2 + |A_2|^2 = 1$, so only ratios are visible. §4 below gives the true computation; §5 explains the window.
 
@@ -33,7 +35,7 @@ What the Wave Lab shows is a window onto these values, not the values themselves
 
 ## 2. Decay: exponential dissipation and finite energy
 
-Nothing acting over a distance keeps all of its energy. Each slice of distance takes its proportional cut, and proportional cutting is the exponential — this is the same decay in the telegrapher's equations, where the transmission line loses energy to resistance. A coupled first-order system in space and time gives complex exponentials *with* envelopes; the inertia waves are that system in mass coordinates, so they get the envelope too.
+Nothing acting over a distance keeps all of its energy. Each slice of distance takes its proportional cut, and proportional cutting is the exponential — this is the same decay in the telegrapher's equations, where the transmission line loses energy to resistance. A coupled first-order system in space and time gives complex exponentials *with* envelopes; the inertia waves are that system with time and space transformed into frequency and wavelength, so they get the envelope too.
 
 Each wave decays away from its source. $\psi_1$ is emitted at body 1 ($\lambda_n = 0$) and fades toward $+\lambda_n$; $\psi_2$ is emitted at body 2 ($\lambda_n = L$) and fades toward $-\lambda_n$:
 
@@ -47,7 +49,7 @@ $$
 \beta = \frac{|M_1 - M_2|}{M_1 + M_2}
 $$
 
-$\beta$ is the boundary asymmetry made quantitative, and it comes from the ground floor of the stack (d5): the only data left there are the boundary conditions $m_1$, $m_2$, so the decay rate can only be built from them. Equal masses give $\beta = 0$ — the symmetric case, lossless. The more lopsided the pair, the harder each wave decays toward the other. It is the same $\beta$ that tilts the envelopes in the simulation and the same normalized difference that sets the orbital eccentricity in the Motion tab.
+$\beta$ is the boundary asymmetry made quantitative, and it comes from the ground floor of the stack (d5): the only data left there are the boundary conditions $m_1$, $m_2$, so the decay rate can only be built from them. The fifth limit removes the last variable, and what the boundary still says at that point — how lopsided the pair is — becomes the envelope. Equal masses give $\beta = 0$ — the symmetric case, lossless. The more lopsided the pair, the harder each wave decays toward the other. It is the same $\beta$ that tilts the envelopes in the simulation and the same normalized difference that sets the orbital eccentricity in the Motion tab.
 
 The decay is what makes the energy finite, and finiteness is what makes the amplitude computable. The energy carried by wave $n$ is the integral of $|\psi_n|^2$ over its line of travel:
 
@@ -55,7 +57,7 @@ $$
 E_n = \int_0^{\infty} A_n^2 e^{-2\beta x}\,dx = \frac{A_n^2}{2\beta}, \qquad \beta > 0
 $$
 
-This converges if and only if $\beta > 0$ — the decay is the convergence. A pure sinusoid ($\beta = 0$) integrated over all space diverges: infinite energy, amplitude unfixable. Photons are the physical precedent: they arrive in discrete, finite packets precisely because their waves decay and close off. Quantization is decay, seen from the energy side.
+This converges if and only if $\beta > 0$ — the decay is the convergence. A pure sinusoid ($\beta = 0$) integrated over all space diverges: infinite energy, amplitude unfixable. The wave lives in the frequency domain — the fifth dimension, entered by the coordinate change — and the envelope is what lets it live there with finite energy. Photons are the physical precedent: they arrive in discrete, finite packets precisely because their waves decay and close off. Quantization is decay, seen from the energy side.
 
 ---
 
@@ -65,7 +67,7 @@ This converges if and only if $\beta > 0$ — the decay is the convergence. A pu
 
 Differentiate $\psi_n = A_n e^{-\beta x_n} e^{i\phi_n}$ with respect to any mass coordinate: $A_n$ is a constant factor, so $dA_n/dM_m = 0$ and it rides through every gradient untouched. Contract via $v = f\lambda$ and $\omega \propto k$: $A_n$ is still there, still untouched. Ground out at the mass proportions, no independent variable left: $A_n$ is gone from the equations entirely.
 
-This is not a failure of the derivation. It is what constants do. The descent differentiates, and differentiation kills constants — the amplitude's information is not destroyed, it is *held by the boundary conditions*, waiting at the bottom while the phase structure goes through the stack. It returns on the ascent as the undetermined constant of integration, and the closure — the definite integral evaluated between known bounds — is what fixes it.
+This is not a failure of the transform. It is what constants do. The laws are what survives the limits — and a constant survives by being invisible to them: the descent differentiates, and differentiation kills constants. The amplitude's information is not destroyed, it is *held by the boundary conditions*, waiting at the bottom while the phase structure goes through the stack. It returns on the ascent as the undetermined constant of integration, and the closure — the definite integral evaluated between known bounds — is what fixes it.
 
 ### 3b. The computation
 
@@ -87,7 +89,7 @@ $$
 
 Note the cross-coupling: body 1's amplitude is set by body 2's mass. Each wave's strength is fixed by the companion — the reciprocal structure runs all the way down.
 
-**The budget (d1).** The Hamiltonian only rotates its energy — what goes in comes out. Total energy is the invariant the whole stack carries:
+**The budget (d1).** The first limit read the conservation law off the boundary: energy cannot leak where the boundary is known. Total energy is the invariant the whole transform carries:
 
 $$
 E_1 + E_2 = E_{\text{total}}
@@ -130,6 +132,8 @@ When $\beta = 0$ (equal masses), the envelope integral diverges and the computat
 | **u3–u4.** Time integrals: $F_n$, $X_n$ | $A_n$ rides along, still undetermined, through the rotation and the wobble. |
 | **u5.** Closure: $F_n(\tau) = J_n(L,\tau) - W_n(L,\tau)$ | The definite integral is evaluated between the known bounds. Envelope integral + symmetry ratio + energy budget: $A_n$ is solved. The stack hands back everything it was owed. |
 
+The table stops at u5 — the closure of the wave computation, where the amplitude is fixed. The stack's ascent runs two layers further: u6 merges the branch waves into the center vector, and u7 integrates the center — the turbulence point, moving. The merge only sums what closure already computed; the amplitude is fixed before the branches merge, not by them.
+
 ---
 
 ## 5. Standing waves, nodes, and harmonies
@@ -151,4 +155,4 @@ The summed field $\psi_s = \psi_1 + \psi_2$ is two counter-propagating decaying 
 - **$A_1, A_2$** — fixed at **u5**, by envelope integral + symmetry ratio + energy budget: $A_n = \sqrt{2\beta E_{\text{total}}\,M_{\text{companion}}/(M_1+M_2)}$. Cross-coupled: each set by the companion mass.
 - **$\lambda^* = L\,M_2/(M_1+M_2)$** — the balance point, the mass-weighted node.
 
-The stack owes nothing it hasn't paid: the phase was derived from the symmetry, the decay from the boundary conditions, and the amplitude — the integration constant of the whole trip — from the definite integral at closure.
+The transform owes nothing it hasn't paid: the phase was derived from the symmetry, the decay from the boundary conditions, and the amplitude — the integration constant of the whole trip — from the definite integral at closure.

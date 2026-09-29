@@ -1,6 +1,6 @@
 # Time from Collisions
 
-*This note updates the theory. The earlier notes stand as the derivation path — the route by which the stack was found — and are not rewritten. What follows extends the Gravitational Tech Stack upward: two new layers, two new symmetry rules, and a new account of what time is. Where this note and an earlier note disagree about what moves, this note is the current statement.*
+*This note updates the theory. The earlier notes stand as the derivation path — the route by which the stack was found — and are not rewritten. What follows extends the Quantum Tech Stack upward: two new layers, two new symmetry rules, and a new account of what time is. Where this note and an earlier note disagree about what moves, this note is the current statement.*
 
 ---
 
@@ -13,12 +13,13 @@
 - [5. The new layers](#5-the-new-layers)
 - [6. The balance point is a clock ratio](#6-the-balance-point-is-a-clock-ratio)
 - [7. A clock relative to an external body](#7-a-clock-relative-to-an-external-body)
-- [8. The eigenplane — Kepler did the same thing](#8-the-eigenplane--kepler-did-the-same-thing)
-- [9. The infinite field](#9-the-infinite-field)
-- [10. The background energy](#10-the-background-energy)
-- [11. A math problem, not a physics problem](#11-a-math-problem-not-a-physics-problem)
-- [12. What time is](#12-what-time-is)
-- [13. Conclusion](#13-conclusion)
+- [8. The clock belongs to a third reference](#8-the-clock-belongs-to-a-third-reference)
+- [9. The eigenplane — Kepler did the same thing](#9-the-eigenplane--kepler-did-the-same-thing)
+- [10. The infinite field](#10-the-infinite-field)
+- [11. The background energy](#11-the-background-energy)
+- [12. A math problem, not a physics problem](#12-a-math-problem-not-a-physics-problem)
+- [13. What time is](#13-what-time-is)
+- [14. Conclusion](#14-conclusion)
 
 
 ## 1. What the animation showed
@@ -64,7 +65,7 @@ $\mathbf{C}(t)$ is the *resultant* — the vector sum of the branch wobbles. It 
 
 ## 4. The new symmetry rules
 
-The Gravitational Tech Stack had one branching rule: **space splits** — a new spatial dimension branches the integration path, and the stack runs once per branch (§7 of that note). Watching the center move reveals the mirror rule:
+The Quantum Tech Stack had one branching rule: **space splits** — a new spatial dimension branches the integration path, and the stack runs once per branch (§7 of that note). Watching the center move reveals the mirror rule:
 
 **Time unifies.** A time integration cannot be taken branch by branch. The next layer up after the wobbles is a time dimension in the integration, and it *demands* that it act on both spatial dimensions at once — by the symmetry rules. Time is what the branches have in common; the symmetry forbids integrating it piecemeal. Where space split the path, time merges it back.
 
@@ -119,7 +120,26 @@ Integrate that rocking in time and you get the clock ratio — the apparent time
 Time, at a point, is the rate of change of frequency in the field of gravitational waves — the excitation of frequencies at each point in space. The rocking golden point is that excitation, drawn — a clock relative to some external body.
 
 
-## 8. The eigenplane — Kepler did the same thing
+## 8. The clock belongs to a third reference
+
+Here is the correction to §7: the clock is not between the two bodies. It is the pair's **shared clock**, and it is read against an **external third reference** — a third body, or the background field beyond the boundary. Two bodies alone have a ratio (the balance point, $T_1/T_2 = M_2/M_1$) but no reading: a ratio is not a clock. The reading needs something outside the pair to be read against. The golden point's position on the line is the time — but the line itself is anchored to the external reference. Move the reference and the reading moves; that is what "relative" means.
+
+**How to compute it.** The pair's merged resultant is $\mathbf{C}(t) = \sum_n\sum_j X_{n,j}(t)\,\hat{e}_j$ — the turbulence point, the one motion the locked bodies agree on. The clock reading is the component of that motion along the direction to the external reference — the projection of $\mathbf{C}(t)$ onto the pair–reference axis, integrated in time:
+
+$$\tau(t) = \int_0^t \mathbf{C}(t') \cdot \hat{e}_{\text{ref}}\,dt'.$$
+
+The balance point sets the zero — the rest position, the ratio — and the integrated projection sets the reading. Two computations, two jobs: the ratio is internal (mass proportions); the reading is external (reference projection).
+
+**Two bodies in 3D space.** The pair's force acts along their separation line; the resultant motion comes back perpendicular — rotated ninety degrees from the force direction, the transform's doing. So the pair lives on a plane: the line of force crossed with the perpendicular resultant velocity. The external third reference sits off that plane — or rather, the plane is *defined* against it: pick the reference, and the perpendicular direction the resultant takes is the one orthogonal to the pair–reference axis. This is the resultant velocity rotated from the direction of the force, and it must be considered: the clock does not read the radial pull, it reads the rotated resultant. Compute $\mathbf{C}(t)$, take the component perpendicular to the force line in the plane containing the reference, integrate — that is the pair's time.
+
+**Three bodies in 3D space.** Three pairs, three resultants, three planes — unless the bodies share a plane, in which case the planes coincide and one clock serves. In general: compute each pair's turbulence point against the external reference (the field beyond the three-body boundary — there is always more field), merge the three readings at the common center (u6: time acts on all branches at once), integrate (u7). The merged reading is the triple's shared clock — still relative, still anchored outside.
+
+**There is always some other external force.** The boundary never closes: whatever system you draw, the field beyond it acts on the inside. That is not a flaw in the computation — it is what the computation is *of*. The clock ratio $T_1/T_2 = M_2/M_1$ is exact within the boundary; the reading $\tau(t)$ is exact relative to the chosen reference. Choose a larger boundary — include the third body, recompute the plane, merge a new center — and you get a new clock, exact relative to the new outside. The background energy of §11 is the limit of this process: integrate over all space and all time, and the "external reference" becomes the field itself.
+
+So the rule: **no clock without a third reference, no reference without an outside, no outside that ever ends.** The rotated resultant is the hand of the clock; the external body is the face it reads against.
+
+
+## 9. The eigenplane — Kepler did the same thing
 
 Here is the correction this theory owed Kepler: he was never wrong. He did exactly what the three-body construction did.
 
@@ -134,7 +154,7 @@ Add another body and you get a new vector in a new direction: back to 3D, recomp
 And the amount that collapsed point moves between the bodies — the center's motion on the plane — is the rate of change of time. Integrate it and you get the time difference between two points. Integrate again over space and you learn nothing new, because the plane is always constructed in 3D spacetime: re-integrating the same boundary rebuilds the same plane. A new spatial integration only ever tells you how to compute a new relative clock for a *larger* boundary condition.
 
 
-## 9. The infinite field
+## 10. The infinite field
 
 Why does it never close? Because the wave field extends infinitely far. Write gravity as a wave field and there is always more energy coming from outside whatever boundary you drew — more masses, more frequencies, more collisions that were not included. Inside the boundary the motion looks clean. The chaos is the outside leaking in.
 
@@ -145,7 +165,7 @@ Within a given boundary — a given amount of energy in the system — the integ
 And that may be the conclusion of the whole investigation: we can find the apparent time between two bodies — their shared center, their clock ratio — but to find motion relative to another body we always have to find a new reference plane. Space is infinite and not integrable over infinity. Technically we would have to keep integrating relative to some other part of the wave field, and it goes on forever without any reference. Every time is some system's time. There is no clock of the whole field, because there is no boundary around infinity.
 
 
-## 10. The background energy
+## 11. The background energy
 
 That may be the point of calculating the cosmic background radiation.
 
@@ -157,7 +177,7 @@ Then the collisions do their work. Bodies meet, scatter, and their directions ra
 
 So the background energy and the planes are the same story told at two scales. Integrate everything and you get the total — the background, increasing or decreasing. Draw a boundary and you get a plane, a center, a clock — and the price of the boundary is the transforms you will pay when the next body arrives.
 
-## 11. A math problem, not a physics problem
+## 12. A math problem, not a physics problem
 
 The more bodies you add, the more vectors each body carries. Past a point it becomes impossible to solve in three-dimensional space: with four bodies or more there are more independent variables than equations — $x$, $y$, $z$ for four or more vectors each — and the system is underdetermined. And even for three bodies, there is always some unknown part of the field acting on the system from outside the boundary.
 
@@ -166,7 +186,7 @@ So the three-body problem was never a question of the physics. The force law is 
 Which clarifies what the wave equation was doing all along: it rewrote the equations of relativity in wave form. The same content, in a shape that was easier to understand. The wave field that extends infinitely far is spacetime; the boundary you integrate over is the reference frame; the clock ratio is proper time. Nothing was overthrown. It was translated.
 
 
-## 12. What time is
+## 13. What time is
 
 Putting it together:
 
@@ -179,10 +199,10 @@ Putting it together:
 **What we perceive as time is really the motion of the center point of a mass vibrating in a field of gravity waves.** The bodies are locked together and they act on the center between them — and how much they pull the center is the motion and the stretching of time.
 
 
-## 13. Conclusion
+## 14. Conclusion
 
-The Gravitational Tech Stack now climbs seven layers up (u1–u7), and the new top of the stack is time itself — not assumed, but built: branched by space, merged by symmetry, vibrated by collision, integrated into stretch, ratioed by the balance point.
+The Quantum Tech Stack now climbs seven layers up (u1–u7), and the new top of the stack is time itself — not assumed, but built: branched by space, merged by symmetry, vibrated by collision, integrated into stretch, ratioed by the balance point.
 
-The open question from the tech stack's conclusion — what the phasor's rotation *is* — has its answer: it is the phase of the motion wave, turning in the complex plane. There was never a hidden dimension; the complex plane is a representation, a coordinate choice — it is just how the coordinate transform writes motion as a wave, broken into components in each direction. The center, moving — the turbulence point the locked bodies share, doing the one motion they can all agree on — is what the merged frame's clock reads. And that reading is what we call time.
+The open question from the tech stack's conclusion — what the phasor's rotation *is* — has its answer: it is the phase of the motion wave, turning in the complex plane. There was never a hidden dimension as a place; the complex plane is a representation, a coordinate choice — it is just how the coordinate transform writes motion as a wave, broken into components in each direction. The hidden fifth dimension is the frequency domain the transform enters — the symmetric phase domain, creating the symmetry between space and time, held up by the invariant of the conservation law. The center, moving — the turbulence point the locked bodies share, doing the one motion they can all agree on — is what the merged frame's clock reads. And that reading is what we call time.
 
 But the agreement is always local. Every clock belongs to the boundary that merged it: the apparent time between two bodies is well-defined, and within that boundary the integrations close and return the conservation law. Beyond the boundary there is always more field — more collisions, more frequencies, another body — and to include it you redraw the boundary, recompute the plane, and merge a new center. There is no final reference, no clock of the whole. The stack does not end at the top; it ends at the edge of whatever you chose to include. That is not a failure of the theory. It is what time is.

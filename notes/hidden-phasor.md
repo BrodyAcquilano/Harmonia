@@ -1,6 +1,6 @@
-# The Hidden Phasor: Time as Rotation in the Wave Lab
+# The Phasor: The Coordinate Transform in the Wave Lab
 
-*Companion to "Symmetric Inertia Transfer" and "Lambda Derivation." This note documents the Wave Lab simulation: what the animation means, where time appears and where it stays hidden, and how each graph is to be read.*
+*Companion to "The Theory of Symmetric Inertia Transfer" and "Derivation of the Structural Wavelengths." This note documents the Wave Lab simulation: the coordinate transform from time and space into the frequency domain — velocity and time changed into a symmetric phase domain — performed live: what the animation means, and how each graph is to be read.*
 
 ---
 
@@ -16,12 +16,12 @@
 - [6. Why the axis runs $0$ to $4\pi$](#6-why-the-axis-runs-0-to-4pi)
 - [7. Reading the graphs](#7-reading-the-graphs)
 - [8. What this simulation does not show](#8-what-this-simulation-does-not-show)
-- [9. Conclusion: a chirp function in five dimensions](#9-conclusion-a-chirp-function-in-five-dimensions)
+- [9. Conclusion: the fifth dimension is the frequency domain](#9-conclusion-the-fifth-dimension-is-the-frequency-domain)
 
 
 ## 1. The phase-angle knob
 
-The field equations from the main paper are
+The field equations from *The Theory of Symmetric Inertia Transfer* are
 
 $$
 W_1(M_1,M_2) = A_1 e^{i(k_1 M_1 - \omega_1 M_2)}
@@ -33,13 +33,15 @@ $$
 
 There is no time variable here. The masses themselves are the coordinates: $M_1$ is the spatial coordinate of $W_1$, $M_2$ its temporal coordinate, and the roles reverse for $W_2$.
 
-The simulation introduces a clock $\tau$ and writes the phase of the first wave as
+The simulation performs the coordinate transform on these equations. It introduces a clock $\tau$ and writes the phase of the first wave as
 
 $$
 \phi_1(\tau) = k_1 \lambda_n - \omega_1 M_2 \tau
 $$
 
-The essential clarification: **$\tau$ is not a knob for $M_2$. It is a knob for the phase angle.** $M_2$ stays fixed at whatever the slider sets. What advances is the angle $\phi_1$ itself. The phasor $e^{i\phi_1}$ rotates through the complex plane — real part becoming imaginary, imaginary becoming negative real — cycling through full periods as $\tau$ runs.
+Read it as the transform reads it: $\lambda_n$ is space rewritten as wavelength; $\omega_1 M_2 \tau$ is time rewritten as frequency. Position-time in, frequency-lambda out — the phasor $e^{i\phi_1}$ is the transformed motion, and its rotation through the complex plane is the transform turning: real part becoming imaginary, imaginary becoming negative real, cycling through full periods as $\tau$ runs.
+
+The essential clarification: **$\tau$ is not a knob for $M_2$. It is a knob for the phase angle.** $M_2$ stays fixed at whatever the slider sets. What advances is the angle $\phi_1$ itself.
 
 So the period $T$ is not the time for $M_2$ to change. It is the time for the phasor to complete one rotation:
 
@@ -51,11 +53,11 @@ Playing $\tau$ from $0$ to $T$ rotates each phasor through exactly one full cycl
 
 ## 2. Where time is — and where it stays hidden
 
-Most graphs in the Wave Lab have a spatial horizontal axis ($\lambda_n$). On those, time is a hidden dimension — the phasor rotates through it, and we perceive that rotation only as animation: the curves breathing, shifting, exchanging real and imaginary parts frame by frame.
+Most graphs in the Wave Lab have a spatial horizontal axis ($\lambda_n$). On those there is no time axis — what you see instead is the transform at work: the phasor rotating in the frequency domain, and we perceive that rotation only as animation: the curves breathing, shifting, exchanging real and imaginary parts frame by frame.
 
-The phasor itself is a coordinate transform: position and time rewritten in the frequency domain — frequency and wavelength. The field equations take mass-coordinates in; the simulation works in $(\omega, \lambda)$ — how fast the phasor turns, how long the wave is — and the Motion tab transforms back into displacement over time. Same physics, turned coordinates.
+The phasor itself is the coordinate transform: position and time rewritten in the frequency domain — frequency and wavelength. The field equations take mass-coordinates in; the simulation works in $(\omega, \lambda)$ — how fast the phasor turns, how long the wave is — and the Motion tab transforms back into displacement over time. Same physics, turned coordinates. It is not a window into a hidden place; it is the transform, performing — the hidden fifth dimension, the frequency domain, turning.
 
-The Motion tab adds what the other tabs refuse: graphs with a genuine time axis. "Net Impulse Over Time" and "Wobble Over Time" plot $F_n(t)$ and $X_n(t)$ against $t$ over one full wobble cycle, marked $0$ to $T$. Everywhere else, time stays hidden by design. In the theory, time was never an independent background coordinate; the simulation honors that everywhere except where the point of the graph *is* the trajectory — there, and only there, time gets an axis.
+The Motion tab adds what the other tabs refuse: graphs with a genuine time axis. "Net Impulse Over Time" and "Wobble Over Time" plot $F_n(t)$ and $X_n(t)$ against $t$ over one full wobble cycle, marked $0$ to $T$. Everywhere else, time stays off the axes by design. In the theory, time was never an independent background coordinate; the simulation honors that everywhere except where the point of the graph *is* the trajectory — there, and only there, time gets an axis.
 
 ## 3. Why the spatial part stays fixed
 
@@ -131,7 +133,7 @@ $$
 
 $X_n(t)$ is the wobble: body $n$'s displacement from its starting point, as a function of time, both directions. This is what the Motion tab now plots.
 
-There is a dimensional logic to this, worth stating plainly. We started with **one dimension**: the spatial line $\lambda_n$ between the bodies. We added a **second**: the hidden phasor dimension, time as rotation. Integrating once over the wavelength gave us energy as a function of position. The second integral is taken over **time**, not space — and it gives us displacement as a function of time. **For every spatial dimension, we add a branch, not new time dimensions**: the same two time dimensions — one for the phase to rotate through, one for the motion to accumulate in — run again, rotated into the new direction. The pattern — space, phasor-time, displacement-time — generalizes to higher dimensions the same way: branches through the same machinery.
+There is a transform logic to this, worth stating plainly. We started with the spatial line $\lambda_n$ between the bodies — space rewritten as wavelength. Then the coordinate change moves the physics into the frequency domain — the fifth dimension — where the phase rotates: time rewritten as frequency. Integrating once over the wavelength gives energy as a function of position. The second integral is taken over **time**, not space — and it gives displacement as a function of time. **For every spatial direction, we add a branch, not new dimensions**: the same transform — motion treated as a wave, one wave per direction — runs again, rotated into the new direction. The pattern — wavelength, frequency-domain phase, displacement-time — generalizes the same way: branches through the same machinery.
 
 A note on wavelengths, since the two axes are easily confused: the **spatial wavelength** is $2\pi$ (with normalized $k_1 = 1$). The **phasor's temporal period** is $2\pi/(\omega_1 M_2)$ — a different quantity, different units, different axis. Every graph before the Motion tab is plotted against the spatial one; the Motion tab's time graphs are plotted against the temporal one. They are not the same wavelength.
 
@@ -261,22 +263,22 @@ This note describes the constant-relative-velocity, phasor-rotation simulation o
 - The **mass-space view** — the fields plotted directly against $M_1$ and $M_2$ as coordinates, with no $\lambda_n$ and no $\tau$. There the wavenumber varies with the coordinate itself and the waves chirp.
 - The **accelerating case** — relative velocity changing with time, wavelength breathing in and out (the chirp of Section 5b, second half).
 - The **$\Delta X$ readout** — the Motion tab plots $X_1(t)$ and $X_2(t)$ separately, but their difference $\Delta X(t) = X_1 - X_2$ is not yet drawn as its own curve.
-- The **$\lambda$-derivation bridge** — the explicit change of variables from $(M_1, M_2)$ to $(\lambda, T)$ via the free-fall construction, which would make the "equivalent but viewed from a different space" claim exact rather than analogical.
+- The **$\lambda$-derivation bridge** — the explicit change of variables from $(M_1, M_2)$ to $(\lambda, T)$ via the free-fall construction. *The Theory of Symmetric Inertia Transfer* states the transform directly; wiring the simulation's coordinates to that derivation end to end is future work.
 
 Each of these is a future simulation. This one is kept, as is, so the ideas can be revisited as they mature.
 
-## 9. Conclusion: a chirp function in five dimensions
+## 9. Conclusion: the fifth dimension is the frequency domain
 
-What was built here has a name: **it is a chirp function**.
+What was built here is the coordinate transform, performed live.
 
 The picture, stated plainly. The Earth moves forward and the Earth pulls the Moon, but their relative velocity is constant — so relative to one another, the Moon moves in a straight line. Project its motion onto the plane perpendicular to the velocity vector and the orbit collapses: the Moon falls toward the Earth and comes back, falls and comes back. **Four quarter cycles** of the Moon's motion — in, back, out, back — and that is the wave. The spatial oscillation *is* the projected orbit.
 
-Then the time that got added in: the **hidden time phasor**. It cycles the phase of the wave, and as the phase cycles, the energy-over-space distribution changes. That is all that changes. **All the masses stay constant; nothing changes except the energy at each point in between the two masses.** The phasor turns; the energy redistributes; the bodies stay what they are.
+Then the transform: position and time rewritten as frequency and wavelength. The phasor is not a window into a hidden place — it *is* the transform, turning. Its rotation cycles the phase of the wave, and as the phase cycles, the energy-over-wavelength distribution changes. That is all that changes. **All the masses stay constant; nothing changes except the energy at each point in between the two masses.** The phasor turns; the energy redistributes; the bodies stay what they are.
 
-Integrate once over space and you get work and impulse — the energy accounts, $W_n$ and $J_n$. Then, at each instant, collapse the whole spatial line to a single number — the net released impulse $F_n(t) = J_n(L,t) - W_n(L,t)$ — and integrate *that* over time: $X_n(t) = \int_0^t F_n(t')\,dt'$. That is the second integral: not over space but over time, flipped to $J_n - W_n$ because motion comes from what is released, not what is stored. It gives each body's wobble as a trajectory, both directions. It is plotted in the Motion tab as eleven graphs: the spatial and temporal push-pull densities (the starting definition, recovered after two integrations), the static one-cycle snapshots of net impulse and displacement over time, the live in-line wobble projection (the same motion looking down the $\lambda$ axis, $yz$ plane — the lighter body crossing in front), the apparent wobble (the $xy$-plane projection, the two dots), the apparent circular orbit at constant velocity (the naive fixed-center view), Kepler's ellipse with external force, the balance-point-split view, the turbulence point, and the clock relative to an external body.
+Integrate once over wavelength and you get work and impulse — the energy accounts, $W_n$ and $J_n$. Then, at each instant, collapse the whole spatial line to a single number — the net released impulse $F_n(t) = J_n(L,t) - W_n(L,t)$ — and integrate *that* over time: $X_n(t) = \int_0^t F_n(t')\,dt'$. That is the second integral: not over space but over time, flipped to $J_n - W_n$ because motion comes from what is released, not what is stored. It gives each body's wobble as a trajectory, both directions. It is plotted in the Motion tab as eleven graphs: the spatial and temporal push-pull densities (the starting definition, recovered after two integrations), the static one-cycle snapshots of net impulse and displacement over time, the live in-line wobble projection (the same motion looking down the $\lambda$ axis, $yz$ plane — the lighter body crossing in front), the apparent wobble (the $xy$-plane projection, the two dots), the apparent circular orbit at constant velocity (the naive fixed-center view), Kepler's ellipse with external force, the balance-point-split view, the turbulence point, and the clock relative to an external body.
 
-But here is the part that matters. If you treated the distance between the two bodies as a single variable, you would only ever know their *relative* motion — how far apart they are, how fast the gap opens and closes. The phasor gives you more than that. The phasor is the hidden time dimension; the second integral is taken over time, and that gives us motion in the time dimension we know. So we learn not only how much their motion was relative to each other, but **how much the motion was relative to a center point** — a third, impartial reference point that belongs to neither body. Not just "the Moon falls toward the Earth," but how far the Moon wobbles one way from center and how far the Earth wobbles the other, each pulled by gravity, each measured against something neutral. That is new information. The relative motion was always visible; the wobble against center was hidden until the second integral.
+But here is the part that matters. If you treated the distance between the two bodies as a single variable, you would only ever know their *relative* motion — how far apart they are, how fast the gap opens and closes. The transform gives you more than that. The second integral is taken over time, and that gives us motion in the time domain we know. So we learn not only how much their motion was relative to each other, but **how much the motion was relative to a center point** — a third, impartial reference point that belongs to neither body. Not just "the Moon falls toward the Earth," but how far the Moon wobbles one way from center and how far the Earth wobbles the other, each pulled by gravity, each measured against something neutral. That is new information. The relative motion was always visible; the wobble against center was hidden until the second integral. And the clock is read off that center's motion relative to an external body — time as the shared reading, not an absolute background.
 
-Count the dimensions. Three of space — the world the bodies move in. Then two of time: the **fourth**, the hidden phasor, over which the phase rotates and the energy redistributes; and the **fifth**, over which the second integral accumulates and motion emerges. **Five dimensions** — and a new spatial dimension adds branches through the same five, not new ones: the same two time dimensions, one to cycle the phase, one to accumulate the motion, run again in the new direction.
+And the fifth dimension. The old draft of this conclusion counted five dimensions and called the phasor a hidden one. Here is the corrected statement: **the fifth dimension is the frequency domain itself — entered by the coordinate change.** When the transform moves $(t, x) \to (\omega, \lambda)$, the physics goes somewhere new: the domain of frequency and wavelength, somewhere symmetric in space and time — the phase treats the spatial gradient $k$ and the temporal gradient $\omega$ as the same kind of thing. That domain is the fifth dimension: not a place you visit, but the transformed coordinates. That is where it comes in — because we do a coordinate change. And it holds up over the invariant of the conservation law: $dW_s = 0$ read off the boundary at the top, vanished at the bottom, returned on the ascent — the relative phases never changing under any operation. A coordinate change is only honest if what it claims to preserve is actually preserved. Here it is: the invariant holds, so the domain holds.
 
-And this is where it comes from: **Kepler's laws**. Bodies falling around each other, sweeping out their orbits in fixed periods, the period bound to the distance. The chirp function is Kepler's orbit with the common drift removed and the fall-and-return laid bare on a line. Integrating over the fifth dimension is what turns Kepler's geometry into motion — the orbit is the shape; the wobble against center is what the integrals reveal.
+Kepler is still where it comes from: bodies falling around each other, the period bound to the distance, $T^2 \propto a^3$ — two of time, three of space, the five the transform spends. The Wave Lab is Kepler's orbit with the common drift removed and the fall-and-return laid bare on a line — transformed into frequency and wavelength, integrated back into motion.

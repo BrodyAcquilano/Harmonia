@@ -1,550 +1,274 @@
-# THE THEORY OF SYMMETRIC INERTIA TRANSFER
+# The Theory of Symmetric Inertia Transfer
 
-### *Relativistic Mass Distribution and the Coupling of Spatiotemporal Inertia*
+*A way of changing velocity and time into a symmetric phase domain. What I actually did, understood late: I took time and space and converted them — by a coordinate transform — into a relative frequency domain. Everything in this note is that transform, written out as a theory.*
 
 ---
 
 ## Table of Contents
 
-1. [Introduction](#1-introduction)
-2. [Core Field Equations](#2-core-field-equations)
-3. [Closed-Form Structural Wavelength Solutions](#3-closed-form-structural-wavelength-solutions)
-4. [Conservation Laws and Symmetric Inertia Transfer](#4-conservation-laws-and-symmetric-inertia-transfer)
-5. [First-Principles Two-Body Derivation](#5-first-principles-two-body-derivation)
-6. [Analytical Boundary Cases and Research Scenarios](#6-analytical-boundary-cases-and-research-scenarios)
+- [1. What the theory is](#1-what-the-theory-is)
+- [2. The coordinate transform](#2-the-coordinate-transform)
+- [3. What the fifth dimension is](#3-what-the-fifth-dimension-is)
+- [4. What the hidden fifth dimension might mean](#4-what-the-hidden-fifth-dimension-might-mean)
+- [5. The limits on the way down](#5-the-limits-on-the-way-down)
+- [6. The field equations](#6-the-field-equations)
+- [7. Relative phases: the invariant](#7-relative-phases-the-invariant)
+- [8. The conservation law](#8-the-conservation-law)
+- [9. Mass, wavelength, and Kepler's baseline](#9-mass-wavelength-and-keplers-baseline)
+- [10. The way back up](#10-the-way-back-up)
+- [11. The massless boundary](#11-the-massless-boundary)
+- [12. The theory, stated](#12-the-theory-stated)
 
-# 1. Introduction
 
-**The Theory of Symmetric Inertia Transfer** is a closed two-body framework in which space and time are not introduced as independent background coordinates. Instead, the relativistic masses $M_1$ and $M_2$ are used directly as the coordinate variables of two coupled complex waves. The geometry of the system is therefore written in terms of the relationship between the two mass states themselves: each body contributes a spatial coordinate to its own field and a temporal coordinate to the companion field.
+## 1. What the theory is
 
-The physical intuition begins with the word *inert*: non-reactive, or resistant to change. The theory separates this idea into two coupled forms. **Spatial inertia** is the resistance of a mass distribution to spatial change and is represented by the real component of the wave. **Temporal inertia** is the change-carrying counterpart of that spatial resistance and is represented by the imaginary component. In this language, energy is treated as temporal inertia: it is opposite to spatial inertia in role - where spatial inertia resists change, temporal inertia expresses the capacity for change - while both remain parts of the same complete inertial state.
+Here is the view, stated plainly: **symmetric inertia transfer is a way of changing velocity and time into a symmetric phase domain.** Take time and space — where bodies are, when — and rewrite them as frequency and wavelength — how fast the motion turns, how long its wave is. That is the whole move.
 
-The factor $i$ gives the coupling a geometric form. Multiplication by $i$ is a $90^\circ$ rotation in the complex plane, so the model uses the real and imaginary axes to represent two orthogonal manifestations of inertia. Spatial inertia can rotate into temporal inertia, and temporal inertia can rotate back into spatial inertia, without requiring the complete state of the closed system to be created or destroyed.
+Three principles run the transform, and they are the theory:
 
-The two bodies are therefore not represented by independent waves. Their fields, $W_1$ and $W_2$, are cross-coupled: the spatial phase of Body 1 is paired with the temporal phase associated with Body 2, while the spatial phase of Body 2 is paired with the temporal phase associated with Body 1. This reciprocal structure produces the central symmetry of the theory. A change in one body must be accompanied by a complementary change in the companion field, so that the total inertial state remains conserved.
+1. **The transform.** Position and time go in; frequency and wavelength come out. Motion is treated as a wave and broken into components in each direction — one wave per direction.
+2. **The limits.** Each step of the transform is a limit — a limit with respect to time, a limit over space, a differentiation, another limit over space, a final substitution. Each limit removes a variable. The theory is what survives the limits.
+3. **The invariant.** Relative phases never change. Every operation in the transform multiplies all components by the same phase factor; absolute phase shifts, relative phase is invariant. Whatever the coordinates are, the information survives them.
 
-The structural wavelengths $\lambda_1$ and $\lambda_2$ are part of the same coupling. They are not independent distances laid over the two masses from an outside coordinate system. They are mass-dependent structural scales whose allowed values are constrained by $M_1$, $M_2$, and the symmetry between the two fields. The mass distribution therefore determines the spatial scale of the wave structure, while the conservation law determines how spatial and temporal inertia are transferred through that structure.
+The companion note, *The Quantum Tech Stack*, is the same principles written as a machine — the five levels down, the seven up, the limits named d1–d5 and the integrals u1–u7. This note is the theory; that note is the engine. They were written in parallel and they say the same thing.
 
-This produces the central idea of **symmetric inertia transfer**: in a closed system, inertia is conserved across the coupled fields, but the form in which that inertia appears may change. Spatial inertia in one field is paired with temporal inertia in the other. The real-spatial and imaginary-temporal components are not separately isolated reservoirs; together they form a symmetric exchange in which the total state remains invariant even as its distribution between the two bodies changes.
+---
 
-The massless boundary provides the limiting intuition. As rest mass approaches zero, the corresponding rest-mass spatial wavenumber approaches zero and the field approaches a uniform real amplitude. In the mass-coordinate representation, light therefore occupies the spatially inert limiting state: it carries no rest-mass spatial coordinate to deform, while nonzero rest mass generates the cross-coordinate phase structure that couples spatial and temporal inertia.
+## 2. The coordinate transform
 
-# 2. Core Field Equations
+Start with two bodies, masses $M_1$ and $M_2$, separated by $r$, moving in time $t$. That is the ordinary picture: positions, clocks.
 
-The theory begins with two complex waves. The first uses $M_1$ as its spatial coordinate and $M_2$ as its temporal coordinate; the second reverses those roles. This exchange is deliberate. It makes the two-body system symmetric from the beginning and allows spatial inertia in either body to be coupled directly to temporal inertia in the other.
+The transform rewrites it. Velocity becomes a wave:
 
-## A. Simple Exponential Form
+$$V_n = \lambda_n F_n$$
 
-The compact field equations are
+— velocity equals wavelength times frequency, the wave relation. The body's motion is now a wave with a wavelength $\lambda_n$ (how long) and a frequency $F_n$ (how fast it turns). The separation $r$ is rewritten as a difference of structural wavelength coordinates:
 
-$$
-W_1(M_1,M_2)=A_1e^{i(k_1M_1-\omega_1M_2)}.
-$$
+$$r \;\to\; \Delta\lambda = \lambda_o - \lambda_n$$
 
-$$
-W_2(M_2,M_1)=A_2e^{i(k_2M_2-\omega_2M_1)}.
-$$
+where $n$ is the body being evaluated and $o$ is the other body. And time is rewritten through the Planck–Einstein relation $E = hf = M_nc^2$, which ties each body's frequency to its mass:
 
-Here $A_1$ and $A_2$ are the field amplitudes, $k_1$ and $k_2$ are the spatial wavenumbers, and $\omega_1$ and $\omega_2$ are the temporal angular frequencies. The exchange $M_1\leftrightarrow M_2$ between the two equations is the first expression of the theory's spatial-temporal symmetry.
+$$F_n = \frac{M_nc^2}{h}, \qquad \omega_n = 2\pi F_n = \frac{2\pi M_nc^2}{h}.$$
 
-## B. Expanded Trigonometric Form
+So: **space becomes wavelength, time becomes frequency, and mass sets the rate.** The transform is $(t, x) \to (\omega, \lambda)$ — a relative frequency domain. Relative, because nothing here is absolute: every wavelength is measured against a companion's, every frequency against the other's mass.
 
-Using Euler's identity,
+The symbols, fixed once:
 
-$$
-e^{i\theta}=\cos\theta+i\sin\theta,
-$$
+- $M_1, M_2$ — the two masses. Boundary conditions; everything is eventually a proportion of these.
+- $\lambda_1, \lambda_2$ — structural wavelength coordinates. Space, transformed.
+- $F_1, F_2$ — frequencies; $\omega_1, \omega_2$ — angular frequencies. Time, transformed.
+- $k_n = 2\pi/\lambda_n$ — spatial wavenumbers, the phase gradients in space.
+- $\tau$ — the phasor clock: time as read in the transformed domain.
+- $i$ — the quarter-turn. Multiplication by $i$ rotates 90° in the complex plane. It is the transform's way of writing "perpendicular."
 
-the real-spatial and imaginary-temporal components become explicit:
+Breaking the motion into components in each direction is part of the transform, not an addition to it. A velocity in three dimensions is three waves — one per direction — each with its own amplitude and phase, each through the same machinery. That is what the branches of the tech stack are: directional components of the motion wave.
 
-$$
-W_1(M_1,M_2)=A_1\cos(k_1M_1-\omega_1M_2)+iA_1\sin(k_1M_1-\omega_1M_2).
-$$
+---
 
-$$
-W_2(M_2,M_1)=A_2\cos(k_2M_2-\omega_2M_1)+iA_2\sin(k_2M_2-\omega_2M_1).
-$$
+## 3. What the fifth dimension is
 
-The cosine term is the real-spatial component and represents spatial inertia. The sine term is the imaginary-temporal component and represents temporal inertia. The two are separated by a quarter-cycle, so a phase rotation redistributes the same complex field state between its spatial and temporal forms.
+The fifth dimension has been called a hidden timelike place the signal visits. It is better said this way:
 
-## C. Pure-Parameter Trigonometric Form
+**It is the frequency domain itself — entered by the coordinate change.**
 
-The intermediate wave parameters can be removed. Wavenumber is written as
+When we do the coordinate transform — $(t, x) \to (\omega, \lambda)$ — we move the physics somewhere new: the domain of frequency and wavelength. That domain is the fifth dimension. It is hidden only in this sense: it is not the time and space we started in — it is the transformed coordinates, the domain the coordinate change moves us into. That is where it comes in — because we do a coordinate change.
 
-$$
-k_n=\frac{2\pi}{\lambda_n},
-$$
+And it is somewhere **symmetric in space and time**. In ordinary coordinates, space and time play different roles — one is where things are, the other is what clocks read. In the frequency domain they stand on equal footing: the phase $k_1M_1 - \omega_1M_2$ treats the spatial gradient $k$ and the temporal gradient $\omega$ as the same kind of thing, two components of one phase. The symmetry the old drafts were reaching for was this: the transform takes us somewhere space and time are symmetric.
 
-and the Planck-Einstein relation
+What holds it up — what makes the fifth dimension legitimate rather than a trick — is the **invariant of the conservation law**. The transform stands on the invariant: the conservation law $dW_s = 0$ is read off the boundary at the top, vanishes at the bottom, and returns on the ascent; the relative phases never change under any operation. A coordinate change is only honest if what it claims to preserve is actually preserved. Here it is: the invariant holds, so the domain holds.
 
-$$
-E=hf=M_nc^2
-$$
+So: the fifth dimension is the hidden fifth dimension that creates the symmetry — the frequency domain, reached by the coordinate change, symmetric in space and time, held up by the invariant of the conservation law. Hidden because it is the transformed coordinates, not the time and space we started in — and the invariant is what they stand on.
 
-gives
+---
 
-$$
-\omega_n=2\pi f_n=\frac{2\pi M_nc^2}{h}.
-$$
+## 4. What the hidden fifth dimension might mean
 
-Substituting these relations into $W_1$ and $W_2$ leaves the fields in terms of the masses, the two structural wavelengths, and the constants $h$, $c$, $\pi$, and $i$:
+*What follows is speculation — not derived, but where the picture points. The theory as stated ends with §3; this section asks what §3 might mean.*
 
-$$
-W_1(M_1,M_2)=A_1\cos\left(\frac{2\pi M_1}{\lambda_1}-\frac{2\pi M_1M_2c^2}{h}\right)+iA_1\sin\left(\frac{2\pi M_1}{\lambda_1}-\frac{2\pi M_1M_2c^2}{h}\right).
-$$
+**The symmetry might be the point, not the trick.** The transform works suspiciously well: limits that are hard in $(t, x)$ become algebra in $(\omega, \lambda)$. Why should that be? Maybe because the physics was always symmetric and $(t, x)$ is the projection that breaks the symmetry. We experience time as special — it flows, space doesn't — but in the phase domain $k$ and $\omega$ are the same kind of thing, two gradients of one phase. Speculation: the flow of time is a readout artifact, the direction we happen to sample the phase along. The universe doesn't have a time direction; our instruments do.
 
-$$
-W_2(M_2,M_1)=A_2\cos\left(\frac{2\pi M_2}{\lambda_2}-\frac{2\pi M_1M_2c^2}{h}\right)+iA_2\sin\left(\frac{2\pi M_2}{\lambda_2}-\frac{2\pi M_1M_2c^2}{h}\right).
-$$
+**Hidden the way frequency is hidden.** Nobody has ever seen a frequency. You watch the signal in time and infer the frequency by transforming. The fifth dimension is hidden exactly like that: every clock and ruler we own measures $(t, x)$. We never measure $(\omega, \lambda)$ directly; we compute them. So the hiddenness is not mysterious — it is the ordinary hiddenness of the dual domain. What *is* suggestive: if the dual domain is where the equations simplify, maybe it is the native domain — the one the physics is written in — and spacetime is the display.
 
-The temporal cross-term is the same mass product $M_1M_2$ in both fields. The spatial term changes only by exchanging the body and its associated wavelength. The full pair can therefore be written without an independent position variable or an independent time variable: the coordinate dependence is carried by $M_1$, $M_2$, $\lambda_1$, and $\lambda_2$ themselves.
+**Conservation as the shadow of the invariant.** The transform stands on $dW_s = 0$. Read it backwards: maybe conservation laws are what the hidden domain looks like from $(t, x)$. Energy is conserved because relative phase is invariant under the transform — the conserved quantity is the invariant, seen through the projection. Noether told us symmetries make conservation laws; here the symmetry is the fifth dimension's own space-time symmetry, and the conservation law is its shadow.
 
-# 3. Closed-Form Structural Wavelength Solutions
+**Mass as winding.** Mass maps to structural wavelength — $M_1\lambda_1^2 = -M_2\lambda_2^2$. In the hidden domain, mass might be geometric: how tightly the wave winds. Inertia, the resistance to change of motion, would then be resistance to phase change — a tightly wound wave doesn't turn easily. The two inertias, real (spatial, resistant) and imaginary (temporal, change-carrying), would be one phase object seen from its space face and its time face, the quarter-turn $i$ rotating between them.
 
-The wavelengths $\lambda_1$ and $\lambda_2$ are not independent of the masses. They are the spatial scales of the mass-coordinate fields, so changing the mass distribution changes the wavelength structure. The theory therefore imposes a mass-wavelength relation rather than treating $\lambda_1$ and $\lambda_2$ as freely chosen external distances. The two wavelengths are coupled to one another through the same two-body symmetry that couples $W_1$ and $W_2$.
+**Gravity as phase gradient.** If gravity is the coordinate transform, then what we feel as pull might be the $(t, x)$ projection of phase gradients in the hidden domain. Bodies don't reach across space and pull each other; their phase fields slope, and the slope reads out as motion. The equivalence principle — gravity indistinguishable from acceleration — would fall out of the symmetry itself: in a domain where space and time are symmetric, there is no preferred direction to be pulled in. There is only phase flow, and falling is following it.
 
-The proposed structural wavelengths are written as exact closed forms under the model's stated boundary conditions. Those boundary conditions are an isolated two-body system in vacuum, with no imposed initial relative velocity, so that the motion being examined is generated by the mutual gravitational coupling of the two bodies. The derivation then evaluates the free-fall balance through $PE_n=KE_n$. The complete construction of those conditions is given in Section 5.
+**The meeting point.** The stack shows it: new spatial directions add branches, but the frequency domain stays one. Every branch rotates through the same fifth dimension — it is where the directional components get summed, the center, the resultant. So the hidden dimension might be the meeting point: the single place all the directional waves superpose. *Time from Collisions* says time is built at the center, from collisions — the center is where the hidden domain touches $(t, x)$. Every clock might be a local readout of the one domain.
 
-Under this boundary, the structural wavelengths are
+**Why the stack is called quantum.** $\Psi = W_1 + W_2$, complex phases, superposition, discrete packets from decay-closure — quantum mechanics might be what physics looks like written natively in the fifth dimension, classical physics the $(t, x)$ readout. Quantization would be boundary closure: finite energy requires the wave to close off in the hidden domain, so only certain modes fit — the harmonics. "Kepler's harmonies" would be phase-locking: orbital resonances as standing-wave conditions in the fifth dimension.
 
-$$
-\lambda_1=\frac{h}{c^2}\sqrt{\frac{2G}{M_1}}\left[\left(\frac{2Gh^2}{c^4}\right)^{1/3}\left(\frac{i}{\sqrt{M_2}}-\frac{1}{\sqrt{M_1}}\right)^{2/3}\right]^{-1/2}.
-$$
+**What would change the story.** Honest speculation names its tests. If mass ratios in bound systems show harmonic — small-integer — relationships beyond what Newton predicts, that's phase-locking. If the balance-point construction ($\lambda^* = L \cdot M_2/(M_1+M_2)$) predicts something the barycenter doesn't in a three-body case, that's the transform earning its keep. The theory lives or dies on whether the symmetric domain computes anything the asymmetric one can't.
 
-$$
-\lambda_2=i\frac{h}{c^2}\sqrt{\frac{2G}{M_2}}\left[\left(\frac{2Gh^2}{c^4}\right)^{1/3}\left(\frac{i}{\sqrt{M_2}}-\frac{1}{\sqrt{M_1}}\right)^{2/3}\right]^{-1/2}.
-$$
+---
 
-Both wavelengths contain the same coupled two-body factor. Neither can be specified from its own mass alone, and neither can be varied independently while the other mass is held outside the system. Their scale is fixed by the distribution of $M_1$ and $M_2$, while the relative complex branch carries the spatial-temporal rotation required by the symmetric field structure.
+## 5. The limits on the way down
 
-The important structural point is that **mass and wavelength are linked**. In the model, wavelength is a mass-dependent coordinate scale, not an additional independent coordinate. The proportional relation that emerges between the mass-wavelength sectors is therefore part of the same symmetry later expressed by the conservation law. Section 5 shows how that mass-wavelength coupling arises from the two-body free-fall construction.
+The transform is not applied all at once. It is applied as a sequence of limits, each one removing a variable. Pointing them out is the point of this section — the theory is what survives them.
 
-# 4. Conservation Laws and Symmetric Inertia Transfer
+**Limit 1 — with respect to time.** The rate of change of energy over the boundary:
 
-The conservation law is the core result of the theory. The field equations establish a symmetric two-body coupling; the conservation law determines how that coupling is allowed to change. The coordinates are simply the two masses themselves: $M_1$ and $M_2$. Each mass appears as the real-spatial coordinate of one field and as the imaginary-temporal coordinate of the other. The symmetry is therefore not between two unrelated coordinate grids. It is the reciprocal use of the same two relativistic masses in opposite spatial and temporal roles.
+$$\lim_{\text{boundary}}\frac{dE}{dt} = 0.$$
 
-Define the total or summed field as
+Energy is conserved *because the boundary conditions are known*: moon-earth, the $PE$ and $KE$ equations — where the boundary is known, energy cannot leak. One time dimension contracted: acceleration to velocity, $F = ma$ to $KE = \tfrac12mv^2$.
 
-$$
-W_s=W_1+W_2.
-$$
+**Limit 2 — over space.** Spend the dispersion relation:
 
-$W_s$ is the complete inertial state of the closed two-body system. The conservation principle is that $W_1$ and $W_2$ may change individually, but their coupled changes cannot produce an unbalanced change in $W_s$. Spatial inertia and temporal inertia may be redistributed between the two bodies, but the total inertial state remains conserved.
+$$v = f\lambda.$$
 
-Within this interpretation, **spatial inertia** is the real, resistant component of the field, while **temporal inertia** is the imaginary, change-carrying component. Energy is identified with this temporal inertia. The two have opposite roles - resistance to change and capacity for change - but they are coupled quadratures of one state. The conservation law links them so that a spatial change in one field is paired with a temporal change in the other.
+One spatial variable contracted. The phasor, deconstructed one step further: the relation the wave's phase will obey is used up as a limit.
 
-## A. Cross-Coordinate Symmetry
+**Limit 3 — differentiate with respect to time.** Through the phase:
 
-For the first mass coordinate, conservation requires
+$$\frac{\partial\psi_n}{\partial M_m} = \pm i(k,\omega)\psi_n \;\;\to\;\; k_1\psi_1 = \omega_2\psi_2.$$
 
-$$
-\frac{\partial W_1}{\partial M_1}+\frac{\partial W_2}{\partial M_1}=0.
-$$
+The $i$ drops out of the ratio. Absolute phase is gone; what remains is the relation between the phase gradients — the local symmetry. Every $+i$ matched by a $-i$.
 
-For the second mass coordinate, conservation requires
+**Limit 4 — over space, again.** The chain rule applied to the dispersion relation:
 
-$$
-\frac{\partial W_1}{\partial M_2}+\frac{\partial W_2}{\partial M_2}=0.
-$$
+$$\omega \propto k \qquad\text{(e.g. }\omega_2 = k_1k_2/\omega_1\text{)}.$$
 
-These are the two local symmetry rules. The first pairs the **spatial inertia of Body 1** with the **temporal inertia carried by Body 2 through $M_1$**. The second pairs the **spatial inertia of Body 2** with the **temporal inertia carried by Body 1 through $M_2$**.
+The dispersion collapses to a proportionality. One $\lambda$ left.
 
-Differentiating the exponential fields makes the direction of each response explicit:
+**Limit 5 — substitution.** The mass proportions are known, so the last variable is eliminated:
 
-$$
-\frac{\partial W_1}{\partial M_1}=ik_1W_1,\qquad \frac{\partial W_2}{\partial M_1}=-i\omega_2W_2.
-$$
+$$\frac{\lambda_2}{\lambda_1} = \sqrt{\frac{M_1}{M_2}}.$$
 
-$$
-\frac{\partial W_2}{\partial M_2}=ik_2W_2,\qquad \frac{\partial W_1}{\partial M_2}=-i\omega_1W_1.
-$$
+No independent variable remains. Everything is a proportion of the boundary masses $m_1$, $m_2$. The boundary conditions can be reconstructed from mass alone.
 
-The positive spatial phase gradient of one field is therefore paired with the negative temporal phase gradient of the companion field. The two conservation equations become
+Five limits, five variables gone. What survives them is the law.
 
-$$
-k_1W_1=\omega_2W_2,
-$$
+---
 
-$$
-k_2W_2=\omega_1W_1.
-$$
+## 6. The field equations
 
-Together they give the compact symmetry condition
+At the bottom of the limits, the stack tells us the solution is a time- and space-dependent wave — so write it. Two complex waves, cross-coupled: each body contributes a spatial coordinate to its own field and a temporal coordinate to the companion's. That exchange is the symmetry, stated once, at the start:
 
-$$
-k_1k_2=\omega_1\omega_2.
-$$
+$$W_1(M_1,M_2) = A_1e^{i(k_1M_1-\omega_1M_2)}, \qquad W_2(M_2,M_1) = A_2e^{i(k_2M_2-\omega_2M_1)}.$$
 
-This is the central spatial-temporal symmetry of the field pair. The product of the spatial phase scales equals the product of the temporal phase scales. Spatial inertia is not conserved separately from temporal inertia; rather, the transfer between the two is constrained so that the complete paired state remains unchanged.
+$A_1, A_2$ are the amplitudes — the integration constants of the whole trip, fixed at closure, not derived here. $k_1, k_2$ are the spatial phase gradients; $\omega_1, \omega_2$ the temporal ones. The exchange $M_1 \leftrightarrow M_2$ between the two equations is the reciprocal structure: spatial inertia in one field paired with temporal inertia in the other.
 
-Under a matched-phase boundary, the first balance gives
+Expanded, the real and imaginary parts show the two forms the same state takes:
 
-$$
-\frac{A_1}{\lambda_1}=A_2\frac{M_2c^2}{h},
-$$
+$$W_1 = A_1\cos(k_1M_1-\omega_1M_2) + iA_1\sin(k_1M_1-\omega_1M_2),$$
 
-with the companion relation obtained by exchanging $1\leftrightarrow2$. The amplitude and wavelength of either spatial field are therefore tied directly to the temporal mass scale of the other body.
+$$W_2 = A_2\cos(k_2M_2-\omega_2M_1) + iA_2\sin(k_2M_2-\omega_2M_1).$$
 
-## B. Conservation of the Total Inertial State
+The cosine is the real-spatial component — resistance to change. The sine is the imaginary-temporal component — the capacity for change, which is what energy is in this language. A quarter-cycle rotation redistributes the same state between its spatial and temporal forms. That rotation is the transform working: the $i$ is how the coordinate change writes "perpendicular."
 
-The two local symmetry rules combine into the total differential of $W_s$:
+With $k_n = 2\pi/\lambda_n$ and $\omega_n = 2\pi M_nc^2/h$, the fields are written in masses, structural wavelengths, and constants alone — no independent position variable, no independent time variable. The coordinate dependence is carried by $M_1$, $M_2$, $\lambda_1$, $\lambda_2$ themselves. That is the transform, complete: the ordinary coordinates are gone, and the physics is still all there.
 
-$$
-dW_s=\left(\frac{\partial W_1}{\partial M_1}+\frac{\partial W_2}{\partial M_1}\right)dM_1+\left(\frac{\partial W_1}{\partial M_2}+\frac{\partial W_2}{\partial M_2}\right)dM_2=0.
-$$
+---
 
-This equation defines conservation of inertia for the closed system. It does not require either body or either wave to remain unchanged. It requires the changes to occur in complementary pairs.
+## 7. Relative phases: the invariant
 
-Consider first a positive change $+dM_1$. The $M_1$ part of the conservation law is
+Differentiate the fields and pair them:
 
-$$
-\frac{\partial W_1}{\partial M_1}dM_1+\frac{\partial W_2}{\partial M_1}dM_1=0.
-$$
+$$\frac{\partial W_1}{\partial M_1} = ik_1W_1, \qquad \frac{\partial W_2}{\partial M_1} = -i\omega_2W_2,$$
 
-Using the field derivatives,
+$$\frac{\partial W_2}{\partial M_2} = ik_2W_2, \qquad \frac{\partial W_1}{\partial M_2} = -i\omega_1W_1.$$
 
-$$
-ik_1W_1\,dM_1-i\omega_2W_2\,dM_1=0.
-$$
+Conservation pairs each spatial gradient with the companion's temporal gradient:
 
-The **real-spatial inertia of Body 1** is driven in the positive spatial phase direction through $\partial W_1/\partial M_1$, while the **imaginary-temporal inertia of the companion field** contributes with the opposite sign through $\partial W_2/\partial M_1$. In the phase-gradient convention of the wave equations, the spatial contribution of $W_1$ goes up as the temporal contribution of $W_2$ goes down by the matching amount. Their sum remains zero.
+$$k_1W_1 = \omega_2W_2, \qquad k_2W_2 = \omega_1W_1,$$
 
-Now consider a positive change $+dM_2$:
+and together:
 
-$$
-\frac{\partial W_1}{\partial M_2}dM_2+\frac{\partial W_2}{\partial M_2}dM_2=0,
-$$
+$$k_1k_2 = \omega_1\omega_2.$$
 
-so that
+The product of the spatial phase scales equals the product of the temporal phase scales. Notice what happened to the $i$: it dropped out of the ratio. The absolute phase — where in its cycle each wave is — shifts under every operation of the transform. The *relative* phase — the relation between the two waves — never changes. That is the invariant the transform protects, and it is why the signal that comes back up is the signal that went down. It is also what the fifth dimension holds up over: the frequency domain is legitimate because this invariant survives the move into it.
 
-$$
--i\omega_1W_1\,dM_2+ik_2W_2\,dM_2=0.
-$$
+Under a matched-phase boundary, the first balance gives $A_1/\lambda_1 = A_2M_2c^2/h$, with the companion relation by $1 \leftrightarrow 2$. Each wave's amplitude is set by the companion's mass — the reciprocal structure runs all the way down.
 
-The pairing reverses. The **real-spatial inertia of Body 2** is driven in the positive spatial phase direction through $\partial W_2/\partial M_2$, while the **imaginary-temporal inertia of Body 1's field** changes with the opposite sign through $\partial W_1/\partial M_2$. Spatial and temporal inertia exchange roles under $1\leftrightarrow2$, preserving the same symmetry.
+---
 
-There is no required time ordering between the two terms in either infinitesimal balance. They are the two sides of the same differential response. The conservation law states which paired changes must accompany one another, not that one must occur first and the other later.
+## 8. The conservation law
 
-## C. The Inertial Shift Dynamic
+Define the total field:
 
-The factor $i$ is what allows the conserved quantity to change form. A quarter-cycle rotation exchanges the real and imaginary axes,
+$$W_s = W_1 + W_2.$$
 
-$$
-1\xrightarrow{\times i}i,\qquad i\xrightarrow{\times i}-1,
-$$
+The conservation law is the vanishing of its total differential:
 
-so the model interprets the transfer between spatial and temporal inertia as a complex rotation rather than as the creation of a new quantity.
+$$dW_s = \left(\frac{\partial W_1}{\partial M_1}+\frac{\partial W_2}{\partial M_1}\right)dM_1 + \left(\frac{\partial W_1}{\partial M_2}+\frac{\partial W_2}{\partial M_2}\right)dM_2 = 0,$$
 
-If $+dM_1$ increases the spatial inertia represented by $\partial W_1/\partial M_1$, conservation requires the companion term $\partial W_2/\partial M_1$ to shift oppositely. The added state therefore appears across the coupled field as temporal inertia rather than as an uncompensated increase in $W_s$. Likewise, if $+dM_2$ increases the spatial contribution $\partial W_2/\partial M_2$, the balancing response occurs in the temporal contribution $\partial W_1/\partial M_2$.
+with the two local pairings
 
-The symmetry can therefore be read in both directions:
+$$\frac{\partial W_1}{\partial M_1}+\frac{\partial W_2}{\partial M_1} = 0, \qquad \frac{\partial W_1}{\partial M_2}+\frac{\partial W_2}{\partial M_2} = 0.$$
 
-$$
-\text{Body 1 spatial inertia}\;\longleftrightarrow\;\text{Body 2 temporal inertia},
-$$
+Read it as the transform reads it: the law is not postulated — it is read off the boundary at the top (Limit 1: where the boundary is known, energy cannot leak), it vanishes at the bottom (no independent variable left, the differential is zero), and it reappears on the way back up (the ascent integrals reverse the limits, and the law they return to is the one they left). Three writings of one fact. The trip is over when the equation we started from returns.
 
-$$
-\text{Body 2 spatial inertia}\;\longleftrightarrow\;\text{Body 1 temporal inertia}.
-$$
+The law does not require either wave to stay unchanged. It requires the changes to come in complementary pairs: spatial inertia up in one field, temporal inertia down in the other, the sum always zero. There is no time ordering between the two sides of any infinitesimal balance — they are the two sides of one differential response.
 
-These two cross-couplings, together with $dW_s=0$, define symmetric inertia transfer. Relativistic mass determines the spatial and temporal phase scales; the conservation law determines how the resulting inertia is allowed to flow between the two bodies. Energy, as temporal inertia, is therefore not an independent addition to the system but the complementary form taken by the same conserved inertial state when it is expressed along the imaginary-temporal axis.
+---
 
-# 5. First-Principles Two-Body Derivation
+## 9. Mass, wavelength, and Kepler's baseline
 
-The derivation begins with two bodies of masses $M_1$ and $M_2$ in an idealized vacuum. For the initial free-fall construction, $M_1$ is taken to be the larger source body and $M_2$ the smaller body released with no imposed initial relative velocity. The relative motion is therefore attributed only to the gravitational coupling between the two bodies. The same construction can then be written from either body's point of view to recover the symmetric two-body form.
+The mass-wavelength link is derived, not assumed. Start from the free-fall energy balance for the body being evaluated ($n$; $o$ is the other body):
 
-The index $n$ denotes the **body currently being evaluated**, so $n$ may be $1$ or $2$. The index $o$ denotes the **other body**. Thus, when $n=1$, $o=2$, and when $n=2$, $o=1$.
+$$L_n = PE_n - KE_n = 0 \quad\Longrightarrow\quad PE_n = KE_n.$$
 
-A **Lagrangian** is the mechanical function used to describe the dynamics of a system by combining its kinetic and potential energy. In ordinary classical mechanics it is commonly written as $L=KE-PE$ and is used through the equations of motion to determine how the system evolves. For this two-body construction the overall sign is reversed without changing the zero-balance condition, so a separate quantity $L_n$ is assigned to whichever body is being evaluated using
+Write gravity from the companion mass, $g = GM_o/r^2$, and apply the transform's first move — the separation becomes a wavelength difference, $r \to \lambda_o - \lambda_n$:
 
-$$
-L_n=PE_n-KE_n.
-$$
+$$PE_n = \frac{GM_nM_o}{\lambda_o-\lambda_n}.$$
 
-The familiar mechanical starting expressions are
+Apply the second move — velocity as a wave, $V_n = \lambda_nF_n$:
 
-$$
-PE=MgH,
-$$
+$$KE_n = \frac{M_n\lambda_n^2F_n^2}{2}.$$
 
-$$
-KE=\frac{1}{2}MV^2,
-$$
+The balance $PE_n = KE_n$, with $T_n = 1/F_n$, gives
 
-where $H$ is used here for ordinary height or radial separation so that it is not confused with Planck's constant $h$. For the radial two-body free-fall boundary, the height scale is the same separation that determines the gravitational field, so $H\rightarrow r$.
+$$2M_oGT_n^2 = \lambda_n^2(\lambda_o-\lambda_n).$$
 
-The initial condition is then selected by setting the two-body energy balance to zero,
+This is Kepler's third law in the transformed coordinates: $T^2 \propto a^3$, a squared period against a cubic spatial quantity — but the spatial quantity is built from the structural wavelengths themselves, $\lambda_n^2(\lambda_o-\lambda_n)$, two powers of the body's own wavelength and one of the separation. The harmonic structure survives the transform; only the coordinates changed.
 
-$$
-L_n=0\quad\Longrightarrow\quad PE_n=KE_n.
-$$
+Writing the normalized relation for both reciprocal branches and using $\lambda_2-\lambda_1 = -(\lambda_1-\lambda_2)$:
 
-This boundary isolates the gravitational coupling itself: there is no imposed initial orbital velocity and no external force in the starting case. Body 2 is released into free fall relative to Body 1, and the same construction can then be written with the body labels exchanged. Circular motion, elliptical motion, and other nonzero-velocity states are extensions of this baseline rather than part of the initial derivation.
+$$\frac{M_1T_1^2}{\lambda_1^2} = -\frac{M_2T_2^2}{\lambda_2^2}.$$
 
-## Step 1 - Universal Gravitational Substitution
+The Planck–Einstein period $T_n = h/M_nc^2$ eliminates the periods:
 
-Instead of treating $g$ as a fixed local acceleration, write it from the companion mass:
+$$M_1\lambda_1^2 = -M_2\lambda_2^2.$$
 
-$$
-g=\frac{GM_o}{r^2}.
-$$
+Mass and wavelength are linked — wavelength is a mass-dependent coordinate scale, not an independent coordinate. Taking the square root, the structural minus sign (the two separations have opposite orientation) becomes the quarter-turn:
 
-Using $H=r$ in $PE_n=M_ngH$ gives
+$$\sqrt{M_1}\,\lambda_1 = \pm i\sqrt{M_2}\,\lambda_2.$$
 
-$$
-PE_n=M_n\left(\frac{GM_o}{r^2}\right)r=\frac{GM_nM_o}{r}.
-$$
+The two reciprocal branches cannot stay on the same real orientation; they are separated by 90° in the complex plane. The $i$ here is not a new dimension — it is the transform recording that the two directions of the separation point opposite ways. The closed-form wavelengths of the lambda-derivation note are this relation, solved through the gravitational branch equation; the details live there.
 
-The theory now removes the independent separation coordinate $r$. Each body is assigned an **absolute structural wavelength coordinate**, $\lambda_n$ or $\lambda_o$, and the physical separation is represented by the difference between those absolute wavelength coordinates:
+Kepler's $T^2 \propto a^3$ also counts the transform's dimensions: two of time — the transformed time and the accumulation time — three of space, $2 + 3 = 5$ — the five limits of §5. The count is not a choice; the harmonic law says so.
 
-$$
-r\rightarrow\Delta\lambda=\lambda_o-\lambda_n.
-$$
+---
 
-This is different from treating $\lambda$ itself as an ordinary relative distance. $\lambda_n$ and $\lambda_o$ are the two absolute structural coordinates; their difference supplies the relational separation. The potential-energy expression becomes
+## 10. The way back up
 
-$$
-PE_n=\frac{GM_nM_o(\lambda_o-\lambda_n)}{(\lambda_o-\lambda_n)^2}=\frac{GM_nM_o}{\lambda_o-\lambda_n}.
-$$
+Reverse the limits as integrals, in reverse order: expand the substitution, integrate over the restored space ($W_n$, $J_n$ — work and impulse), integrate over the transformed time ($F_n$ — the quarter-turns composing, radial in, perpendicular out), integrate over the accumulation time ($X_n$ — motion, the wobble), and close on the conservation law recovered. The full machine is the tech stack note's ascent, u1–u7 — including the branch merge (u6: one wave per direction, summed into the center) and the center integration (u7: the turbulence point, moving).
 
-## Step 2 - Wave Representation of Mechanical Velocity
+The ninety-degree rotation the round trip is famous for is the transform's doing, not a mystery: each integration of $e^{i\phi}$ multiplies by $1/i = -i$, a quarter-turn in the complex plane, and five of them net one. The force goes down radial and comes back perpendicular the way a vector's components change when the axes rotate — the same physics, rewritten in the new coordinates, pointing somewhere new.
 
-Mechanical velocity is rewritten using the wave relation
+---
 
-$$
-V_n=\lambda_nF_n,
-$$
+## 11. The massless boundary
 
-which gives
+Take $M_2 \to 0$. Then $\omega_2 = 2\pi M_2c^2/h \to 0$ and $k_2 = 2\pi/\lambda_2 \to 0$, and the second field flattens to a constant real amplitude:
 
-$$
-KE_n=\frac{1}{2}M_nV_n^2=\frac{M_n\lambda_n^2F_n^2}{2}.
-$$
+$$W_2 \to A_2.$$
 
-This step makes the kinetic side of the free-fall problem use the same structural wavelength that defines the spatial coordinate of the field.
+Normalized to the photon energy, $A_2 \equiv E_\gamma = hc/\lambda_\gamma$ (the photon's ordinary wavelength $\lambda_\gamma$ is distinct from the structural $\lambda_2$), the total field becomes
 
-## Step 3 - Free-Fall Energy Balance
+$$W_s \to E_\gamma + A_1e^{i2\pi M_1/\lambda_1}.$$
 
-Applying $PE_n=KE_n$ gives
+The massless companion supplies a uniform real baseline; the massive field carries the phase structure. In the transform's terms: light is the limiting case that carries no structural wavelength to deform — the boundary where the frequency domain goes quiet and only the baseline remains.
 
-$$
-\frac{GM_nM_o}{\lambda_o-\lambda_n}=\frac{M_n\lambda_n^2F_n^2}{2}.
-$$
+---
 
-Cancelling $M_n$,
+## 12. The theory, stated
 
-$$
-\frac{GM_o}{\lambda_o-\lambda_n}=\frac{\lambda_n^2F_n^2}{2}.
-$$
+1. **Symmetric inertia transfer is a way of changing velocity and time into a symmetric phase domain.** Time and space are rewritten as frequency and wavelength — a relative frequency domain. Motion is treated as a wave and broken into components in each direction.
+2. **Each step is a limit.** A limit with respect to time, a limit over space, a differentiation, another limit over space, a final substitution. Each limit removes a variable. The theory is what survives the limits.
+3. **Relative phases are invariant.** Absolute phase shifts under every operation; relative phase never changes. The information survives the transform.
+4. **The conserved quantity is read off the boundary and recovered at closure.** $dW_s = 0$ at the top, at the bottom, and on the return — one fact, three writings.
+5. **The fifth dimension is the frequency domain.** It is entered by the coordinate change, it is symmetric in space and time, and it holds up over the invariant of the conservation law — the hidden fifth dimension that creates the symmetry: hidden because it is the transformed coordinates, not the time and space we started in, and the invariant is what they stand on.
 
-With
-
-$$
-T_n=\frac{1}{F_n},
-$$
-
-the relation becomes
-
-$$
-2M_oGT_n^2=\lambda_n^2(\lambda_o-\lambda_n).
-$$
-
-The right-hand side has a cubic wavelength structure. This is the model's analogue of **Kepler's third law**, which is normally written
-
-$$
-T^2\propto a^3.
-$$
-
-For a body in orbit, Kepler's third law says that the **square of the orbital period $T$ is proportional to the cube of the orbit's semi-major axis $a$**. In other words, the characteristic time scale grows with the three-dimensional spatial scale of the orbit according to $T^2\propto a^3$. In the present two-body construction, the corresponding spatial quantity is not an externally supplied semi-major axis. It is built from the two structural wavelength coordinates themselves:
-
-$$
-\lambda_n^2(\lambda_o-\lambda_n).
-$$
-
-This product contains two powers of the wavelength coordinate of the body being evaluated and one power of the wavelength difference between the two bodies. The wavelength difference $\lambda_o-\lambda_n$ supplies the two-body separation, so the complete product plays the role of the cubic spatial scale $a^3$ in the Kepler relation. Thus
-
-$$
-2M_oGT_n^2=\lambda_n^2(\lambda_o-\lambda_n)
-$$
-
-has the same basic harmonic structure: a squared period is related to a cubic spatial quantity, but here that spatial quantity is expressed entirely through the absolute structural wavelengths of the two-body system. This is the model's Keplerian harmonic baseline.
-
-## Step 4 - Symmetric Two-Body Branch Relation
-
-Writing the normalized relation for the two reciprocal branches gives
-
-$$
-\frac{2M_1GT_1^2}{\lambda_1^2(\lambda_2-\lambda_1)}=\frac{2M_2GT_2^2}{\lambda_2^2(\lambda_1-\lambda_2)}.
-$$
-
-Because
-
-$$
-\lambda_2-\lambda_1=-(\lambda_1-\lambda_2),
-$$
-
-the reversal of the relational separation introduces the structural negative sign
-
-$$
-\frac{M_1T_1^2}{\lambda_1^2}=-\frac{M_2T_2^2}{\lambda_2^2}.
-$$
-
-## Step 5 - Planck-Einstein Period and Mass-Wavelength Coupling
-
-From
-
-$$
-E=hf=M_nc^2,
-$$
-
-we obtain
-
-$$
-f_n=\frac{M_nc^2}{h},\qquad T_n=\frac{h}{M_nc^2},\qquad T_n^2=\frac{h^2}{M_n^2c^4}.
-$$
-
-Substituting into the symmetric branch relation eliminates the period terms:
-
-$$
-\frac{1}{M_1\lambda_1^2}=-\frac{1}{M_2\lambda_2^2}.
-$$
-
-Equivalently,
-
-$$
-M_1\lambda_1^2=-M_2\lambda_2^2.
-$$
-
-This is the direct mass-wavelength constraint produced by the free-fall construction. The structural wavelength is therefore not independent of mass: the two mass-wavelength sectors are linked.
-
-Now take the square root of both sides explicitly:
-
-$$
-\sqrt{M_1\lambda_1^2}=\sqrt{-M_2\lambda_2^2}.
-$$
-
-Resolving the negative square root gives
-
-$$
-\sqrt{M_1}\,\lambda_1=\pm i\sqrt{M_2}\,\lambda_2,\qquad \sqrt{-1}=i.
-$$
-
-This is the point at which the complex structure becomes explicit. The negative sign did not appear arbitrarily: it entered in Step 4 because the two reciprocal separations have opposite orientation,
-
-$$
-\lambda_2-\lambda_1=-(\lambda_1-\lambda_2).
-$$
-
-When the squared mass-wavelength relation is reduced by taking its square root, that structural minus sign becomes the factor $i$. The two reciprocal mass-wavelength branches therefore cannot remain on the same real orientation; they are separated by a quarter-cycle rotation in the complex plane. The two signs represent the conjugate branch orientations. Selecting a branch and combining it with the gravitational product relation yields the closed structural wavelength solutions presented in Section 3. The same complex rotation then reappears in Section 4 as the mechanism that couples spatial inertia to temporal inertia while preserving the total field $W_s$.
-
-# 6. Analytical Boundary Cases and Research Scenarios
-
-## A. Resolved Scenario - Photon / Massless Boundary
-
-Take the second body toward the massless limit,
-
-$$
-M_2\rightarrow0.
-$$
-
-The corresponding temporal frequency tends to zero,
-
-$$
-\omega_2=\frac{2\pi M_2c^2}{h}\rightarrow0,
-$$
-
-and the structural wavelength branch drives the associated spatial wavenumber toward zero,
-
-$$
-k_2=\frac{2\pi}{\lambda_2}\rightarrow0.
-$$
-
-The second field therefore approaches a constant real amplitude:
-
-$$
-W_2\rightarrow A_2\cos(0)+iA_2\sin(0)=A_2.
-$$
-
-In the field equations, $A_2$ is the amplitude of the second branch. For the photon boundary, the field amplitude can be normalized to the photon energy,
-
-$$
-A_2\equiv E_\gamma=hf_\gamma=p_\gamma c=\frac{hc}{\lambda_\gamma},
-$$
-
-where $f_\gamma$, $p_\gamma$, and $\lambda_\gamma$ are the photon's ordinary frequency, momentum, and electromagnetic wavelength. The photon wavelength $\lambda_\gamma$ is distinct from the structural coordinate wavelength $\lambda_2$. Under this energy normalization,
-
-$$
-W_2\rightarrow E_\gamma.
-$$
-
-The first field retains its coupled phase,
-
-$$
-W_1\rightarrow A_1\cos\left(\frac{2\pi M_1}{\lambda_1}-\frac{2\pi M_1M_2c^2}{h}\right)+iA_1\sin\left(\frac{2\pi M_1}{\lambda_1}-\frac{2\pi M_1M_2c^2}{h}\right),
-$$
-
-so the total field becomes
-
-$$
-W_s\rightarrow E_\gamma+A_1\cos\left(\frac{2\pi M_1}{\lambda_1}-\frac{2\pi M_1M_2c^2}{h}\right)+iA_1\sin\left(\frac{2\pi M_1}{\lambda_1}-\frac{2\pi M_1M_2c^2}{h}\right).
-$$
-
-At the exact massless limit $M_2=0$, the temporal cross-term also vanishes, so the total field can be written with $A_2$ removed entirely:
-
-$$
-W_s\rightarrow E_\gamma+A_1\cos\left(\frac{2\pi M_1}{\lambda_1}\right)+iA_1\sin\left(\frac{2\pi M_1}{\lambda_1}\right)=E_\gamma+A_1e^{i2\pi M_1/\lambda_1}.
-$$
-
-The massless companion therefore supplies a uniform real baseline equal to its photon-energy amplitude, while the massive field carries the remaining spatial-temporal phase structure. This is the mass-coordinate sense in which light forms the spatially inert boundary of the theory.
-
-## B. Research Scenarios for the Reader
-
-### Problem 1 - Symmetric-Mass Standing State
-
-Set
-
-$$
-M_1=M_2=M.
-$$
-
-Compute $W_s=W_1+W_2$ and determine the conditions on $A_1$, $A_2$, $\lambda_1$, and $\lambda_2$ under which the two cross-coupled phases form a stationary standing-state envelope. Identify the resulting nodes and antinodes in the mass-coordinate representation.
-
-### Problem 2 - Circular Orbit from Nonzero Initial Velocity
-
-Extend the free-fall boundary by giving the smaller body a tangential initial velocity chosen for a circular orbit. Determine how the additional initial kinetic term modifies the relation $PE_n=KE_n$, the structural wavelengths, and the conservation equations. Test whether a constant orbital radius corresponds to a constant mass-wavelength separation while spatial and temporal inertia continue to exchange internally.
-
-### Problem 3 - Elliptical Orbit
-
-Replace the circular initial condition with a bound elliptical orbit. Allow the wavelength separation $\lambda_o-\lambda_n$ to vary through the orbit and determine how the spatial and temporal phase gradients change between periapsis and apoapsis. Examine whether conservation of $W_s$ produces a periodic transfer between spatial and temporal inertia over one complete orbit.
-
-### Problem 4 - Gravitational-Wave Disturbance
-
-Introduce a small time-dependent disturbance into the coupled mass-wavelength structure and study how that disturbance propagates through the cross-coordinate conservation rules. Determine whether a perturbation in the spatial-inertia sector necessarily generates a paired perturbation in the temporal-inertia sector, and derive the corresponding wave speed and polarization structure predicted by the model.
-
-### Problem 5 - Three-Body Extension
-
-Introduce a third mass $M_3$ and replace the two-wave system with a symmetric network of pairwise couplings. Determine the minimum field structure required so that every spatial coordinate has a corresponding temporal partner while a generalized total field remains conserved. Compare the resulting dynamics with standard three-body behavior and identify whether the conservation rule constrains chaotic energy exchange.
-
-### Problem 6 - Strong-Field / Event-Horizon Boundary
-
-Take $M_1\gg M_2$ and follow the closed-form wavelength branches toward an extreme gravitational boundary. Determine how the relative complex rotation changes the balance between spatial and temporal inertia and whether the field develops a limiting transmission or reflection condition.
-
-### Problem 7 - Transmission-Line Impedance Analogy
-
-Treat the two mass sectors as effective coupled impedances with $Z_n\propto M_n$. Derive reflection and transmission coefficients at the coordinate junction and compare the impedance-matching condition with
-
-$$
-k_1W_1=\omega_2W_2,\qquad k_2W_2=\omega_1W_1.
-$$
-
-Determine whether perfect matching corresponds to a state in which spatial-to-temporal inertia transfer occurs without a reflected component.
-
-### Problem 8 - Conserved Field Magnitude
-
-Alongside the linear total field $W_s=W_1+W_2$, investigate the positive magnitude
-
-$$
-|W_1|^2+|W_2|^2.
-$$
-
-Express it entirely in terms of the mass-coupled phases and determine how it behaves under the same symmetric inertia-transfer rules. Compare conservation of the complex differential $dW_s=0$ with conservation of the total squared field magnitude.
+The name says what it is: the symmetric transfer of the inertial state between the coupled fields — and the transfer is the coordinate change. What goes in as velocity and time comes out as phase in a symmetric domain, and the conservation law is what that domain holds up over.

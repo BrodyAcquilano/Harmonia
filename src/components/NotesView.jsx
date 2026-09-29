@@ -20,7 +20,7 @@ const NOTE_ORDER = [
   '../../notes/decay-and-amplitude.md',
   '../../notes/hidden-phasor.md',
   '../../notes/keplers-laws.md',
-  '../../notes/gravitational-tech-stack.md',
+  '../../notes/quantum-tech-stack.md',
   '../../notes/three-body-problem.md',
   '../../notes/time-from-collisions.md',
 ]
