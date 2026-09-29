@@ -313,13 +313,13 @@ The honest statement, then: the 3-4-5 construction computes the relative motion 
 
 ## 15. Split branches — unstretching the ellipses
 
-§8 gave each body two pair-circles; §§11–13 summed them into resultant ellipses, every motion referred to the one eigenpoint. The Wave Lab's "Split Branches: Three Centers: Six Circles" runs the factorization backward — not recovering the pair-circles (that information was merged away in the sum), but splitting each resultant ellipse into its two circular components. An axis-aligned ellipse $(a\\cos\\tau,\\,e\\sin\\tau)$ is exactly the sum of two circular motions at the same rate, counter-rotating:
+§8 gave each body two pair-circles; §§11–13 summed them into resultant ellipses, every motion referred to the one eigenpoint. The Wave Lab's "Split Branches: Three Centers: Six Circles" runs the factorization backward — not recovering the pair-circles (that information was merged away in the sum), but splitting each resultant ellipse into its two circular components. An axis-aligned ellipse $(a\cos\tau,\,e\sin\tau)$ is exactly the sum of two circular motions at the same rate, counter-rotating:
 
-$$D(\\tau) = \\tfrac{a+e}{2}(\\cos\\tau,\\,\\sin\\tau), \\qquad P(\\tau) = \\tfrac{a-e}{2}(\\cos\\tau,\\,-\\sin\\tau), \\qquad D+P = (a\\cos\\tau,\\,e\\sin\\tau).$$
+$$D(\tau) = \tfrac{a+e}{2}(\cos\tau,\,\sin\tau), \qquad P(\tau) = \tfrac{a-e}{2}(\cos\tau,\,-\sin\tau), \qquad D+P = (a\cos\tau,\,e\sin\tau).$$
 
 Three deferent centers $D_k$ ride the prograde circles about the fixed eigenpoint $E$; each body rides its retrograde epicycle. Six circles, twelve equations of motion. The semi-axes $(a_k, e_k)$ come straight from the solved resultants, so the circles carry the true mass ratios — no mechanical guess. (The first attempt set the epicycle to twice the deferent rate; a 2:1 epicycle draws an epitrochoid, never an ellipse. The rates must match, counter-rotating.) The first graph's ellipses are drawn faint beneath; each body lands on its ellipse exactly, and that coincidence is the verification.
 
-The acceleration reading comes along. The ellipse at uniform $\\tau$ has non-uniform speed, $|v|^2 = a^2\\sin^2\\tau + e^2\\cos^2\\tau$ — real tangential acceleration along the path. Each circle alone has constant speed; the variation is the interference of the two. Unstretching isolates the squish as its own uniform motion: the retrograde circle of radius $(a-e)/2$ *is* the eccentricity, made into a motion.
+The acceleration reading comes along. The ellipse at uniform $\tau$ has non-uniform speed, $|v|^2 = a^2\sin^2\tau + e^2\cos^2\tau$ — real tangential acceleration along the path. Each circle alone has constant speed; the variation is the interference of the two. Unstretching isolates the squish as its own uniform motion: the retrograde circle of radius $(a-e)/2$ *is* the eccentricity, made into a motion.
 
 Nothing is subtracted to get there. Body = frame motion + relative motion — the frame's motion adds (the turbulence correction: add the frame, never remove it). Each body interacts in two pairs, each pair counted once; the opposite side of the triangle is the reference the relative motion is measured against — the deferent center — not a term to remove. No double counting, because nothing is counted twice.
 
