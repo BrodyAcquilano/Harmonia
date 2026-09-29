@@ -2338,7 +2338,7 @@ export default function WaveLab() {
                 <span><Tex tex="\text{motion with external force and perpendicular velocity}" /></span>
               </div>
             </div>
-            <p className="graph-note">The eigen point stays locked \u2014 the eigen line stretches on either side of it, each side by its mass proportion, due to some external force outside the eigen plane. This apparent stretching relative to the eigenpoint in 1D is time dilation.</p>
+            <p className="graph-note">The eigen point stays locked — the eigen line stretches on either side of it, each side by its mass proportion, due to some external force outside the eigen plane. This apparent stretching relative to the eigenpoint in 1D is time dilation.</p>
             <canvas ref={canvasClockRef} className="wave-canvas-orbit-lg" />
             <div className="graph-caption"><Tex tex="\\text{the eigen point stays locked --- the line stretches on either side, each side by its mass proportion}" /></div>
             <div className="graph-caption"><Tex tex="\\text{apparent stretching relative to the eigenpoint in 1D --- this is time dilation}" /></div>
