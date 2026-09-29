@@ -1,4 +1,5 @@
 # Derivation of the Structural Wavelengths $\lambda_1$ and $\lambda_2$
+*2026-09-27*
 
 ## Solving the transform's mass–wavelength relation: the coordinate change to lambda, worked through to the closed form
 

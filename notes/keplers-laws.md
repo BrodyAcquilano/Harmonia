@@ -1,4 +1,5 @@
 # Kepler's Laws: The Right Proportion
+*2026-09-27*
 
 *Companion to "Symmetric Inertia Transfer," "Lambda Derivation," "The Hidden Phasor," and "Time from Collisions." On what Kepler got right — the proportions, the harmony, and the projection itself: the ellipse is the 2D relative motion on the eigenplane, the same operation the three-body construction performs. He was not wrong; he was doing exactly this.*
 

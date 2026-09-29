@@ -1,4 +1,5 @@
 # The Three Body Problem
+*2026-09-28*
 
 *The pair machine works. Two bodies in, closed-form waves out, Kepler recovered, the quantum tech stack traversed both ways. The next wall is the famous one: three bodies, where every textbook says closed-form solutions without chaos are impossible. This note is the program for running six pair-equations through the quantum tech stack — and then the one hard problem the quantum tech stack doesn't solve for us: summing the pairs.*
 

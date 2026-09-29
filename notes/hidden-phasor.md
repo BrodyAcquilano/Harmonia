@@ -1,4 +1,5 @@
 # The Phasor: The Coordinate Transform in the Wave Lab
+*2026-09-27*
 
 *Companion to "The Theory of Symmetric Inertia Transfer" and "Derivation of the Structural Wavelengths." This note documents the Wave Lab simulation: the coordinate transform from time and space into the frequency domain — velocity and time changed into a symmetric phase domain — performed live: what the animation means, and how each graph is to be read.*
 

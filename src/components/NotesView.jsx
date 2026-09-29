@@ -13,6 +13,11 @@ const noteModules = import.meta.glob('../../notes/*.md', {
   eager: true,
 })
 
+// Display-title overrides for notes whose file name can't produce the right tab label.
+const TITLE_OVERRIDES = {
+  '../../notes/the-2-3-ratio.md': 'The 2:3 Ratio',
+}
+
 // Display order of the notes, first to last.
 const NOTE_ORDER = [
   '../../notes/symmetric-inertia-transfer.md',
@@ -24,6 +29,7 @@ const NOTE_ORDER = [
   '../../notes/three-body-problem.md',
   '../../notes/time-from-collisions.md',
   '../../notes/the-4th-dimension.md',
+  '../../notes/the-2-3-ratio.md',
 ]
 
 function titleFromPath(path) {
@@ -39,7 +45,7 @@ export default function NotesView() {
     () =>
       NOTE_ORDER.map((path) => ({
         path,
-        title: titleFromPath(path),
+        title: TITLE_OVERRIDES[path] || titleFromPath(path),
         text: noteModules[path],
       })).filter((n) => n.text),
     []

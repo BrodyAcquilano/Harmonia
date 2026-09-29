@@ -1,4 +1,5 @@
 # Decay and Amplitude: A Worked Example of the Stack
+*2026-09-27*
 
 *This note is a worked example of the quantum tech stack: deriving the decay and the amplitudes step by step, in order, with the actual math. The stack note describes the machine; this note runs it. The companion note "The Theory of Symmetric Inertia Transfer" states the principles the machine runs on — a way of changing velocity and time into a symmetric phase domain: the coordinate transform from time and space into a relative frequency domain, the limits at each step, the invariant they stand on. Read the stack note first if the level names (d1–d5, u1–u5) are unfamiliar.*
 

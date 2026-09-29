@@ -1,4 +1,5 @@
 # Time from Collisions
+*2026-09-28*
 
 *This note updates the theory. The earlier notes stand as the derivation path — the route by which the stack was found — and are not rewritten. What follows extends the Quantum Tech Stack upward: two new layers, two new symmetry rules, and a new account of what time is. Where this note and an earlier note disagree about what moves, this note is the current statement.*
 

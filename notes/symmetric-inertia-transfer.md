@@ -1,4 +1,5 @@
 # The Theory of Symmetric Inertia Transfer
+*2026-09-27*
 
 *A way of changing velocity and time into a symmetric phase domain. What I actually did, understood late: I took time and space and converted them — by a coordinate transform — into a relative frequency domain. Everything in this note is that transform, written out as a theory.*
 
