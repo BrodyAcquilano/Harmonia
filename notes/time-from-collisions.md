@@ -1,6 +1,6 @@
 # Time from Collisions
 
-*This note updates the theory. The earlier notes stand as the derivation path — the route by which the stack was found — and are not rewritten. What follows extends the Quantum Tech Stack upward: two new layers, two new symmetry rules, and a new account of what time is. Where this note and an earlier note disagree about what moves, this note is the current statement.*
+*This note updates the theory. The earlier notes stand as the derivation path — the route by which the stack was found — and are not rewritten. What follows extends the Gravitational Tech Stack upward: two new layers, two new symmetry rules, and a new account of what time is. Where this note and an earlier note disagree about what moves, this note is the current statement.*
 
 ---
 
@@ -12,12 +12,13 @@
 - [4. The new symmetry rules](#4-the-new-symmetry-rules)
 - [5. The new layers](#5-the-new-layers)
 - [6. The balance point is a clock ratio](#6-the-balance-point-is-a-clock-ratio)
-- [7. The Universal Clock](#7-the-universal-clock)
+- [7. A clock relative to an external body](#7-a-clock-relative-to-an-external-body)
 - [8. The eigenplane — Kepler did the same thing](#8-the-eigenplane--kepler-did-the-same-thing)
 - [9. The infinite field](#9-the-infinite-field)
-- [10. A math problem, not a physics problem](#10-a-math-problem-not-a-physics-problem)
-- [11. What time is](#11-what-time-is)
-- [12. Conclusion](#12-conclusion)
+- [10. The background energy](#10-the-background-energy)
+- [11. A math problem, not a physics problem](#11-a-math-problem-not-a-physics-problem)
+- [12. What time is](#12-what-time-is)
+- [13. Conclusion](#13-conclusion)
 
 
 ## 1. What the animation showed
@@ -58,12 +59,12 @@ $$
 
 The rigid pair rides on $\mathbf{C}(t)$: both bodies displaced by the same center vector. The relative motion the old picture showed was the center moving under the bodies, misread as the bodies moving under themselves.
 
-$\mathbf{C}(t)$ is the *resultant* — the vector sum of the branch wobbles. It is the whole pair's answer to the turbulence, delivered at the one point the pair shares. This is the math the Motion tab's "True Motion: Unified Center Vibration" box is built on: bodies locked to each other at the balance-point split, the center drawn as a cross, the whole rigid configuration moving with the resultant vector.
+$\mathbf{C}(t)$ is the *resultant* — the vector sum of the branch wobbles. It is the whole pair's answer to the turbulence, delivered at the one point the pair shares. This is the math the Motion tab's "The Turbulence: The Next Eigenstate" box is built on: bodies locked to each other at the balance-point split, the center drawn as a cross, the whole rigid configuration moving with the resultant vector — a turbulence point moving in a line relative to some external body.
 
 
 ## 4. The new symmetry rules
 
-The Quantum Tech Stack had one branching rule: **space splits** — a new spatial dimension branches the integration path, and the stack runs once per branch (§7 of that note). Watching the center move reveals the mirror rule:
+The Gravitational Tech Stack had one branching rule: **space splits** — a new spatial dimension branches the integration path, and the stack runs once per branch (§7 of that note). Watching the center move reveals the mirror rule:
 
 **Time unifies.** A time integration cannot be taken branch by branch. The next layer up after the wobbles is a time dimension in the integration, and it *demands* that it act on both spatial dimensions at once — by the symmetry rules. Time is what the branches have in common; the symmetry forbids integrating it piecemeal. Where space split the path, time merges it back.
 
@@ -82,6 +83,8 @@ The ascent of the tech stack gains two layers. (The descent is unchanged — the
 | **u7. Integrate the center.** One more integration — another time part. | $\boldsymbol{\tau}(t) = \int_0^t \mathbf{C}(t')\,dt'$ | The stretching of time, accumulated from the center's vibration. How hard the bodies pull the center is how much time stretches. | Integrate the center motion over time. |
 
 The rule for adding branches to a time integration is now explicit: **a time integral takes all branches at once.** u6 is not one more branch — it is the layer where branches end. Any future time layer merges first, then integrates. Space adds branches; time collects them.
+
+The round trip is a coordinate transform both ways: the descent rewrites position and time in the frequency domain — frequency and wavelength — and the ascent transforms back into motion. The rotation is the transform.
 
 
 ## 6. The balance point is a clock ratio
@@ -105,15 +108,15 @@ The lighter body, on the longer lever arm, runs through more time; the heavier b
 And the *amount* of time-stretch — how much time dilates moment to moment — is the pull on the center: the magnitude of $\mathbf{C}(t)$, accumulated by u7. How much the locked bodies pull their shared center is the motion, and the stretching, of time.
 
 
-## 7. The Universal Clock
+## 7. A clock relative to an external body
 
-Fix the two bodies. Don't let them move at all. Now watch the center: a solid golden point rocking back and forth on the light grey line between them — each body pulling on it separately.
+Fix the frame. Don't let anything move but the point. Now watch: a solid golden point rocking back and forth on a light grey line — the line fits inside the graph, and the point is all there is.
 
-When two masses rock a center point of the field in space, they each pull on it separately. $M_1$ pulls it one way, $M_2$ pulls it the other, and the point stretches between them. That stretching *is* the wave in space being stretched: the separate pulls deform the field at the shared point, and the golden point is time itself, stretched between the masses.
+The point is the turbulence point, read as a clock. Its rest position sits at the balance-point split — the mass ratio already said where, $T_1/T_2 = M_2/M_1$ — and it rocks around that rest position with the merged resultant $\mathbf{C}(t)$. The rocking is motion with external force and perpendicular velocity: the point answers the field of some external body, and its position on the line is the time reading.
 
-Integrate that rocking in time and you get the clock ratio — which happens to be the apparent time difference between the two bodies in space. The balance point already said so: $T_1/T_2 = M_2/M_1$. The "Universal Clock" animation is that ratio made visible: the golden point is the excitation of frequencies at that point in space, rocking on the two pulls.
+Integrate that rocking in time and you get the clock ratio — the apparent time difference between the two bodies in space. The balance point already said so. The animation is that ratio made visible: the golden point is the excitation of frequencies at that point in space.
 
-Time, at a point, is the rate of change of frequency in the field of gravitational waves — the excitation of frequencies at each point in space. The rocking golden point is that excitation, drawn.
+Time, at a point, is the rate of change of frequency in the field of gravitational waves — the excitation of frequencies at each point in space. The rocking golden point is that excitation, drawn — a clock relative to some external body.
 
 
 ## 8. The eigenplane — Kepler did the same thing
@@ -122,7 +125,7 @@ Here is the correction this theory owed Kepler: he was never wrong. He did exact
 
 Take the 3D motion — bodies accelerating through the field, chaotic to the eye — and find the plane they stay relatively locked on. That plane is constructed in 3D spacetime: you compute the relative vectors in three dimensions, then collapse to the two-dimensional plane where the locking holds. On that plane, the relative motion is an ellipse. That is Kepler's first law — and it is also the Wave Lab's three-body ellipses. The same operation, the same result.
 
-The first time through, with two bodies, the relative velocity in the ignored dimension was constant — which is why the motion wrapped into a circle. Constant relative velocity plus one collapsed dimension gives a closed curve. With three bodies the relative velocities are not constant — something is accelerating in space — so the true motion will not close in 3D. But you can still shift into two dimensions and find the plane they all orbit on. That plane is the eigenplane: the flat 2D coordinate system, cut through 3D space, on which the bodies stay relatively locked.
+The first time through, with two bodies, the relative velocity in the ignored dimension was constant — which is why the motion wrapped into a circle. Constant relative velocity plus one collapsed dimension gives a closed curve. With three bodies the relative velocities are not constant — there is acceleration relative to something else — so the motion will not close in 3D. But you can still shift into two dimensions and find the plane they all orbit on. That plane is the eigenplane: the flat 2D coordinate system, cut through 3D space, on which the bodies stay relatively locked.
 
 It is not the true motion. It is the projection onto the eigenplane. Kepler drew the projection with perfect fidelity — and so did we, the second time, when the three-body tab produced its ellipses. The mistake was only ever in the interpretation: calling the projection the whole story, or calling it wrong for being a projection. It is neither. It is the 2D relative motion, and it is correct as far as it goes.
 
@@ -142,7 +145,19 @@ Within a given boundary — a given amount of energy in the system — the integ
 And that may be the conclusion of the whole investigation: we can find the apparent time between two bodies — their shared center, their clock ratio — but to find motion relative to another body we always have to find a new reference plane. Space is infinite and not integrable over infinity. Technically we would have to keep integrating relative to some other part of the wave field, and it goes on forever without any reference. Every time is some system's time. There is no clock of the whole field, because there is no boundary around infinity.
 
 
-## 10. A math problem, not a physics problem
+## 10. The background energy
+
+That may be the point of calculating the cosmic background radiation.
+
+If we could integrate over all of space and all of time for frequencies — every mass-wave spatial frequency, every collision, everywhere — we would find the total energy in the system. What is left over, the part belonging to no particular boundary, is the background energy: the field's own temperature, the hum underneath every local clock. Measure it, and we could say whether it is increasing or decreasing — whether the field as a whole is winding up or winding down.
+
+The Big Bang is the structured start. Everything at a point, flying out in an orderly way: a great many bodies traveling in the same direction, sharing planes, covered by one coordinate system. A young system is easy to solve — the bodies agree on their planes, so the eigenplanes coincide and the transforms between them are trivial.
+
+Then the collisions do their work. Bodies meet, scatter, and their directions randomize relative to each other: more and more chaotic, fewer and fewer rotating in groups that share a plane. Every new relative group needs its own eigenplane, and shifting from one 2D plane view to another costs a coordinate transform — more variables, every collision. The older the system, the more planes, the more transforms, the harder the solve. Chaos is not a breakdown of the law; it is the accumulation of coordinate systems.
+
+So the background energy and the planes are the same story told at two scales. Integrate everything and you get the total — the background, increasing or decreasing. Draw a boundary and you get a plane, a center, a clock — and the price of the boundary is the transforms you will pay when the next body arrives.
+
+## 11. A math problem, not a physics problem
 
 The more bodies you add, the more vectors each body carries. Past a point it becomes impossible to solve in three-dimensional space: with four bodies or more there are more independent variables than equations — $x$, $y$, $z$ for four or more vectors each — and the system is underdetermined. And even for three bodies, there is always some unknown part of the field acting on the system from outside the boundary.
 
@@ -151,7 +166,7 @@ So the three-body problem was never a question of the physics. The force law is 
 Which clarifies what the wave equation was doing all along: it rewrote the equations of relativity in wave form. The same content, in a shape that was easier to understand. The wave field that extends infinitely far is spacetime; the boundary you integrate over is the reference frame; the clock ratio is proper time. Nothing was overthrown. It was translated.
 
 
-## 11. What time is
+## 12. What time is
 
 Putting it together:
 
@@ -164,9 +179,9 @@ Putting it together:
 **What we perceive as time is really the motion of the center point of a mass vibrating in a field of gravity waves.** The bodies are locked together and they act on the center between them — and how much they pull the center is the motion and the stretching of time.
 
 
-## 12. Conclusion
+## 13. Conclusion
 
-The Quantum Tech Stack now climbs seven layers up (u1–u7), and the new top of the stack is time itself — not assumed, but built: branched by space, merged by symmetry, vibrated by collision, integrated into stretch, ratioed by the balance point.
+The Gravitational Tech Stack now climbs seven layers up (u1–u7), and the new top of the stack is time itself — not assumed, but built: branched by space, merged by symmetry, vibrated by collision, integrated into stretch, ratioed by the balance point.
 
 The open question from the tech stack's conclusion — what the hidden time dimension *is* — has its answer: it is the center, moving. The fifth dimension was never a place; it is the point the locked bodies share, doing the one motion they can all agree on. And that agreement is what we call time.
 

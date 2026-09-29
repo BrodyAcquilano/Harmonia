@@ -947,7 +947,7 @@ function renderTBPhasorSquare(ctx, canvas, pairIdx) {
   ctx.fillText(pair.tag + sub[pair.b], S / 2, S / 2 + 11)
 }
 
-// Three Body Motion — ONE common center: the COM at (0,0), centered in the box.
+// Three Bodies Projected onto a 2D Eigenplane in 3D Space — ONE common center: the COM at (0,0), centered in the box.
 // Each body rides an ellipse centered at the COM. Splitting the resultant
 // wobble into x/y components gives the semi-axes: a ∝ Rx, b ∝ Ry, scaled so
 // the major axis equals the body's starting distance from the COM (the circle
@@ -1233,7 +1233,7 @@ function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
   }
   ctx.restore()
 }
-// True Motion: Unified Center Vibration. The bodies are locked rigid at the
+// The Turbulence: The Next Eigenstate. The bodies are locked rigid at the
 // balance-point split — m₁ a distance λ* left of center, m₂ a distance
 // L−λ* right — and the CENTER moves with the resultant vector
 // C(t) = X₁(t) + X₂(t), the vector sum of the two branch wobbles. The whole
@@ -1286,11 +1286,12 @@ function renderUnifiedCenterFrame(ctx, canvas, s, tau) {
   ctx.fillText('m₂', p2x, cy + 28)
   ctx.restore()
 }
-// Universal Clock. The two bodies are FIXED — they do not move. Between
-// them, on the light grey line joining them, a solid golden point rocks
-// back and forth: time itself, stretched between the masses. Each body
-// pulls on it separately (faint blue/orange pull tints); integrating that
-// rocking in time gives the clock ratio T₁/T₂ = M₂/M₁.
+// A Clock Relative to an External Body. No bodies are drawn — just a light
+// grey line that fits inside the graph, and a solid golden point rocking on
+// it: the turbulence point read as a clock. Its rest position sits at the
+// balance-point split (the clock ratio T₁/T₂ = M₂/M₁); its position on the
+// line is the time reading. Motion with external force and perpendicular
+// velocity.
 function renderUniversalClockFrame(ctx, canvas, s, tau) {
   const g = frameSetup(ctx, canvas)
   if (!(s.M1 + s.M2 > 0)) return
@@ -1301,40 +1302,20 @@ function renderUniversalClockFrame(ctx, canvas, s, tau) {
   for (let i = 0; i < NT; i++) cMax = Math.max(cMax, Math.abs(x1[i] + x2[i]))
   const { padL, padT, pw, ph } = g
   const midY = padT + ph / 2
-  const xL = padL + pw * 0.18, xR = padL + pw * 0.82
-  // Balance point along the line, measured from m₁.
+  // The line fits inside the graph with margin on both ends.
+  const xL = padL + pw * 0.25, xR = padL + pw * 0.75
+  // Rest position at the balance-point split (the clock ratio).
   const frac = (s.M1 + s.M2 > 0) ? s.M2 / (s.M1 + s.M2) : 0.5
   const baseX = xL + (xR - xL) * frac
-  const gx = baseX + (c / cMax) * (pw * 0.10)
+  const gx = baseX + (c / cMax) * (pw * 0.08)
   ctx.save()
-  // Light grey line connecting the two bodies.
+  // Light grey line — the clock's track.
   ctx.strokeStyle = '#d8d2c2'
   ctx.lineWidth = 2
   ctx.beginPath(); ctx.moveTo(xL, midY); ctx.lineTo(xR, midY); ctx.stroke()
-  // The separate pulls: each body stretches the point its own way.
-  ctx.globalAlpha = 0.45
-  ctx.lineWidth = 3
-  ctx.strokeStyle = C1
-  ctx.beginPath(); ctx.moveTo(xL, midY); ctx.lineTo(gx, midY); ctx.stroke()
-  ctx.strokeStyle = C2
-  ctx.beginPath(); ctx.moveTo(gx, midY); ctx.lineTo(xR, midY); ctx.stroke()
-  ctx.globalAlpha = 1
-  // Bodies, fixed.
-  const r1 = dotRadius(s.M1, s.M1, s.M2)
-  const r2 = dotRadius(s.M2, s.M1, s.M2)
-  ctx.fillStyle = C1
-  ctx.beginPath(); ctx.arc(xL, midY, r1, 0, 2 * Math.PI); ctx.fill()
-  ctx.fillStyle = C2
-  ctx.beginPath(); ctx.arc(xR, midY, r2, 0, 2 * Math.PI); ctx.fill()
-  // The golden point: time, rocking between them.
+  // The golden point: the time reading, rocking on the line.
   ctx.fillStyle = '#d9a441'
   ctx.beginPath(); ctx.arc(gx, midY, 7, 0, 2 * Math.PI); ctx.fill()
-  // Labels.
-  ctx.fillStyle = '#3a2c1a'
-  ctx.font = '600 13px "IBM Plex Mono", monospace'
-  ctx.textAlign = 'center'
-  ctx.fillText('m₁', xL, midY + 30)
-  ctx.fillText('m₂', xR, midY + 30)
   ctx.restore()
 }
 // Motion tab: elliptical relative orbit — the step between the circular
@@ -1415,7 +1396,7 @@ function renderEllipseFrame(ctx, canvas, s, tau) {
 }
 
 // Motion tab: static ellipse geometry diagram, drawn underneath the animated
-// Elliptical Relative Motion. Same a/b/e as the animation; labels the
+// Kepler's Ellipse: Motion with External Force. Same a/b/e as the animation; labels the
 // semi-major axis a (center → vertex) and the semi-minor axis b
 // (center → co-vertex), with both foci marked.
 function renderEllipseGeomFrame(ctx, canvas, s) {
@@ -2212,11 +2193,12 @@ export default function WaveLab() {
           <>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Apparent Relative Motion</h2>
+              <h2 className="graph-title">Apparent Motion with Constant Velocity</h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
                 <span><Tex tex="M_{\max} \text{ fixed --- the naive view}" /></span>
+                <span><Tex tex="\text{circular motion --- no external force}" /></span>
                 <span><Tex tex="\lambda_2 - \lambda_1 = \lambda_1 - \lambda_2 = x" /></span>
               </div>
             </div>
@@ -2225,14 +2207,14 @@ export default function WaveLab() {
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Elliptical Relative Motion</h2>
+              <h2 className="graph-title">Kepler's Ellipse: Motion with External Force</h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
                 <span><Tex tex="M_{\max} \text{ fixed at a focus}" /></span>
               </div>
             </div>
-            <p className="graph-note">Restoring distance variance — the larger mass fixed, the eccentricity set by the balance-point split.</p>
+            <p className="graph-note">Kepler's projected view — acceleration restored in the 2D plane; the eccentricity is set by the balance-point split.</p>
             <canvas ref={canvasEllipseRef} className="wave-canvas-orbit" />
             <canvas ref={canvasEllipseGeomRef} className="wave-canvas-orbit" />
             <div className="graph-caption"><Tex tex="\text{static ellipse: } a \text{ semi-major axis, } b \text{ semi-minor axis}" /></div>
@@ -2266,12 +2248,12 @@ export default function WaveLab() {
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">True Motion: Unified Center Vibration</h2>
+              <h2 className="graph-title">The Turbulence: The Next Eigenstate</h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
                 <span><Tex tex="\mathbf{C}(t) = X_1(t) + X_2(t) \text{ --- the resultant}" /></span>
-                <span><Tex tex="\text{bodies locked at } \lambda^* \text{, the center moves}" /></span>
+                <span><Tex tex="\text{a turbulence point moving in a line relative to some external body}" /></span>
               </div>
             </div>
             <canvas ref={canvasUnifiedRef} className="wave-canvas-orbit-lg" />
@@ -2280,16 +2262,16 @@ export default function WaveLab() {
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title">Universal Clock</h2>
+              <h2 className="graph-title">A Clock Relative to an External Body</h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
                 <span><Tex tex="\frac{T_1}{T_2} = \frac{M_2}{M_1}" /></span>
-                <span><Tex tex="\text{the golden point is time, stretched between the masses}" /></span>
+                <span><Tex tex="\text{motion with external force and perpendicular velocity}" /></span>
               </div>
             </div>
             <canvas ref={canvasClockRef} className="wave-canvas-orbit-lg" />
-            <div className="graph-caption"><Tex tex="\text{each body pulls the center separately --- integrating the rocking gives the clock ratio}" /></div>
+            <div className="graph-caption"><Tex tex="\text{the point's position on the line is the time reading --- integrating the rocking gives the clock ratio}" /></div>
             <div className="graph-footnote">xy plane</div>
           </div>
           </>
@@ -2367,7 +2349,7 @@ export default function WaveLab() {
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title"><Tex tex="\text{Three Body Motion}" /></h2>
+              <h2 className="graph-title"><Tex tex="\text{Three Bodies Projected onto a 2D Eigenplane in 3D Space}" /></h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">

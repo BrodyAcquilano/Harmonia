@@ -1,6 +1,6 @@
 # Decay and Amplitude: A Worked Example of the Stack
 
-*This note is a worked example of the quantum tech stack: deriving the decay and the amplitudes step by step, in order, with the actual math. The stack note describes the machine; this note runs it. Read the stack note first if the level names (d1–d5, u1–u5) are unfamiliar.*
+*This note is a worked example of the gravitational tech stack: deriving the decay and the amplitudes step by step, in order, with the actual math. The stack note describes the machine; this note runs it. Read the stack note first if the level names (d1–d5, u1–u5) are unfamiliar.*
 
 ---
 
