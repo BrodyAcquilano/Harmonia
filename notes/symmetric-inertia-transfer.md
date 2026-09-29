@@ -139,6 +139,8 @@ No independent variable remains. Everything is a proportion of the boundary mass
 
 Five limits, five variables gone. What survives them is the law.
 
+The derivatives are the deconstruction: each differentiation breaks the motion into its individual components — one wave per direction — giving up information about the actual motion to gain information about the energy at each point. And because the boundary conditions don't change, the lost information can be added back: differentiate to break into components and get the motion from the force, or integrate to get the force from the motion. Deconstruct when we want the individual motion components; merge when we want the total motion.
+
 ---
 
 ## 6. The field equations
@@ -246,6 +248,8 @@ Kepler's $T^2 \propto a^3$ also counts the transform's dimensions: two of time �
 Reverse the limits as integrals, in reverse order: expand the substitution, integrate over the restored space ($W_n$, $J_n$ — work and impulse), integrate over the transformed time ($F_n$ — the quarter-turns composing, radial in, perpendicular out), integrate over the accumulation time ($X_n$ — motion, the wobble), and close on the conservation law recovered. The full machine is the tech stack note's ascent, u1–u7 — including the branch merge (u6: one wave per direction, summed into the center) and the center integration (u7: the turbulence point, moving).
 
 The ninety-degree rotation the round trip is famous for is the transform's doing, not a mystery: each integration of $e^{i\phi}$ multiplies by $1/i = -i$, a quarter-turn in the complex plane, and five of them net one. The force goes down radial and comes back perpendicular the way a vector's components change when the axes rotate — the same physics, rewritten in the new coordinates, pointing somewhere new.
+
+Read as a trip through the frequency domain: transferring to frequency-$\lambda$ means choosing the center as the invariant reference, in a lower-dimensional space. In that space we rotate into it by $i$ — the symmetric flip of force into velocity, of space into time. Then we rotate by $-i$, and the force comes out as velocity — in some other direction, or the same direction, depending on how much the phase angle changed. The eigen dimensions are the one-dimensional phasors the branches collapse into; that is why things come out rotated.
 
 ---
 

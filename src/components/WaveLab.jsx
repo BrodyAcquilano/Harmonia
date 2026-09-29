@@ -2295,6 +2295,7 @@ export default function WaveLab() {
             </div>
             <canvas ref={canvasClockRef} className="wave-canvas-orbit-lg" />
             <div className="graph-caption"><Tex tex="\text{the point's position on the line is the time reading --- integrating the rocking gives the clock ratio}" /></div>
+            <div className="graph-caption"><Tex tex="\text{another eigenstate of the system --- the relative time difference}" /></div>
             <div className="graph-footnote">xy plane</div>
           </div>
           </>

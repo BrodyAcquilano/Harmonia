@@ -277,6 +277,8 @@ The Wave Lab's "Three Bodies Projected onto a 2D Eigenplane in 3D Space" is this
 
 Read as a projection: three bodies in 3D space, drawn on the 2D eigenplane — the flat plane, cut through 3D space, on which the three stay relatively locked. The ellipses are the projection, not the true motion; the true motion is the centers moving through the field, each carrying its own clock. And the point moving in the Motion tab's turbulence graph is the same kind of point here: the eigen point relative to the center — the merged resultant of the branches, the turbulence point of the 3-4-5 boundary.
 
+Splitting the branches deconstructs into individual components — the motion based on the energy within the system. Merging them asks about the change in energy from an external source outside the boundary conditions — and merging is how we restore the clock rate, adding the additional clock information and the additional motion from the new source.
+
 ---
 
 ## 14. Conclusion — the 3-4-5 projection
@@ -295,7 +297,9 @@ What this chain computes is the eigenplane projection for the Burrau boundary �
 
 It was never a solution, because the problem as stated — the positions for all $t \geq 0$, in the real field — does not close. The wave field extends infinitely far beyond the 3-4-5 boundary, and there is always more energy coming from outside it: more masses, more frequencies, more collisions than the twelve branches include. That outside is what appears as chaos. What the textbooks call chaotic motion is the larger system leaking through the boundary we drew.
 
-And the boundary is redrawn every time: add a fourth body and you get new vectors in new directions — back to 3D, recompute everything, collapse to a new 2D plane, merge a new center, compute a new clock. Each plane belongs to its boundary; each clock belongs to its plane.
+And the boundary is redrawn every time: add a fourth body and you get new vectors in new directions — back to 3D, recompute everything, collapse to a new 2D plane, merge a new center, compute a new clock. Each plane belongs to its boundary; each clock belongs to its plane. The merge rule generalizes: any $n$ bodies treated as one resultant can merge with any $m$ bodies treated as one resultant — pairs and branches into one resultant acceleration by summing, then integrate over space or over time for the center's motion relative to some other point. Every added integral is another body: another pair of phasors, another resultant value to add.
+
+We cannot set the boundary so that there is no outside turbulence — that would need an infinite boundary and the individual motion of every body in it. There are always more branches than we can account for, so we only ever see the apparent motion in an eigenplane.
 
 So this was never a question of the physics. The force law is not missing. It is a math problem: underdetermination. With four bodies or more there are more independent variables than equations — $x$, $y$, $z$ for four or more vectors each — and even with three there is always unknown field outside the boundary. We can add up all the forces inside the boundary, but there is always some other gravitational body acting on the system — some external force — that the sum does not include. There is always at least one more body — always more field — than the equations close over.
 

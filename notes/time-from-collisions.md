@@ -69,6 +69,8 @@ $$
 
 So the eigen line resides **parallel** to the plane of motion — it lies in the plane, along the in-plane perpendicular — while the force line crosses it. The turbulence is never out of the plane; it is the plane's own perpendicular axis, moving.
 
+Finding this resultant wobble is not switching coordinate references or viewing the motion a new way. It is inferring another property from the system: how much we are moving relative to an external force. The velocity integral is the acceleration from the external force — and from it we know not only how much each body wobbles relative to one another in each direction, but how much each one stretches time relative to some third reference point. Two uses for the same acceleration: find the velocity over space, or find the time difference over space relative to the energy difference caused by mass.
+
 $\mathbf{C}(t)$ is the *resultant* — the vector sum of the branch wobbles. It is the whole pair's answer to the turbulence, delivered at the one point the pair shares. This is the math the Motion tab's "The Turbulence: The Next Eigenstate" box is built on: the bodies wobbling relative to the center at the balance-point split, the eigen line through them moving turbulently with the resultant, the center drawn as a cross — the bodies wobbling in the plane of the line, the line itself turbulent relative to the external reference.
 
 
@@ -93,6 +95,8 @@ The ascent of the tech stack gains two layers. (The descent is unchanged — the
 | **u7. Integrate the center.** One more integration — another time part. | $\boldsymbol{\tau}(t) = \int_0^t \mathbf{C}(t')\,dt'$ | The stretching of time, accumulated from the center's vibration. How hard the bodies pull the center is how much time stretches. | Integrate the center motion over time. |
 
 The rule for adding branches to a time integration is now explicit: **a time integral takes all branches at once.** u6 is not one more branch — it is the layer where branches end. Any future time layer merges first, then integrates. Space adds branches; time collects them.
+
+And every added integral is another body. To include one more body, integrate over another pair of phasors and add the resultant values: take pairs and branches, merge them into one resultant acceleration by summing, then integrate over space or over time to get the motion of their center relative to some other point. We can always merge any $n$ bodies treated as one resultant with any $m$ bodies treated as one resultant — pairs and branches into one resultant, by summation.
 
 The round trip is a coordinate transform both ways: the descent rewrites position and time in the frequency domain — frequency and wavelength — and the ascent transforms back into motion. The rotation is the transform.
 
@@ -146,6 +150,8 @@ The balance point sets the zero — the rest position, the ratio — and the int
 **There is always some other external force.** The boundary never closes: whatever system you draw, the field beyond it acts on the inside. That is not a flaw in the computation — it is what the computation is *of*. The clock ratio $T_1/T_2 = M_2/M_1$ is exact within the boundary; the reading $\tau(t)$ is exact relative to the chosen reference. Choose a larger boundary — include the third body, recompute the plane, merge a new center — and you get a new clock, exact relative to the new outside. The background energy of §11 is the limit of this process: integrate over all space and all time, and the "external reference" becomes the field itself.
 
 So the rule: **no clock without a third reference, no reference without an outside, no outside that ever ends.** The rotated resultant is the hand of the clock; the external body is the face it reads against.
+
+One more rule, and it is new: **the reference point of motion and the reference point of time are on the same line.** We can only use an external point as a reference if it sits on the perpendicular line of another body — when force and velocity are balanced and constant, so energy is conserved. Otherwise we have to merge branches and use the center point of the new resultant. Adding an external reference point is like adding another level of integration: it holds only when the force is balanced and the point is perpendicular to the direction of motion. When it holds — perpendicular, energy conserved, the symmetry rule maintained — the external reference can be treated like an extra symmetric dimension. Otherwise it can't be treated as another dimension. Dimensions are our perception of where things are symmetrical.
 
 
 ## 9. The eigenplane — Kepler did the same thing
@@ -208,6 +214,8 @@ Putting it together:
 
 **What we perceive as time is really the motion of the center point of a mass vibrating in a field of gravity waves.** The bodies are locked together and they act on the center between them — and how much they pull the center is the motion and the stretching of time.
 
+The dimensions, as we can see them: relative motion we see in 3D; absolute motion in a system we can only see in 2D; absolute time we can only see in 1D; symmetry we don't see at all, because it is dimensionless — but we can infer it from context. Time stretching is what motion in the 2D eigenplane looks like from inside it: on the eigenplane things don't stretch relative to one another in time, but there is always another external force stretching or compressing things more.
+
 
 ## 14. Conclusion
 
@@ -216,3 +224,7 @@ The Quantum Tech Stack now climbs seven layers up (u1–u7), and the new top of 
 The open question from the tech stack's conclusion — what the phasor's rotation *is* — has its answer: it is the phase of the motion wave, turning in the complex plane. There was never a hidden dimension as a place; the complex plane is a representation, a coordinate choice — it is just how the coordinate transform writes motion as a wave, broken into components in each direction. The hidden fifth dimension is the frequency domain the transform enters — the symmetric phase domain, creating the symmetry between space and time, held up by the invariant of the conservation law. The center, moving — the turbulence point the locked bodies share, the center of the wave, the third external reference point the symmetric frequency domain gives us, doing the one motion they can all agree on — is what the merged frame's clock reads. And that reading is what we call time. The motion the clock reads is the hidden law's output: force turned perpendicular, arriving as motion — the transform converted the radial pull between the bodies into perpendicular relative velocity, the locked pair handed it to the center, and the center carries it through the field. Time is the reading of the converted force, measured against a third reference.
 
 But the agreement is always local. Every clock belongs to the boundary that merged it: the apparent time between two bodies is well-defined, and within that boundary the integrations close and return the conservation law. Beyond the boundary there is always more field — more collisions, more frequencies, another body — and to include it you redraw the boundary, recompute the plane, and merge a new center. There is no final reference, no clock of the whole. The stack does not end at the top; it ends at the edge of whatever you chose to include — the motion is still always relative to the boundary conditions we set, which never account for the full system. That is not a failure of the theory. It is what time is.
+
+We cannot set a boundary condition such that there will be no outside turbulence or chaos in the underlying system — that would need an infinite boundary, and knowing the individual motion of every body in it. There are an infinite number of branches we can't account for, so we only ever see the apparent motion in an eigenplane — unless we add another branch to give us our velocity relative to something else.
+
+The final thing left in the stack is the time difference between two points, or the change in the position. Both are information of the system — the inputs and the outputs of the signal we put in. The system is the boundary conditions and the symmetry between them in the phase domain.
