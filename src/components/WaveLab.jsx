@@ -2355,7 +2355,7 @@ export default function WaveLab() {
                 <span><Tex tex="\text{yellow dot: the balance point, riding its own small ellipse}" /></span>
               </div>
             </div>
-            <p className="graph-note">The symmetric balance point shifts at a constant rate — our clock. Its back-and-forth along the eigen line, read against the external force, tells how much time dilation occurs when a third body acts.</p>
+            <p className="graph-note">The symmetric balance point shifts at a constant rate — our clock. Its back-and-forth along the eigen line — the fixed ratio making the wavelengths contract or expand — is time dilation when a third body acts.</p>
             <canvas ref={canvasBalanceClockRef} className="wave-canvas-orbit-lg" />
             <div className="graph-caption"><Tex tex="\text{the line gets longer on the stretched side --- the fixed ratio makes the wavelengths contract or expand and causes time dilation}" /></div>
             <div className="graph-caption"><Tex tex="\text{the dot traces the orbit ellipse scaled by the mass ratio --- its own equation of motion}" /></div>
