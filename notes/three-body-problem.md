@@ -21,6 +21,7 @@
 - [12. The resultant wobble](#12-the-resultant-wobble)
 - [13. Center, balance points, and why the motion is elliptical](#13-center-balance-points-and-why-the-motion-is-elliptical)
 - [14. Conclusion — the 3-4-5 projection](#14-conclusion--the-3-4-5-projection)
+- [15. Split branches — unstretching the ellipses](#15-split-branches--unstretching-the-ellipses)
 
 
 ## 1. Why three bodies
@@ -294,6 +295,8 @@ The chain, end to end:
 6. **Center** (§7, §13): three balance points, Ceva's concurrence, one center of mass.
 7. **Paths** (§12–§13): the directional resultants project to ellipses — $a \propto R_x$, $b \propto R_y$ — centered at the common center.
 
+8. **Deconstruction** (§15): each resultant ellipse factored into prograde + retrograde circles — six circles, twelve equations — landing exactly on the §13 ellipses.
+
 What this chain computes is the eigenplane projection for the Burrau boundary — not a solution to the three-body problem. The three bodies released from rest at Burrau's coordinates are a boundary condition: a choice of how much energy to include. Inside that boundary, the pair-waves go through the stack, the resultants sum by phasor arithmetic, Ceva gives the common center, and the directional resultants project to ellipses on the 2D plane where the three bodies stay relatively locked. Twelve branches went in; three elliptical wobbles came out — the 2D relative motion, drawn on the eigenplane. Kepler's operation, four hundred years later, by machine.
 
 It was never a solution, because the problem as stated — the positions for all $t \geq 0$, in the real field — does not close. The wave field extends infinitely far beyond the 3-4-5 boundary, and there is always more energy coming from outside it: more masses, more frequencies, more collisions than the twelve branches include. That outside is what appears as chaos. What the textbooks call chaotic motion is the larger system leaking through the boundary we drew.
@@ -305,3 +308,19 @@ We cannot set the boundary so that there is no outside turbulence — that would
 So this was never a question of the physics. The force law is not missing. It is a math problem: underdetermination. With four bodies or more there are more independent variables than equations — $x$, $y$, $z$ for four or more vectors each — and even with three there is always unknown field outside the boundary. We can add up all the forces inside the boundary, but there is always some other gravitational body acting on the system — some external force — that the sum does not include. There is always at least one more body — always more field — than the equations close over.
 
 The honest statement, then: the 3-4-5 construction computes the relative motion on the eigenplane for one boundary condition — the plane, the center, the clock ratio for that system. The true motion, the centers moving through the infinite field each carrying their own time, was never on the plane. It was underneath it all along.
+
+---
+
+## 15. Split branches — unstretching the ellipses
+
+§8 gave each body two pair-circles; §§11–13 summed them into resultant ellipses, every motion referred to the one eigenpoint. The Wave Lab's "Split Branches: Three Centers: Six Circles" runs the factorization backward — not recovering the pair-circles (that information was merged away in the sum), but splitting each resultant ellipse into its two circular components. An axis-aligned ellipse $(a\\cos\\tau,\\,e\\sin\\tau)$ is exactly the sum of two circular motions at the same rate, counter-rotating:
+
+$$D(\\tau) = \\tfrac{a+e}{2}(\\cos\\tau,\\,\\sin\\tau), \\qquad P(\\tau) = \\tfrac{a-e}{2}(\\cos\\tau,\\,-\\sin\\tau), \\qquad D+P = (a\\cos\\tau,\\,e\\sin\\tau).$$
+
+Three deferent centers $D_k$ ride the prograde circles about the fixed eigenpoint $E$; each body rides its retrograde epicycle. Six circles, twelve equations of motion. The semi-axes $(a_k, e_k)$ come straight from the solved resultants, so the circles carry the true mass ratios — no mechanical guess. (The first attempt set the epicycle to twice the deferent rate; a 2:1 epicycle draws an epitrochoid, never an ellipse. The rates must match, counter-rotating.) The first graph's ellipses are drawn faint beneath; each body lands on its ellipse exactly, and that coincidence is the verification.
+
+The acceleration reading comes along. The ellipse at uniform $\\tau$ has non-uniform speed, $|v|^2 = a^2\\sin^2\\tau + e^2\\cos^2\\tau$ — real tangential acceleration along the path. Each circle alone has constant speed; the variation is the interference of the two. Unstretching isolates the squish as its own uniform motion: the retrograde circle of radius $(a-e)/2$ *is* the eccentricity, made into a motion.
+
+Nothing is subtracted to get there. Body = frame motion + relative motion — the frame's motion adds (the turbulence correction: add the frame, never remove it). Each body interacts in two pairs, each pair counted once; the opposite side of the triangle is the reference the relative motion is measured against — the deferent center — not a term to remove. No double counting, because nothing is counted twice.
+
+And the point §13 was approaching: the squish can come from inside the eigenplane. No fourth body and no force outside the plane is needed to stretch circles into ellipses — referring all of the motion to the single eigenpoint does it.

@@ -1020,10 +1020,14 @@ function renderTBMotionFrame(ctx, canvas, tau) {
 }
 
 
-// Three Centers: deconstructing the collapsed eigenplane back into three
-// pair-planes. Three deferent centers D_k orbit the fixed eigenpoint E; each
-// body M_k rides an epicycle about its deferent center. Six circles, twelve
-// equations of motion - each body interacts in two pairs.
+// Split Branches: unstretching the ellipses into circles. Each body ellipse
+// (a_k cos, e_k sin) factors exactly into a prograde circle of radius
+// (a_k+e_k)/2 and a retrograde circle of radius (a_k-e_k)/2, both at the
+// orbital rate - the semi-axes come straight from the solved resultants, so
+// the circles carry the true mass ratios. The deferent centers D_k ride the
+// prograde circles about the fixed eigenpoint E; each body rides its
+// retrograde epicycle. Six circles, twelve equations of motion - and each
+// body lands exactly on the first graph's ellipses, drawn faint beneath.
 function renderTBCentersFrame(ctx, canvas, tau) {
   const dpr = window.devicePixelRatio || 1
   const S = Math.max(canvas.clientWidth, 50)
@@ -1037,16 +1041,28 @@ function renderTBCentersFrame(ctx, canvas, tau) {
   ctx.fillRect(0, 0, S, S)
   const cx = S / 2, cy = S / 2
 
-  const masses = [3, 4, 5], MT = 12
-  const cols = [C1, C2, TB_C3]
-  const subs = ['\u2081', '\u2082', '\u2083']
-  // deferent radius: the center's share of the mass; epicycle radius: the
-  // body's share against the other two (the two pairs it interacts in)
-  const defR = masses.map((m) => m / MT)
-  const epiR = masses.map((m) => 0.62 * (MT - m) / MT)
-  const maxExt = Math.max(...masses.map((m, k) => defR[k] + epiR[k]))
+  // ellipse factors from the solved resultants (same numbers as graph 1)
+  const els = TB_ELLIPSE.map((b) => {
+    const mx = Math.max(b.rx, b.ry)
+    const a = (b.d * b.rx) / mx
+    const e = (b.d * b.ry) / mx
+    const t0 = Math.atan2(a * Math.sin(b.th0), e * Math.cos(b.th0))
+    return { a, e, t0, Rd: (a + e) / 2, Re: (a - e) / 2, color: b.color, mass: b.mass, sub: b.sub }
+  })
+  const maxExt = Math.max(...els.map((x) => Math.max(x.a, x.e)))
   const R = (S / 2 - 46) / maxExt
   const GOLD = '#d9a441', DARK = '#3a3125'
+
+  // the first graph's ellipses, faint beneath - the verification target
+  els.forEach((x) => {
+    ctx.strokeStyle = x.color
+    ctx.globalAlpha = 0.22
+    ctx.lineWidth = 1.5
+    ctx.beginPath()
+    ctx.ellipse(cx, cy, x.a * R, x.e * R, 0, 0, 2 * Math.PI)
+    ctx.stroke()
+    ctx.globalAlpha = 1
+  })
 
   // the fixed eigenpoint
   ctx.strokeStyle = GOLD
@@ -1064,36 +1080,34 @@ function renderTBCentersFrame(ctx, canvas, tau) {
   ctx.textBaseline = 'alphabetic'
   ctx.fillText('E', cx, cy + 26)
 
-  for (let k = 0; k < 3; k++) {
-    const ph = k * 2 * Math.PI / 3
-    // deferent: the center's circle about E
+  els.forEach((x) => {
+    const th = tau + x.t0
+    // deferent: prograde circle about E
     ctx.strokeStyle = '#b09a5e'
     ctx.globalAlpha = 0.55
     ctx.lineWidth = 1.25
     ctx.setLineDash([5, 4])
-    ctx.beginPath(); ctx.arc(cx, cy, defR[k] * R, 0, 2 * Math.PI); ctx.stroke()
+    ctx.beginPath(); ctx.arc(cx, cy, x.Rd * R, 0, 2 * Math.PI); ctx.stroke()
     ctx.setLineDash([])
     ctx.globalAlpha = 1
-    const da = tau + ph
-    const dx = cx + defR[k] * R * Math.cos(da)
-    const dy = cy - defR[k] * R * Math.sin(da)
+    const dx = cx + x.Rd * R * Math.cos(th)
+    const dy = cy - x.Rd * R * Math.sin(th)
     ctx.strokeStyle = '#b09a5e'
     ctx.globalAlpha = 0.6
     ctx.lineWidth = 1
     ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(dx, dy); ctx.stroke()
     ctx.globalAlpha = 1
-    // epicycle: the body's circle about D_k (twice the rate, opposite sense)
-    ctx.strokeStyle = cols[k]
+    // epicycle: retrograde circle about D_k (signed radius; phase absorbs it)
+    ctx.strokeStyle = x.color
     ctx.globalAlpha = 0.55
     ctx.lineWidth = 1.25
     ctx.setLineDash([5, 4])
-    ctx.beginPath(); ctx.arc(dx, dy, epiR[k] * R, 0, 2 * Math.PI); ctx.stroke()
+    ctx.beginPath(); ctx.arc(dx, dy, Math.abs(x.Re) * R, 0, 2 * Math.PI); ctx.stroke()
     ctx.setLineDash([])
     ctx.globalAlpha = 1
-    const ea = 2 * tau + ph
-    const bx = dx + epiR[k] * R * Math.cos(ea)
-    const by = dy - epiR[k] * R * Math.sin(ea)
-    ctx.strokeStyle = cols[k]
+    const bx = dx + x.Re * R * Math.cos(th)
+    const by = dy + x.Re * R * Math.sin(th)
+    ctx.strokeStyle = x.color
     ctx.globalAlpha = 0.7
     ctx.lineWidth = 1.25
     ctx.beginPath(); ctx.moveTo(dx, dy); ctx.lineTo(bx, by); ctx.stroke()
@@ -1103,16 +1117,16 @@ function renderTBCentersFrame(ctx, canvas, tau) {
     ctx.fillStyle = '#715f43'
     ctx.font = '11px "IBM Plex Mono", monospace'
     ctx.textAlign = 'center'
-    ctx.fillText('D' + subs[k], dx, dy - 10)
-    const br = 8 * Math.sqrt(masses[k] / 3)
-    ctx.fillStyle = cols[k]
+    ctx.fillText('D' + x.sub, dx, dy - 10)
+    const br = 8 * Math.sqrt(x.mass / 3)
+    ctx.fillStyle = x.color
     ctx.beginPath(); ctx.arc(bx, by, br, 0, 2 * Math.PI); ctx.fill()
     ctx.font = '13px "IBM Plex Mono", monospace'
     ctx.textAlign = 'left'
     ctx.textBaseline = 'middle'
-    ctx.fillText('M' + subs[k], bx + br + 5, by)
+    ctx.fillText('M' + x.sub, bx + br + 5, by)
     ctx.textBaseline = 'alphabetic'
-  }
+  })
 }
 
 
@@ -2562,15 +2576,17 @@ export default function WaveLab() {
                 <span><i className="swatch" style={{ background: C2 }} /><Tex tex="M_2" /></span>
                 <span><i className="swatch" style={{ background: TB_C3 }} /><Tex tex="M_3" /></span>
                 <span style={{ textAlign: 'center' }}><Tex tex="\text{six circles --- twelve equations of motion}" /></span>
+                <span style={{ textAlign: 'center' }}><Tex tex="\text{prograde + retrograde --- the ellipse, unstretched}" /></span>
               </div>
             </div>
             <div className="tb-math">
-              <div className="tb-math-line"><Tex tex="\mathbf{D}_k(\tau) = R_k(\cos(\tau + \phi_k),\,\sin(\tau + \phi_k))" /></div>
-              <div className="tb-math-line"><Tex tex="\mathbf{B}_k(\tau) = \mathbf{D}_k(\tau) + r_k(\cos(2\tau + \psi_k),\,-\sin(2\tau + \psi_k))" /></div>
+              <div className="tb-math-line"><Tex tex="\mathbf{D}_k(\tau) = R_k(\cos(\tau+\phi_k),\,\sin(\tau+\phi_k)),\; R_k=(a_k+e_k)/2" /></div>
+              <div className="tb-math-line"><Tex tex="\mathbf{B}_k(\tau) = \mathbf{D}_k(\tau) + r_k(\cos(\tau+\phi_k),\,-\sin(\tau+\phi_k)),\; r_k=(a_k-e_k)/2" /></div>
             </div>
             <canvas ref={canvasTBCentersRef} className="wave-canvas-sq" />
-            <p className="graph-note">Three centers instead of one --- the collapsed eigenplane deconstructed back into its pair-planes. Each body moves on a circle, and that circle's center moves on another circle about the fixed eigenpoint: six circles, twelve equations of motion. Each body interacts in two pairs. The ellipses were the squish from collapsing to one center --- and the squish can come from inside the eigenplane. No fourth body required.</p>
-            <div className="graph-caption"><Tex tex="\text{each body: an epicycle on a deferent --- both circles in the eigenplane}" /></div>
+            <p className="graph-note">Split branches: each ellipse unstretched into two circles. The center D_k rides the prograde circle of radius (a_k+e_k)/2 about the fixed eigenpoint; the body rides the retrograde epicycle of radius (a_k-e_k)/2 — the squish, isolated as its own uniform motion. Six circles, twelve equations of motion, and each body lands exactly on the first graph’s ellipses, drawn faint beneath. Each body still interacts in two pairs; nothing is subtracted — the frame’s motion adds.</p>
+            <div className="graph-caption"><Tex tex="\text{each ellipse: prograde circle + retrograde circle --- both at the orbital rate}" /></div>
+            <div className="graph-caption"><Tex tex="\text{the bodies land on the first graph's ellipses --- drawn faint beneath}" /></div>
             <div className="graph-caption"><Tex tex="\text{the squish can come from inside the eigenplane --- no fourth body required}" /></div>
           </div>
           </>
