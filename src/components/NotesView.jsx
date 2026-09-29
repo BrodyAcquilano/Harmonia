@@ -23,6 +23,7 @@ const NOTE_ORDER = [
   '../../notes/quantum-tech-stack.md',
   '../../notes/three-body-problem.md',
   '../../notes/time-from-collisions.md',
+  '../../notes/the-4th-dimension.md',
 ]
 
 function titleFromPath(path) {
