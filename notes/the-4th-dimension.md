@@ -105,6 +105,8 @@ The rate of change of the increase in energy fluctuation, related to the change 
 
 Or we can reverse the direction of the sphere's expansion: collapse the fluctuation and trace the eigenstates back to their origin. As the sphere collapses, time and space become more similar, and the number of eigenstates we need to describe the relationships reduces — which means the motion is more uniform and less turbulent, as if it was all coming from a single point. And that is the big bang theory.
 
+A correction to the picture above: entropy is not the universe expanding. It is our symmetrical interaction with another universe — like an overlap. As our volume overlaps it, the rate of change of entropy tells us how much the overlap is changing. Or it is information coming in from another dimension: someone sending a signal. The expanding sphere still counts the eigenstates correctly, but what it is counting is the changing overlap, not an inflating volume.
+
 ## 11. Fourier decomposition of a local boundary
 
 The energy fluctuation in a local boundary area can be broken up into component waves using the Fourier transform. We take the signal and decompose it. Because we know every wave has an exponential decay and an envelope of its decay, we can trace those wave amplitudes and frequencies back — and get the cosmic background radiation. The state of energy fluctuations at every point tells us every component of motion in the system for every resultant eigenvector.
@@ -180,3 +182,41 @@ On the other end, we should arrive at a single dimensionless equation on the top
 So either another universe or a higher dimension. A higher dimension implies another universe. Perhaps the fluctuation is caused by a changing overlapping volume — thus relating the two degrees of time to the three of space through the rate of change of surface area to volume. Perhaps the fluctuations in energy are merely mechanical, from two overlapping universes, and there is no intent behind them. Or perhaps it is an intentional signal. The consequences of our actions here in our universe can then be seen in another dimension, or in another universe, or in a parallel part of spacetime.
 
 What this suggests is groundbreaking: light is like a capacitance that causes vibration in a resonator. But instead of a computer circuit and a capacitor, it is light-energy fluctuation from the cosmic background radiation vibrating masses. And if we know the energy fluctuations and the background radiation, we can break that into component frequencies and integrate over a hidden 4th spatial dimension — and recover the relative motion of every mass in the universe. It completely solves the problem of relative motion. Like an external clock outside the universe.
+
+**Next steps: the rules for solving it.** The steps are these:
+
+1. **Get the cosmic background radiation.** Measure the fluctuation spectrum — the component frequencies of the light-energy fluctuations.
+2. **Use entropy to find the boundary conditions.** The entropy rate gives the envelope: the boundary we integrate over. Entropy itself becomes an integral — part of the layering, part of the stack — and we will also have to reverse it, integrating backward to collapse the eigenstate count toward the single source.
+3. **Integrate over the hidden 4th spatial dimension.** Break the fluctuations into component frequencies and integrate in the frequency domain.
+4. **Then two choices.** Either **(a)** split into components and ask what each component is: is it a message from the parallel universe? Do the individual components, combined in some new way, contain intelligence — or do their rotated counterparts, or the convolution itself, contain something? Or **(b)** rotate 180 degrees and read off the relative position changes of every mass.
+5. Even if there is no intelligence from the higher dimension, the symmetry still holds, and this still acts as a universal clock. The clock does not need a sender.
+
+Then we have the universal clock, and we know everything in all of space and time all at once.
+
+The entropy integral is the relation between mass and time, and it may let us flip the wave equation into a universal clock equation in terms of $T_1$ and $T_2$ instead of $M_1$ and $M_2$. By symmetry its form is exactly opposite to the mass one. With the mass waves
+
+$$
+W_1(M_1,M_2) = A_1 e^{i(k_1 M_1 - \omega_1 M_2)}, \qquad W_2(M_2,M_1) = A_2 e^{i(k_2 M_2 - \omega_2 M_1)},
+$$
+
+the clock reads (proposed), with $T_1, T_2$ the temporal coordinates playing the role the masses played and $B_1, B_2$ the clock amplitudes:
+
+$$
+U_1(T_1,T_2) = B_1 e^{-i(k_1 T_1 - \omega_1 T_2)}, \qquad U_2(T_2,T_1) = B_2 e^{-i(k_2 T_2 - \omega_2 T_1)}.
+$$
+
+The negative sign is the current guess — exactly opposite. But converting domains through the phasor domain suggests it might instead be the inverse magnitude, $k_1 \to 1/k_1$, $\omega_1 \to 1/\omega_1$:
+
+$$
+U_1(T_1,T_2) = B_1 e^{i(T_1/k_1 - T_2/\omega_1)}, \qquad U_2(T_2,T_1) = B_2 e^{i(T_2/k_2 - T_1/\omega_2)}.
+$$
+
+Either form gives another invariant in the phase domain, relating amplitude in space to amplitude in time — the amplitude relation the notes already carry, now mirrored. And entropy joins the stack as its own integral layer,
+
+$$
+\mathcal{S}(\tau) = \int \sigma(\tau')\, d\tau',
+$$
+
+with $\sigma$ the fluctuation-increase (entropy) rate: run forward it layers new eigenstates, run backward it reverses the entropy part.
+
+The universal clock would basically solve relativity, because it gives us one external clock — the same clock for every mass, against which all relative motion is read.
