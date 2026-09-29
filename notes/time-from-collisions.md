@@ -135,6 +135,7 @@ Integrate that rocking in time and you get the clock ratio — the apparent time
 
 Time, at a point, is the rate of change of frequency in the field of gravitational waves — the excitation of frequencies at each point in space. The rocking golden point is that excitation, drawn — a clock relative to some external body.
 
+**The clock drawn on the orbits.** The Motion tab's newest graph, "The Clock: Balance Point on the Eigen Line," draws this clock directly on the two-body orbits: it duplicates "Our View: Space Branches Split" and squishes the circular orbits into ellipses — the external force stretching the wavelength of gravity. The balance point becomes a yellow dot riding a small circle of radius $a - b$ (the squish amount) about the locked center, at the same rate as the bodies. It stays on the $m_1$–$m_2$ eigen line while the ellipse radii breathe, so it slides back and forth between the bodies — the body on the dot's side taking the extra wavelength contraction. The dot's steady circling is the clock: its back-and-forth along the line, read against the external reference, is the time-dilation reading when a third body acts. This is how the center of mass changes along the eigen line during the orbits.
 
 ## 8. The clock belongs to a third reference
 
@@ -161,7 +162,7 @@ One more rule, and it is new: **the reference point of motion and the reference 
 
 Here is the correction this theory owed Kepler: he was never wrong. He did exactly what the three-body construction did.
 
-Take the 3D motion — bodies accelerating through the field, chaotic to the eye — and find the plane they stay relatively locked on. That plane is constructed in 3D spacetime: you compute the relative vectors in three dimensions, then collapse to the two-dimensional plane where the locking holds. On that plane, the relative motion is an ellipse. That is Kepler's first law — and it is also the Wave Lab's three-body ellipses. The same operation, the same result.
+Take the 3D motion — bodies accelerating through the field, chaotic to the eye — and find the plane they stay relatively locked on. That plane is constructed in 3D spacetime: you compute the relative vectors in three dimensions, then collapse to the two-dimensional plane where the locking holds. On that plane, the relative motion is an ellipse. That is Kepler's first law — and it is also the Wave Lab's three-body ellipses. The same operation, the same result. One correction to the earlier telling: the external force does not contract the circle into an ellipse — it stretches the wavelength of gravity, stretching the circle into an ellipse.
 
 The first time through, with two bodies, the relative velocity in the ignored dimension was constant — which is why the motion wrapped into a circle. Constant relative velocity plus one collapsed dimension gives a closed curve. With three bodies the relative velocities are not constant — there is acceleration relative to something else — so the motion will not close in 3D. But you can still shift into two dimensions and find the plane they all orbit on. That plane is the eigenplane: the flat 2D coordinate system, cut through 3D space, on which the bodies stay relatively locked.
 

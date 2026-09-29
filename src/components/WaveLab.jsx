@@ -1320,6 +1320,108 @@ function renderUnifiedCenterFrame(ctx, canvas, s, tau) {
   ctx.fillText('m\u2082', p2x, cy + 28)
   ctx.restore()
 }
+// The Clock: Balance Point on the Eigen Line. A duplicate of "Our View:
+// Space Branches Split" with the circular orbits squished into ellipses —
+// the external force stretches the wavelength of gravity. Eccentricity from
+// the balance-point split, as in Kepler's graph: e = |M1-M2|/(M1+M2).
+// The balance point is a yellow dot riding a small circle of radius (a-b) —
+// the squish amount — about the locked center, at the same rate as the
+// bodies. It stays exactly on the m1-m2 eigen line (same angle phi) while
+// the bodies' ellipse radii breathe, so it slides back and forth between
+// m1 and m2: the body on the dot's side takes the extra wavelength
+// contraction. The dot's steady circling is the clock — its back-and-forth
+// along the line, read against the external reference, is the time-dilation
+// reading when a third body acts. (The small circle is centered on the
+// locked center rather than the empty focus: that is the placement that
+// keeps the dot exactly on the eigen line.)
+function renderBalanceClockFrame(ctx, canvas, s, tau) {
+  const g = frameSetup(ctx, canvas)
+  if (!(s.M1 + s.M2 > 0)) return
+  const P = gravityParams(s.M1, s.M2)
+  const { tauMax } = wobbleCurves(s.M1, s.M2, P)
+  const lamStar = Math.min(Math.max((X_MAX * s.M2) / (s.M1 + s.M2), 0), X_MAX)
+  const R1 = lamStar, R2 = X_MAX - lamStar
+  const e = Math.min(Math.abs(2 * lamStar - X_MAX) / X_MAX, 0.999)
+  const k = Math.sqrt(1 - e * e)
+  const { padL, padT, pw, ph } = g
+  const cx = padL + pw / 2, cy = padT + ph / 2
+  const sc = ((Math.min(pw, ph) / 2) * 0.78) / X_MAX
+  const r1 = R1 * sc, r2 = R2 * sc
+  const phi = 2 * Math.PI * (((tau % tauMax) + tauMax) % tauMax) / tauMax
+  const ux = Math.cos(phi), uy = Math.sin(phi)
+  // Ellipse radius in direction (ux, uy): x^2/r^2 + y^2/(rk)^2 = 1.
+  const denom = Math.sqrt(k * k * ux * ux + uy * uy)
+  const RR1 = (r1 * k) / denom, RR2 = (r2 * k) / denom
+  const p1x = cx + RR1 * ux, p1y = cy + RR1 * uy
+  const p2x = cx - RR2 * ux, p2y = cy - RR2 * uy
+  // The dot's circle: radius (a-b) of the relative orbit, clamped so the
+  // dot never crosses the nearer body.
+  const delta = Math.min(X_MAX * (1 - k) * sc, 0.45 * Math.min(r1, r2) * k * sc)
+  const dx = cx + delta * ux, dy = cy + delta * uy
+  const dr1 = dotRadius(s.M1, s.M1, s.M2)
+  const dr2 = dotRadius(s.M2, s.M1, s.M2)
+  ctx.save()
+  // Orbit ellipse guides (the squished circles).
+  ctx.strokeStyle = '#e5dcc0'
+  ctx.lineWidth = 1
+  ctx.beginPath(); ctx.ellipse(cx, cy, r1, r1 * k, 0, 0, 2 * Math.PI); ctx.stroke()
+  ctx.beginPath(); ctx.ellipse(cx, cy, r2, r2 * k, 0, 0, 2 * Math.PI); ctx.stroke()
+  // External reference: the static rest line the clock is read against.
+  ctx.strokeStyle = '#e5dcc0'
+  ctx.lineWidth = 1
+  ctx.setLineDash([4, 4])
+  ctx.beginPath(); ctx.moveTo(padL, cy); ctx.lineTo(padL + pw, cy); ctx.stroke()
+  ctx.setLineDash([])
+  ctx.fillStyle = '#a99760'
+  ctx.font = '11px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'left'
+  ctx.fillText('external reference', padL + 6, cy - 8)
+  // The dot's track: circle of radius (a-b) about the locked center.
+  if (delta > 0.5) {
+    ctx.strokeStyle = '#d9a441'
+    ctx.globalAlpha = 0.5
+    ctx.lineWidth = 1
+    ctx.setLineDash([3, 3])
+    ctx.beginPath(); ctx.arc(cx, cy, delta, 0, 2 * Math.PI); ctx.stroke()
+    ctx.setLineDash([])
+    ctx.globalAlpha = 1
+  }
+  // Eigen line through the bodies.
+  const span = Math.max(RR1, RR2) + 14
+  ctx.strokeStyle = '#b3a684'
+  ctx.lineWidth = 2
+  ctx.beginPath()
+  ctx.moveTo(cx - span * ux, cy - span * uy)
+  ctx.lineTo(cx + span * ux, cy + span * uy)
+  ctx.stroke()
+  // Locked center cross.
+  ctx.strokeStyle = '#a99760'
+  ctx.lineWidth = 1.5
+  ctx.beginPath()
+  ctx.moveTo(cx - 6, cy); ctx.lineTo(cx + 6, cy)
+  ctx.moveTo(cx, cy - 6); ctx.lineTo(cx, cy + 6)
+  ctx.stroke()
+  ctx.fillStyle = '#715f43'
+  ctx.font = '11px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'center'
+  ctx.fillText('locked center', cx, cy + 20)
+  // Bodies.
+  const dot = (x, y, r, color, label) => {
+    ctx.fillStyle = color
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill()
+    ctx.fillStyle = '#3a2c1a'
+    ctx.font = '600 13px "IBM Plex Mono", monospace'
+    ctx.textAlign = 'center'
+    ctx.fillText(label, x, y + 26)
+  }
+  dot(p1x, p1y, dr1, C1, 'm\u2081')
+  dot(p2x, p2y, dr2, C2, 'm\u2082')
+  // The balance point: yellow dot — the clock.
+  ctx.fillStyle = '#d9a441'
+  ctx.beginPath(); ctx.arc(dx, dy, 6, 0, 2 * Math.PI); ctx.fill()
+  ctx.restore()
+}
+
 // A Clock Relative to an External Body. No bodies are drawn — just a light
 // grey line that fits inside the graph, and a solid golden point rocking on
 // it: the turbulence point read as a clock. Its rest position sits at the
@@ -1407,6 +1509,21 @@ function renderEllipseFrame(ctx, canvas, s, tau) {
   ctx.moveTo(ux - 6, ey); ctx.lineTo(ux + 6, ey)
   ctx.moveTo(ux, ey - 6); ctx.lineTo(ux, ey + 6)
   ctx.stroke()
+  // External force arrows on the left — the force stretches the wavelength
+  // of gravity, stretching the circle into the ellipse.
+  ctx.strokeStyle = '#8a6d3b'
+  ctx.fillStyle = '#8a6d3b'
+  ctx.lineWidth = 2
+  for (const ay of [ey - 24, ey, ey + 24]) {
+    const ax = g.padL + 12
+    ctx.beginPath(); ctx.moveTo(ax + 18, ay); ctx.lineTo(ax, ay); ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(ax, ay); ctx.lineTo(ax + 7, ay - 4); ctx.lineTo(ax + 7, ay + 4)
+    ctx.closePath(); ctx.fill()
+  }
+  ctx.font = '11px "IBM Plex Mono", monospace'
+  ctx.textAlign = 'left'
+  ctx.fillText('external force', g.padL + 34, ey - 26)
   // Force line: gravity acts along the line joining the two masses.
   ctx.globalAlpha = 0.55
   ctx.strokeStyle = '#b3a684'
@@ -1679,6 +1796,7 @@ export default function WaveLab() {
   const canvasOrbitTrueRef = useRef(null)
   const canvasUnifiedRef = useRef(null)
   const canvasClockRef = useRef(null)
+  const canvasBalanceClockRef = useRef(null)
   const canvasPushPullRef = useRef(null)
   const canvasPushPullTimeRef = useRef(null)
   const canvasTBSq0Ref = useRef(null)
@@ -1752,6 +1870,8 @@ export default function WaveLab() {
         if (un) renderUnifiedCenterFrame(un.getContext('2d'), un, s, tauRef.current)
         const ck = canvasClockRef.current
         if (ck) renderUniversalClockFrame(ck.getContext('2d'), ck, s, tauRef.current)
+        const bc = canvasBalanceClockRef.current
+        if (bc) renderBalanceClockFrame(bc.getContext('2d'), bc, s, tauRef.current)
         const pp = canvasPushPullRef.current
         if (pp) renderPushPullFrame(pp.getContext('2d'), pp, s, tauRef.current, s.ppDisplay)
         const ppt = canvasPushPullTimeRef.current
@@ -2275,7 +2395,7 @@ export default function WaveLab() {
                 <span><Tex tex="M_{\max} \text{ fixed at a focus}" /></span>
               </div>
             </div>
-            <p className="graph-note">External force with constant velocity — but velocity and force are not balanced: an additional unknown force from a 4th body contracts the circle into an ellipse.</p>
+            <p className="graph-note">External force with constant velocity — but velocity and force are not balanced: an additional unknown force from a 4th body stretches the wavelength of gravity, stretching the circle into an ellipse.</p>
             <canvas ref={canvasEllipseRef} className="wave-canvas-orbit" />
             <canvas ref={canvasEllipseGeomRef} className="wave-canvas-orbit" />
             <div className="graph-caption"><Tex tex="\text{static ellipse: } a \text{ semi-major axis, } b \text{ semi-minor axis}" /></div>
@@ -2308,9 +2428,26 @@ export default function WaveLab() {
                 <span><Tex tex="\text{motion with external force and perpendicular velocity}" /></span>
               </div>
             </div>
+            <p className="graph-note">How the center of mass changes along the eigen line during the orbits.</p>
             <canvas ref={canvasClockRef} className="wave-canvas-orbit-lg" />
             <div className="graph-caption"><Tex tex="\text{the point's position on the line is the time reading --- integrating the rocking gives the clock ratio}" /></div>
             <div className="graph-caption"><Tex tex="\text{another eigenstate of the system --- the relative time difference}" /></div>
+            <div className="graph-footnote">xy plane</div>
+          </div>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">The Clock: Balance Point on the Eigen Line</h2>
+            </div>
+            <div className="graph-meta-row">
+              <div className="legend">
+                <span><Tex tex="\text{circular orbits squished into ellipses --- the external force stretches the wavelength}" /></span>
+                <span><Tex tex="\text{yellow dot: the balance point, circling the locked center at radius } a-b" /></span>
+              </div>
+            </div>
+            <p className="graph-note">The symmetric balance point shifts at a constant rate — our clock. Its back-and-forth along the eigen line, read against the external reference, tells how much time dilation occurs when a third body acts.</p>
+            <canvas ref={canvasBalanceClockRef} className="wave-canvas-orbit-lg" />
+            <div className="graph-caption"><Tex tex="\text{the dot stays on the m1--m2 line, sliding back and forth between the bodies}" /></div>
+            <div className="graph-caption"><Tex tex="\text{the body on the dot's side takes the extra wavelength contraction}" /></div>
             <div className="graph-footnote">xy plane</div>
           </div>
           </>
