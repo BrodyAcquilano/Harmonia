@@ -1242,7 +1242,7 @@ function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
 // the rotating line -- the same wobble as "A Clock Relative to an External
 // Body," but from the bird's-eye xy view. The dot's motion is the orbit
 // ellipse scaled by the mass ratio about the focus: its own small ellipse.
-// The steady wobble is the clock, read against the external reference.
+// The steady wobble is the clock, read against the external force.
 function renderBalanceClockFrame(ctx, canvas, s, tau) {
   const g = frameSetup(ctx, canvas)
   if (!(s.M1 + s.M2 > 0)) return
@@ -1298,7 +1298,7 @@ function renderBalanceClockFrame(ctx, canvas, s, tau) {
   ctx.fillStyle = '#a99760'
   ctx.font = '11px "IBM Plex Mono", monospace'
   ctx.textAlign = 'left'
-  ctx.fillText('external reference', padL + 6, fy - 8)
+  ctx.fillText('external force', padL + 6, fy - 8)
   // The dot's own track: the orbit ellipse scaled by the mass ratio about
   // the occupied focus.
   ctx.strokeStyle = '#d9a441'
@@ -1333,36 +1333,52 @@ function renderBalanceClockFrame(ctx, canvas, s, tau) {
   ctx.restore()
 }
 
-// A Clock Relative to an External Body. No bodies are drawn — just a light
-// grey line that fits inside the graph, and a solid golden point rocking on
-// it: the turbulence point read as a clock. Its rest position sits at the
-// balance-point split (the clock ratio T₁/T₂ = M₂/M₁); its position on the
-// line is the time reading. Motion with external force and perpendicular
-// velocity.
+// A Clock Relative to an External Body. The eigen point (golden dot) is
+// locked at the center -- it does not move. The eigen line stretches on
+// either side of it, following the proportions that define the line
+// underneath: each side stretches by its mass proportion, m1 sitting at
+// L*m2/(m1+m2) and m2 at L*m1/(m1+m2) from the center, so the center of
+// mass stays exactly at the locked point. The stretch rate is borrowed
+// from the Kepler ellipse below: the line length breathes with the
+// ellipse's radial factor r(phi)/a as the masses move around it. This
+// apparent stretching relative to the eigenpoint in 1D is time dilation.
 function renderUniversalClockFrame(ctx, canvas, s, tau) {
   const g = frameSetup(ctx, canvas)
   if (!(s.M1 + s.M2 > 0)) return
   const P = gravityParams(s.M1, s.M2)
-  const { T1, T2, NT, x1, x2 } = wobbleCurves(s.M1, s.M2, P)
-  const c = samplePeriodic(x1, T1, NT, tau) + samplePeriodic(x2, T2, NT, tau)
-  let cMax = 0.1
-  for (let i = 0; i < NT; i++) cMax = Math.max(cMax, Math.abs(x1[i] + x2[i]))
+  const { tauMax } = wobbleCurves(s.M1, s.M2, P)
+  // Eccentricity from the balance-point split -- the same construction as
+  // the Kepler ellipse below.
+  const lamStar = (X_MAX * s.M2) / (s.M1 + s.M2)
+  const e = Math.min(Math.abs(2 * lamStar - X_MAX) / X_MAX, 0.999)
+  const phi = 2 * Math.PI * (((tau % tauMax) + tauMax) % tauMax) / tauMax
+  const rFactor = (1 - e * e) / (1 + e * Math.cos(phi))
   const { padL, padT, pw, ph } = g
-  const midY = padT + ph / 2
-  // The line fits inside the graph with margin on both ends.
-  const xL = padL + pw * 0.25, xR = padL + pw * 0.75
-  // Rest position at the balance-point split (the clock ratio).
-  const frac = (s.M1 + s.M2 > 0) ? s.M2 / (s.M1 + s.M2) : 0.5
-  const baseX = xL + (xR - xL) * frac
-  const gx = baseX + (c / cMax) * (pw * 0.08)
+  const cx = padL + pw / 2, midY = padT + ph / 2
+  // The line length breathes with the ellipse's stretch rate; scaled so the
+  // far side always fits inside the graph.
+  const L = ((pw * 0.42) / (1 + e)) * rFactor
+  const M = s.M1 + s.M2
+  const xL = cx - L * (s.M2 / M), xR = cx + L * (s.M1 / M)
   ctx.save()
-  // Light grey line — the clock's track.
+  // The eigen line, stretching about the locked center.
   ctx.strokeStyle = '#d8d2c2'
   ctx.lineWidth = 2
   ctx.beginPath(); ctx.moveTo(xL, midY); ctx.lineTo(xR, midY); ctx.stroke()
-  // The golden point: the time reading, rocking on the line.
+  // The masses, attached to the line at their lever proportions.
+  const dot = (x, r, color, label) => {
+    ctx.fillStyle = color
+    ctx.beginPath(); ctx.arc(x, midY, r, 0, 2 * Math.PI); ctx.fill()
+    ctx.fillStyle = '#3a2c1a'
+    ctx.font = '600 13px "IBM Plex Mono", monospace'
+    ctx.textAlign = 'center'
+    ctx.fillText(label, x, midY + 26)
+  }
+  dot(xL, dotRadius(s.M1, s.M1, s.M2), C1, 'm\u2081')
+  dot(xR, dotRadius(s.M2, s.M1, s.M2), C2, 'm\u2082')
+  // The eigen point: locked at the center.
   ctx.fillStyle = '#d9a441'
-  ctx.beginPath(); ctx.arc(gx, midY, 7, 0, 2 * Math.PI); ctx.fill()
+  ctx.beginPath(); ctx.arc(cx, midY, 7, 0, 2 * Math.PI); ctx.fill()
   ctx.restore()
 }
 // Motion tab: elliptical relative orbit — the step between the circular
@@ -2261,7 +2277,7 @@ export default function WaveLab() {
                 <span><Tex tex="\text{axis wrapped around the center, split at } \lambda^*" /></span>
               </div>
             </div>
-            <p className="graph-note">Relative to an external reference on the force eigenvector — the balance point, the 1D eigenpoint (center of mass). Constant velocity from a third body in the eigen plane; no external force outside the eigen plane.</p>
+            <p className="graph-note">Relative to an external reference on the force eigenvector — the balance point, the 1D eigenpoint (center of mass), the perfect reference point. Constant velocity from a third body in the eigen plane; no external force outside the eigen plane.</p>
             <canvas ref={canvasOrbitTrueRef} className="wave-canvas-orbit-lg" />
             <div className="graph-foot-row">
               <div className="zoom-controls">
@@ -2322,11 +2338,12 @@ export default function WaveLab() {
                 <span><Tex tex="\text{motion with external force and perpendicular velocity}" /></span>
               </div>
             </div>
-            <p className="graph-note">How the center of mass (the eigen point) moves along the eigen line, due to some external force outside the eigen plane.</p>
+            <p className="graph-note">The eigen point stays locked \u2014 the eigen line stretches on either side of it, each side by its mass proportion, due to some external force outside the eigen plane. This apparent stretching relative to the eigenpoint in 1D is time dilation.</p>
             <canvas ref={canvasClockRef} className="wave-canvas-orbit-lg" />
-            <div className="graph-caption"><Tex tex="\text{the point's position on the line is the time reading --- integrating the rocking gives the clock ratio}" /></div>
+            <div className="graph-caption"><Tex tex="\\text{the eigen point stays locked --- the line stretches on either side, each side by its mass proportion}" /></div>
+            <div className="graph-caption"><Tex tex="\\text{apparent stretching relative to the eigenpoint in 1D --- this is time dilation}" /></div>
             <div className="graph-caption"><Tex tex="\text{another eigenstate of the system --- the relative time difference}" /></div>
-            <div className="graph-footnote">xy plane</div>
+            <div className="graph-footnote">1D eigen line</div>
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
@@ -2338,7 +2355,7 @@ export default function WaveLab() {
                 <span><Tex tex="\text{yellow dot: the balance point, riding its own small ellipse}" /></span>
               </div>
             </div>
-            <p className="graph-note">The symmetric balance point shifts at a constant rate — our clock. Its back-and-forth along the eigen line, read against the external reference, tells how much time dilation occurs when a third body acts.</p>
+            <p className="graph-note">The symmetric balance point shifts at a constant rate — our clock. Its back-and-forth along the eigen line, read against the external force, tells how much time dilation occurs when a third body acts.</p>
             <canvas ref={canvasBalanceClockRef} className="wave-canvas-orbit-lg" />
             <div className="graph-caption"><Tex tex="\text{the line gets longer on the stretched side --- the fixed ratio makes the point wobble}" /></div>
             <div className="graph-caption"><Tex tex="\text{the dot traces the orbit ellipse scaled by the mass ratio --- its own equation of motion}" /></div>
