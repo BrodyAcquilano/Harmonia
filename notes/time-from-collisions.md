@@ -25,11 +25,11 @@
 
 ## 1. What the animation showed
 
-Watching the two-body motion, something becomes clear that the equations had been hiding: **it is the center that moves, not the bodies.**
+Watching the two-body motion, something becomes clear that the equations had been hiding — and I stated it too strongly the first time I wrote this section. It is not the center *instead of* the bodies. It is both.
 
-The old picture had each body riding its own wobble — $X_1(t)$ carrying $M_1$, $X_2(t)$ carrying $M_2$, each displaced from its mean. But fix the center between the two circles and let the configuration rotate, and the truth comes out: the bodies are rocking back and forth *together*, locked at their separation, and what actually travels is the point between them.
+The old picture had each body riding its own wobble — $X_1(t)$ carrying $M_1$, $X_2(t)$ carrying $M_2$, each displaced from its mean. Fix the center between the two circles and let the configuration rotate, and part of the truth comes out: the bodies are rocking back and forth *together*, locked at their separation by gravity. The wobble does not separate them — they hand their relative motion to the point they share.
 
-The bodies are locked by gravity at a fixed distance. The wobble does not move them relative to each other — it moves the center underneath them.
+But that is only half. The center itself travels — turbulently, shaken by the same field of colliding mass-waves (§2). So each body sits at $C(t) + p_n + X_n(t)$: the turbulent center, plus its locked position in the configuration, plus its own branch wobble relative to the center. The bodies move relative to the center, and the center moves relative to everything else. Both motions are real, and the time we are trying to build has to count both.
 
 
 ## 2. The turbulence picture
