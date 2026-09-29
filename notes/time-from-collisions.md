@@ -74,7 +74,7 @@ So the eigen line resides **parallel** to the plane of motion — it lies in the
 
 Finding this resultant wobble is not switching coordinate references or viewing the motion a new way. It is inferring another property from the system: how much we are moving relative to an external force. The velocity integral is the acceleration from the external force — and from it we know not only how much each body wobbles relative to one another in each direction, but how much each one stretches time relative to some third reference point. Two uses for the same acceleration: find the velocity over space, or find the time difference over space relative to the energy difference caused by mass.
 
-$\mathbf{C}(t)$ is the *resultant* — the vector sum of the branch wobbles. It is the whole pair’s answer to the external force, delivered as a stretch of the orbit. This is the math the Motion tab’s "Wavelength Expansion and Contraction: External Force" box is built on: the bodies wobbling about the fixed center at the balance-point split, the external force pulling on the left, the circular swing stretched into an ellipse — expansion on one side, contraction on the other — read against the external reference.
+$\mathbf{C}(t)$ is the *resultant* — the vector sum of the branch wobbles. It is the whole pair’s answer to the external force, delivered as a stretch of the orbit. This is the math the wavelength-expansion construction is built on: the bodies wobbling about the fixed center at the balance-point split, the external force pulling on the left, the circular swing stretched into an ellipse — expansion on one side, contraction on the other — read against the external reference.
 
 
 ## 4. The new symmetry rules

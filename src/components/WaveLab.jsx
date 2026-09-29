@@ -1233,93 +1233,6 @@ function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
   }
   ctx.restore()
 }
-// Wavelength Expansion and Contraction: External Force. The center is FIXED —
-// the 1D eigenpoint (balance point / center of mass). An external force pulls
-// on the left side at its own arbitrary rate (1 unit, not set by the masses),
-// so the bodies no longer circle the center: the circular swing is stretched
-// into an ellipse — wavelength expansion on the pulled side, contraction on
-// the other. This adds acceleration (velocity not constant), unlike the other
-// Motion graphs. yz plane: the horizontal axis is the line of centers.
-function renderUnifiedCenterFrame(ctx, canvas, s, tau) {
-  const g = frameSetup(ctx, canvas)
-  if (!(s.M1 + s.M2 > 0)) return
-  const P = gravityParams(s.M1, s.M2)
-  const { T1, T2, NT, x1, x2, tauMax } = wobbleCurves(s.M1, s.M2, P)
-  const v1 = samplePeriodic(x1, T1, NT, tau)
-  const v2 = samplePeriodic(x2, T2, NT, tau)
-  let vMax = 0.1
-  for (let i = 0; i < NT; i++) vMax = Math.max(vMax, Math.abs(x1[i]), Math.abs(x2[i]))
-  const lamStar = Math.min(Math.max((X_MAX * s.M2) / (s.M1 + s.M2), 0), X_MAX)
-  const R1 = lamStar, R2 = X_MAX - lamStar
-  const { padL, padT, pw, ph } = g
-  const cx = padL + pw / 2, cy = padT + ph / 2
-  const sc = ((Math.min(pw, ph) / 2) * 0.78) / X_MAX
-  // External force: arbitrary 1-unit rate — not derived from the masses.
-  // Scaled with the body motion so the whole swing fits in the box.
-  const extAmp = pw * 0.05
-  const phi = 2 * Math.PI * (((tau % tauMax) + tauMax) % tauMax) / tauMax
-  const fExt = extAmp * Math.sin(phi)
-  // Bodies wobble about the FIXED center; the external pull stretches the
-  // swing — expansion on the pulled (left) side, contraction on the right.
-  const wobAmp = pw * 0.05
-  const p1x = cx - R1 * sc + (v1 / vMax) * wobAmp + fExt
-  const p2x = cx + R2 * sc + (v2 / vMax) * wobAmp + fExt
-  const r1 = dotRadius(s.M1, s.M1, s.M2)
-  const r2 = dotRadius(s.M2, s.M1, s.M2)
-  ctx.save()
-  // External reference: the static rest line the stretch is read against.
-  ctx.strokeStyle = '#e5dcc0'
-  ctx.lineWidth = 1
-  ctx.setLineDash([4, 4])
-  ctx.beginPath(); ctx.moveTo(padL, cy); ctx.lineTo(padL + pw, cy); ctx.stroke()
-  ctx.setLineDash([])
-  ctx.fillStyle = '#a99760'
-  ctx.font = '11px "IBM Plex Mono", monospace'
-  ctx.textAlign = 'left'
-  ctx.fillText('external reference', padL + 6, cy - 8)
-  // The eigen line through the center — fixed; bodies ride it left and right.
-  const span = X_MAX * sc + wobAmp + extAmp
-  ctx.strokeStyle = '#b3a684'
-  ctx.lineWidth = 2
-  ctx.beginPath(); ctx.moveTo(cx - span, cy); ctx.lineTo(cx + span, cy); ctx.stroke()
-  ctx.fillStyle = '#715f43'
-  ctx.font = '11px "IBM Plex Mono", monospace'
-  ctx.textAlign = 'center'
-  ctx.fillText('eigen line \u2016 plane of motion', cx, cy - 14)
-  // Bodies (heavier larger), wobbling about the fixed center.
-  ctx.fillStyle = C1
-  ctx.beginPath(); ctx.arc(p1x, cy, r1, 0, 2 * Math.PI); ctx.fill()
-  ctx.fillStyle = C2
-  ctx.beginPath(); ctx.arc(p2x, cy, r2, 0, 2 * Math.PI); ctx.fill()
-  // The center: a gold cross — fixed, the 1D eigenpoint.
-  ctx.strokeStyle = '#d9a441'
-  ctx.lineWidth = 2
-  ctx.beginPath()
-  ctx.moveTo(cx - 8, cy); ctx.lineTo(cx + 8, cy)
-  ctx.moveTo(cx, cy - 8); ctx.lineTo(cx, cy + 8)
-  ctx.stroke()
-  // External force arrows on the left side.
-  ctx.strokeStyle = '#8a6d3b'
-  ctx.fillStyle = '#8a6d3b'
-  ctx.lineWidth = 2
-  for (const ay of [cy - 22, cy, cy + 22]) {
-    const ax = padL + 14
-    ctx.beginPath(); ctx.moveTo(ax + 18, ay); ctx.lineTo(ax, ay); ctx.stroke()
-    ctx.beginPath()
-    ctx.moveTo(ax, ay); ctx.lineTo(ax + 7, ay - 4); ctx.lineTo(ax + 7, ay + 4)
-    ctx.closePath(); ctx.fill()
-  }
-  ctx.font = '11px "IBM Plex Mono", monospace'
-  ctx.textAlign = 'left'
-  ctx.fillText('external force', padL + 38, cy - 24)
-  // Labels.
-  ctx.fillStyle = '#3a2c1a'
-  ctx.font = '600 13px "IBM Plex Mono", monospace'
-  ctx.textAlign = 'center'
-  ctx.fillText('m\u2081', p1x, cy + 28)
-  ctx.fillText('m\u2082', p2x, cy + 28)
-  ctx.restore()
-}
 // The Clock: Balance Point on the Eigen Line. A duplicate of "Our View:
 // Space Branches Split" with the circular orbits squished into ellipses —
 // the external force stretches the wavelength of gravity. Eccentricity from
@@ -1794,7 +1707,6 @@ export default function WaveLab() {
   const canvasInlineWobbleRef = useRef(null)
   const canvasOrbitApparentRef = useRef(null)
   const canvasOrbitTrueRef = useRef(null)
-  const canvasUnifiedRef = useRef(null)
   const canvasClockRef = useRef(null)
   const canvasBalanceClockRef = useRef(null)
   const canvasPushPullRef = useRef(null)
@@ -1866,8 +1778,6 @@ export default function WaveLab() {
         if (eg) renderEllipseGeomFrame(eg.getContext('2d'), eg, s)
         const ot = canvasOrbitTrueRef.current
         if (ot) renderOrbitFrame(ot.getContext('2d'), ot, s, tauRef.current, true)
-        const un = canvasUnifiedRef.current
-        if (un) renderUnifiedCenterFrame(un.getContext('2d'), un, s, tauRef.current)
         const ck = canvasClockRef.current
         if (ck) renderUniversalClockFrame(ck.getContext('2d'), ck, s, tauRef.current)
         const bc = canvasBalanceClockRef.current
@@ -2395,28 +2305,13 @@ export default function WaveLab() {
                 <span><Tex tex="M_{\max} \text{ fixed at a focus}" /></span>
               </div>
             </div>
-            <p className="graph-note">External force with constant velocity — but velocity and force are not balanced: an additional unknown force from a 4th body stretches the wavelength of gravity, stretching the circle into an ellipse.</p>
+            <p className="graph-note">External force with constant velocity — the known external force (the sun) lies in the eigen plane, balanced with velocity, so the orbit stays circular. A second, unknown force — a 4th body outside the eigen plane — is unbalanced: it stretches the wavelength of gravity, stretching the circle into an ellipse.</p>
             <canvas ref={canvasEllipseRef} className="wave-canvas-orbit" />
             <canvas ref={canvasEllipseGeomRef} className="wave-canvas-orbit" />
             <div className="graph-caption"><Tex tex="\text{static ellipse: } a \text{ semi-major axis, } b \text{ semi-minor axis}" /></div>
             <div className="graph-caption"><Tex tex="T^2 \propto a^3" /></div>
             <div className="graph-caption"><Tex tex="\text{Kepler's third law}" /></div>
             <div className="graph-footnote">xy plane</div>
-          </div>
-          <div className="graph-box">
-            <div className="graph-title-row">
-              <h2 className="graph-title">Wavelength Expansion and Contraction: External Force</h2>
-            </div>
-            <div className="graph-meta-row">
-              <div className="legend">
-                <span><Tex tex="\text{external force --- arbitrary 1-unit rate, not set by the masses}" /></span>
-                <span><Tex tex="\text{center fixed --- the 1D eigenpoint}" /></span>
-              </div>
-            </div>
-            <canvas ref={canvasUnifiedRef} className="wave-canvas-orbit-lg" />
-            <div className="graph-caption"><Tex tex="\text{the bodies no longer circle the center --- pulled on the left, the swing stretches into an ellipse}" /></div>
-            <div className="graph-caption"><Tex tex="\text{expansion and contraction need an external force and non-constant velocity --- this graph adds acceleration, unlike the others}" /></div>
-            <div className="graph-footnote">yz plane</div>
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
