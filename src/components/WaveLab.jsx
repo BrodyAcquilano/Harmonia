@@ -2261,7 +2261,7 @@ export default function WaveLab() {
                 <span><Tex tex="\text{axis wrapped around the center, split at } \lambda^*" /></span>
               </div>
             </div>
-            <p className="graph-note">Relative to an external reference on the force eigenvector — the balance point, the 1D eigenpoint (center of mass); constant velocity, no external force.</p>
+            <p className="graph-note">Relative to an external reference on the force eigenvector — the balance point, the 1D eigenpoint (center of mass). Constant velocity from a third body in the eigen plane; no external force outside the eigen plane.</p>
             <canvas ref={canvasOrbitTrueRef} className="wave-canvas-orbit-lg" />
             <div className="graph-foot-row">
               <div className="zoom-controls">
@@ -2287,11 +2287,11 @@ export default function WaveLab() {
             <div className="graph-meta-row">
               <div className="legend">
                 <span><Tex tex="M_{\max} \text{ fixed --- the naive view}" /></span>
-                <span><Tex tex="\text{circular motion --- no external force}" /></span>
+                <span><Tex tex="\text{circular motion --- force in the eigen plane}" /></span>
                 <span><Tex tex="\lambda_2 - \lambda_1 = \lambda_1 - \lambda_2 = x" /></span>
               </div>
             </div>
-            <p className="graph-note">Motion here is perceived motion: the apparent background shift and the angular changes of the stars. There is no absolute frame in this view — only the naive reading.</p>
+            <p className="graph-note">Motion here is perceived motion: the apparent background shift and the angular changes of the stars. The constant velocity comes from an external force in the eigen plane — no force, no velocity, no circular motion.</p>
             <canvas ref={canvasOrbitApparentRef} className="wave-canvas-orbit" />
             <div className="graph-footnote">xy plane</div>
           </div>
@@ -2304,7 +2304,7 @@ export default function WaveLab() {
                 <span><Tex tex="M_{\max} \text{ fixed at a focus}" /></span>
               </div>
             </div>
-            <p className="graph-note">External force with constant velocity — the known external force (the sun) lies in the eigen plane, balanced with velocity, so the orbit stays circular. A second, unknown force — a 4th body outside the eigen plane — is unbalanced: it stretches the wavelength of gravity, stretching the circle into an ellipse.</p>
+            <p className="graph-note">The known external force (the sun) lies in the eigen plane, balanced with velocity — the orbit stays circular. An unknown 4th body outside the eigen plane is unbalanced: it stretches the wavelength of gravity, stretching the circle into an ellipse.</p>
             <canvas ref={canvasEllipseRef} className="wave-canvas-orbit" />
             <canvas ref={canvasEllipseGeomRef} className="wave-canvas-orbit" />
             <div className="graph-caption"><Tex tex="\text{static ellipse: } a \text{ semi-major axis, } b \text{ semi-minor axis}" /></div>

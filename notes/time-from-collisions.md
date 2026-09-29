@@ -33,6 +33,8 @@ The old picture had each body riding its own wobble — $X_1(t)$ carrying $M_1$,
 
 But the second half, as I wrote it, was wrong. The center does not travel — it is fixed, the 1D eigenpoint the motion is read against. The bodies move around it: rocking back and forth together, locked at their separation, each riding its own branch wobble about the center point. So each body sits at $p_n + X_n(t)$: its locked position in the configuration plus its wobble relative to the fixed center. The motion belongs to the bodies; the center is the point it is measured against.
 
+One correction to the old language: the constant velocity is not force-free. It is caused by a third body in the eigen plane — the known external force (the sun), balanced with velocity. With no force there would be no velocity, and no circular motion. What is absent is any external force *outside* the eigen plane; that is what would break the symmetry.
+
 
 ## 2. Wavelength expansion and contraction
 
