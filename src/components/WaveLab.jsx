@@ -2548,11 +2548,11 @@ export default function WaveLab() {
               </div>
             </div>
             <canvas ref={canvasTBMotionRef} className="wave-canvas-sq" />
-            <p className="graph-note">The circles are stretched to ellipses because the eigenpoint is the reference for all of the motions.</p>
+            <p className="graph-note">The circles are stretched to ellipses — not because there is an external force outside the eigenplane, but because we put all of the motion relative to the eigenpoint at the eigenpoint.</p>
           </div>
           <div className="graph-box">
             <div className="graph-title-row">
-              <h2 className="graph-title"><Tex tex="\text{Three Centers: Six Circles}" /></h2>
+              <h2 className="graph-title"><Tex tex="\text{Split Branches: Three Centers: Six Circles}" /></h2>
             </div>
             <div className="graph-meta-row">
               <div className="legend">
