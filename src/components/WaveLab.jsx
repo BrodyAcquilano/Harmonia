@@ -1233,92 +1233,90 @@ function renderOrbitFrame(ctx, canvas, s, tau, trueMotion) {
   }
   ctx.restore()
 }
-// The Clock: Balance Point on the Eigen Line. A duplicate of "Our View:
-// Space Branches Split" with the circular orbits squished into ellipses —
-// the external force stretches the wavelength of gravity. Eccentricity from
-// the balance-point split, as in Kepler's graph: e = |M1-M2|/(M1+M2).
-// The balance point is a yellow dot riding a small circle of radius (a-b) —
-// the squish amount — about the locked center, at the same rate as the
-// bodies. It stays exactly on the m1-m2 eigen line (same angle phi) while
-// the bodies' ellipse radii breathe, so it slides back and forth between
-// m1 and m2: the body on the dot's side takes the extra wavelength
-// contraction. The dot's steady circling is the clock — its back-and-forth
-// along the line, read against the external reference, is the time-dilation
-// reading when a third body acts. (The small circle is centered on the
-// locked center rather than the empty focus: that is the placement that
-// keeps the dot exactly on the eigen line.)
+// The Clock: Balance Point on the Eigen Line. Borrows the Kepler's Ellipse
+// animation -- the larger mass fixed at one focus, the smaller mass orbiting
+// the ellipse -- and draws the balance point on the m1-m2 line at the fixed
+// mass ratio. The line's length changes around the ellipse (longer on the
+// stretched side, where the external force stretches the wavelength of
+// gravity); the ratio stays fixed, so the point wobbles back and forth along
+// the rotating line -- the same wobble as "A Clock Relative to an External
+// Body," but from the bird's-eye xy view. The dot's motion is the orbit
+// ellipse scaled by the mass ratio about the focus: its own small ellipse.
+// The steady wobble is the clock, read against the external reference.
 function renderBalanceClockFrame(ctx, canvas, s, tau) {
   const g = frameSetup(ctx, canvas)
   if (!(s.M1 + s.M2 > 0)) return
   const P = gravityParams(s.M1, s.M2)
   const { tauMax } = wobbleCurves(s.M1, s.M2, P)
-  const lamStar = Math.min(Math.max((X_MAX * s.M2) / (s.M1 + s.M2), 0), X_MAX)
-  const R1 = lamStar, R2 = X_MAX - lamStar
+  // Same ellipse as Kepler's graph: e from the balance-point split.
+  const lamStar = (X_MAX * s.M2) / (s.M1 + s.M2)
   const e = Math.min(Math.abs(2 * lamStar - X_MAX) / X_MAX, 0.999)
-  const k = Math.sqrt(1 - e * e)
+  const a = X_MAX
+  const c = a * e
+  const b = a * Math.sqrt(1 - e * e)
   const { padL, padT, pw, ph } = g
-  const cx = padL + pw / 2, cy = padT + ph / 2
-  const sc = ((Math.min(pw, ph) / 2) * 0.78) / X_MAX
-  const r1 = R1 * sc, r2 = R2 * sc
+  const ex = padL + pw / 2, ey = padT + ph / 2
+  const sc = ((Math.min(pw, ph) / 2) * 0.78) / a
   const phi = 2 * Math.PI * (((tau % tauMax) + tauMax) % tauMax) / tauMax
-  const ux = Math.cos(phi), uy = Math.sin(phi)
-  // Ellipse radius in direction (ux, uy): x^2/r^2 + y^2/(rk)^2 = 1.
-  const denom = Math.sqrt(k * k * ux * ux + uy * uy)
-  const RR1 = (r1 * k) / denom, RR2 = (r2 * k) / denom
-  const p1x = cx + RR1 * ux, p1y = cy + RR1 * uy
-  const p2x = cx - RR2 * ux, p2y = cy - RR2 * uy
-  // The dot's circle: radius (a-b) of the relative orbit, clamped so the
-  // dot never crosses the nearer body.
-  const delta = Math.min(X_MAX * (1 - k) * sc, 0.45 * Math.min(r1, r2) * k * sc)
-  const dx = cx + delta * ux, dy = cy + delta * uy
-  const dr1 = dotRadius(s.M1, s.M1, s.M2)
-  const dr2 = dotRadius(s.M2, s.M1, s.M2)
+  // Occupied focus one focal length ahead of center (periapsis along +x).
+  const fx = ex + c * sc, fy = ey
+  const m1IsMax = s.M1 >= s.M2
+  const fixColor = m1IsMax ? C1 : C2, fixLabel = m1IsMax ? 'm\u2081' : 'm\u2082'
+  const movColor = m1IsMax ? C2 : C1, movLabel = m1IsMax ? 'm\u2082' : 'm\u2081'
+  const fixR = dotRadius(Math.max(s.M1, s.M2), s.M1, s.M2)
+  const movR = dotRadius(Math.min(s.M1, s.M2), s.M1, s.M2)
+  // Distance from the occupied focus at phase phi.
+  const r = (a * (1 - e * e)) / (1 + e * Math.cos(phi))
+  const mx = fx + r * sc * Math.cos(phi)
+  const my = fy + r * sc * Math.sin(phi)
+  // Balance point: the mass ratio along the m1-m2 line. The ratio
+  // lamStar/X_MAX never changes; the line length r does -- so the point
+  // rides its own small ellipse and wobbles along the rotating line.
+  const q = lamStar / X_MAX
+  const bx = fx + q * (mx - fx), by = fy + q * (my - fy)
   ctx.save()
-  // Orbit ellipse guides (the squished circles).
+  // Ellipse guide.
   ctx.strokeStyle = '#e5dcc0'
   ctx.lineWidth = 1
-  ctx.beginPath(); ctx.ellipse(cx, cy, r1, r1 * k, 0, 0, 2 * Math.PI); ctx.stroke()
-  ctx.beginPath(); ctx.ellipse(cx, cy, r2, r2 * k, 0, 0, 2 * Math.PI); ctx.stroke()
+  ctx.beginPath()
+  ctx.ellipse(ex, ey, a * sc, b * sc, 0, 0, 2 * Math.PI)
+  ctx.stroke()
+  // Empty focus marker.
+  ctx.strokeStyle = '#a99760'
+  ctx.lineWidth = 1.5
+  const ux = ex - c * sc
+  ctx.beginPath()
+  ctx.moveTo(ux - 6, ey); ctx.lineTo(ux + 6, ey)
+  ctx.moveTo(ux, ey - 6); ctx.lineTo(ux, ey + 6)
+  ctx.stroke()
   // External reference: the static rest line the clock is read against.
   ctx.strokeStyle = '#e5dcc0'
   ctx.lineWidth = 1
   ctx.setLineDash([4, 4])
-  ctx.beginPath(); ctx.moveTo(padL, cy); ctx.lineTo(padL + pw, cy); ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(padL, fy); ctx.lineTo(padL + pw, fy); ctx.stroke()
   ctx.setLineDash([])
   ctx.fillStyle = '#a99760'
   ctx.font = '11px "IBM Plex Mono", monospace'
   ctx.textAlign = 'left'
-  ctx.fillText('external reference', padL + 6, cy - 8)
-  // The dot's track: circle of radius (a-b) about the locked center.
-  if (delta > 0.5) {
-    ctx.strokeStyle = '#d9a441'
-    ctx.globalAlpha = 0.5
-    ctx.lineWidth = 1
-    ctx.setLineDash([3, 3])
-    ctx.beginPath(); ctx.arc(cx, cy, delta, 0, 2 * Math.PI); ctx.stroke()
-    ctx.setLineDash([])
-    ctx.globalAlpha = 1
-  }
-  // Eigen line through the bodies.
-  const span = Math.max(RR1, RR2) + 14
+  ctx.fillText('external reference', padL + 6, fy - 8)
+  // The dot's own track: the orbit ellipse scaled by the mass ratio about
+  // the occupied focus.
+  ctx.strokeStyle = '#d9a441'
+  ctx.globalAlpha = 0.5
+  ctx.lineWidth = 1
+  ctx.setLineDash([3, 3])
+  ctx.beginPath()
+  ctx.ellipse(fx - q * c * sc, ey, q * a * sc, q * b * sc, 0, 0, 2 * Math.PI)
+  ctx.stroke()
+  ctx.setLineDash([])
+  ctx.globalAlpha = 1
+  // Eigen line: the m1-m2 line the balance point rides.
   ctx.strokeStyle = '#b3a684'
   ctx.lineWidth = 2
   ctx.beginPath()
-  ctx.moveTo(cx - span * ux, cy - span * uy)
-  ctx.lineTo(cx + span * ux, cy + span * uy)
+  ctx.moveTo(fx, fy)
+  ctx.lineTo(mx + 0.12 * (mx - fx), my + 0.12 * (my - fy))
   ctx.stroke()
-  // Locked center cross.
-  ctx.strokeStyle = '#a99760'
-  ctx.lineWidth = 1.5
-  ctx.beginPath()
-  ctx.moveTo(cx - 6, cy); ctx.lineTo(cx + 6, cy)
-  ctx.moveTo(cx, cy - 6); ctx.lineTo(cx, cy + 6)
-  ctx.stroke()
-  ctx.fillStyle = '#715f43'
-  ctx.font = '11px "IBM Plex Mono", monospace'
-  ctx.textAlign = 'center'
-  ctx.fillText('locked center', cx, cy + 20)
-  // Bodies.
   const dot = (x, y, r, color, label) => {
     ctx.fillStyle = color
     ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.fill()
@@ -1327,11 +1325,11 @@ function renderBalanceClockFrame(ctx, canvas, s, tau) {
     ctx.textAlign = 'center'
     ctx.fillText(label, x, y + 26)
   }
-  dot(p1x, p1y, dr1, C1, 'm\u2081')
-  dot(p2x, p2y, dr2, C2, 'm\u2082')
-  // The balance point: yellow dot — the clock.
+  dot(fx, fy, fixR, fixColor, fixLabel)
+  dot(mx, my, movR, movColor, movLabel)
+  // The balance point: yellow dot -- the clock.
   ctx.fillStyle = '#d9a441'
-  ctx.beginPath(); ctx.arc(dx, dy, 6, 0, 2 * Math.PI); ctx.fill()
+  ctx.beginPath(); ctx.arc(bx, by, 6, 0, 2 * Math.PI); ctx.fill()
   ctx.restore()
 }
 
@@ -2335,14 +2333,14 @@ export default function WaveLab() {
             </div>
             <div className="graph-meta-row">
               <div className="legend">
-                <span><Tex tex="\text{circular orbits squished into ellipses --- the external force stretches the wavelength}" /></span>
-                <span><Tex tex="\text{yellow dot: the balance point, circling the locked center at radius } a-b" /></span>
+                <span><Tex tex="\text{the m1--m2 line stretches and contracts --- the mass ratio stays fixed}" /></span>
+                <span><Tex tex="\text{yellow dot: the balance point, riding its own small ellipse" /></span>
               </div>
             </div>
             <p className="graph-note">The symmetric balance point shifts at a constant rate — our clock. Its back-and-forth along the eigen line, read against the external reference, tells how much time dilation occurs when a third body acts.</p>
             <canvas ref={canvasBalanceClockRef} className="wave-canvas-orbit-lg" />
-            <div className="graph-caption"><Tex tex="\text{the dot stays on the m1--m2 line, sliding back and forth between the bodies}" /></div>
-            <div className="graph-caption"><Tex tex="\text{the body on the dot's side takes the extra wavelength contraction}" /></div>
+            <div className="graph-caption"><Tex tex="\text{the line gets longer on the stretched side --- the fixed ratio makes the point wobble}" /></div>
+            <div className="graph-caption"><Tex tex="\text{the dot traces the orbit ellipse scaled by the mass ratio --- its own equation of motion}" /></div>
             <div className="graph-footnote">xy plane</div>
           </div>
           </>
