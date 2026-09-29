@@ -126,7 +126,7 @@ The 3-4-5 boundary conditions fix every constant up to one overall scale — not
 
 ($k_{a,j} = \omega_{a,j} = 1$ on each branch for the first-listed body of each pair is the *normalization* — the chosen reference scale, not a result the boundary conditions derive. What the 3-4-5 data fix are the *relative* values: $k_{b,j}/k_{a,j} = \omega_{b,j}/\omega_{a,j} = \sqrt{M_b/M_a}$, plus the amplitudes, $\beta_{ab}$, and the spans. An absolute wavelength/frequency scale would need another datum.) Six equations, twelve branches — the input side of the machine.
 
-Recomputed under the branched stack of §4: nothing here changes. The branches — the wobble integral split in two directions on the way up, the initial conditions split in two on the way down — run through the same five-dimensional machinery; they do not touch the pair's own constants. The table above stands as written.
+Recomputed under the branched stack of §4: nothing here changes. The branches — the wobble integral split in two directions on the way up, the initial conditions split in two on the way down — run through the same five-layer machinery; they do not touch the pair's own constants. The table above stands as written.
 
 ---
 
