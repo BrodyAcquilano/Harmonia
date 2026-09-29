@@ -1,6 +1,6 @@
 # The 4th Dimension
 
-*The big bang theory, cosmic background radiation. Using the 4th dimension to convert local energy fluctuations to universal position changes.*
+*The big bang theory, cosmic background radiation, dark matter, dark energy. Using the 4th dimension to convert local energy fluctuations to universal position changes.*
 
 ---
 
@@ -24,6 +24,7 @@
 - [16. Entropy, new dimensions, and the signal question](#16-entropy-new-dimensions-and-the-signal-question)
 - [17. From local to universal](#17-from-local-to-universal)
 - [18. Conclusion: what the light might be](#18-conclusion-what-the-light-might-be)
+- [19. When there is no message: the single resultant](#19-when-there-is-no-message-the-single-resultant)
 
 ## 1. The hidden phasor dimension
 
@@ -181,6 +182,8 @@ On the other end, we should arrive at a single dimensionless equation on the top
 
 So either another universe or a higher dimension. A higher dimension implies another universe. Perhaps the fluctuation is caused by a changing overlapping volume — thus relating the two degrees of time to the three of space through the rate of change of surface area to volume. Perhaps the fluctuations in energy are merely mechanical, from two overlapping universes, and there is no intent behind them. Or perhaps it is an intentional signal. The consequences of our actions here in our universe can then be seen in another dimension, or in another universe, or in a parallel part of spacetime.
 
+There is a diagnostic hidden here. If the radiation adds up — if the light accounts for exactly the mass the symmetry demands — then the fluctuations come from mass in our universe and the symmetry holds closed. If it doesn't add up, then the fluctuations in light aren't from the mass in our universe and the symmetry, but from another dimension or another external force: information being sent in, or an overlapping universe. The proportion of the mass could tell us how much overlap there is — and how many universes we are overlapping.
+
 What this suggests is groundbreaking: light is like a capacitance that causes vibration in a resonator. But instead of a computer circuit and a capacitor, it is light-energy fluctuation from the cosmic background radiation vibrating masses. And if we know the energy fluctuations and the background radiation, we can break that into component frequencies and integrate over a hidden 4th spatial dimension — and recover the relative motion of every mass in the universe. It completely solves the problem of relative motion. Like an external clock outside the universe.
 
 **Next steps: the rules for solving it.** The steps are these:
@@ -188,7 +191,7 @@ What this suggests is groundbreaking: light is like a capacitance that causes vi
 1. **Get the cosmic background radiation.** Measure the fluctuation spectrum — the component frequencies of the light-energy fluctuations.
 2. **Use entropy to find the boundary conditions.** The entropy rate gives the envelope: the boundary we integrate over. Entropy itself becomes an integral — part of the layering, part of the stack — and we will also have to reverse it, integrating backward to collapse the eigenstate count toward the single source.
 3. **Integrate over the hidden 4th spatial dimension.** Break the fluctuations into component frequencies and integrate in the frequency domain.
-4. **Then two choices.** Either **(a)** split into components and ask what each component is: is it a message from the parallel universe? Do the individual components, combined in some new way, contain intelligence — or do their rotated counterparts, or the convolution itself, contain something? Or **(b)** rotate 180 degrees and read off the relative position changes of every mass.
+4. **Then two choices.** Either **(a)** split into components and ask what each component is: is it a message from the parallel universe? Do the individual components, combined in some new way, contain intelligence — or do their rotated counterparts, or the convolution itself, contain something? Or **(b)** rotate 180 degrees and read off the relative position changes of every mass (the single-resultant path of §19).
 5. Even if there is no intelligence from the higher dimension, the symmetry still holds, and this still acts as a universal clock. The clock does not need a sender.
 
 Then we have the universal clock, and we know everything in all of space and time all at once.
@@ -220,3 +223,15 @@ $$
 with $\sigma$ the fluctuation-increase (entropy) rate: run forward it layers new eigenstates, run backward it reverses the entropy part.
 
 The universal clock would basically solve relativity, because it gives us one external clock — the same clock for every mass, against which all relative motion is read.
+
+## 19. When there is no message: the single resultant
+
+If we don't treat the cosmic background radiation as an intelligent signal — no separate components being pumped in from an outside source — then we don't split branches. We integrate to get a single resultant.
+
+In that case we need entropy to give us the boundary conditions at a point in time. Then when we rotate into space we can look back and get the fluctuations of every other body — within the bounds. But we have to reverse the entropy, then break it back up into components to find the specific point or mass we care about.
+
+There is an issue: as time advances we lose information. We can no longer predict the motion of particles because they expand too far away — because the further away they are, the less we detect the fluctuations, from the decay in amplitude and our inability to measure the fluctuations. So when we reverse the boundary conditions, we are looking at frequencies of light within a certain boundary: we can only predict the motion of masses at points in space if they are within that boundary.
+
+The further we go back, as entropy decreases, we lose information relating position and time. However, mass restores it. The relationship of mass and time is perfectly symmetric, so we can relate energy to mass directly. The frequency of light tells us the quantity of mass that created it: we know how much each mass is in quantity, and how many distinct masses there are — and the spacetime relationship tells us where to find them.
+
+The only issue is that fluctuations decay. So there becomes mass that can influence things in other parts of space that we don't know about — external to our boundary, too far away to be detectable. However, if they were too far away to be detectable, then they can't have affected the other mass either. If they are close to the other mass, then perhaps the light we see is the extra part of the mass that we don't know about. That unknown extra mass — mass whose fluctuations have decayed past detectability, outside our boundary — is what we call dark matter. But if that radiation doesn't add up — if the light accounts for more or less mass than the symmetry allows — then we know the fluctuations in light aren't from the mass in our universe and the symmetry, but from another dimension or another external force: information being sent in, or an overlapping universe. The proportion of the mass could tell us how much overlap there is, and how many universes we are overlapping.
