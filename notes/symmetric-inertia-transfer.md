@@ -22,7 +22,7 @@
 
 ## 1. What the theory is
 
-Here is the view, stated plainly: **symmetric inertia transfer is a way of changing velocity and time into a symmetric phase domain.** Take time and space — where bodies are, when — and rewrite them as frequency and wavelength — how fast the motion turns, how long its wave is. That is the whole move.
+Here is the view, stated plainly: **symmetric inertia transfer is a way of changing velocity and time into a symmetric phase domain.** Time and space — where bodies are, when — converted using a coordinate transform into a relative frequency domain: frequency and wavelength — how fast the motion turns, how long its wave is. The fifth dimension came from converting into a symmetric wave frequency domain — and then it converts back to a 4 dimensional spacetime. That round trip is the whole move, and the move has a law: **the hidden law of symmetric inertia transfer converts force into relative velocity in the perpendicular direction.**
 
 Three principles run the transform, and they are the theory:
 
@@ -265,7 +265,7 @@ The massless companion supplies a uniform real baseline; the massive field carri
 
 ## 12. The theory, stated
 
-1. **Symmetric inertia transfer is a way of changing velocity and time into a symmetric phase domain.** Time and space are rewritten as frequency and wavelength — a relative frequency domain. Motion is treated as a wave and broken into components in each direction.
+1. **Symmetric inertia transfer is a way of changing velocity and time into a symmetric phase domain.** Time and space are converted by a coordinate transform into a relative frequency domain — a symmetric wave frequency domain, the fifth dimension — and converted back to 4D spacetime. Motion is treated as a wave and broken into components in each direction. The hidden law: force goes in radial and comes out as relative velocity in the perpendicular direction.
 2. **Each step is a limit.** A limit with respect to time, a limit over space, a differentiation, another limit over space, a final substitution. Each limit removes a variable. The theory is what survives the limits.
 3. **Relative phases are invariant.** Absolute phase shifts under every operation; relative phase never changes. The information survives the transform.
 4. **The conserved quantity is read off the boundary and recovered at closure.** $dW_s = 0$ at the top, at the bottom, and on the return — one fact, three writings.

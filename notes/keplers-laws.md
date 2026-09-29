@@ -100,7 +100,7 @@ Then count. Two passages through time: the transformed time — time rewritten a
 
 The picture sharpens one more level. It is just like light emitting from an antenna.
 
-A force acts on the two bodies — and the pair, taken together, *is* the antenna. What an antenna does is cross a boundary: the signal travels down through the circuit as guided current, and then it is emitted — rebuilt in the perpendicular direction, as a free wave. The two-body system does the same thing. The radial field between the bodies is the guided signal; the parallel motion is the emission. The direction changes at the crossing, and that is why the ladder has to go all the way down and come back up.
+A force acts on the two bodies — and the pair, taken together, *is* the antenna. What an antenna does is cross a boundary: the signal travels down through the circuit as guided current, and then it is emitted — rebuilt in the perpendicular direction, as a free wave. The two-body system does the same thing. The radial field between the bodies is the guided signal; the parallel motion is the emission. The direction changes at the crossing, and that is why the ladder has to go all the way down and come back up — the hidden law of symmetric inertia transfer: the transform converts force into relative velocity in the perpendicular direction.
 
 Down first: differentiate, level by level, through all five levels, until you reach the fundamental conservation-of-energy relation — the equation that equals zero. In the original derivation this was the Lagrangian:
 

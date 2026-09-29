@@ -57,7 +57,7 @@ $$
 E_n = \int_0^{\infty} A_n^2 e^{-2\beta x}\,dx = \frac{A_n^2}{2\beta}, \qquad \beta > 0
 $$
 
-This converges if and only if $\beta > 0$ — the decay is the convergence. A pure sinusoid ($\beta = 0$) integrated over all space diverges: infinite energy, amplitude unfixable. The wave lives in the frequency domain — the fifth dimension, entered by the coordinate change — and the envelope is what lets it live there with finite energy. Photons are the physical precedent: they arrive in discrete, finite packets precisely because their waves decay and close off. Quantization is decay, seen from the energy side.
+This converges if and only if $\beta > 0$ — the decay is the convergence. A pure sinusoid ($\beta = 0$) integrated over all space diverges: infinite energy, amplitude unfixable. The wave lives in the frequency domain — the fifth dimension, the symmetric wave frequency domain entered by the coordinate change — and the envelope is what lets it live there with finite energy. Photons are the physical precedent: they arrive in discrete, finite packets precisely because their waves decay and close off. Quantization is decay, seen from the energy side.
 
 ---
 
