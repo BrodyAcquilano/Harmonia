@@ -2322,7 +2322,7 @@ export default function WaveLab() {
                 <span><Tex tex="\text{motion with external force and perpendicular velocity}" /></span>
               </div>
             </div>
-            <p className="graph-note">How the center of mass changes along the eigen line during the orbits.</p>
+            <p className="graph-note">How the center of mass (the eigen point) moves along the eigen line, due to some external force outside the eigen plane.</p>
             <canvas ref={canvasClockRef} className="wave-canvas-orbit-lg" />
             <div className="graph-caption"><Tex tex="\text{the point's position on the line is the time reading --- integrating the rocking gives the clock ratio}" /></div>
             <div className="graph-caption"><Tex tex="\text{another eigenstate of the system --- the relative time difference}" /></div>

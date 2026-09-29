@@ -129,7 +129,7 @@ And the *amount* of time-stretch — how much time dilates moment to moment — 
 
 Fix the frame. Don't let anything move but the point. Now watch: a solid golden point rocking back and forth on a light grey line — the line fits inside the graph, and the point is all there is.
 
-The point is the merged resultant, read as a clock. Its rest position sits at the balance-point split — the mass ratio already said where, $T_1/T_2 = M_2/M_1$ — and it rocks around that rest position with the merged resultant $\mathbf{C}(t)$. The rocking is motion with external force and perpendicular velocity: the point answers the field of some external body, and its position on the line is the time reading.
+The point is the merged resultant, read as a clock. Its rest position sits at the balance-point split — the mass ratio already said where, $T_1/T_2 = M_2/M_1$ — and it rocks around that rest position with the merged resultant $\mathbf{C}(t)$. The rocking is motion with external force and perpendicular velocity: the center of mass (the eigen point) moves along the eigen line, due to some external force outside the eigen plane. The point answers the field of some external body, and its position on the line is the time reading.
 
 Integrate that rocking in time and you get the clock ratio — the apparent time difference between the two bodies in space. The balance point already said so. The animation is that ratio made visible: the golden point is the excitation of frequencies at that point in space.
 
