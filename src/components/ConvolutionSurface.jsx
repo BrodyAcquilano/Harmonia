@@ -56,13 +56,14 @@ function fibPoint(i, n, r, target) {
 // stays bounded. Energy is the inverse, E = 1/u — the 180° partner.
 export function surfU(theta, phi, a, n, N) {
   const env = Math.cos(n * phi)
+  const gamma = 0.618033988749895 // (sqrt(5)-1)/2
   let u = 1
   for (let j = 1; j <= N; j++) {
-    // quadratic phase chirp: the j-th harmonic peaks at th = -2πj/N,
-    // spreading the N harmonics around the full circle instead of
-    // piling them all up at th = 0
-    const dj = (2 * Math.PI * j * j) / N
-    u += (a / j) * Math.cos(j * theta + dj) * env
+    // fixed +/-1 sign pattern (golden-ratio bits): spreads the harmonic
+    // peaks around the circle instead of piling them at th = 0, while
+    // keeping perfect left-right symmetry (unlike a phase shift)
+    const sgn = (Math.floor(j * gamma) % 2 === 0) ? 1 : -1
+    u += (a / j) * sgn * Math.cos(j * theta) * env
   }
   return Math.max(u, 0.05)
 }
