@@ -143,14 +143,13 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
     )
     scene.add(selPoint)
 
-    // eigenvector arrow: shaft + cone head + rounded tip
+    // eigenvector arrow: shaft + cone head
     const UP = new THREE.Vector3(0, 1, 0)
     const arrowMat = new THREE.MeshStandardMaterial({ color: GOLD, emissive: 0x8a6a1f, emissiveIntensity: 0.45, roughness: 0.4 })
     const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 1, 20), arrowMat)
     const head = new THREE.Mesh(new THREE.ConeGeometry(0.058, 1, 28), arrowMat)
-    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.02, 14, 10), arrowMat)
     const arrow = new THREE.Group()
-    arrow.add(shaft, head, tip)
+    arrow.add(shaft, head)
     scene.add(arrow)
 
     const fitCamera = () => {
@@ -185,7 +184,7 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
     }
     loop()
 
-    apiRef.current = { sphere, wire, points, selPoint, arrow, shaft, head, tip, UP, basePos }
+    apiRef.current = { sphere, wire, points, selPoint, arrow, shaft, head, UP, basePos }
 
     return () => {
       cancelAnimationFrame(raf)
@@ -209,7 +208,7 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
     const api = apiRef.current
     if (!api) return
     const R = Math.max(entropy, 0)
-    const { sphere, wire, points, selPoint, arrow, shaft, head, tip, UP, basePos } = api
+    const { sphere, wire, points, selPoint, arrow, shaft, head, UP, basePos } = api
     const isWave = mode === 'wave'
     const wv = isWave ? { a: waveAmp, m: waveM, n: waveN } : null
 
@@ -299,7 +298,6 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
       head.scale.set(1, headLen, 1)
       head.position.copy(dir).multiplyScalar(shaftLen + headLen / 2)
       head.quaternion.setFromUnitVectors(UP, dir)
-      tip.position.copy(dir).multiplyScalar(len)
     }
   }, [entropy, tau1, tau2, mode, waveAmp, waveM, waveN])
 
