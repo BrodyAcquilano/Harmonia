@@ -255,7 +255,7 @@ export default function QuarkSpace() {
               <div className="eq-box">
                 <span className="eq-label">Convolution surface — one wave per eigenstate</span>
                 <span className="eq-line"><Tex tex="u = 1 + \sum_{k=1}^{N(s)} \frac{a}{k}\sigma_k\cos(q_k\theta)" /></span>
-                <span className="eq-line"><Tex tex="q_1 = 2,\, q_2 = -1 \text{ — the seeds } \frac{2}{3}f_q, -\frac{1}{3}f_q}" /></span>
+                <span className="eq-line"><Tex tex="q_1 = 2,\, q_2 = -1 \text{ — the seeds } \frac{2}{3}f_q, -\frac{1}{3}f_q" /></span>
                 <span className="eq-line"><Tex tex="q_k = q_i \pm q_j \text{ — each new frequency a random sum/difference of two earlier ones}" /></span>
                 <span className="eq-line"><Tex tex="\sigma_k = \pm 1 \text{ — fixed signs spread the peaks, left mirrors right}" /></span>
                 <span className="eq-line">chain starts: {firstTerms}, …</span>
