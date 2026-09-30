@@ -42,7 +42,7 @@ export default function QuarkSpace() {
   const [entropy, setEntropy] = useState(0.6)
   const [tau1, setTau1] = useState(45)
   const [tau2, setTau2] = useState(30)
-  const [waveAmp, setWaveAmp] = useState(0.45)
+  const [waveAmp, setWaveAmp] = useState(0.04)
   const [waveM, setWaveM] = useState(8)
   const [waveN, setWaveN] = useState(8)
 
@@ -78,43 +78,6 @@ export default function QuarkSpace() {
 
   return (
     <div className="quark-page">
-      <div className="graph-box">
-        <div className="graph-title-row">
-          <h2 className="graph-title">The Quark Space</h2>
-        </div>
-        <div className="quark-intro-body">
-          <p>
-            The quark space is a convolution of energy and mass — where energy is
-            just mass 180° phase shifted. It is a convolution of mass and energy
-            and space and time, relating all motion to the vibrations caused from
-            quarks, which release or absorb light energy. That light interacts with
-            mass and creates gravitational waves — motion.
-          </p>
-          <p>
-            Each point of the convolution sphere is an eigenstate. λx, λy, λz give
-            its direction; τ1 and τ2 are the sphere's time coordinates — related to
-            λ, they select the point, while the sphere's amplitude at that point
-            sets its energy and mass. Entropy grows the sphere from a single point:
-            higher entropy, more eigenstates.
-          </p>
-          <p>
-            The big bang was not the moment all matter was a single point — it was
-            when all matter operated on the same 1:1 mass-to-energy ratio and
-            vibrated at the same frequency, before quarks were created. All motion
-            since is the adding of new frequencies: new eigenstates built on the
-            same 2/3 building block, each time a quark is absorbed or released.
-          </p>
-          <p>
-            That release creates a disproportion between energy and mass — −1/3 mass
-            to 1 energy, or 2/3 mass to 1 energy — and every combination of these
-            still resolves to 2/3: 2/3 + 2/3 = 4/3 = 1 + 1/3 = 2 − 2/3. All
-            frequencies share this same harmonic ratio, and infinitely many
-            frequencies can be added from it. Adding new frequencies increases the
-            number of eigenstates — which is why entropy increases.
-          </p>
-        </div>
-      </div>
-
       <div className="lab-layout">
         <nav className="sim-nav" aria-label="Simulations">
           <h3>Simulations</h3>
@@ -139,6 +102,43 @@ export default function QuarkSpace() {
         </nav>
 
         <div className="lab-stage">
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">The Quark Space</h2>
+            </div>
+            <div className="quark-intro-body">
+              <p>
+                The quark space is a convolution of energy and mass — where energy is
+                just mass 180° phase shifted. It is a convolution of mass and energy
+                and space and time, relating all motion to the vibrations caused from
+                quarks, which release or absorb light energy. That light interacts with
+                mass and creates gravitational waves — motion.
+              </p>
+              <p>
+                Each point of the convolution sphere is an eigenstate. λx, λy, λz give
+                its direction; τ1 and τ2 are the sphere's time coordinates — related to
+                λ, they select the point, while the sphere's amplitude at that point
+                sets its energy and mass. Entropy grows the sphere from a single point:
+                higher entropy, more eigenstates.
+              </p>
+              <p>
+                The big bang was not the moment all matter was a single point — it was
+                when all matter operated on the same 1:1 mass-to-energy ratio and
+                vibrated at the same frequency, before quarks were created. All motion
+                since is the adding of new frequencies: new eigenstates built on the
+                same 2/3 building block, each time a quark is absorbed or released.
+              </p>
+              <p>
+                That release creates a disproportion between energy and mass — −1/3 mass
+                to 1 energy, or 2/3 mass to 1 energy — and every combination of these
+                still resolves to 2/3: 2/3 + 2/3 = 4/3 = 1 + 1/3 = 2 − 2/3. All
+                frequencies share this same harmonic ratio, and infinitely many
+                frequencies can be added from it. Adding new frequencies increases the
+                number of eigenstates — which is why entropy increases.
+              </p>
+            </div>
+          </div>
+
           <div className="graph-box">
             <div className="graph-title-row">
               <h2 className="graph-title">{isWave ? 'Convolution Surface' : 'Convolution Sphere'}</h2>
@@ -179,7 +179,7 @@ export default function QuarkSpace() {
           {isWave && (
             <div className="control-group">
               <h3>Wave</h3>
-              <Slider label="a" value={waveAmp} min={0} max={0.8} step={0.01}
+              <Slider label="a" value={waveAmp} min={0} max={0.2} step={0.01}
                 onChange={setWaveAmp} format={(v) => v.toFixed(2)} />
               <Slider label="m" value={waveM} min={1} max={20} step={1}
                 onChange={setWaveM} format={(v) => v.toFixed(0)} />

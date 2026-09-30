@@ -227,9 +227,9 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
       if (!isWave) {
         colA.setXYZ(i, 1, 1, 1)
       } else {
-        // high spots (mass) green, low spots (energy) red
+        // high spots (mass) light green, low spots (energy) light red
         const t = span > 1e-6 ? (radii[i] - rMin) / span : 0.5
-        colA.setXYZ(i, 1.0 - 0.7 * t, 0.3 + 0.6 * t, 0.3)
+        colA.setXYZ(i, 1.0 - 0.35 * t, 0.65 + 0.3 * t, 0.65)
       }
     }
     posA.needsUpdate = true
@@ -237,7 +237,7 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
     sphere.geometry.computeVertexNormals()
     if (isWave) {
       sphere.material.color.set(0xffffff)
-      sphere.material.opacity = 0.8
+      sphere.material.opacity = 0.65
       wire.material.opacity = 0.18
     } else {
       sphere.material.color.set(0xe9d9a6)
