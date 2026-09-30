@@ -1172,6 +1172,13 @@ body {
   cursor: grabbing;
 }
 
+.surface-map-canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  border-radius: 10px;
+}
+
 .readouts {
   display: flex;
   flex-direction: column;

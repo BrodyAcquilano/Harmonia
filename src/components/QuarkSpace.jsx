@@ -3,6 +3,7 @@ import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import Slider from './Slider.jsx'
 import ConvolutionSurface, { surfU } from './ConvolutionSurface.jsx'
+import SurfaceMap from './SurfaceMap.jsx'
 
 /* The Quark Space: a convolution of energy and mass and space and time.
    The two time coordinates are angles: τ1 on the mass-wave-frequency axis,
@@ -96,7 +97,7 @@ export default function QuarkSpace() {
               role="tab"
               aria-selected="true"
             >
-              Convolution Sphere
+              Convolution Surface
             </button>
           </div>
         </nav>
@@ -170,6 +171,20 @@ export default function QuarkSpace() {
               (mass wave frequency, energy wave phase); the values are the angles.
               The surface carries one wave per eigenstate, from E = hf = mc² —
               green mass highs, red energy lows.
+            </p>
+          </div>
+
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Flat Map</h2>
+            </div>
+            <SurfaceMap
+              entropy={entropy} tau1={tau1} tau2={tau2}
+              waveAmp={waveAmp} waveN={waveN}
+            />
+            <p className="graph-note">
+              The surface unfolded flat — θ across, φ vertical. Green peaks, red valleys.
+              The yellow dot is the arrow's position, moved by τ1 and τ2.
             </p>
           </div>
 
