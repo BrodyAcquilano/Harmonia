@@ -7,6 +7,7 @@ import SurfaceMap from './SurfaceMap.jsx'
 import ConvolutionSphere from './ConvolutionSphere.jsx'
 import TimeDomain from './TimeDomain.jsx'
 import MassLattice from './MassLattice.jsx'
+import MassCreation from './MassCreation.jsx'
 import Fundamental20 from './Fundamental20.jsx'
 
 /* The Quark Space: a convolution of energy and mass and space and time.
@@ -62,6 +63,8 @@ export default function QuarkSpace() {
   const [entropyM, setEntropyM] = useState(60000)
   const [waveAmpM, setWaveAmpM] = useState(0.15)
   const [playingM, setPlayingM] = useState(false)
+  const [playingC, setPlayingC] = useState(false)
+  const [speedC, setSpeedC] = useState(1)
   const [speedM, setSpeedM] = useState(1)
   const [playing, setPlaying] = useState(true)
   const [speed, setSpeed] = useState(1)
@@ -509,6 +512,44 @@ export default function QuarkSpace() {
 
           <div className="graph-box">
             <div className="graph-title-row">
+              <h2 className="graph-title">Mass Creation</h2>
+            </div>
+            <div className="quark-intro-body">
+              <p>
+                Quarks fire at random positions in the field — about eight per
+                second. 95% of the time a firing forms a unit mass, a green
+                sphere; the other 5% release only energy, a red flash with no
+                mass. That is the 95/5 split from the surface, playing out one
+                quark at a time.
+              </p>
+              <p>
+                Every formed mass then moves in the field the same way the
+                lattice masses do — riding the resultant wave, perpendicular to
+                the energy wave, 180° out of phase — so each one traces a closed
+                loop. When masses bump together they merge into a single
+                rendered sphere, sized by the total unit masses inside; the
+                program still counts every unit mass separately, and when they
+                drift apart the cluster breaks up again. Masses that form in the
+                same spot pile onto the same sphere, so it grows.
+              </p>
+            </div>
+          </div>
+
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Mass Creation Field</h2>
+            </div>
+            <MassCreation entropy={entropyM} waveAmp={waveAmpM} playing={playingC} speed={speedC} onPlayingChange={setPlayingC} onSpeedChange={setSpeedC} />
+            <p className="graph-note">
+              Green spheres are formed masses — watch them appear, drift in
+              closed loops, merge when they bump, and split apart again. Red
+              flashes are the 5%: energy released with no mass. Up to 900 unit
+              masses; its own clock, its own play button.
+            </p>
+          </div>
+
+          <div className="graph-box">
+            <div className="graph-title-row">
               <h2 className="graph-title">Equations</h2>
             </div>
             <div className="eq-grid">
@@ -521,6 +562,16 @@ export default function QuarkSpace() {
                 <span className="eq-label">The gain g</span>
                 <span className="eq-line"><Tex tex="g = 2 \text{ — visual gain standing in for unreachable entropy}" /></span>
                 <span className="eq-line"><Tex tex="m = 1 \text{ everywhere, constant size}" /></span>
+              </div>
+              <div className="eq-box">
+                <span className="eq-label">Mass creation — quark firing</span>
+                <span className="eq-line"><Tex tex="\text{quarks fire at } \lambda \approx 8/\mathrm{s},\quad P(\text{mass}) = 0.95" /></span>
+                <span className="eq-line"><Tex tex="\text{the other 5\% release only energy — a red flash, no mass}" /></span>
+              </div>
+              <div className="eq-box">
+                <span className="eq-label">Merging — one rendered sphere</span>
+                <span className="eq-line"><Tex tex="M = \sum_i m_i,\quad R \propto M^{1/3}" /></span>
+                <span className="eq-line"><Tex tex="|\mathbf{p}_i - \mathbf{p}_j| < r_m \text{ merges — splits apart beyond it}" /></span>
               </div>
             </div>
           </div>
@@ -679,7 +730,7 @@ export default function QuarkSpace() {
             <h3>Wave</h3>
             <Slider label="a" value={waveAmpM} min={0} max={0.2} step={0.01}
               onChange={setWaveAmpM} format={(v) => v.toFixed(2)} />
-            <p className="graph-note">Drives both the motion and the breathing — larger a, wilder masses.</p>
+            <p className="graph-note">Drives the motion — larger a, wilder masses.</p>
           </div>
 
           </>

@@ -13,6 +13,9 @@
 - [7. The universe was still — then the first proton formed](#7-the-universe-was-still-then-the-first-proton-formed)
 - [8. A small input, an increasingly complex system](#8-a-small-input-an-increasingly-complex-system)
 - [9. Painting the map by frequency](#9-painting-the-map-by-frequency)
+- [10. The Space-Time Domain — giving the waves somewhere to go](#10-the-space-time-domain--giving-the-waves-somewhere-to-go)
+- [11. The Mass Lattice — 343 masses riding the resultant](#11-the-mass-lattice--343-masses-riding-the-resultant)
+- [12. Mass Creation — formation, then motion](#12-mass-creation--formation-then-motion)
 
 ## 1. Why I built this diagram
 
@@ -107,3 +110,29 @@ Then each point on the map asks one question: of the four families interfering h
 What I see when I drag the entropy slider now is the territories shifting. At low entropy a few loud early eigenstates own huge regions; as entropy climbs, the later, weaker ones carve the territories into finer filaments — the rare $4/3$ yellows show up in thin threads where they can. The exact borders are different on every page load, because the dice are re-rolled each visit, but the *behavior* is always the same: more entropy, more eigenstates, finer structure. It feels like watching the resonator learn new overtones.
 
 Two smaller changes came along with this one: the entropy slider now runs to a million ($N$ reaches $20{,}001$ eigenstates), and the amplitude slider starts at its maximum, since that was where I kept putting it anyway. The 3D surface itself is untouched — same wave, same math, just fast enough now that twenty thousand eigenstates don't slow it down.
+
+## 10. The Space-Time Domain — giving the waves somewhere to go
+
+The surface shows me the wave folded onto a sphere, but a sphere hides something: the wave has three axes and the sphere only shows their sum. I wanted to see each axis wave on its own — the x wave, the y wave, the z wave, each one a sum of the four fundamentals, fanning out through space.
+
+So the Space-Time Domain draws each axis wave five times, at $-60^\circ, -30^\circ, 0^\circ, 30^\circ, 60^\circ$ — the x and y families fan through the xy plane, the z family through the zy plane (which plane the z family fans through is a convention; I picked zy and keep wondering whether zx would have told me something about the forces). The first 20 component waves of each axis are drawn faint in their fundamental's color, and the gold curve on top is the sum — the resultant, the same superposition the surface computes, evaluated along each direction.
+
+That gold curve is the important one. It is motion drawn as a wave: $\mathbf{p}(t) = \mathbf{p}_0 + (w_x, w_y, w_z)$, the position of a point carried by all three axis waves at once. This is §7's claim made visible — motion created from waves, not sitting on top of them.
+
+## 11. The Mass Lattice — 343 masses riding the resultant
+
+If one point can ride the resultant, why not a whole cube of them? The Mass Lattice puts a unit mass on every point of a $7 \times 7 \times 7$ grid and evaluates the resultant motion at all 343 positions at once. Press play and the cube ripples — every mass tracing the closed loop its own position dictates.
+
+It took three tries to see anything at all, and the reasons were stacked. First the canvas collapsed to zero height — a wrong CSS class, the kind of bug that makes you feel stupid for an hour. Then, with the box finally visible, still nothing: the wave function was being called with the wrong arguments, so every coefficient computed as NaN, and all 343 spheres were placed at NaN coordinates. Invisible by arithmetic, not by scale. I keep this here because it is exactly the kind of mistake the date rule is for — the next time the lattice is blank, I will check the numbers before I blame the sizes.
+
+The lattice as it stands: solid green spheres, constant size, $m = 1$ everywhere — no breathing, no red. The grid is tight, wavelength-sized, and the motion carries a visual gain of $g = 2$. That gain is doing honest work, not decorative work: at the entropies I can simulate only a few combinations have built up, and going from $s = 60000$ to $s = 1000000$ grows the raw motion only from $0.39$ to $0.51$. The real universe's entropy dwarfs a million, so the real motion dwarfs mine — the gain stands in for all the entropy I can't reach.
+
+## 12. Mass Creation — formation, then motion
+
+The lattice showed me masses *moving* in the field. But there is a second perspective, and once I saw it I couldn't unsee it: masses being *made* by the field. Formation first, motion second — the §7 story, the first proton forming in a still field, on repeat.
+
+So below the lattice there is a second graph, with its own clock and its own play button. Quarks fire at random positions in the field, about eight per sim-second. 95% of the time a firing forms a unit mass — a green sphere. The other 5% release only energy: a red flash, no mass. That is the 95/5 split from §5 and §6, no longer a seeding weight inside the surface but an event I can watch happen, one quark at a time.
+
+Every formed mass then rides the same resultant as the lattice masses — perpendicular to the energy wave, $180^\circ$ out of phase — and because the frequencies are integers, each mass traces a closed loop. When two masses bump they merge into a single rendered sphere, sized by the total unit masses inside ($R \propto M^{1/3}$); the program still counts every unit mass separately, and when they drift apart the cluster breaks up again. Masses that form in the same spot pile onto the same sphere, so it grows — accumulation made visible.
+
+What I watch for: does the field clump? Do the mergers build anything that lasts, or does the wave motion always pull clusters apart again? At low entropy the loops are wide and slow and mergers are rare; I haven't yet found the entropy where they start to stick. That question is the next one.
