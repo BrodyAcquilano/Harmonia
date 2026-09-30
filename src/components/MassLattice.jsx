@@ -2,26 +2,23 @@ import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import Slider from './Slider.jsx'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { buildQuarkTerms, waveCoeffsFromTerms } from './ConvolutionSurface.jsx'
+import { buildQuarkTerms, waveCoeffsFromTerms, MAX_STATES } from './ConvolutionSurface.jsx'
 
-/* The Mass Lattice: a cube of masses, one at every grid point, each with
-   mass m = 1. The waves do two things to each mass. First they move it: its
-   position is the resultant of the three axis waves at its rest position —
-   p(t) = p0 + (w_x(x0,t), w_y(y0,t), w_z(z0,t)) — motion created from waves,
-   the same superposition as the gold curve of the Space-Time Domain,
-   evaluated at every point at once. Then they breathe it: m = 1 + w, the
-   local mass swells where the wave piles up and thins where it dips, and
-   energy is the exact inverse, E = 1/m, so E·m = 1 everywhere — green where
-   mass gathers, red where energy is released, the same language as the
-   surface. z is vertical here. */
+/* The Mass Lattice: a cube of masses, one at every grid point, each a
+   green unit mass (m = 1, constant size). Each mass rides the resultant of
+   the three axis waves at its rest position —
+   p(t) = p0 + g·(w_x(x0,t), w_y(y0,t), w_z(z0,t)) — motion created from
+   waves, the same superposition as the gold curve of the Space-Time Domain,
+   evaluated at every point at once. The motion is amplified by a visual
+   gain g: at the entropies we can simulate only a few combinations have
+   built up, so the raw wave motion is small next to the real universe's —
+   the gain stands in for all the entropy we can't. z is vertical here. */
 
-const GOLD = 0xd9a441
 const AXIS_LEN = 2.2
-const GREEN = [0.25, 0.72, 0.32] // mass piles up
-const REDD = [0.78, 0.28, 0.22] // energy released
-const NEUT = [0.85, 0.79, 0.68] // m = 1
+const MASS_GREEN = 0x2e8b6e
 const GRID_N = 7
-const GRID_SPAN = 1.8
+const GRID_SPAN = 1.4 // tight — wavelength sizes, so the motion shows
+const MOTION_GAIN = 2 // visual gain: stands in for un-simulatable entropy
 
 export default function MassLattice({
   entropy = 500,
@@ -40,9 +37,10 @@ export default function MassLattice({
     () => [0, 1, 2].map(() => buildQuarkTerms(entropy)),
     [entropy],
   )
+  const N = Math.min(1 + Math.round(Math.max(entropy, 0) / 50), MAX_STATES)
   const coeffs = useMemo(
-    () => chains.map((terms) => waveCoeffsFromTerms(terms, waveAmp)),
-    [chains, waveAmp],
+    () => chains.map((terms) => waveCoeffsFromTerms(terms, N, waveAmp)),
+    [chains, N, waveAmp],
   )
   const coeffRef = useRef(coeffs)
   coeffRef.current = coeffs
@@ -128,10 +126,10 @@ export default function MassLattice({
     timeTag.className = 'sim-clock'
     mount.appendChild(timeTag)
 
-    // the lattice: one unit mass at every grid point
+    // the lattice: one green unit mass at every grid point, constant size
     const N = GRID_N * GRID_N * GRID_N
-    const sphereGeo = new THREE.SphereGeometry(0.1, 14, 12)
-    const sphereMat = new THREE.MeshStandardMaterial({ roughness: 0.45, metalness: 0.1 })
+    const sphereGeo = new THREE.SphereGeometry(0.11, 14, 12)
+    const sphereMat = new THREE.MeshStandardMaterial({ color: MASS_GREEN, roughness: 0.45, metalness: 0.1 })
     const lattice = new THREE.InstancedMesh(sphereGeo, sphereMat, N)
     lattice.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
     lattice.frustumCulled = false
@@ -150,9 +148,6 @@ export default function MassLattice({
           }
     }
     const dummy = new THREE.Object3D()
-    const tmpColor = new THREE.Color()
-    // allocate instance colors
-    for (let i = 0; i < N; i++) lattice.setColorAt(i, tmpColor.setRGB(...NEUT))
 
     const OMEGA = 0.6
     const clock = new THREE.Clock()
@@ -193,25 +188,11 @@ export default function MassLattice({
           dy += Cy[f] * Math.cos(f * y0 - f * wt)
           dz += Cz[f] * Math.cos(f * z0 - f * wt)
         }
-        const wbar = (dx + dy + dz) / 3
-        // mass breathes with the wave: m = 1 + w, E = 1/m
-        const s = Math.min(1.7, Math.max(0.5, 1 + wbar))
-        dummy.position.set(x0 + dx, y0 + dy, z0 + dz)
-        dummy.scale.setScalar(s)
+        dummy.position.set(x0 + MOTION_GAIN * dx, y0 + MOTION_GAIN * dy, z0 + MOTION_GAIN * dz)
         dummy.updateMatrix()
         lattice.setMatrixAt(i, dummy.matrix)
-        // green where mass piles up, red where energy is released
-        const k = Math.min(1, Math.abs(wbar) / 0.3)
-        const hi = wbar >= 0 ? GREEN : REDD
-        tmpColor.setRGB(
-          NEUT[0] + (hi[0] - NEUT[0]) * k,
-          NEUT[1] + (hi[1] - NEUT[1]) * k,
-          NEUT[2] + (hi[2] - NEUT[2]) * k,
-        )
-        lattice.setColorAt(i, tmpColor)
       }
       lattice.instanceMatrix.needsUpdate = true
-      if (lattice.instanceColor) lattice.instanceColor.needsUpdate = true
       timeTag.textContent = 't = ' + simT.toFixed(1) + ' s'
       controls.update()
       renderer.render(scene, camera)

@@ -479,18 +479,18 @@ export default function QuarkSpace() {
             </div>
             <div className="quark-intro-body">
               <p>
-                A cube of masses — one at every grid point, each with mass m = 1.
-                The waves do two things to each mass. First they move it: its
-                position is the resultant of the three axis waves at its rest
-                position, p(t) = p0 + (w_x(x0,t), w_y(y0,t), w_z(z0,t)) — motion
-                created from waves, the same superposition as the gold curve of
-                the Space-Time Domain, evaluated at every point at once.
+                A cube of masses — one at every grid point, each a green unit
+                mass, m = 1, constant size. Each mass rides the resultant of the
+                three axis waves at its rest position,
+                p(t) = p0 + g·(w_x(x0,t), w_y(y0,t), w_z(z0,t)) — motion created
+                from waves, the same superposition as the gold curve of the
+                Space-Time Domain, evaluated at every point at once.
               </p>
               <p>
-                Then they breathe it: m = 1 + w, the local mass swells where the
-                wave piles up and thins where it dips, and energy is the exact
-                inverse, E = 1/m, so E·m = 1 everywhere. Green where mass gathers,
-                red where energy is released — the same language as the surface.
+                The motion is amplified by a visual gain g. At the entropies we
+                can simulate only a few combinations have built up, so the raw
+                wave motion is small next to the real universe's — the gain
+                stands in for all the entropy we can't reach, even at a million.
               </p>
             </div>
           </div>
@@ -501,10 +501,9 @@ export default function QuarkSpace() {
             </div>
             <MassLattice entropy={entropyM} waveAmp={waveAmpM} playing={playingM} speed={speedM} onPlayingChange={setPlayingM} onSpeedChange={setSpeedM} />
             <p className="graph-note">
-              343 unit masses on a 7×7×7 grid. Each one rides the summed wave
-              motion at its position and breathes with it — green as mass piles
-              up, red as energy is released. Press play and watch the whole cube
-              ripple.
+              343 green unit masses on a 7×7×7 grid, constant size. Each one
+              rides the amplified resultant wave motion at its position. Press
+              play and watch the whole cube ripple.
             </p>
           </div>
 
@@ -515,13 +514,13 @@ export default function QuarkSpace() {
             <div className="eq-grid">
               <div className="eq-box">
                 <span className="eq-label">Resultant motion — one mass</span>
-                <span className="eq-line"><Tex tex="\mathbf{p}(t) = \mathbf{p}_0 + (w_x(x_0,t),\, w_y(y_0,t),\, w_z(z_0,t))" /></span>
+                <span className="eq-line"><Tex tex="\mathbf{p}(t) = \mathbf{p}_0 + g\,(w_x(x_0,t),\, w_y(y_0,t),\, w_z(z_0,t))" /></span>
                 <span className="eq-line"><Tex tex="w_x(x,t) = \sum_{f=1}^{4} C^xf \cos(fx - f\Omega t)" /></span>
               </div>
               <div className="eq-box">
-                <span className="eq-label">Mass breathes, energy answers</span>
-                <span className="eq-line"><Tex tex="m = 1 + \bar{w},\quad E = \dfrac{1}{m},\quad E \cdot m = 1" /></span>
-                <span className="eq-line"><Tex tex="\bar{w} = \tfrac{1}{3}(w_x + w_y + w_z) \text{ at the mass}" /></span>
+                <span className="eq-label">The gain g</span>
+                <span className="eq-line"><Tex tex="g = 2 \text{ — visual gain standing in for unreachable entropy}" /></span>
+                <span className="eq-line"><Tex tex="m = 1 \text{ everywhere, constant size}" /></span>
               </div>
             </div>
           </div>
