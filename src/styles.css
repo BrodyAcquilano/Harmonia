@@ -1204,6 +1204,46 @@ body {
   cursor: grabbing;
 }
 
+/* simulation clock + transport controls inside the graph box */
+.sim-clock {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  color: #715f43;
+  background: rgba(253, 250, 240, 0.9);
+  border: 1px solid #e2d5b3;
+  border-radius: 6px;
+  padding: 3px 9px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.sim-stage-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.sim-transport {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 2px 0;
+}
+
+.sim-transport .transport-play {
+  width: auto;
+  flex: none;
+  padding: 8px 20px;
+  text-align: center;
+}
+
+.sim-transport .transport-speed {
+  flex: 1;
+  min-width: 0;
+}
+
 .surface-map-canvas {
   display: block;
   width: 100%;

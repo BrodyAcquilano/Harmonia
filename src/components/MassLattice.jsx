@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
+import Slider from './Slider.jsx'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { buildQuarkTerms, waveCoeffsFromTerms } from './ConvolutionSurface.jsx'
 
@@ -27,6 +28,8 @@ export default function MassLattice({
   waveAmp = 0.15,
   playing = false,
   speed = 1,
+  onPlayingChange,
+  onSpeedChange,
 }) {
   const mountRef = useRef(null)
   const stateRef = useRef({ playing, speed, entropy, waveAmp })
@@ -120,6 +123,11 @@ export default function MassLattice({
     grid.position.z = -AXIS_LEN
     scene.add(grid)
 
+    // time readout, updated imperatively (no react re-render per frame)
+    const timeTag = document.createElement('div')
+    timeTag.className = 'sim-clock'
+    mount.appendChild(timeTag)
+
     // the lattice: one unit mass at every grid point
     const N = GRID_N * GRID_N * GRID_N
     const sphereGeo = new THREE.SphereGeometry(0.1, 14, 12)
@@ -204,6 +212,7 @@ export default function MassLattice({
       }
       lattice.instanceMatrix.needsUpdate = true
       if (lattice.instanceColor) lattice.instanceColor.needsUpdate = true
+      timeTag.textContent = 't = ' + simT.toFixed(1) + ' s'
       controls.update()
       renderer.render(scene, camera)
     }
@@ -213,9 +222,27 @@ export default function MassLattice({
       window.removeEventListener('resize', onResize)
       renderer.setAnimationLoop(null)
       renderer.dispose()
+      mount.removeChild(timeTag)
       mount.removeChild(renderer.domElement)
     }
   }, [])
 
-  return <div ref={mountRef} className="quark-canvas-wrap" />
+  return (
+    <div className="sim-stage-col">
+      <div ref={mountRef} className="quark-canvas-wrap" />
+      <div className="sim-transport">
+        <button
+          className="sim-item transport-play"
+          onClick={() => onPlayingChange && onPlayingChange(!playing)}
+          aria-pressed={playing}
+        >
+          {playing ? 'Pause' : 'Play'}
+        </button>
+        <div className="transport-speed">
+          <Slider label="speed" value={speed} min={0.1} max={3} step={0.1}
+            onChange={(v) => onSpeedChange && onSpeedChange(v)} format={(v) => `${v.toFixed(1)}×`} />
+        </div>
+      </div>
+    </div>
+  )
 }

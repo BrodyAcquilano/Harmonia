@@ -430,7 +430,7 @@ export default function QuarkSpace() {
             <div className="graph-title-row">
               <h2 className="graph-title">Space-Time Domain</h2>
             </div>
-            <TimeDomain entropy={entropyT} waveAmp={waveAmpT} playing={playing} speed={speed} compCount={compCount} />
+            <TimeDomain entropy={entropyT} waveAmp={waveAmpT} playing={playing} speed={speed} compCount={compCount} onPlayingChange={setPlaying} onSpeedChange={setSpeed} />
             <p className="graph-note">
               One independent frequency chain per axis — x, y and z each get their
               own random quarks, each fanned across its plane of motion (x and y
@@ -499,7 +499,7 @@ export default function QuarkSpace() {
             <div className="graph-title-row">
               <h2 className="graph-title">Mass Lattice</h2>
             </div>
-            <MassLattice entropy={entropyM} waveAmp={waveAmpM} playing={playingM} speed={speedM} />
+            <MassLattice entropy={entropyM} waveAmp={waveAmpM} playing={playingM} speed={speedM} onPlayingChange={setPlayingM} onSpeedChange={setSpeedM} />
             <p className="graph-note">
               343 unit masses on a 7×7×7 grid. Each one rides the summed wave
               motion at its position and breathes with it — green as mass piles
@@ -665,20 +665,6 @@ export default function QuarkSpace() {
             <p className="graph-note">The first 20 eigenstate waves of each axis, drawn faint in their own fundamental's color.</p>
           </div>
 
-          <div className="control-group">
-            <h3>Time</h3>
-            <button
-              className="sim-item"
-              onClick={() => setPlaying((p) => !p)}
-              aria-pressed={playing}
-              style={{ width: '100%' }}
-            >
-              {playing ? 'Pause' : 'Play'}
-            </button>
-            <Slider label="speed" value={speed} min={0.1} max={3} step={0.1}
-              onChange={setSpeed} format={(v) => `${v.toFixed(1)}×`} />
-            <p className="graph-note">Each fundamental oscillates at f·Ω — higher frequencies move faster.</p>
-          </div>
           </>
           )}
           {sim === 'mass' && (
@@ -697,20 +683,6 @@ export default function QuarkSpace() {
             <p className="graph-note">Drives both the motion and the breathing — larger a, wilder masses.</p>
           </div>
 
-          <div className="control-group">
-            <h3>Time</h3>
-            <button
-              className="sim-item"
-              onClick={() => setPlayingM((p) => !p)}
-              aria-pressed={playingM}
-              style={{ width: '100%' }}
-            >
-              {playingM ? 'Pause' : 'Play'}
-            </button>
-            <Slider label="speed" value={speedM} min={0.1} max={3} step={0.1}
-              onChange={setSpeedM} format={(v) => `${v.toFixed(1)}×`} />
-            <p className="graph-note">Each fundamental oscillates at f·Ω — higher frequencies move faster.</p>
-          </div>
           </>
           )}
         </div>

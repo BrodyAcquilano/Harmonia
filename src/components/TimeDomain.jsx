@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
+import Slider from './Slider.jsx'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { buildQuarkTerms, waveCoeffsFromTerms, MAX_STATES } from './ConvolutionSurface.jsx'
 import { HUES } from './SurfaceMap.jsx'
@@ -61,7 +62,7 @@ function makeLabel(text) {
   return sp
 }
 
-export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, speed = 1, compCount = MAX_COMP }) {
+export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, speed = 1, compCount = MAX_COMP, onPlayingChange, onSpeedChange }) {
   const mountRef = useRef(null)
   const apiRef = useRef(null)
   const playRef = useRef(playing)
@@ -212,9 +213,7 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
 
     // time readout, updated imperatively (no react re-render per frame)
     const timeTag = document.createElement('div')
-    timeTag.style.cssText =
-      'position:absolute;top:8px;right:10px;font-family:"IBM Plex Mono",monospace;' +
-      'font-size:12px;color:#715f43;pointer-events:none;'
+    timeTag.className = 'sim-clock'
     mount.appendChild(timeTag)
 
     // per-sample wave values, shared by the axis waves and the total curve
@@ -378,5 +377,22 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
     }
   }, [])
 
-  return <div ref={mountRef} className="quark-canvas-wrap" />
+  return (
+    <div className="sim-stage-col">
+      <div ref={mountRef} className="quark-canvas-wrap" />
+      <div className="sim-transport">
+        <button
+          className="sim-item transport-play"
+          onClick={() => onPlayingChange && onPlayingChange(!playing)}
+          aria-pressed={playing}
+        >
+          {playing ? 'Pause' : 'Play'}
+        </button>
+        <div className="transport-speed">
+          <Slider label="speed" value={speed} min={0.1} max={3} step={0.1}
+            onChange={(v) => onSpeedChange && onSpeedChange(v)} format={(v) => `${v.toFixed(1)}×`} />
+        </div>
+      </div>
+    </div>
+  )
 }
