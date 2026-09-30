@@ -6,6 +6,7 @@ import ConvolutionSurface, { surfU, QUARK_TERMS } from './ConvolutionSurface.jsx
 import SurfaceMap from './SurfaceMap.jsx'
 import ConvolutionSphere from './ConvolutionSphere.jsx'
 import TimeDomain from './TimeDomain.jsx'
+import MassLattice from './MassLattice.jsx'
 import Fundamental20 from './Fundamental20.jsx'
 
 /* The Quark Space: a convolution of energy and mass and space and time.
@@ -55,9 +56,13 @@ export default function QuarkSpace() {
   const [tau1, setTau1] = useState(0) // angle on the mass-wave-frequency axis — moves the arrow
   const [tau2, setTau2] = useState(0) // angle on the energy-wave-phase axis — moves the arrow
   const [waveAmp, setWaveAmp] = useState(0.2)
-  const [sim, setSim] = useState('sphere') // 'sphere' | 'surface' | 'time'
+  const [sim, setSim] = useState('sphere') // 'sphere' | 'surface' | 'time' | 'mass'
   const [entropyT, setEntropyT] = useState(60000)
   const [waveAmpT, setWaveAmpT] = useState(0.2)
+  const [entropyM, setEntropyM] = useState(60000)
+  const [waveAmpM, setWaveAmpM] = useState(0.15)
+  const [playingM, setPlayingM] = useState(false)
+  const [speedM, setSpeedM] = useState(1)
   const [playing, setPlaying] = useState(true)
   const [speed, setSpeed] = useState(1)
   const [compCount, setCompCount] = useState(20)
@@ -125,6 +130,14 @@ export default function QuarkSpace() {
               onClick={() => setSim('time')}
             >
               Space-Time Domain
+            </button>
+            <button
+              className="sim-item"
+              role="tab"
+              aria-selected={sim === 'mass'}
+              onClick={() => setSim('mass')}
+            >
+              Mass Lattice
             </button>
           </div>
         </nav>
@@ -458,6 +471,62 @@ export default function QuarkSpace() {
           </div>
           </>
           )}
+          {sim === 'mass' && (
+          <>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">The Mass Lattice</h2>
+            </div>
+            <div className="quark-intro-body">
+              <p>
+                A cube of masses — one at every grid point, each with mass m = 1.
+                The waves do two things to each mass. First they move it: its
+                position is the resultant of the three axis waves at its rest
+                position, p(t) = p0 + (w_x(x0,t), w_y(y0,t), w_z(z0,t)) — motion
+                created from waves, the same superposition as the gold curve of
+                the Space-Time Domain, evaluated at every point at once.
+              </p>
+              <p>
+                Then they breathe it: m = 1 + w, the local mass swells where the
+                wave piles up and thins where it dips, and energy is the exact
+                inverse, E = 1/m, so E·m = 1 everywhere. Green where mass gathers,
+                red where energy is released — the same language as the surface.
+              </p>
+            </div>
+          </div>
+
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Mass Lattice</h2>
+            </div>
+            <MassLattice entropy={entropyM} waveAmp={waveAmpM} playing={playingM} speed={speedM} />
+            <p className="graph-note">
+              343 unit masses on a 7×7×7 grid. Each one rides the summed wave
+              motion at its position and breathes with it — green as mass piles
+              up, red as energy is released. Press play and watch the whole cube
+              ripple.
+            </p>
+          </div>
+
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Equations</h2>
+            </div>
+            <div className="eq-grid">
+              <div className="eq-box">
+                <span className="eq-label">Resultant motion — one mass</span>
+                <span className="eq-line"><Tex tex="\mathbf{p}(t) = \mathbf{p}_0 + (w_x(x_0,t),\, w_y(y_0,t),\, w_z(z_0,t))" /></span>
+                <span className="eq-line"><Tex tex="w_x(x,t) = \sum_{f=1}^{4} C^xf \cos(fx - f\Omega t)" /></span>
+              </div>
+              <div className="eq-box">
+                <span className="eq-label">Mass breathes, energy answers</span>
+                <span className="eq-line"><Tex tex="m = 1 + \bar{w},\quad E = \dfrac{1}{m},\quad E \cdot m = 1" /></span>
+                <span className="eq-line"><Tex tex="\bar{w} = \tfrac{1}{3}(w_x + w_y + w_z) \text{ at the mass}" /></span>
+              </div>
+            </div>
+          </div>
+          </>
+          )}
         </div>
 
         <div className="lab-side">
@@ -608,6 +677,38 @@ export default function QuarkSpace() {
             </button>
             <Slider label="speed" value={speed} min={0.1} max={3} step={0.1}
               onChange={setSpeed} format={(v) => `${v.toFixed(1)}×`} />
+            <p className="graph-note">Each fundamental oscillates at f·Ω — higher frequencies move faster.</p>
+          </div>
+          </>
+          )}
+          {sim === 'mass' && (
+          <>
+          <div className="control-group">
+            <h3>Entropy</h3>
+            <Slider label="s" value={entropyM} min={0} max={1000000} step={1}
+              onChange={setEntropyM} format={(v) => v.toFixed(0)} />
+            <p className="graph-note">Higher entropy, more eigenstates on each axis — every axis keeps its own chain.</p>
+          </div>
+
+          <div className="control-group">
+            <h3>Wave</h3>
+            <Slider label="a" value={waveAmpM} min={0} max={0.2} step={0.01}
+              onChange={setWaveAmpM} format={(v) => v.toFixed(2)} />
+            <p className="graph-note">Drives both the motion and the breathing — larger a, wilder masses.</p>
+          </div>
+
+          <div className="control-group">
+            <h3>Time</h3>
+            <button
+              className="sim-item"
+              onClick={() => setPlayingM((p) => !p)}
+              aria-pressed={playingM}
+              style={{ width: '100%' }}
+            >
+              {playingM ? 'Pause' : 'Play'}
+            </button>
+            <Slider label="speed" value={speedM} min={0.1} max={3} step={0.1}
+              onChange={setSpeedM} format={(v) => `${v.toFixed(1)}×`} />
             <p className="graph-note">Each fundamental oscillates at f·Ω — higher frequencies move faster.</p>
           </div>
           </>
