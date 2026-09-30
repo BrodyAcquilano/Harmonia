@@ -87,7 +87,7 @@ function pickWeighted(rnd, table) {
 // m = −1 (decay, subtracted). Built once per page load — a fresh random
 // universe each visit; within a session a given entropy builds the same
 // surface (no flicker while dragging the slider).
-function buildQuarkTerms(count, seed, formationOnly = false) {
+export function buildQuarkTerms(count, seed, formationOnly = false) {
   const rnd = mulberry32(seed)
   const terms = [{ q: 2, m: 1 }, { q: -1, m: 1 }] // the seeds: 2/3·f_q, −1/3·f_q
   while (terms.length < count) {
@@ -134,18 +134,24 @@ export function foldTheta(theta) {
 // with C_f = Σ_{k<N, |q_k|=f} m_k·σ_k·a/√(k+1) — every eigenstate's 1/√k
 // fractional weight clustered into its fundamental. One O(N) pass replaces
 // N cosines per evaluation, which is what keeps N = 20001 instant.
-export function waveCoeffs(N, a) {
+// grouped coefficients from an explicit term list — the Time Domain builds
+// one independent chain per axis, so it passes its own terms
+export function waveCoeffsFromTerms(terms, N, a) {
   const C = [0, 0, 0, 0, 0] // 1-indexed by |q|
-  const n = Math.min(N, QUARK_TERMS.length)
+  const n = Math.min(N, terms.length)
   for (let k = 0; k < n; k++) {
     // fixed +/-1 sign pattern (golden-ratio bits): spreads the peaks around
     // the circle instead of piling them at th = 0, while keeping perfect
     // left-right symmetry (unlike a phase shift)
     const sgn = (Math.floor((k + 1) * SGN_GAMMA) % 2 === 0) ? 1 : -1
-    const term = QUARK_TERMS[k]
+    const term = terms[k]
     C[Math.abs(term.q)] += term.m * sgn * (a / Math.sqrt(k + 1))
   }
   return C
+}
+
+export function waveCoeffs(N, a) {
+  return waveCoeffsFromTerms(QUARK_TERMS, N, a)
 }
 
 // 4-cosine evaluation of precomputed coefficients — the fast path for

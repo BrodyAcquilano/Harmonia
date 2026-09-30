@@ -21,7 +21,7 @@ import { foldTheta, waveCoeffs, MAX_STATES } from './ConvolutionSurface.jsx'
 
 const W = 360, H = 180
 // fundamental colors by |q| in units of f_q/3
-const HUES = {
+export const HUES = {
   1: [37, 99, 173],   // 1/3 f_q — blue
   2: [192, 57, 43],   // 2/3 f_q — red
   3: [46, 139, 110],  // 1 f_q — green

@@ -5,6 +5,7 @@ import Slider from './Slider.jsx'
 import ConvolutionSurface, { surfU, QUARK_TERMS } from './ConvolutionSurface.jsx'
 import SurfaceMap from './SurfaceMap.jsx'
 import ConvolutionSphere from './ConvolutionSphere.jsx'
+import TimeDomain from './TimeDomain.jsx'
 import Fundamental20 from './Fundamental20.jsx'
 
 /* The Quark Space: a convolution of energy and mass and space and time.
@@ -54,7 +55,11 @@ export default function QuarkSpace() {
   const [tau1, setTau1] = useState(0) // angle on the mass-wave-frequency axis — moves the arrow
   const [tau2, setTau2] = useState(0) // angle on the energy-wave-phase axis — moves the arrow
   const [waveAmp, setWaveAmp] = useState(0.2)
-  const [sim, setSim] = useState('surface') // 'surface' | 'sphere'
+  const [sim, setSim] = useState('sphere') // 'sphere' | 'surface' | 'time'
+  const [entropyT, setEntropyT] = useState(60000)
+  const [waveAmpT, setWaveAmpT] = useState(0.2)
+  const [playing, setPlaying] = useState(true)
+  const [speed, setSpeed] = useState(1)
 
   // Local amplitude at the arrow (θ = τ1). τ1/τ2 are angles that move
   // the arrow — they never reshape the wave. Mass is carried as amplitude
@@ -99,6 +104,14 @@ export default function QuarkSpace() {
             <button
               className="sim-item"
               role="tab"
+              aria-selected={sim === 'sphere'}
+              onClick={() => setSim('sphere')}
+            >
+              Convolution Sphere
+            </button>
+            <button
+              className="sim-item"
+              role="tab"
               aria-selected={sim === 'surface'}
               onClick={() => setSim('surface')}
             >
@@ -107,10 +120,10 @@ export default function QuarkSpace() {
             <button
               className="sim-item"
               role="tab"
-              aria-selected={sim === 'sphere'}
-              onClick={() => setSim('sphere')}
+              aria-selected={sim === 'time'}
+              onClick={() => setSim('time')}
             >
-              Convolution Sphere
+              Space-Time Domain
             </button>
           </div>
         </nav>
@@ -369,6 +382,71 @@ export default function QuarkSpace() {
           </div>
           </>
           )}
+          {sim === 'time' && (
+          <>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">The Space-Time Domain</h2>
+            </div>
+            <div className="quark-intro-body">
+              <p>
+                The same quark-frequency family as the surface, let loose in space
+                and time. Each axis — x, y, z — carries its own independent random
+                chain of quark frequencies: one wave per eigenstate at amplitude
+                a/√k, the pink-noise family. Every point of every wave is painted
+                by the fundamental it is most made of — blue 1/3 f_q, red 2/3 f_q,
+                green 1 f_q, yellow 4/3 f_q.
+              </p>
+              <p>
+                The bright gold curve is the superposition of all three waves —
+                T(s,t) = (w_x, w_y, w_z), the total shape. Press play and every
+                fundamental oscillates at its own rate f·Ω: the waves interfere,
+                the total shape writhes, and motion appears. This is motion being
+                created from waves.
+              </p>
+            </div>
+          </div>
+
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Space-Time Domain</h2>
+            </div>
+            <TimeDomain entropy={entropyT} waveAmp={waveAmpT} playing={playing} speed={speed} />
+            <p className="graph-note">
+              One independent frequency chain per axis — x, y and z each get their
+              own random quarks. Colors mark the dominant fundamental at each
+              point; the bright gold curve is the three waves superposed.
+            </p>
+            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', padding: '8px 6px 0',
+                           fontFamily: '"IBM Plex Mono", monospace', fontSize: 12, color: '#715f43' }}>
+              {[['#2563ad', '1/3 f_q'], ['#c0392b', '2/3 f_q'], ['#2e8b6e', '1 f_q'], ['#e6b800', '4/3 f_q']].map(([color, text]) => (
+                <span key={text} style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                  <span style={{ width: 11, height: 11, borderRadius: 2, background: color, display: 'inline-block' }} />
+                  {text}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Equations</h2>
+            </div>
+            <div className="eq-grid">
+              <div className="eq-box">
+                <span className="eq-label">One wave per axis, over time</span>
+                <span className="eq-line"><Tex tex="w_x(s,t) = \sum_{f=1}^{4} C^xf \cos(fs - f\Omega t)" /></span>
+                <span className="eq-line"><Tex tex="w_y, w_z \text{ the same — each with its own chain}" /></span>
+              </div>
+              <div className="eq-box">
+                <span className="eq-label">Superposition — the total shape</span>
+                <span className="eq-line"><Tex tex="T(s,t) = (w_x(s,t),\, w_y(s,t),\, w_z(s,t))" /></span>
+                <span className="eq-line"><Tex tex="\Omega \text{ set by the speed control}" /></span>
+              </div>
+            </div>
+          </div>
+          </>
+          )}
         </div>
 
         <div className="lab-side">
@@ -481,6 +559,38 @@ export default function QuarkSpace() {
               <Row k="E · m" v="1" />
             </div>
             <p className="graph-note">The 1:1 sphere — energy and mass are equal everywhere.</p>
+          </div>
+          </>
+          )}
+          {sim === 'time' && (
+          <>
+          <div className="control-group">
+            <h3>Entropy</h3>
+            <Slider label="s" value={entropyT} min={0} max={1000000} step={1}
+              onChange={setEntropyT} format={(v) => v.toFixed(0)} />
+            <p className="graph-note">Higher entropy, more eigenstates on each axis — every axis keeps its own chain.</p>
+          </div>
+
+          <div className="control-group">
+            <h3>Wave</h3>
+            <Slider label="a" value={waveAmpT} min={0} max={0.2} step={0.01}
+              onChange={setWaveAmpT} format={(v) => v.toFixed(2)} />
+            <p className="graph-note">One wave per eigenstate at amplitude a/√k on each axis.</p>
+          </div>
+
+          <div className="control-group">
+            <h3>Time</h3>
+            <button
+              className="sim-item"
+              onClick={() => setPlaying((p) => !p)}
+              aria-pressed={playing}
+              style={{ width: '100%' }}
+            >
+              {playing ? 'Pause' : 'Play'}
+            </button>
+            <Slider label="speed" value={speed} min={0.1} max={3} step={0.1}
+              onChange={setSpeed} format={(v) => `${v.toFixed(1)}×`} />
+            <p className="graph-note">Each fundamental oscillates at f·Ω — higher frequencies move faster.</p>
           </div>
           </>
           )}
