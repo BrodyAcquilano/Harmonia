@@ -86,6 +86,21 @@ export default function QuarkSpace() {
             sets its energy and mass. Entropy grows the sphere from a single point:
             higher entropy, more eigenstates.
           </p>
+          <p>
+            The big bang was not the moment all matter was a single point — it was
+            when all matter operated on the same 1:1 mass-to-energy ratio and
+            vibrated at the same frequency, before quarks were created. All motion
+            since is the adding of new frequencies: new eigenstates built on the
+            same 2/3 building block, each time a quark is absorbed or released.
+          </p>
+          <p>
+            That release creates a disproportion between energy and mass — −1/3 mass
+            to 1 energy, or 2/3 mass to 1 energy — and every combination of these
+            still resolves to 2/3: 2/3 + 2/3 = 4/3 = 1 + 1/3 = 2 − 2/3. All
+            frequencies share this same harmonic ratio, and infinitely many
+            frequencies can be added from it. Adding new frequencies increases the
+            number of eigenstates — which is why entropy increases.
+          </p>
         </div>
       </div>
 
