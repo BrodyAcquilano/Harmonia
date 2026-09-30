@@ -143,7 +143,7 @@ export default function QuarkSpace() {
             </div>
             <ConvolutionSphere
               entropy={entropy} tau1={tau1} tau2={tau2}
-              mode={sim} waveAmp={waveAmp} waveM={waveM} waveN={waveN}
+              mode={isWave ? 'wave' : 'uniform'} waveAmp={waveAmp} waveM={waveM} waveN={waveN}
             />
             <p className="graph-note">
               {isWave
