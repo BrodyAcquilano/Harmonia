@@ -85,17 +85,21 @@ function pickWeighted(rnd, table) {
 // m = −1 (decay, subtracted). Built once per page load — a fresh random
 // universe each visit; within a session a given entropy builds the same
 // surface (no flicker while dragging the slider).
-function buildQuarkTerms(count, seed) {
+function buildQuarkTerms(count, seed, formationOnly = false) {
   const rnd = mulberry32(seed)
   const terms = [{ q: 2, m: 1 }, { q: -1, m: 1 }] // the seeds: 2/3·f_q, −1/3·f_q
   while (terms.length < count) {
-    if (rnd() < 0.95) terms.push({ q: pickWeighted(rnd, FORMATION_STATES), m: 1 })
+    if (formationOnly || rnd() < 0.95) terms.push({ q: pickWeighted(rnd, FORMATION_STATES), m: 1 })
     else terms.push({ q: pickWeighted(rnd, DECAY_STATES), m: -1 })
   }
   return terms
 }
 
 export const QUARK_TERMS = buildQuarkTerms(MAX_STATES, (Math.random() * 0xFFFFFFFF) >>> 0)
+
+// The 20 base frequencies: formation-only picks from a fixed seed, matching
+// the table in notes/quark-space.md — the early universe, before any decay.
+export const BASE20 = buildQuarkTerms(20, 20260930, true)
 
 // unit-surface multiplier on the sphere: the 1:1 sphere plus one mass wave
 // per eigenstate. θ is the angle from +λ in the λ–v plane. The k-th

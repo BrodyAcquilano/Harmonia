@@ -4,6 +4,7 @@ import 'katex/dist/katex.min.css'
 import Slider from './Slider.jsx'
 import ConvolutionSurface, { surfU, QUARK_TERMS } from './ConvolutionSurface.jsx'
 import SurfaceMap from './SurfaceMap.jsx'
+import Fundamental20 from './Fundamental20.jsx'
 
 /* The Quark Space: a convolution of energy and mass and space and time.
    The two time coordinates are angles: τ1 on the mass-wave-frequency axis,
@@ -191,6 +192,8 @@ export default function QuarkSpace() {
               Green peaks, red valleys. The yellow dot marks the arrow's (τ1, τ2).
             </p>
           </div>
+
+          <Fundamental20 />
 
           <div className="graph-box">
             <div className="graph-title-row">
