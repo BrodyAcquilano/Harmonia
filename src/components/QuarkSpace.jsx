@@ -190,6 +190,47 @@ export default function QuarkSpace() {
 
           <div className="graph-box">
             <div className="graph-title-row">
+              <h2 className="graph-title">More entropy, more frequencies</h2>
+            </div>
+            <p className="graph-note">
+              The number of frequencies increases as entropy increases, because
+              newer combinations of frequencies can be built from old ones.
+              Start with 2/3 and −1/3 — then 2/3 + 2/3, then
+              2/3 − 1/3 — and keep going. Each new combination is a
+              new frequency, a new eigenstate on the sphere:
+            </p>
+            <div className="eq-grid">
+              <div className="eq-box">
+                <span className="eq-label">Building new frequencies from old ones</span>
+                <span className="eq-line"><Tex tex="\frac{2}{3}, -\frac{1}{3} \text{ — the seeds}" /></span>
+                <span className="eq-line"><Tex tex="\frac{2}{3} + \frac{2}{3} = \frac{4}{3}" /></span>
+                <span className="eq-line"><Tex tex="\frac{2}{3} - \frac{1}{3} = \frac{1}{3}" /></span>
+              </div>
+            </div>
+            <p className="graph-note">
+              The cosmic background radiation shows this process developing over
+              time. The main belt where the Milky Way sits is high in activity,
+              so it keeps adding new frequencies as entropy rises there.
+              Everywhere else, random processes have split the fluctuations
+              between dark matter and dark energy.
+            </p>
+            <p className="graph-note">
+              Dark matter and dark energy are the stored frequencies — the
+              process of creating up and down quarks. Creating a quark subtracts
+              a frequency from the existing combinations, but it still creates
+              energy fluctuations. Down quarks result in dark matter; up quarks
+              result in dark energy.
+            </p>
+            <p className="graph-note">
+              The process is random, so unlike this sphere, the background
+              radiation reads as a random combination of energy fluctuations
+              — except along the Milky Way’s belt, where rising
+              entropy keeps increasing the number of frequencies.
+            </p>
+          </div>
+
+          <div className="graph-box">
+            <div className="graph-title-row">
               <h2 className="graph-title">Equations</h2>
             </div>
             <div className="eq-grid">
