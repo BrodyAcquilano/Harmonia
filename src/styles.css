@@ -1177,7 +1177,7 @@ body {
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 2 / 1;
   border-radius: 10px;
 }
 
