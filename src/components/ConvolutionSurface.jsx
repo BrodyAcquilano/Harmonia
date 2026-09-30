@@ -291,8 +291,8 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
     const radii = new Float32Array(count)
     for (let i = 0; i < count; i++) {
       const x = basePos[i * 3], y = basePos[i * 3 + 1], z = basePos[i * 3 + 2]
-      // θ measured from +λ in the λ–v plane
-      const th = Math.atan2(y, x)
+      // θ measured from +λ in the λ–v plane (+λ is at −X since the swap)
+      const th = Math.atan2(y, -x)
       const r = surfU(th, waveAmp, N)
       radii[i] = r
       if (r < rMin) rMin = r
@@ -324,7 +324,7 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
       n = N
       for (let i = 0; i < n; i++) {
         fibPoint(i, n, 1, v)
-        const th = Math.atan2(v.y, v.x)
+        const th = Math.atan2(v.y, -v.x)
         const rl = R * surfU(th, waveAmp, N)
         attr.setXYZ(i, v.x * rl, v.y * rl, v.z * rl)
       }
@@ -339,7 +339,7 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
     const u0 = surfU(TH, waveAmp, N)
     const rl = R * u0
     const P = new THREE.Vector3(
-      rl * Math.cos(PH) * Math.cos(TH),
+      -rl * Math.cos(PH) * Math.cos(TH),
       rl * Math.cos(PH) * Math.sin(TH),
       rl * Math.sin(PH)
     )

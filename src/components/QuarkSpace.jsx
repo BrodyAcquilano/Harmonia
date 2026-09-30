@@ -239,7 +239,7 @@ export default function QuarkSpace() {
             <div className="eq-grid">
               <div className="eq-box">
                 <span className="eq-label">Frequency from wavelength</span>
-                <span className="eq-line"><Tex tex="f = \dfrac{c}{|\lambda|}" /></span>
+                <span className="eq-line"><Tex tex="f = \dfrac{c}{\lambda}" /></span>
                 <span className="eq-line"><Tex tex="\text{one cycle per wavelength, at light speed}" /></span>
               </div>
               <div className="eq-box">
