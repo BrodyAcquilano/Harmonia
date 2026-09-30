@@ -10,7 +10,8 @@
 - [4. What the surface represents](#4-what-the-surface-represents)
 - [5. Where the frequencies come from](#5-where-the-frequencies-come-from)
 - [6. Formation wins — why entropy increases](#6-formation-wins--why-entropy-increases)
-- [7. A small input, an increasingly complex system](#7-a-small-input-an-increasingly-complex-system)
+- [7. The universe was still — then the first proton formed](#7-the-universe-was-still-then-the-first-proton-formed)
+- [8. A small input, an increasingly complex system](#8-a-small-input-an-increasingly-complex-system)
 
 ## 1. Why I built this diagram
 
@@ -51,6 +52,41 @@ Why should formation win? Because of charge. Quarks carry charges that pull them
 
 So entropy increases because eigenstates are increasing, and eigenstates are increasing because more and more quarks are being formed over time. Entropy is not disorder here. It is construction.
 
-## 7. A small input, an increasingly complex system
+## 7. The universe was still — then the first proton formed
+
+Before any of this, the field was still. No frequencies, no fluctuations — a uniform gravitational mass-light field with nothing ringing in it. Then the first proton formed: two up quarks and a down quark locked together, $2/3 + 2/3 - 1/3 = 1$, and that was the first non-uniformity. The first frequency.
+
+And a frequency is motion. The moment the field had a frequency in it, it had somewhere to go — the wave pushed on the field around it, and that disturbance is what the next formation rode in on. A domino effect: each proton formed makes the field a little less uniform, a little more disturbed, and the next formation comes a little easier, a little sooner. That is how you get from one proton to a universe full of them — not all at once, but each one making the next one more likely.
+
+The later frequencies are weaker for a reason. On the surface, amplitude falls as $1/\sqrt{k}$: the higher-entropy eigenstates are smaller. That is not just a plotting choice — it is the history. The early frequencies are the abundant ones, the common quark states, formed when the field was fresh and every formation rang loud. The later ones take time to develop and are less abundant — rarer combinations, finer ripples on top of a wave that was already there. So the surface reads like a timeline: the loud, low-$k$ structure is the ancient universe; the fine high-$k$ texture is everything that happened since.
+
+Here are the first 20 formation picks — the early universe, before any decay had time to happen — run through the seeding above with the formation weights. Decays are left out: they came much later.
+
+| $k$ | frequency | relative abundance |
+|-----|-----------|-------------------|
+| 1 | $+\frac{2}{3}f_q$ | $2/7$ |
+| 2 | $-\frac{1}{3}f_q$ | $2/7$ |
+| 3 | $+\frac{1}{3}f_q$ | $1/7$ |
+| 4 | $-1\,f_q$ | $1/7$ |
+| 5 | $-1\,f_q$ | $1/7$ |
+| 6 | $-\frac{4}{3}f_q$ | $1/7$ |
+| 7 | $-\frac{2}{3}f_q$ | $2/7$ |
+| 8 | $-1\,f_q$ | $1/7$ |
+| 9 | $-1\,f_q$ | $1/7$ |
+| 10 | $-\frac{2}{3}f_q$ | $2/7$ |
+| 11 | $-\frac{1}{3}f_q$ | $2/7$ |
+| 12 | $-\frac{4}{3}f_q$ | $1/7$ |
+| 13 | $+\frac{1}{3}f_q$ | $1/7$ |
+| 14 | $-\frac{4}{3}f_q$ | $1/7$ |
+| 15 | $-1\,f_q$ | $1/7$ |
+| 16 | $-\frac{2}{3}f_q$ | $2/7$ |
+| 17 | $-\frac{2}{3}f_q$ | $2/7$ |
+| 18 | $+\frac{1}{3}f_q$ | $1/7$ |
+| 19 | $-\frac{4}{3}f_q$ | $1/7$ |
+| 20 | $-\frac{1}{3}f_q$ | $2/7$ |
+
+Added together, these twenty are the base fundamental frequency — the lowest, loudest tone of the resonator, the one everything later is an overtone of.
+
+## 8. A small input, an increasingly complex system
 
 This is the part that feels like chaos theory to me. The entire surface — two thousand interfering eigenstates, the whole roiling green-and-red sphere — grows out of two seeds: $2/3$ and $-1/3$. That is the small input. Everything else is the 95/5 dice, rolled two thousand times, each roll adding or subtracting one cosine. No roll knows about the others. And yet the result is not noise — it is a structured, intricate, *specific* surface, different on every page load, sensitive to every early pick. Change one of the first ten frequencies and the whole sphere rearranges; the late ones only ripple the details. A small input created an increasingly complex system, and the complexity never stops growing, because formation keeps winning. That, as far as I can tell, is what the universe has been doing too.
