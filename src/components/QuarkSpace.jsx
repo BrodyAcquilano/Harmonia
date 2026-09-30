@@ -53,31 +53,30 @@ export default function QuarkSpace() {
   const [tau2, setTau2] = useState(0) // angle on the energy-wave-phase axis — moves the arrow
   const [waveAmp, setWaveAmp] = useState(0.04)
 
-  // Local amplitude at the arrow (θ = τ1 around the vase, v/c = τ2/90 along
-  // it). τ1/τ2 are angles that move the arrow — they never reshape the wave.
-  // Mass is carried as amplitude (high spots, green); energy is its
-  // inverse — the 180° phase-shifted partner (low spots, red) — so E · m = 1.
+  // Local amplitude at the arrow (θ = τ1). τ1/τ2 are angles that move
+  // the arrow — they never reshape the wave. Mass is carried as amplitude
+  // (high spots, green); energy is its inverse — the 180° phase-shifted
+  // partner (low spots, red) — so E · m = 1.
   const R = Math.max(entropy, 0) / 100000 // the sphere scales very slowly with entropy
   // the eigenstate count sets the surface wave number: N points on a sphere
   // resolve wave numbers up to ~√N, so the wave varies at the finest scale
   // the eigenstates can resolve
   const nStates = 1 + Math.round(27 * Math.log(1 + entropy))
-  const th = tau1 * D2R
-  const u0 = surfU(th, Math.abs(tau2) / 90, waveAmp, nStates)
+  const th = tau1 * D2R, ph = tau2 * D2R
+  const u0 = surfU(th, waveAmp, nStates)
   const A = R * u0
   const m = A
   const E = A > 0 ? 1 / A : Infinity
   // eigenvector components at the arrow
-  const lam = A * Math.cos(th)
-  const vel = (tau2 / 90) * R
-  const ilam = A * Math.sin(th)
-  const plen = Math.sqrt(lam * lam + vel * vel + ilam * ilam)
+  const lam = A * Math.cos(ph) * Math.cos(th)
+  const vel = A * Math.cos(ph) * Math.sin(th)
+  const ilam = A * Math.sin(ph)
   // harmonic bound of the eigenstate sum: Σ a/j
   let hN = 0
   for (let j = 1; j <= nStates; j++) hN += 1 / j
   const bound = waveAmp * hN
 
-  const volume = 2 * Math.PI * R ** 3
+  const volume = (4 / 3) * Math.PI * R ** 3
   const area = 4 * Math.PI * R ** 2
 
   // natural units c = h = 1: f = c/|λ| from the local wavelength at the point
@@ -131,7 +130,7 @@ export default function QuarkSpace() {
                 frequency, energy wave phase — and the values are the angles
                 that move the gold arrow to the point on the surface where
                 energy and mass are read. The three
-                spatial coordinates relate the volume inside the vase to its surface,
+                spatial coordinates relate the volume inside the sphere to its surface,
                 and the two of time give all the possible values on the surface — two
                 of time, three of space, the way Kepler's T² ∝ a³ counts them. So an
                 eigenstate can be defined either way.
@@ -183,7 +182,7 @@ export default function QuarkSpace() {
               waveAmp={waveAmp}
             />
             <p className="graph-note">
-              The vase unfolded flat — θ across the full circle (λ → iλ → −λ → −iλ), v vertical (−c to +c).
+              The surface unfolded flat — τ1 across the full circle, τ2 vertical.
               Green peaks, red valleys. The yellow dot is the arrow's position,
               moved by τ1 and τ2.
             </p>
@@ -211,9 +210,9 @@ export default function QuarkSpace() {
               </div>
               <div className="eq-box">
                 <span className="eq-label">Convolution surface — one wave per eigenstate</span>
-                <span className="eq-line"><Tex tex="u = 1 + \frac{|v|}{c}\left|\sum_{j=1}^{N(s)} \frac{a}{j}\sigma_j\cos(j\theta)\right|" /></span>
+                <span className="eq-line"><Tex tex="u = 1 + \left|\sum_{j=1}^{N(s)} \frac{a}{j}\sigma_j\cos(j\theta)\right|" /></span>
                 <span className="eq-line"><Tex tex="\sigma_j = \pm 1 \text{ — fixed signs spread the peaks, left mirrors right}" /></span>
-                <span className="eq-line"><Tex tex="\theta: \lambda \to i\lambda \to -\lambda \to -i\lambda \to \lambda \text{ — 0 to 2π around } v|" /></span>
+                <span className="eq-line"><Tex tex="\theta\text{ — angle from } +\lambda\text{ in the }\lambda\text{–}v\text{ plane; }\left| \cdot \right|\text{ keeps every displacement outward}" /></span>
                 <span className="eq-line"><Tex tex="v = f_j\lambda_j = 2\pi f_q \text{ — one wave speed for all eigenstates}" /></span>
                 <span className="eq-line"><Tex tex="N(s) = 1 + 27\,\ln(1 + s) \text{ — entropy sets the eigenstate count}" /></span>
                 <span className="eq-line"><Tex tex="r = R\,u, \quad R = \dfrac{s}{100000}, \quad m = u, \quad E = \dfrac{1}{u}" /></span>
@@ -232,8 +231,8 @@ export default function QuarkSpace() {
               </div>
               <div className="eq-box">
                 <span className="eq-label">Eigenvector — moved by τ1, τ2</span>
-                <span className="eq-line"><Tex tex="P = (r\cos\theta,\, v,\, r\sin\theta)" /></span>
-                <span className="eq-line"><Tex tex="\theta = \tau_1,\, v/c = \tau_2/90 \text{ (angles; the labels name the axes)}" /></span>
+                <span className="eq-line"><Tex tex="P = (r\cos\phi\cos\theta,\, r\cos\phi\sin\theta,\, r\sin\phi)" /></span>
+                <span className="eq-line"><Tex tex="\theta = \tau_1,\, \phi = \tau_2 \text{ (angles; the labels name the axes)}" /></span>
               </div>
             </div>
           </div>
@@ -268,7 +267,7 @@ export default function QuarkSpace() {
               onChange={setWaveAmp} format={(v) => v.toFixed(2)} />
             <p className="graph-note">
               Surface u/R range: 1.00 – {(1 + bound).toFixed(2)} (outward only).
-              One wave per eigenstate at amplitude a/j; amplitude grows with |v| — smallest at the equator.
+              One wave per eigenstate at amplitude a/j; the absolute value keeps every displacement outward — no dents.
             </p>
           </div>
 
@@ -287,7 +286,7 @@ export default function QuarkSpace() {
               <Row k="λ" v={fmt(lam)} />
               <Row k="v" v={fmt(vel)} />
               <Row k="iλ" v={fmt(ilam)} />
-              <Row k="|P|" v={fmt(plen)} />
+              <Row k="|P|" v={fmt(A)} />
             </div>
           </div>
 

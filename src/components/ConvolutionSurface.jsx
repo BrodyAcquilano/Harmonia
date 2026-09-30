@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 /* Convolution surface, drawn with three.js.
-   The surface starts as a uniform 1:1 cylinder of mass to energy. Each expelled
+   The surface starts as a uniform 1:1 sphere of mass to energy. Each expelled
    quark — each new eigenstate — adds one new frequency to the mass wave: the
    j-th eigenstate adds f_j = j·f_q, where the quark frequency quantum
    f_q = (2/3)·m_q·c²/h comes from E = hf = mc² with m_q·c² = 2 MeV.
@@ -14,10 +14,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
    Axes are wavelength (X: λ / −λ), velocity (Y: v / −v, vertical), and the
    imaginary wavelength axis (Z: iλ / −iλ) — the phase angle is read from it.
    The wave's angle θ is measured in the λ–v plane.
-   Entropy s in [0,100000]: s = 0 is a single point; the vase scales very slowly as R = s/100000. */
+   Entropy s in [0,100000]: s = 0 is a single point; the sphere scales very slowly as R = s/100000. */
 
 const D2R = Math.PI / 180
-const AXIS_LEN = 1.32 // axes reach just past the max vase (radius 1)
+const AXIS_LEN = 1.32 // axes reach just past the max sphere (radius 1)
 const GOLD = 0xd9a441
 const MAX_STATES = 320
 
@@ -40,16 +40,14 @@ function makeLabel(text) {
   return sp
 }
 
-// unit-surface multiplier on the vase: the 1:1 cylinder plus one mass wave
-// per eigenstate. θ runs 0..2π in the λ–iλ plane
-// (λ → iλ → −λ → −iλ → λ); vfrac = |v|/c runs 0 at the equator to 1 at ±c.
-// The j-th eigenstate adds frequency f_j = j·f_q (f_q the quark frequency
-// quantum from E = hf = mc²). Amplitudes fall as 1/j so the sum stays
-// bounded. Energy is the inverse, E = 1/u — the 180° partner. v = fλ holds
-// per harmonic with one wave speed. The absolute value keeps every
-// displacement outward (no dents); amplitude grows with |v|, smallest at
-// the equator.
-export function surfU(theta, vfrac, a, N) {
+// unit-surface multiplier on the sphere: the 1:1 sphere plus one mass wave
+// per eigenstate. θ is the angle from +λ in the λ–v plane. The j-th
+// eigenstate adds frequency f_j = j·f_q (f_q the quark frequency quantum
+// from E = hf = mc²). Amplitudes fall as 1/j so the sum stays bounded.
+// Energy is the inverse, E = 1/u — the 180° partner. v = fλ holds per
+// harmonic with one wave speed. The absolute value keeps every displacement
+// outward (no dents); the wave ignores velocity — uniform in all directions.
+export function surfU(theta, a, N) {
   const gamma = 0.618033988749895 // (sqrt(5)-1)/2
   let w = 0
   for (let j = 1; j <= N; j++) {
@@ -59,7 +57,17 @@ export function surfU(theta, vfrac, a, N) {
     const sgn = (Math.floor(j * gamma) % 2 === 0) ? 1 : -1
     w += (a / j) * sgn * Math.cos(j * theta)
   }
-  return Math.max(1 + vfrac * Math.abs(w), 0.05)
+  return Math.max(1 + Math.abs(w), 0.05)
+}
+
+// i-th point of an n-point Fibonacci lattice on a sphere of radius r
+function fibPoint(i, n, r, target) {
+  if (n <= 1) return target.set(0, 0, 0)
+  const golden = Math.PI * (3 - Math.sqrt(5))
+  const y = 1 - (i / (n - 1)) * 2
+  const rad = Math.sqrt(Math.max(0, 1 - y * y))
+  const th = golden * i
+  return target.set(r * rad * Math.cos(th), r * y, r * rad * Math.sin(th))
 }
 
 export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAmp = 0.04 }) {
@@ -110,22 +118,21 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
       }
     })
 
-    // faint floor grid: the coordinate grid the vase sits on
+    // faint floor grid: the coordinate grid the sphere sits on
     const grid = new THREE.GridHelper(2.64, 16, 0xcbb37a, 0xdccfae)
     grid.material.transparent = true
     grid.material.opacity = 0.28
     grid.position.y = -AXIS_LEN
     scene.add(grid)
 
-    // the convolution surface: a vase around the v axis, semi-transparent,
-    // displaced radially by the wave and tinted by local amplitude
-    // (green = mass high, red = energy low)
-    const vaseGeo = new THREE.CylinderGeometry(1, 1, 2, 96, 32, true)
-    const basePos = vaseGeo.attributes.position.array.slice()
-    const vCount = vaseGeo.attributes.position.count
-    vaseGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(vCount * 3).fill(1), 3))
-    const vase = new THREE.Mesh(
-      vaseGeo,
+    // the convolution surface: semi-transparent, displaced by the wave
+    // and tinted by local amplitude (green = mass high, red = energy low)
+    const sphereGeo = new THREE.SphereGeometry(1, 64, 48)
+    const basePos = sphereGeo.attributes.position.array.slice()
+    const vCount = sphereGeo.attributes.position.count
+    sphereGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(vCount * 3).fill(1), 3))
+    const sphere = new THREE.Mesh(
+      sphereGeo,
       new THREE.MeshStandardMaterial({
         color: 0xffffff, transparent: true, opacity: 0.65,
         roughness: 0.35, metalness: 0.05,
@@ -134,12 +141,12 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
       })
     )
     const wire = new THREE.Mesh(
-      new THREE.CylinderGeometry(1, 1, 2, 24, 10, true),
+      sphereGeo,
       new THREE.MeshBasicMaterial({ color: 0xb09a5e, wireframe: true, transparent: true, opacity: 0.18 })
     )
-    scene.add(vase, wire)
+    scene.add(sphere, wire)
 
-    // eigenstates: points on the vase (golden-angle spiral, spread along v)
+    // eigenstates: points on the surface (Fibonacci lattice)
     const posArr = new Float32Array(MAX_STATES * 3)
     const ptsGeo = new THREE.BufferGeometry()
     ptsGeo.setAttribute('position', new THREE.BufferAttribute(posArr, 3))
@@ -172,7 +179,7 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
       renderer.setSize(w, h)
       camera.aspect = w / h
       camera.updateProjectionMatrix()
-      // distance so the axes (just past the max vase) fill the smaller view dimension
+      // distance so the axes (just past the max sphere) fill the smaller view dimension
       const fov = camera.fov * D2R
       const fitH = AXIS_LEN / Math.tan(fov / 2)
       const dist = Math.max(fitH, fitH / camera.aspect)
@@ -198,7 +205,7 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
     }
     loop()
 
-    apiRef.current = { vase, wire, points, arrow, shaft, head, UP, basePos }
+    apiRef.current = { sphere, wire, points, arrow, shaft, head, UP, basePos }
 
     return () => {
       cancelAnimationFrame(raf)
@@ -223,25 +230,24 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
     if (!api) return
     const R = Math.max(entropy, 0) / 100000
     const N = Math.min(1 + Math.round(27 * Math.log(1 + entropy)), MAX_STATES)
-    const { vase, wire, points, arrow, shaft, head, UP, basePos } = api
+    const { sphere, wire, points, arrow, shaft, head, UP, basePos } = api
 
-    // displace the unit-vase vertices radially by the wave and tint by
+    // displace the unit-sphere vertices radially by the wave and tint by
     // amplitude (green = mass high, red = energy low)
-    const posA = vase.geometry.attributes.position
-    const colA = vase.geometry.attributes.color
+    const posA = sphere.geometry.attributes.position
+    const colA = sphere.geometry.attributes.color
     const count = posA.count
     let rMin = Infinity, rMax = -Infinity
     const radii = new Float32Array(count)
     for (let i = 0; i < count; i++) {
       const x = basePos[i * 3], y = basePos[i * 3 + 1], z = basePos[i * 3 + 2]
-      // θ in the λ–iλ plane (λ → iλ → −λ → −iλ), |v|/c = |y| with y in [-1, 1]
-      const th = Math.atan2(z, x)
-      const vf = Math.min(1, Math.abs(y))
-      const r = surfU(th, vf, waveAmp, N)
+      // θ measured from +λ in the λ–v plane
+      const th = Math.atan2(y, x)
+      const r = surfU(th, waveAmp, N)
       radii[i] = r
       if (r < rMin) rMin = r
       if (r > rMax) rMax = r
-      posA.setXYZ(i, x * r, y, z * r)
+      posA.setXYZ(i, x * r, y * r, z * r)
     }
     const span = rMax - rMin
     for (let i = 0; i < count; i++) {
@@ -250,15 +256,16 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
     }
     posA.needsUpdate = true
     colA.needsUpdate = true
-    vase.geometry.computeVertexNormals()
+    sphere.geometry.computeVertexNormals()
 
-    vase.visible = R > 1e-4
+    sphere.visible = R > 1e-4
     wire.visible = R > 1e-4
-    vase.scale.setScalar(Math.max(R, 1e-4))
+    sphere.scale.setScalar(Math.max(R, 1e-4))
     wire.scale.setScalar(Math.max(R, 1e-4))
 
-    // eigenstates: one point at s = 0, up to 320 at s = 1, riding the vase
+    // eigenstates: one point at s = 0, up to 320 at s = 1, riding the surface
     const attr = points.geometry.attributes.position
+    const v = new THREE.Vector3()
     let n
     if (R <= 1e-4) {
       n = 1
@@ -266,26 +273,25 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
     } else {
       n = N
       for (let i = 0; i < n; i++) {
-        const th = i * 2.399963229728653 // golden angle around the vase
-        const y = 1 - (2 * (i + 0.5)) / n // spread along v, -1..1
-        const rl = R * surfU(th, Math.abs(y), waveAmp, N)
-        attr.setXYZ(i, Math.cos(th) * rl, y * R, Math.sin(th) * rl)
+        fibPoint(i, n, 1, v)
+        const th = Math.atan2(v.y, v.x)
+        const rl = R * surfU(th, waveAmp, N)
+        attr.setXYZ(i, v.x * rl, v.y * rl, v.z * rl)
       }
     }
     attr.needsUpdate = true
     points.geometry.setDrawRange(0, n)
     points.geometry.computeBoundingSphere()
 
-    // the eigenvector: τ1 moves the arrow around the vase, τ2 moves it
-    // along v; the labels name the axes
-    const TH = tau1 * D2R
-    const vf = Math.min(1, Math.abs(tau2) / 90)
-    const u0 = surfU(TH, vf, waveAmp, N)
+    // the eigenvector: τ1/τ2 are angles that move the arrow to the point
+    // where the values are read; the labels name the axes
+    const TH = tau1 * D2R, PH = tau2 * D2R
+    const u0 = surfU(TH, waveAmp, N)
     const rl = R * u0
     const P = new THREE.Vector3(
-      rl * Math.cos(TH),
-      (tau2 / 90) * R,
-      rl * Math.sin(TH)
+      rl * Math.cos(PH) * Math.cos(TH),
+      rl * Math.cos(PH) * Math.sin(TH),
+      rl * Math.sin(PH)
     )
     const len = P.length()
     arrow.visible = len > 1e-3
