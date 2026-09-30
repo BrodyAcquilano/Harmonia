@@ -54,40 +54,53 @@ function mulberry32(seed) {
   }
 }
 
-// The quark frequency chain, in units of f_q/3 — so the seeds 2/3·f_q and
-// -1/3·f_q are the integers 2 and -1. Integer values keep every cos(q·θ)
-// seamless around the sphere (no branch-cut crack). Each new frequency is a
-// random sum or difference of two earlier ones: newer combinations built from
-// old ones, deduplicated, never zero. The chain is built once per page load;
-// entropy only decides how many of its frequencies are active.
-function buildQuarkFreqs(count, seed = 20260930) {
-  const qs = [2, -1]
-  const seen = new Set([2, 1])
-  const rnd = mulberry32(seed)
-  while (qs.length < count) {
-    let cand = 0
-    let ok = false
-    for (let tries = 0; tries < 60 && !ok; tries++) {
-      const a = qs[(rnd() * qs.length) | 0]
-      const b = qs[(rnd() * qs.length) | 0]
-      cand = a + (rnd() < 0.5 ? b : -b)
-      ok = cand !== 0 && !seen.has(Math.abs(cand))
-    }
-    if (!ok) cand = Math.max(...seen) + 1 // fallback: guaranteed fresh
-    qs.push(cand)
-    seen.add(Math.abs(cand))
+// Quark-state frequency seeding — every eigenstate is a direct pick from the
+// 14 quark states, in units of f_q/3 (so each is an integer and every
+// cos(q·θ) stays seamless around the sphere; negative frequencies are the
+// same waves phase-shifted by −180°).
+//
+// Formation (quark formation — dark matter + dark energy), ADDED, 95%:
+//   state:  −2/3  −1/3  +1/3  −4/3   −1
+//   weight:  2/7   2/7   1/7   1/7  1/7
+// Decay (proton decay — normal matter), SUBTRACTED, 5%:
+//   state:  +2/3  +1/3  −1/3  +4/3   +1
+//   weight:  2/7   2/7   1/7   1/7  1/7
+// The weights count quarks: two up quarks make 2/3 twice as likely as −1/3;
+// one quark, two quarks (4/3 one way, 1/3 two ways), all three (1).
+// Formation wins 95 to 5 — if the split were even, formation and decay would
+// cancel out. Instead eigenstates accumulate, and that is why entropy rises.
+const FORMATION_STATES = [[-2, 2], [-1, 2], [1, 1], [-4, 1], [-3, 1]]
+const DECAY_STATES = [[2, 2], [1, 2], [-1, 1], [4, 1], [3, 1]]
+
+function pickWeighted(rnd, table) {
+  let r = rnd() * 7 // weights in each table sum to 7
+  for (const [q, w] of table) {
+    r -= w
+    if (r <= 0) return q
   }
-  return qs
+  return table[table.length - 1][0]
 }
 
-// Fresh random chain on every page load: within a session a given entropy
-// always builds the same surface (no flicker while dragging the slider),
-// but each visit gets a new set of frequencies.
-export const QUARK_FREQS = buildQuarkFreqs(MAX_STATES, (Math.random() * 0xFFFFFFFF) >>> 0)
+// One term per eigenstate: { q, m } with m = +1 (formation, added) or
+// m = −1 (decay, subtracted). Built once per page load — a fresh random
+// universe each visit; within a session a given entropy builds the same
+// surface (no flicker while dragging the slider).
+function buildQuarkTerms(count, seed) {
+  const rnd = mulberry32(seed)
+  const terms = [{ q: 2, m: 1 }, { q: -1, m: 1 }] // the seeds: 2/3·f_q, −1/3·f_q
+  while (terms.length < count) {
+    if (rnd() < 0.95) terms.push({ q: pickWeighted(rnd, FORMATION_STATES), m: 1 })
+    else terms.push({ q: pickWeighted(rnd, DECAY_STATES), m: -1 })
+  }
+  return terms
+}
+
+export const QUARK_TERMS = buildQuarkTerms(MAX_STATES, (Math.random() * 0xFFFFFFFF) >>> 0)
 
 // unit-surface multiplier on the sphere: the 1:1 sphere plus one mass wave
 // per eigenstate. θ is the angle from +λ in the λ–v plane. The k-th
-// eigenstate adds frequency q_k·(f_q/3) from the combination chain above;
+// eigenstate adds frequency q_k·(f_q/3) from the quark-state picks above;
+
 // amplitudes fall as 1/√k — newer combinations are weaker, but every doubling
 // of the eigenstate count adds the same visible structure (pink-noise
 // spectrum), so raising entropy always reshapes the surface. Energy is the
@@ -113,13 +126,14 @@ export function foldTheta(theta) {
 // core used by the 3D surface and the flat map
 export function waveSum(t, a, N) {
   let w = 0
-  const n = Math.min(N, QUARK_FREQS.length)
+  const n = Math.min(N, QUARK_TERMS.length)
   for (let k = 0; k < n; k++) {
     // fixed +/-1 sign pattern (golden-ratio bits): spreads the peaks around
     // the circle instead of piling them at th = 0, while keeping perfect
     // left-right symmetry (unlike a phase shift)
     const sgn = (Math.floor((k + 1) * SGN_GAMMA) % 2 === 0) ? 1 : -1
-    w += (a / Math.sqrt(k + 1)) * sgn * Math.cos(QUARK_FREQS[k] * t)
+    const term = QUARK_TERMS[k]
+    w += term.m * (a / Math.sqrt(k + 1)) * sgn * Math.cos(term.q * t)
   }
   return w
 }

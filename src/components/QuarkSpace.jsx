@@ -2,7 +2,7 @@ import { useState } from 'react'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import Slider from './Slider.jsx'
-import ConvolutionSurface, { surfU, QUARK_FREQS } from './ConvolutionSurface.jsx'
+import ConvolutionSurface, { surfU, QUARK_TERMS } from './ConvolutionSurface.jsx'
 import SurfaceMap from './SurfaceMap.jsx'
 
 /* The Quark Space: a convolution of energy and mass and space and time.
@@ -61,7 +61,7 @@ export default function QuarkSpace() {
   // the eigenstate count sets the surface wave number: N points on a sphere
   // resolve wave numbers up to ~√N, so the wave varies at the finest scale
   // the eigenstates can resolve
-  const nStates = Math.min(1 + Math.round(entropy / 50), QUARK_FREQS.length)
+  const nStates = Math.min(1 + Math.round(entropy / 50), QUARK_TERMS.length)
   const th = tau1 * D2R, ph = tau2 * D2R
   const u0 = surfU(th, waveAmp, nStates)
   const A = R * u0
@@ -72,7 +72,7 @@ export default function QuarkSpace() {
   const vel = A * Math.cos(ph) * Math.sin(th)
   const ilam = A * Math.sin(ph)
   // first few frequencies of the combination chain, for the equation box
-  const firstTerms = QUARK_FREQS.slice(0, 8).join(', ')
+  const firstTerms = QUARK_TERMS.slice(0, 8).map((t) => t.q).join(', ')
   // typical (rms) roughness of the 1/√k eigenstate sum: a·√(Σ 1/k)
   let hN = 0
   for (let j = 1; j <= nStates; j++) hN += 1 / j
@@ -198,17 +198,20 @@ export default function QuarkSpace() {
             </div>
             <p className="graph-note">
               The number of frequencies increases as entropy increases, because
-              newer combinations of frequencies can be built from old ones.
-              Start with 2/3 and −1/3 — then 2/3 + 2/3, then
-              2/3 − 1/3 — and keep going. Each new combination is a
-              new frequency, a new eigenstate on the sphere:
+              every eigenstate is a quark event — a formation or a decay. Each
+              new eigenstate picks one of the 14 quark states: 95% of the time
+              a formation state (a negative frequency — the same wave
+              phase-shifted by −180°), 5% of the time a decay state, which is
+              subtracted from the wave instead of added. The weights count the
+              quarks: two up quarks make 2/3 twice as likely as −1/3, and the
+              two-quark and three-quark combinations fill out the rest:
             </p>
             <div className="eq-grid">
               <div className="eq-box">
-                <span className="eq-label">Building new frequencies from old ones</span>
-                <span className="eq-line"><Tex tex="\frac{2}{3}, -\frac{1}{3} \text{ — the seeds}" /></span>
-                <span className="eq-line"><Tex tex="\frac{2}{3} + \frac{2}{3} = \frac{4}{3}" /></span>
-                <span className="eq-line"><Tex tex="\frac{2}{3} - \frac{1}{3} = \frac{1}{3}" /></span>
+                <span className="eq-label">Quark-state seeding — one pick per eigenstate</span>
+                <span className="eq-line"><Tex tex="\text{formation } 95\%, \text{ added: } -\frac{2}{3}\,(\frac{2}{7}),\; -\frac{1}{3}\,(\frac{2}{7}),\; \frac{1}{3},\; -\frac{4}{3},\; -1\;(\frac{1}{7} \text{ each})" /></span>
+                <span className="eq-line"><Tex tex="\text{decay } 5\%, \text{ subtracted: } \frac{2}{3}\,(\frac{2}{7}),\; \frac{1}{3}\,(\frac{2}{7}),\; -\frac{1}{3},\; \frac{4}{3},\; 1\;(\frac{1}{7} \text{ each})" /></span>
+                <span className="eq-line"><Tex tex="\text{weights count the quarks: two ups, one down}" /></span>
               </div>
             </div>
             <p className="graph-note">
@@ -220,10 +223,10 @@ export default function QuarkSpace() {
             </p>
             <p className="graph-note">
               Dark matter and dark energy are the stored frequencies — the
-              process of creating up and down quarks. Creating a quark subtracts
-              a frequency from the existing combinations, but it still creates
-              energy fluctuations. Down quarks result in dark matter; up quarks
-              result in dark energy.
+              process of creating up and down quarks. Creating a quark adds a
+              frequency (a negative one — phase-shifted by −180°); a decay
+              subtracts one instead, but both are energy fluctuations. Down
+              quarks result in dark matter; up quarks result in dark energy.
             </p>
             <p className="graph-note">
               The process is random, so unlike this sphere, the background
@@ -255,9 +258,10 @@ export default function QuarkSpace() {
               </div>
               <div className="eq-box">
                 <span className="eq-label">Convolution surface — one wave per eigenstate</span>
-                <span className="eq-line"><Tex tex="u = 1 + \sum_{k=1}^{N(s)} \frac{a}{\sqrt{k}}\sigma_k\cos(q_k\theta)" /></span>
+                <span className="eq-line"><Tex tex="u = 1 + \sum_{k=1}^{N(s)} m_k\frac{a}{\sqrt{k}}\sigma_k\cos(q_k\theta)" /></span>
                 <span className="eq-line"><Tex tex="q_1 = 2,\, q_2 = -1 \text{ — the seeds } \frac{2}{3}f_q, -\frac{1}{3}f_q" /></span>
-                <span className="eq-line"><Tex tex="q_k = q_i \pm q_j \text{ — each new frequency a random sum/difference of two earlier ones}" /></span>
+                <span className="eq-line"><Tex tex="q_k \text{ — one weighted pick from the 14 quark states per eigenstate}" /></span>
+                <span className="eq-line"><Tex tex="m_k = +1 \text{ formation } (95\%),\; m_k = -1 \text{ decay } (5\%) \text{ — decay is subtracted}" /></span>
                 <span className="eq-line"><Tex tex="\sigma_k = \pm 1 \text{ — fixed signs spread the peaks, left mirrors right}" /></span>
                 <span className="eq-line">chain starts: {firstTerms}, …</span>
                 <span className="eq-line"><Tex tex="\theta\text{ — angle from } +\lambda\text{ in the }\lambda\text{–}v\text{ plane}" />

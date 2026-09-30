@@ -31,6 +31,7 @@ const NOTE_ORDER = [
   '../../notes/the-4th-dimension.md',
   '../../notes/the-2-3-ratio.md',
   '../../notes/the-quantum-resonator.md',
+  '../../notes/quark-space.md',
 ]
 
 function titleFromPath(path) {
