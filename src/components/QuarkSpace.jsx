@@ -184,7 +184,8 @@ export default function QuarkSpace() {
               waveAmp={waveAmp}
             />
             <p className="graph-note">
-              The surface unfolded flat — τ1 across the full circle, τ2 vertical.
+              The surface unfolded flat — −λ left, iλ center, λ right (the +λ half;
+              the −λ half is its 180° opposite). τ2 vertical.
               Green peaks, red valleys. The yellow dot is the arrow's position,
               moved by τ1 and τ2.
             </p>
@@ -253,12 +254,13 @@ export default function QuarkSpace() {
               </div>
               <div className="eq-box">
                 <span className="eq-label">Convolution surface — one wave per eigenstate</span>
-                <span className="eq-line"><Tex tex="u = 1 + \left|\sum_{k=1}^{N(s)} \frac{a}{k}\sigma_k\cos(q_k\theta)\right|" /></span>
+                <span className="eq-line"><Tex tex="u = 1 + \sum_{k=1}^{N(s)} \frac{a}{k}\sigma_k\cos(q_k\theta)" /></span>
                 <span className="eq-line"><Tex tex="q_1 = 2,\, q_2 = -1 \text{ — the seeds } \frac{2}{3}f_q, -\frac{1}{3}f_q}" /></span>
                 <span className="eq-line"><Tex tex="q_k = q_i \pm q_j \text{ — each new frequency a random sum/difference of two earlier ones}" /></span>
                 <span className="eq-line"><Tex tex="\sigma_k = \pm 1 \text{ — fixed signs spread the peaks, left mirrors right}" /></span>
                 <span className="eq-line">chain starts: {firstTerms}, …</span>
-                <span className="eq-line"><Tex tex="\theta\text{ — angle from } +\lambda\text{ in the }\lambda\text{–}v\text{ plane; }\left| \cdot \right|\text{ keeps every displacement outward}" /></span>
+                <span className="eq-line"><Tex tex="\theta\text{ — angle from } +\lambda\text{ in the }\lambda\text{–}v\text{ plane}" />
+                <span className="eq-line"><Tex tex="w(\theta + \pi) = -w(\theta)\text{ — the } -\lambda\text{ half is the } 180^\circ\text{ phase-shifted opposite}" /></span></span>
                 <span className="eq-line"><Tex tex="v = f_j\lambda_j = 2\pi f_q \text{ — one wave speed for all eigenstates}" /></span>
                 <span className="eq-line"><Tex tex="N(s) = 1 + 27\,\ln(1 + s) \text{ — entropy sets the eigenstate count}" /></span>
                 <span className="eq-line"><Tex tex="r = R\,u, \quad R = \dfrac{s}{100000}, \quad m = u, \quad E = \dfrac{1}{u}" /></span>
@@ -314,7 +316,7 @@ export default function QuarkSpace() {
             <p className="graph-note">
               Surface u/R range: 1.00 – {(1 + bound).toFixed(2)} (outward only).
               One wave per eigenstate at amplitude a/k — newer combinations weaker. Frequencies are a random
-              combination chain from the 2/3, −1/3 seeds; the absolute value keeps every displacement outward — no dents.
+              combination chain from the 2/3, −1/3 seeds. No absolute value — the −λ half is the negated +λ half (180° phase shift), so the surface dents inward where the wave goes negative.
             </p>
           </div>
 

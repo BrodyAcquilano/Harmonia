@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { surfU } from './ConvolutionSurface.jsx'
 
-/* Flat projection of the convolution surface: standard unfolding — τ1 runs
-   horizontally around the full circle (0 to 2π), τ2 runs vertically pole to
-   pole. Peaks are green, valleys are red — full color, since the gold arrow
+/* Flat projection of the convolution surface: half unfolding — the
+   horizontal runs from −λ (left) through iλ (center) to +λ (right), the +λ
+   half of the wave circle. The −λ half isn't shown: it's the 180°
+   phase-shifted opposite (negation) of this half. τ2 runs vertically.
+   Peaks are green, valleys are red — full color, since the gold arrow
    isn't drawn here. The τ1/τ2 controls move a yellow dot: the arrow's
-   position on the map. */
+   position on the map (|τ1| folds onto the half shown). */
 
 const MAX_STATES = 320
 const W = 360, H = 180
@@ -43,7 +45,7 @@ export default function SurfaceMap({ entropy, tau1, tau2, waveAmp = 0.04 }) {
     for (let iy = 0; iy < H; iy++) {
       const t2 = (0.5 - (iy + 0.5) / H) * Math.PI // τ2: +90° top .. -90° bottom
       for (let ix = 0; ix < W; ix++) {
-        const t1 = ((ix + 0.5) / W - 0.5) * 2 * Math.PI // τ1: full circle across
+        const t1 = Math.PI * (1 - (ix + 0.5) / W) // −λ at left .. +λ at right, iλ center
         const u = surfU(t1, waveAmp, N)
         us[iy * W + ix] = u
         if (u < uMin) uMin = u
@@ -65,7 +67,7 @@ export default function SurfaceMap({ entropy, tau1, tau2, waveAmp = 0.04 }) {
     ctx.putImageData(img, 0, 0)
 
     // yellow dot: the arrow's position, moved by τ1/τ2
-    const dx = ((tau1 + 180) / 360) * W
+    const dx = ((180 - Math.abs(tau1)) / 180) * W // |τ1| folds onto the half map
     const dy = ((90 - tau2) / 180) * H
     ctx.beginPath()
     ctx.arc(dx, dy, 7, 0, 2 * Math.PI)
@@ -76,5 +78,15 @@ export default function SurfaceMap({ entropy, tau1, tau2, waveAmp = 0.04 }) {
     ctx.stroke()
   }, [entropy, tau1, tau2, waveAmp])
 
-  return <canvas ref={canvasRef} className="surface-map-canvas" />
+  return (
+    <div>
+      <canvas ref={canvasRef} className="surface-map-canvas" />
+      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 6px 0',
+                    fontFamily: '"IBM Plex Mono", monospace', fontSize: 12, color: '#715f43' }}>
+        <span>−λ</span>
+        <span>iλ</span>
+        <span>λ</span>
+      </div>
+    </div>
+  )
 }

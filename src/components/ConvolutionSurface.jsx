@@ -18,6 +18,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
    Entropy s in [0,100000]: s = 0 is a single point; the sphere scales very slowly as R = s/100000. */
 
 const D2R = Math.PI / 180
+const TAU = Math.PI * 2
 const AXIS_LEN = 1.32 // axes reach just past the max sphere (radius 1)
 const GOLD = 0xd9a441
 const MAX_STATES = 320
@@ -85,11 +86,18 @@ export const QUARK_FREQS = buildQuarkFreqs(MAX_STATES)
 // per eigenstate. θ is the angle from +λ in the λ–v plane. The k-th
 // eigenstate adds frequency q_k·(f_q/3) from the combination chain above;
 // amplitudes fall as 1/k — newer combinations are weaker — so the sum stays
-// bounded. Energy is the inverse, E = 1/u — the 180° partner. The absolute
-// value keeps every displacement outward (no dents); the wave ignores
-// velocity — uniform in all directions.
+// bounded. Energy is the inverse, E = 1/u — the 180° partner. The −λ half
+// (|θ| > π/2) is the 180° phase-shifted opposite of the +λ half: −λ gives
+// −f. No absolute value — the surface dents inward where the wave goes
+// negative; the 0.05 floor only stops the mesh turning inside-out.
 export function surfU(theta, a, N) {
   const gamma = 0.618033988749895 // (sqrt(5)-1)/2
+  let t = theta % TAU
+  if (t > Math.PI) t -= TAU
+  else if (t < -Math.PI) t += TAU
+  let s = 1
+  if (t > Math.PI / 2) { t -= Math.PI; s = -1 }
+  else if (t < -Math.PI / 2) { t += Math.PI; s = -1 }
   let w = 0
   const n = Math.min(N, QUARK_FREQS.length)
   for (let k = 0; k < n; k++) {
@@ -97,9 +105,9 @@ export function surfU(theta, a, N) {
     // the circle instead of piling them at th = 0, while keeping perfect
     // left-right symmetry (unlike a phase shift)
     const sgn = (Math.floor((k + 1) * gamma) % 2 === 0) ? 1 : -1
-    w += (a / (k + 1)) * sgn * Math.cos(QUARK_FREQS[k] * theta)
+    w += (a / (k + 1)) * sgn * Math.cos(QUARK_FREQS[k] * t)
   }
-  return Math.max(1 + Math.abs(w), 0.05)
+  return Math.max(1 + s * w, 0.05)
 }
 
 // i-th point of an n-point Fibonacci lattice on a sphere of radius r
@@ -138,7 +146,7 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
     // coordinate axes: wavelength X (λ / −λ), velocity Y (v / −v, vertical),
     // imaginary wavelength Z (iλ / −iλ) — phase is read from this axis
     const axes = [
-      { ax: 'x', color: 0xc0563f, plus: 'λ', minus: '−λ' },
+      { ax: 'x', color: 0xc0563f, plus: '−λ', minus: 'λ' },
       { ax: 'y', color: 0x2e8b6e, plus: 'v', minus: '−v' },
       { ax: 'z', color: 0x3f6fb5, plus: 'iλ', minus: '−iλ' },
     ]
