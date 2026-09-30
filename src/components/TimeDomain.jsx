@@ -7,15 +7,17 @@ import { HUES } from './SurfaceMap.jsx'
 /* The Space-Time Domain: the same quark-frequency family as the surface, let loose
    in space and time. Each axis — x, y, z — carries its own independent
    random chain of quark frequencies (one wave per eigenstate at amplitude
-   a/√k, the pink-noise family, fundamentals |q| = 1..4). Each point of each
-   wave is painted by the fundamental it is most made of — blue 1/3 f_q,
-   red 2/3 f_q, green 1 f_q, yellow 4/3 f_q — and the bright gold curve is
-   the superposition of all three: T(s,t) = (w_x, w_y, w_z), the total shape.
-   Press play and every fundamental oscillates at its own rate f·Ω: the waves
-   interfere, the total shape writhes — motion created from waves.
-   The first 20 components of each axis are drawn too — faint lines in their
-   own fundamental's color — so the interference building each axis wave is
-   visible. */
+   a/√k, the pink-noise family, fundamentals |q| = 1..4). Each axis fans its
+   wave across its plane of motion — x and y sweep the xy plane, z sweeps
+   the yz plane — so waves propagate in every direction. (z is vertical here.)
+   Each point of each wave is painted by the fundamental it is most made of —
+   blue 1/3 f_q, red 2/3 f_q, green 1 f_q, yellow 4/3 f_q — and the bright
+   gold curve is the superposition of all three: T(s,t) = (w_x, w_y, w_z),
+   the total shape. Press play and every fundamental oscillates at its own
+   rate f·Ω: the waves interfere, the total shape writhes — motion created
+   from waves. The first 20 components of each axis are drawn too — faint
+   lines in their own fundamental's color — so the interference building
+   each axis wave is visible. */
 
 const D2R = Math.PI / 180
 const SPAN = 2.2 // waves run s ∈ [-SPAN, SPAN] along each axis
@@ -23,6 +25,15 @@ const AXIS_LEN = 2.62 // axes reach just past the wave ends
 const SAMPLES = 420 // points per wave
 const OMEGA = (2 * Math.PI) / 8 // base rate: the f=1 fundamental cycles every 8 s at speed 1
 const GOLD = 0xd9a441
+// fan of propagation: each axis sweeps its wave across its plane of motion
+const BLADE_DEG = [-60, -30, 0, 30, 60]
+const D2R_FAN = Math.PI / 180
+// per axis: propagation direction d(α) and in-plane transverse n(α)
+const FAMILIES = [
+  { dir: (a) => [Math.cos(a), Math.sin(a), 0], nrm: (a) => [-Math.sin(a), Math.cos(a), 0] }, // x in xy
+  { dir: (a) => [Math.sin(a), Math.cos(a), 0], nrm: (a) => [Math.cos(a), -Math.sin(a), 0] }, // y in xy
+  { dir: (a) => [0, Math.sin(a), Math.cos(a)], nrm: (a) => [0, Math.cos(a), -Math.sin(a)] },  // z in yz
+]
 const MAX_COMP = 20 // components drawn per axis
 const SGN_GAMMA = 0.618033988749895 // (sqrt(5)-1)/2 — same sign pattern as the surface
 const sgnK = (k) => (Math.floor((k + 1) * SGN_GAMMA) % 2 === 0) ? 1 : -1
@@ -90,6 +101,7 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 300)
+    camera.up.set(0, 0, 1) // z is vertical in the space-time domain
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true
     controls.dampingFactor = 0.08
@@ -123,24 +135,29 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
     const grid = new THREE.GridHelper(AXIS_LEN * 2, 20, 0xcbb37a, 0xdccfae)
     grid.material.transparent = true
     grid.material.opacity = 0.28
-    grid.position.y = -AXIS_LEN
+    grid.rotation.x = Math.PI / 2 // lie in the xy plane — z is vertical
+    grid.position.z = -AXIS_LEN
     scene.add(grid)
 
-    // one wave line per axis, vertex-colored by dominant fundamental
-    const wavePos = [], waveCol = [], waveLines = []
+    // fan of propagation: each axis sweeps its wave across its plane of
+    // motion, vertex-colored by dominant fundamental
+    const blades = []
     for (let a = 0; a < 3; a++) {
-      const geo = new THREE.BufferGeometry()
-      const pos = new Float32Array(SAMPLES * 3)
-      const col = new Float32Array(SAMPLES * 3)
-      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
-      geo.setAttribute('color', new THREE.BufferAttribute(col, 3))
-      geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 6)
-      const line = new THREE.Line(geo, new THREE.LineBasicMaterial({
-        vertexColors: true, transparent: true, opacity: 0.95,
-      }))
-      line.frustumCulled = false
-      scene.add(line)
-      wavePos.push(pos); waveCol.push(col); waveLines.push(line)
+      for (const deg of BLADE_DEG) {
+        const al = deg * D2R_FAN
+        const geo = new THREE.BufferGeometry()
+        const pos = new Float32Array(SAMPLES * 3)
+        const col = new Float32Array(SAMPLES * 3)
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+        geo.setAttribute('color', new THREE.BufferAttribute(col, 3))
+        geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 6)
+        const line = new THREE.Line(geo, new THREE.LineBasicMaterial({
+          vertexColors: true, transparent: true, opacity: 0.9,
+        }))
+        line.frustumCulled = false
+        scene.add(line)
+        blades.push({ a, d: FAMILIES[a].dir(al), n: FAMILIES[a].nrm(al), pos, col, line })
+      }
     }
 
     // the components: the first MAX_COMP eigenstate waves of each axis' own
@@ -202,6 +219,8 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
 
     // per-sample wave values, shared by the axis waves and the total curve
     const wv = [new Float32Array(SAMPLES), new Float32Array(SAMPLES), new Float32Array(SAMPLES)]
+    // per-axis dominant-fundamental colors (same for every blade of the axis)
+    const cc = [new Float32Array(SAMPLES * 3), new Float32Array(SAMPLES * 3), new Float32Array(SAMPLES * 3)]
 
     const updateWaves = (t) => {
       const C3 = coeffsRef.current
@@ -223,11 +242,10 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
           if (av > wMax) wMax = av
         }
       }
-      // pass 2: positions + dominant-frequency colors
+      // pass 2: dominant-frequency colors, once per axis
       for (let a = 0; a < 3; a++) {
         const C = C3[a]
-        const w = wv[a]
-        const pos = wavePos[a], col = waveCol[a]
+        const col = cc[a]
         for (let i = 0; i < SAMPLES; i++) {
           const s = -SPAN + (2 * SPAN * i) / (SAMPLES - 1)
           const ph = s - OMEGA * t
@@ -235,30 +253,43 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
           const c2 = C[2] * Math.cos(2 * ph)
           const c3 = C[3] * Math.cos(3 * ph)
           const c4 = C[4] * Math.cos(4 * ph)
-          const v = w[i]
           // dominant fundamental paints the point
           let f = 1, best = Math.abs(c1)
           if (Math.abs(c2) > best) { f = 2; best = Math.abs(c2) }
           if (Math.abs(c3) > best) { f = 3; best = Math.abs(c3) }
           if (Math.abs(c4) > best) { f = 4 }
           // shade toward white where the wave is weak — like the flat map
-          const b = 0.3 + 0.7 * Math.min(1, Math.abs(v) / wMax)
+          const b = 0.3 + 0.7 * Math.min(1, Math.abs(wv[a][i]) / wMax)
           const hue = FC[f]
           const o = i * 3
           col[o] = 1 - (1 - hue[0]) * b
           col[o + 1] = 1 - (1 - hue[1]) * b
           col[o + 2] = 1 - (1 - hue[2]) * b
-          if (a === 0) { pos[o] = s; pos[o + 1] = v; pos[o + 2] = 0 }
-          else if (a === 1) { pos[o] = 0; pos[o + 1] = s; pos[o + 2] = v }
-          else { pos[o] = v; pos[o + 1] = 0; pos[o + 2] = s }
-          // the superposition: the three waves as one shape
-          const t3 = i * 3
-          totPos[t3] = wv[0][i]
-          totPos[t3 + 1] = wv[1][i]
-          totPos[t3 + 2] = wv[2][i]
         }
-        waveLines[a].geometry.attributes.position.needsUpdate = true
-        waveLines[a].geometry.attributes.color.needsUpdate = true
+      }
+      // pass 3: fan blades — p(s) = s·d + w(s,t)·n
+      for (const b of blades) {
+        const w = wv[b.a]
+        const col = cc[b.a]
+        const pos = b.pos
+        b.col.set(col)
+        for (let i = 0; i < SAMPLES; i++) {
+          const s = -SPAN + (2 * SPAN * i) / (SAMPLES - 1)
+          const v = w[i]
+          const o = i * 3
+          pos[o] = s * b.d[0] + v * b.n[0]
+          pos[o + 1] = s * b.d[1] + v * b.n[1]
+          pos[o + 2] = s * b.d[2] + v * b.n[2]
+        }
+        b.line.geometry.attributes.position.needsUpdate = true
+        b.line.geometry.attributes.color.needsUpdate = true
+      }
+      // the superposition: the three waves as one shape
+      for (let i = 0; i < SAMPLES; i++) {
+        const t3 = i * 3
+        totPos[t3] = wv[0][i]
+        totPos[t3 + 1] = wv[1][i]
+        totPos[t3 + 2] = wv[2][i]
       }
       totGeo.attributes.position.needsUpdate = true
 
@@ -277,8 +308,8 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
           const v = ak * Math.cos(q * (s - OMEGA * t))
           const o = i * 3
           if (c.a === 0) { pos[o] = s; pos[o + 1] = v; pos[o + 2] = 0 }
-          else if (c.a === 1) { pos[o] = 0; pos[o + 1] = s; pos[o + 2] = v }
-          else { pos[o] = v; pos[o + 1] = 0; pos[o + 2] = s }
+          else if (c.a === 1) { pos[o] = v; pos[o + 1] = s; pos[o + 2] = 0 }
+          else { pos[o] = 0; pos[o + 1] = v; pos[o + 2] = s }
         }
         c.line.geometry.attributes.position.needsUpdate = true
       }

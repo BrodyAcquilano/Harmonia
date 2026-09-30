@@ -394,8 +394,11 @@ export default function QuarkSpace() {
                 The same quark-frequency family as the surface, let loose in space
                 and time. Each axis — x, y, z — carries its own independent random
                 chain of quark frequencies: one wave per eigenstate at amplitude
-                a/√k, the pink-noise family. Every point of every wave is painted
-                by the fundamental it is most made of — blue 1/3 f_q, red 2/3 f_q,
+                a/√k, the pink-noise family. Each axis fans its wave across its
+                plane of motion — x and y sweep the xy plane, z sweeps the zy
+                plane (z is vertical here) — so waves propagate in every
+                direction. Every point of every wave is painted by the
+                fundamental it is most made of — blue 1/3 f_q, red 2/3 f_q,
                 green 1 f_q, yellow 4/3 f_q.
               </p>
               <p>
@@ -417,10 +420,11 @@ export default function QuarkSpace() {
             <TimeDomain entropy={entropyT} waveAmp={waveAmpT} playing={playing} speed={speed} compCount={compCount} />
             <p className="graph-note">
               One independent frequency chain per axis — x, y and z each get their
-              own random quarks. The faint lines are the first 20 components of
-              each axis in their own fundamental's color; the brighter wave on
-              each axis is their sum, painted by the dominant fundamental at each
-              point; the bright gold curve is the three waves superposed.
+              own random quarks, each fanned across its plane of motion (x and y
+              in xy, z in zy). The faint lines are the first 20 components of
+              each axis in their own fundamental's color; the brighter fan waves
+              are their sums, painted by the dominant fundamental at each point;
+              the bright gold curve is the three waves superposed.
             </p>
             <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', padding: '8px 6px 0',
                            fontFamily: '"IBM Plex Mono", monospace', fontSize: 12, color: '#715f43' }}>
@@ -442,6 +446,7 @@ export default function QuarkSpace() {
                 <span className="eq-label">One wave per axis, over time</span>
                 <span className="eq-line"><Tex tex="w_x(s,t) = \sum_{f=1}^{4} C^xf \cos(fs - f\Omega t)" /></span>
                 <span className="eq-line"><Tex tex="w_y, w_z \text{ the same — each with its own chain}" /></span>
+                <span className="eq-line"><Tex tex="\text{fan: } p(s) = s\mathbf{d}(\alpha) + w(s,t)\mathbf{n}(\alpha),\; \alpha \in \{-60^\circ, -30^\circ, 0^\circ, 30^\circ, 60^\circ\}" /></span>
                 <span className="eq-line"><Tex tex="w_{x,k}(s,t) = \dfrac{m_k\sigma_k a}{\sqrt{k+1}} \cos(|q_k|(s-\Omega t))" /></span>
               </div>
               <div className="eq-box">
