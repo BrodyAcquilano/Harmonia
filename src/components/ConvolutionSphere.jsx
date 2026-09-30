@@ -4,8 +4,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 /* Convolution sphere (the 4th dimension, §§8–10), drawn with three.js.
    Entropy s in [0,1]: s = 0 is a single point, s = 1 fills the viewport.
-   The selected eigenvector is the surface point at mass-longitude θ and
-   energy-latitude φ; its axes are the wavelengths λx λy λz. */
+   The selected eigenvector is the surface point at time-longitude τ1 and
+   time-latitude τ2; its axes are the wavelengths λx λy λz. */
 
 const D2R = Math.PI / 180
 const AXIS_LEN = 1.32 // axes reach just past the max sphere (radius 1)
@@ -41,7 +41,7 @@ function fibPoint(i, n, r, target) {
   return target.set(r * rad * Math.cos(th), r * y, r * rad * Math.sin(th))
 }
 
-export default function ConvolutionSphere({ entropy, massDeg, energyDeg }) {
+export default function ConvolutionSphere({ entropy, tau1, tau2 }) {
   const mountRef = useRef(null)
   const apiRef = useRef(null)
 
@@ -217,8 +217,8 @@ export default function ConvolutionSphere({ entropy, massDeg, energyDeg }) {
     points.geometry.setDrawRange(0, n)
     points.geometry.computeBoundingSphere()
 
-    // the selected eigenvector: mass-longitude θ, energy-latitude φ
-    const th = massDeg * D2R, ph = energyDeg * D2R
+    // the selected eigenvector: time-longitude τ1, time-latitude τ2
+    const th = tau1 * D2R, ph = tau2 * D2R
     const P = new THREE.Vector3(
       R * Math.cos(ph) * Math.cos(th),
       R * Math.sin(ph),
@@ -241,7 +241,7 @@ export default function ConvolutionSphere({ entropy, massDeg, energyDeg }) {
       head.quaternion.setFromUnitVectors(UP, dir)
       tip.position.copy(dir).multiplyScalar(len)
     }
-  }, [entropy, massDeg, energyDeg])
+  }, [entropy, tau1, tau2])
 
   return <div ref={mountRef} className="quark-canvas-wrap" />
 }

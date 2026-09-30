@@ -1198,3 +1198,32 @@ body {
 .readout-unit {
   color: var(--muted);
 }
+
+/* ---------- quark space page ---------- */
+
+.quark-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.quark-intro-body {
+  padding: 2px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quark-intro-body p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #3a2c1a;
+}
+
+.quark-eq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  padding: 4px 20px 18px;
+}
