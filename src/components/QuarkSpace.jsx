@@ -48,7 +48,7 @@ function Row({ k, v }) {
 }
 
 export default function QuarkSpace() {
-  const [entropy, setEntropy] = useState(60)
+  const [entropy, setEntropy] = useState(60000)
   const [tau1, setTau1] = useState(0) // angle on the mass-wave-frequency axis — moves the arrow
   const [tau2, setTau2] = useState(0) // angle on the energy-wave-phase axis — moves the arrow
   const [waveAmp, setWaveAmp] = useState(0.04)
@@ -57,11 +57,11 @@ export default function QuarkSpace() {
   // the arrow — they never reshape the wave. Mass is carried as amplitude
   // (high spots, green); energy is its inverse — the 180° phase-shifted
   // partner (low spots, red) — so E · m = 1.
-  const R = Math.max(entropy, 0) / 100 // the sphere scales slowly with entropy
+  const R = Math.max(entropy, 0) / 100000 // the sphere scales very slowly with entropy
   // the eigenstate count sets the surface wave number: N points on a sphere
   // resolve wave numbers up to ~√N, so the wave varies at the finest scale
   // the eigenstates can resolve
-  const nStates = 1 + Math.round(entropy * 3)
+  const nStates = 1 + Math.round(27 * Math.log(1 + entropy))
   const waveN = Math.max(1, Math.round(Math.sqrt(nStates)))
   const th = tau1 * D2R, ph = tau2 * D2R
   const u0 = surfU(th, ph, waveAmp, waveN, nStates)
@@ -211,8 +211,8 @@ export default function QuarkSpace() {
               <div className="eq-box">
                 <span className="eq-label">Convolution surface — one wave per eigenstate</span>
                 <span className="eq-line"><Tex tex="u = 1 + \sum_{j=1}^{N(s)} \frac{a}{j}\cos(j\theta)\cos(n\phi)" /></span>
-                <span className="eq-line"><Tex tex="N(s) = 1 + 3\,s \text{ — entropy sets the eigenstate count}" /></span>
-                <span className="eq-line"><Tex tex="r = R\,u, \quad R = \dfrac{s}{100}, \quad m = u, \quad E = \dfrac{1}{u}" /></span>
+                <span className="eq-line"><Tex tex="N(s) = 1 + 27\,\ln(1 + s) \text{ — entropy sets the eigenstate count}" /></span>
+                <span className="eq-line"><Tex tex="r = R\,u, \quad R = \dfrac{s}{100000}, \quad m = u, \quad E = \dfrac{1}{u}" /></span>
               </div>
               <div className="eq-box">
                 <span className="eq-label">Eigenstate frequencies</span>
@@ -223,7 +223,7 @@ export default function QuarkSpace() {
               <div className="eq-box">
                 <span className="eq-label">Entropy</span>
                 <span className="eq-line"><Tex tex="S = k_B \ln \Omega" /></span>
-                <span className="eq-line"><Tex tex="R = \dfrac{s}{100}, \quad N = 1 + 3\,s" /></span>
+                <span className="eq-line"><Tex tex="R = \dfrac{s}{100000}, \quad N = 1 + 27\,\ln(1 + s)" /></span>
                 <span className="eq-line"><Tex tex="\text{entropy grows the radius and the eigenstate count}" /></span>
               </div>
               <div className="eq-box">
@@ -239,7 +239,7 @@ export default function QuarkSpace() {
         <div className="lab-controls">
           <div className="control-group">
             <h3>Entropy</h3>
-            <Slider label="s" value={entropy} min={0} max={100} step={1}
+            <Slider label="s" value={entropy} min={0} max={100000} step={1}
               onChange={setEntropy} format={(v) => v.toFixed(0)} />
             <p className="graph-note">Higher entropy, more eigenstates.</p>
           </div>

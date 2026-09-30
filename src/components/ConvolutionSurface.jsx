@@ -14,7 +14,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
    Axes are wavelength (X: λ / −λ), velocity (Y: v / −v, vertical), and the
    imaginary wavelength axis (Z: iλ / −iλ) — the phase angle is read from it.
    The wave's angle θ is measured in the λ–v plane.
-   Entropy s in [0,100]: s = 0 is a single point; the sphere scales slowly as R = s/100. */
+   Entropy s in [0,100000]: s = 0 is a single point; the sphere scales very slowly as R = s/100000. */
 
 const D2R = Math.PI / 180
 const AXIS_LEN = 1.32 // axes reach just past the max sphere (radius 1)
@@ -220,8 +220,8 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
   useEffect(() => {
     const api = apiRef.current
     if (!api) return
-    const R = Math.max(entropy, 0) / 100
-    const N = Math.min(1 + Math.round(entropy * 3), MAX_STATES)
+    const R = Math.max(entropy, 0) / 100000
+    const N = Math.min(1 + Math.round(27 * Math.log(1 + entropy)), MAX_STATES)
     const { sphere, wire, points, arrow, shaft, head, UP, basePos } = api
 
     // displace the unit-sphere vertices by the two waves and tint by amplitude
