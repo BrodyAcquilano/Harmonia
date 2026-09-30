@@ -2,7 +2,7 @@ import { useState } from 'react'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import Slider from './Slider.jsx'
-import ConvolutionSurface, { surfU } from './ConvolutionSurface.jsx'
+import ConvolutionSurface, { surfU, QUARK_FREQS } from './ConvolutionSurface.jsx'
 import SurfaceMap from './SurfaceMap.jsx'
 
 /* The Quark Space: a convolution of energy and mass and space and time.
@@ -71,7 +71,9 @@ export default function QuarkSpace() {
   const lam = A * Math.cos(ph) * Math.cos(th)
   const vel = A * Math.cos(ph) * Math.sin(th)
   const ilam = A * Math.sin(ph)
-  // harmonic bound of the eigenstate sum: Σ a/j
+  // first few frequencies of the combination chain, for the equation box
+  const firstTerms = QUARK_FREQS.slice(0, 8).join(', ')
+  // harmonic bound of the eigenstate sum: Σ a/k
   let hN = 0
   for (let j = 1; j <= nStates; j++) hN += 1 / j
   const bound = waveAmp * hN
@@ -251,8 +253,11 @@ export default function QuarkSpace() {
               </div>
               <div className="eq-box">
                 <span className="eq-label">Convolution surface — one wave per eigenstate</span>
-                <span className="eq-line"><Tex tex="u = 1 + \left|\sum_{j=1}^{N(s)} \frac{a}{j}\sigma_j\cos(j\theta)\right|" /></span>
-                <span className="eq-line"><Tex tex="\sigma_j = \pm 1 \text{ — fixed signs spread the peaks, left mirrors right}" /></span>
+                <span className="eq-line"><Tex tex="u = 1 + \left|\sum_{k=1}^{N(s)} \frac{a}{k}\sigma_k\cos(q_k\theta)\right|" /></span>
+                <span className="eq-line"><Tex tex="q_1 = 2,\, q_2 = -1 \text{ — the seeds } \frac{2}{3}f_q, -\frac{1}{3}f_q}" /></span>
+                <span className="eq-line"><Tex tex="q_k = q_i \pm q_j \text{ — each new frequency a random sum/difference of two earlier ones}" /></span>
+                <span className="eq-line"><Tex tex="\sigma_k = \pm 1 \text{ — fixed signs spread the peaks, left mirrors right}" /></span>
+                <span className="eq-line">chain starts: {firstTerms}, …</span>
                 <span className="eq-line"><Tex tex="\theta\text{ — angle from } +\lambda\text{ in the }\lambda\text{–}v\text{ plane; }\left| \cdot \right|\text{ keeps every displacement outward}" /></span>
                 <span className="eq-line"><Tex tex="v = f_j\lambda_j = 2\pi f_q \text{ — one wave speed for all eigenstates}" /></span>
                 <span className="eq-line"><Tex tex="N(s) = 1 + 27\,\ln(1 + s) \text{ — entropy sets the eigenstate count}" /></span>
@@ -308,7 +313,8 @@ export default function QuarkSpace() {
               onChange={setWaveAmp} format={(v) => v.toFixed(2)} />
             <p className="graph-note">
               Surface u/R range: 1.00 – {(1 + bound).toFixed(2)} (outward only).
-              One wave per eigenstate at amplitude a/j; the absolute value keeps every displacement outward — no dents.
+              One wave per eigenstate at amplitude a/k — newer combinations weaker. Frequencies are a random
+              combination chain from the 2/3, −1/3 seeds; the absolute value keeps every displacement outward — no dents.
             </p>
           </div>
 

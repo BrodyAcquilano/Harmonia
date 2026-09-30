@@ -4,9 +4,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 /* Convolution surface, drawn with three.js.
    The surface starts as a uniform 1:1 sphere of mass to energy. Each expelled
-   quark — each new eigenstate — adds one new frequency to the mass wave: the
-   j-th eigenstate adds f_j = j·f_q, where the quark frequency quantum
-   f_q = (2/3)·m_q·c²/h comes from E = hf = mc² with m_q·c² = 2 MeV.
+   quark — each new eigenstate — adds one new frequency to the mass wave, built
+   as a random sum or difference of earlier frequencies from the seeds 2/3·f_q
+   and -1/3·f_q, where the quark frequency quantum f_q = (2/3)·m_q·c²/h comes
+   from E = hf = mc² with m_q·c² = 2 MeV.
    Energy is the 180° (i²) partner by construction: E = 1/m, so mass peaks are
    energy troughs — no phase slider needed.
    The gold arrow is positioned by τ1/τ2: angles on the mass-wave-frequency and
@@ -40,22 +41,63 @@ function makeLabel(text) {
   return sp
 }
 
+// Deterministic pseudo-random generator (mulberry32): the frequency chain is
+// random-looking but stable — a given entropy always builds the same surface.
+function mulberry32(seed) {
+  let t = seed >>> 0
+  return function () {
+    t += 0x6D2B79F5
+    let r = Math.imul(t ^ (t >>> 15), 1 | t)
+    r ^= r + Math.imul(r ^ (r >>> 7), 61 | r)
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+// The quark frequency chain, in units of f_q/3 — so the seeds 2/3·f_q and
+// -1/3·f_q are the integers 2 and -1. Integer values keep every cos(q·θ)
+// seamless around the sphere (no branch-cut crack). Each new frequency is a
+// random sum or difference of two earlier ones: newer combinations built from
+// old ones, deduplicated, never zero. The chain is built once; entropy only
+// decides how many of its frequencies are active.
+function buildQuarkFreqs(count, seed = 20260930) {
+  const qs = [2, -1]
+  const seen = new Set([2, 1])
+  const rnd = mulberry32(seed)
+  while (qs.length < count) {
+    let cand = 0
+    let ok = false
+    for (let tries = 0; tries < 60 && !ok; tries++) {
+      const a = qs[(rnd() * qs.length) | 0]
+      const b = qs[(rnd() * qs.length) | 0]
+      cand = a + (rnd() < 0.5 ? b : -b)
+      ok = cand !== 0 && !seen.has(Math.abs(cand))
+    }
+    if (!ok) cand = Math.max(...seen) + 1 // fallback: guaranteed fresh
+    qs.push(cand)
+    seen.add(Math.abs(cand))
+  }
+  return qs
+}
+
+export const QUARK_FREQS = buildQuarkFreqs(MAX_STATES)
+
 // unit-surface multiplier on the sphere: the 1:1 sphere plus one mass wave
-// per eigenstate. θ is the angle from +λ in the λ–v plane. The j-th
-// eigenstate adds frequency f_j = j·f_q (f_q the quark frequency quantum
-// from E = hf = mc²). Amplitudes fall as 1/j so the sum stays bounded.
-// Energy is the inverse, E = 1/u — the 180° partner. v = fλ holds per
-// harmonic with one wave speed. The absolute value keeps every displacement
-// outward (no dents); the wave ignores velocity — uniform in all directions.
+// per eigenstate. θ is the angle from +λ in the λ–v plane. The k-th
+// eigenstate adds frequency q_k·(f_q/3) from the combination chain above;
+// amplitudes fall as 1/k — newer combinations are weaker — so the sum stays
+// bounded. Energy is the inverse, E = 1/u — the 180° partner. The absolute
+// value keeps every displacement outward (no dents); the wave ignores
+// velocity — uniform in all directions.
 export function surfU(theta, a, N) {
   const gamma = 0.618033988749895 // (sqrt(5)-1)/2
   let w = 0
-  for (let j = 1; j <= N; j++) {
-    // fixed +/-1 sign pattern (golden-ratio bits): spreads the harmonic
-    // peaks around the circle instead of piling them at th = 0, while
-    // keeping perfect left-right symmetry (unlike a phase shift)
-    const sgn = (Math.floor(j * gamma) % 2 === 0) ? 1 : -1
-    w += (a / j) * sgn * Math.cos(j * theta)
+  const n = Math.min(N, QUARK_FREQS.length)
+  for (let k = 0; k < n; k++) {
+    // fixed +/-1 sign pattern (golden-ratio bits): spreads the peaks around
+    // the circle instead of piling them at th = 0, while keeping perfect
+    // left-right symmetry (unlike a phase shift)
+    const sgn = (Math.floor((k + 1) * gamma) % 2 === 0) ? 1 : -1
+    w += (a / (k + 1)) * sgn * Math.cos(QUARK_FREQS[k] * theta)
   }
   return Math.max(1 + Math.abs(w), 0.05)
 }
