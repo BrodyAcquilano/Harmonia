@@ -22,10 +22,6 @@ const NEUT = [0.85, 0.79, 0.68] // m = 1
 const GRID_N = 7
 const GRID_SPAN = 1.8
 
-function fmtT(t) {
-  return `t = ${t.toFixed(2)}`
-}
-
 export default function MassLattice({
   entropy = 500,
   waveAmp = 0.15,
@@ -33,7 +29,6 @@ export default function MassLattice({
   speed = 1,
 }) {
   const mountRef = useRef(null)
-  const timeRef = useRef(null)
   const stateRef = useRef({ playing, speed, entropy, waveAmp })
   stateRef.current = { playing, speed, entropy, waveAmp }
 
@@ -127,7 +122,7 @@ export default function MassLattice({
 
     // the lattice: one unit mass at every grid point
     const N = GRID_N * GRID_N * GRID_N
-    const sphereGeo = new THREE.SphereGeometry(0.07, 12, 10)
+    const sphereGeo = new THREE.SphereGeometry(0.1, 14, 12)
     const sphereMat = new THREE.MeshStandardMaterial({ roughness: 0.45, metalness: 0.1 })
     const lattice = new THREE.InstancedMesh(sphereGeo, sphereMat, N)
     lattice.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
@@ -209,7 +204,6 @@ export default function MassLattice({
       }
       lattice.instanceMatrix.needsUpdate = true
       if (lattice.instanceColor) lattice.instanceColor.needsUpdate = true
-      if (timeRef.current) timeRef.current.textContent = fmtT(simT)
       controls.update()
       renderer.render(scene, camera)
     }
@@ -223,10 +217,5 @@ export default function MassLattice({
     }
   }, [])
 
-  return (
-    <div className="td-wrap">
-      <div ref={mountRef} className="td-canvas" />
-      <div ref={timeRef} className="time-tag">{fmtT(0)}</div>
-    </div>
-  )
+  return <div ref={mountRef} className="quark-canvas-wrap" />
 }
