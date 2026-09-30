@@ -93,6 +93,7 @@ export default function QuarkSpace() {
         </div>
       </div>
 
+      <div className="lab-side">
       <div className="lab-controls">
         <div className="control-group">
           <h3>Entropy</h3>
@@ -153,6 +154,7 @@ export default function QuarkSpace() {
           </div>
           <p className="graph-note">c = ħ = 1. Sliders compactify by tan to (−∞, ∞).</p>
         </div>
+      </div>
       </div>
     </div>
   )
