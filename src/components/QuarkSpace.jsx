@@ -5,12 +5,11 @@ import Slider from './Slider.jsx'
 import ConvolutionSurface, { surfU } from './ConvolutionSurface.jsx'
 
 /* The Quark Space: a convolution of energy and mass and space and time.
-   For a given combination — mass-wave frequency f, energy phasor p, amplitude a —
-   the convolution surface shows all values of m. τ1 and τ2 are the selected
-   eigenstate's time coordinates: they move the gold arrow around the surface but
-   never reshape it. When mass is high energy is low, and when mass is low energy
-   is high. The axes are wavelength (λ / −λ), velocity (v / −v, vertical), and
-   the imaginary wavelength axis (iλ / −iλ), from which the phase angle is read.
+   The two time coordinates are the frequency of the mass wave (τ1) and the
+   phase angle the energy wave is rotated by (τ2). When mass is high energy is
+   low, and when mass is low energy is high. The axes are wavelength (λ / −λ),
+   velocity (v / −v, vertical), and the imaginary wavelength axis (iλ / −iλ),
+   from which the phase angle is read. Frequency comes from the velocity.
    Entropy grows the surface from a point — higher entropy, more eigenstates. */
 
 const D2R = Math.PI / 180
@@ -40,13 +39,11 @@ function Row({ k, v }) {
 
 export default function QuarkSpace() {
   const [entropy, setEntropy] = useState(0.6)
-  const [tau1, setTau1] = useState(0) // point longitude, degrees — moves the arrow
-  const [tau2, setTau2] = useState(0) // point latitude, degrees — moves the arrow
+  const [tau1, setTau1] = useState(8) // frequency of the mass wave
+  const [tau2, setTau2] = useState(90) // energy-wave phasor rotation, degrees
   const [waveAmp, setWaveAmp] = useState(0.04)
-  const [freq, setFreq] = useState(8) // mass-wave frequency (θ wave number)
-  const [phasor, setPhasor] = useState(90) // energy-wave rotation from 180°, degrees
 
-  // Local amplitude at the selected (τ1, τ2) point.
+  // Local amplitude at the fixed eigenvector (θ = 0, φ = 0, on the λ axis).
   // Mass is carried as amplitude (high spots, green); energy is its inverse —
   // the 180° phase-shifted partner (low spots, red) — so E · m = 1.
   const R = Math.max(entropy, 0)
@@ -55,22 +52,10 @@ export default function QuarkSpace() {
   // the eigenstates can resolve
   const nStates = 1 + Math.round(entropy * 299)
   const waveN = Math.max(1, Math.round(Math.sqrt(nStates)))
-  const th = tau1 * D2R
-  const ph = tau2 * D2R
-  const u0 = surfU(th, ph, freq, phasor * D2R, waveAmp, waveN)
+  const u0 = surfU(0, 0, tau1, tau2 * D2R, waveAmp, waveN)
   const A = R * u0
   const m = A
   const E = A > 0 ? 1 / A : Infinity
-
-  // τ values on (−∞, ∞) inferred from the angles
-  const tau1v = Math.abs(tau1) >= 180 ? (tau1 > 0 ? Infinity : -Infinity) : Math.tan(th / 2)
-  const tau2v = Math.tan(ph / 2)
-  const fmtTau = (v) => !isFinite(v) ? (v > 0 ? '∞' : '−∞') : v.toFixed(4)
-
-  // eigenvector components at the selected point
-  const lamC = A * Math.cos(ph) * Math.cos(th)
-  const velC = A * Math.cos(ph) * Math.sin(th)
-  const imaC = A * Math.sin(ph)
 
   const volume = (4 / 3) * Math.PI * R ** 3
   const area = 4 * Math.PI * R ** 2
@@ -122,10 +107,8 @@ export default function QuarkSpace() {
                 read from the iλ axis. The velocity gives the frequency, relating ω
                 to k; from the frequency we get E = hf, and from the energy E = mc²
                 gives the mass. The velocity is what relates mass to energy.
-                The two of time are τ1 and τ2, the eigenstate's time coordinates. They
-                range over (−∞, ∞), so we use angles — longitude and latitude on the
-                surface — and infer the value from the angle. Changing τ1 and τ2 moves
-                the arrow around the surface; the surface itself is unchanged. The three
+                The two of time are the frequency of the mass wave (τ1) and the phase
+                angle the energy wave is rotated by (τ2). The three
                 spatial coordinates relate the volume inside the sphere to its surface,
                 and the two of time give all the possible values on the surface — two
                 of time, three of space, the way Kepler's T² ∝ a³ counts them. So an
@@ -159,12 +142,54 @@ export default function QuarkSpace() {
             </div>
             <ConvolutionSurface
               entropy={entropy} tau1={tau1} tau2={tau2}
-              waveAmp={waveAmp} waveN={waveN} freq={freq} phasor={phasor}
+              waveAmp={waveAmp} waveN={waveN}
             />
             <p className="graph-note">
-              τ1 and τ2 move the gold arrow around the surface — green mass highs, red energy lows.
-              The surface shows all values of m for the given wave combination.
+              τ1 sets the mass wave's frequency; τ2 rotates the energy wave's phasor away from 180°.
+              The gold arrow rides the fixed eigenvector on the λ axis, growing and shrinking as the
+              waves move beneath it — green mass highs, red energy lows.
             </p>
+          </div>
+
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Equations</h2>
+            </div>
+            <div className="eq-grid">
+              <div className="eq-box">
+                <span className="eq-label">Frequency from wavelength</span>
+                <span className="eq-line"><Tex tex="f = \dfrac{c}{|\lambda|}" /></span>
+                <span className="eq-line"><Tex tex="\text{one cycle per wavelength, at light speed}" /></span>
+              </div>
+              <div className="eq-box">
+                <span className="eq-label">Planck–Einstein</span>
+                <span className="eq-line"><Tex tex="E = hf" /></span>
+                <span className="eq-line"><Tex tex="\text{energy carried per cycle}" /></span>
+              </div>
+              <div className="eq-box">
+                <span className="eq-label">Mass–energy</span>
+                <span className="eq-line"><Tex tex="E = mc^2" /></span>
+                <span className="eq-line"><Tex tex="\text{with } c = 1 \text{ this is } E = m" /></span>
+              </div>
+              <div className="eq-box">
+                <span className="eq-label">Convolution surface — mass and energy waves</span>
+                <span className="eq-line"><Tex tex="u = 1 + a\cos(\tau_1\theta)\cos(n\phi) + a\cos(\tau_1\theta + \pi + \tau_2)\cos(n\phi)" /></span>
+                <span className="eq-line"><Tex tex="r = R\,u, \quad m = A, \quad E = \dfrac{1}{A}" /></span>
+                <span className="eq-line"><Tex tex="\tau_2 = 0 \to u = 1 \text{ (uniform — the 1:1 version)}" /></span>
+                <span className="eq-line"><Tex tex="\tau_2 \text{ in radians}" /></span>
+              </div>
+              <div className="eq-box">
+                <span className="eq-label">Entropy</span>
+                <span className="eq-line"><Tex tex="S = k_B \ln \Omega" /></span>
+                <span className="eq-line"><Tex tex="R = s, \quad N = 1 + 299\,s" /></span>
+                <span className="eq-line"><Tex tex="\text{entropy grows the radius and the eigenstate count}" /></span>
+              </div>
+              <div className="eq-box">
+                <span className="eq-label">Eigenvector — fixed on the λ axis</span>
+                <span className="eq-line"><Tex tex="P = (r(0,0),\, 0,\, 0)" /></span>
+                <span className="eq-line"><Tex tex="\text{rides the waves as } \tau_1, \tau_2 \text{ move beneath it}" /></span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -178,32 +203,27 @@ export default function QuarkSpace() {
           </div>
 
           <div className="control-group">
-            <h3>τ1 — point longitude</h3>
-            <Slider label="τ1" value={tau1} min={-180} max={180} step={1}
-              onChange={setTau1} format={(v) => `${v.toFixed(0)}°`} />
-            <p className="graph-note">Moves the arrow; the surface is unchanged.</p>
+            <h3>τ1 — mass wave frequency</h3>
+            <Slider label="τ1" value={tau1} min={1} max={20} step={1}
+              onChange={setTau1} format={(v) => v.toFixed(0)} />
+            <p className="graph-note">The frequency of the mass wave. Frequency comes from the velocity — the vertical axis.</p>
           </div>
 
           <div className="control-group">
-            <h3>τ2 — point latitude</h3>
-            <Slider label="τ2" value={tau2} min={-90} max={90} step={1}
+            <h3>τ2 — energy wave phase</h3>
+            <Slider label="τ2" value={tau2} min={-180} max={180} step={1}
               onChange={setTau2} format={(v) => `${v.toFixed(0)}°`} />
-            <p className="graph-note">Moves the arrow; the surface is unchanged.</p>
+            <p className="graph-note">Rotation of the energy wave from 180° out of phase. At 0° the waves cancel. Phase is read from the iλ axis.</p>
           </div>
 
           <div className="control-group">
             <h3>Wave</h3>
             <Slider label="a" value={waveAmp} min={0} max={0.2} step={0.01}
               onChange={setWaveAmp} format={(v) => v.toFixed(2)} />
-            <Slider label="f" value={freq} min={1} max={20} step={1}
-              onChange={setFreq} format={(v) => v.toFixed(0)} />
-            <Slider label="p" value={phasor} min={-180} max={180} step={1}
-              onChange={setPhasor} format={(v) => `${v.toFixed(0)}°`} />
             <p className="graph-note">
               Surface u/R range: {(1 - 2 * waveAmp).toFixed(2)} – {(1 + 2 * waveAmp).toFixed(2)}.
               n = {waveN} follows the eigenstate count (n ≈ √N).
             </p>
-            <p className="graph-note">Rotation of the energy wave from 180° out of phase. At 0° the waves cancel.</p>
           </div>
 
           <div className="control-group">
@@ -216,13 +236,12 @@ export default function QuarkSpace() {
           </div>
 
           <div className="control-group">
-            <h3>Eigenvector (τ1, τ2)</h3>
+            <h3>Eigenvector (fixed, λ axis)</h3>
             <div className="readout">
-              <Row k="λ" v={fmt(lamC)} />
-              <Row k="v" v={fmt(velC)} />
-              <Row k="iλ" v={fmt(imaC)} />
-              <Row k="τ1" v={fmtTau(tau1v)} />
-              <Row k="τ2" v={fmtTau(tau2v)} />
+              <Row k="λ" v={fmt(A)} />
+              <Row k="v" v={fmt(0)} />
+              <Row k="iλ" v={fmt(0)} />
+              <Row k="|λ|" v={fmt(A)} />
             </div>
           </div>
 
@@ -249,46 +268,6 @@ export default function QuarkSpace() {
         </div>
       </div>
 
-      <div className="graph-box">
-        <div className="graph-title-row">
-          <h2 className="graph-title">Equations</h2>
-        </div>
-        <div className="eq-grid">
-          <div className="eq-box">
-            <span className="eq-label">Frequency from wavelength</span>
-            <span className="eq-line"><Tex tex="f = \dfrac{c}{|\lambda|}" /></span>
-            <span className="eq-line"><Tex tex="\text{one cycle per wavelength, at light speed}" /></span>
-          </div>
-          <div className="eq-box">
-            <span className="eq-label">Planck–Einstein</span>
-            <span className="eq-line"><Tex tex="E = hf" /></span>
-            <span className="eq-line"><Tex tex="\text{energy carried per cycle}" /></span>
-          </div>
-          <div className="eq-box">
-            <span className="eq-label">Mass–energy</span>
-            <span className="eq-line"><Tex tex="E = mc^2" /></span>
-            <span className="eq-line"><Tex tex="\text{with } c = 1 \text{ this is } E = m" /></span>
-          </div>
-          <div className="eq-box">
-            <span className="eq-label">Convolution surface — mass and energy waves</span>
-            <span className="eq-line"><Tex tex="u = 1 + a\cos(\tau_1\theta)\cos(n\phi) + a\cos(\tau_1\theta + \pi + \tau_2)\cos(n\phi)" /></span>
-            <span className="eq-line"><Tex tex="r = R\,u, \quad m = A, \quad E = \dfrac{1}{A}" /></span>
-            <span className="eq-line"><Tex tex="\tau_2 = 0 \to u = 1 \text{ (uniform — the 1:1 version)}" /></span>
-            <span className="eq-line"><Tex tex="\tau_2 \text{ in radians}" /></span>
-          </div>
-          <div className="eq-box">
-            <span className="eq-label">Entropy</span>
-            <span className="eq-line"><Tex tex="S = k_B \ln \Omega" /></span>
-            <span className="eq-line"><Tex tex="R = s, \quad N = 1 + 299\,s" /></span>
-            <span className="eq-line"><Tex tex="\text{entropy grows the radius and the eigenstate count}" /></span>
-          </div>
-          <div className="eq-box">
-            <span className="eq-label">Eigenvector — fixed on the λ axis</span>
-            <span className="eq-line"><Tex tex="P = (r(0,0),\, 0,\, 0)" /></span>
-            <span className="eq-line"><Tex tex="\text{rides the waves as } \tau_1, \tau_2 \text{ move beneath it}" /></span>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
