@@ -12,7 +12,10 @@ import { HUES } from './SurfaceMap.jsx'
    red 2/3 f_q, green 1 f_q, yellow 4/3 f_q — and the bright gold curve is
    the superposition of all three: T(s,t) = (w_x, w_y, w_z), the total shape.
    Press play and every fundamental oscillates at its own rate f·Ω: the waves
-   interfere, the total shape writhes — motion created from waves. */
+   interfere, the total shape writhes — motion created from waves.
+   The first 20 components of each axis are drawn too — faint lines in their
+   own fundamental's color — so the interference building each axis wave is
+   visible. */
 
 const D2R = Math.PI / 180
 const SPAN = 2.2 // waves run s ∈ [-SPAN, SPAN] along each axis
@@ -20,6 +23,9 @@ const AXIS_LEN = 2.62 // axes reach just past the wave ends
 const SAMPLES = 420 // points per wave
 const OMEGA = (2 * Math.PI) / 8 // base rate: the f=1 fundamental cycles every 8 s at speed 1
 const GOLD = 0xd9a441
+const MAX_COMP = 20 // components drawn per axis
+const SGN_GAMMA = 0.618033988749895 // (sqrt(5)-1)/2 — same sign pattern as the surface
+const sgnK = (k) => (Math.floor((k + 1) * SGN_GAMMA) % 2 === 0) ? 1 : -1
 
 // dominant-frequency colors, 0..1 for vertex colors
 const FC = [null]
@@ -44,11 +50,13 @@ function makeLabel(text) {
   return sp
 }
 
-export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, speed = 1 }) {
+export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, speed = 1, compCount = MAX_COMP }) {
   const mountRef = useRef(null)
   const apiRef = useRef(null)
   const playRef = useRef(playing)
   const speedRef = useRef(speed)
+  const ampRef = useRef(waveAmp)
+  const compCountRef = useRef(compCount)
 
   // one independent random frequency chain per axis — fresh each page load,
   // fixed within the session so the entropy slider never flickers
@@ -68,6 +76,8 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
 
   useEffect(() => { playRef.current = playing }, [playing])
   useEffect(() => { speedRef.current = speed }, [speed])
+  useEffect(() => { ampRef.current = waveAmp }, [waveAmp])
+  useEffect(() => { compCountRef.current = compCount }, [compCount])
   useEffect(() => { coeffsRef.current = coeffs }, [coeffs])
 
   // ---- one-time scene setup ----
@@ -131,6 +141,33 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
       line.frustumCulled = false
       scene.add(line)
       wavePos.push(pos); waveCol.push(col); waveLines.push(line)
+    }
+
+    // the components: the first MAX_COMP eigenstate waves of each axis' own
+    // chain — faint lines in their own fundamental's color, so the interference
+    // building each axis wave is visible
+    const compLines = []
+    {
+      // `chains` is memoized once and never changes, so the setup closure's
+      // copy is the live one
+      for (let a = 0; a < 3; a++) {
+        for (let k = 0; k < MAX_COMP; k++) {
+          const term = chains[a][k]
+          const qAbs = Math.abs(term.q)
+          const geo = new THREE.BufferGeometry()
+          const pos = new Float32Array(SAMPLES * 3)
+          geo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+          geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 6)
+          const hue = HUES[qAbs]
+          const line = new THREE.Line(geo, new THREE.LineBasicMaterial({
+            color: new THREE.Color(hue[0] / 255, hue[1] / 255, hue[2] / 255),
+            transparent: true, opacity: 0.7,
+          }))
+          line.frustumCulled = false
+          scene.add(line)
+          compLines.push({ a, k, qAbs, m: term.m, pos, line })
+        }
+      }
     }
 
     // the superposition: T(s,t) = (w_x, w_y, w_z) — bright gold line + points
@@ -224,6 +261,27 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
         waveLines[a].geometry.attributes.color.needsUpdate = true
       }
       totGeo.attributes.position.needsUpdate = true
+
+      // components: v_k = m_k·σ_k·(a/√(k+1))·cos(|q_k|·(s − Ωt))
+      const nComp = Math.min(compCountRef.current, MAX_COMP)
+      const amp = ampRef.current
+      for (const c of compLines) {
+        const show = c.k < nComp
+        c.line.visible = show
+        if (!show) continue
+        const ak = c.m * sgnK(c.k) * (amp / Math.sqrt(c.k + 1))
+        const q = c.qAbs
+        const pos = c.pos
+        for (let i = 0; i < SAMPLES; i++) {
+          const s = -SPAN + (2 * SPAN * i) / (SAMPLES - 1)
+          const v = ak * Math.cos(q * (s - OMEGA * t))
+          const o = i * 3
+          if (c.a === 0) { pos[o] = s; pos[o + 1] = v; pos[o + 2] = 0 }
+          else if (c.a === 1) { pos[o] = 0; pos[o + 1] = s; pos[o + 2] = v }
+          else { pos[o] = v; pos[o + 1] = 0; pos[o + 2] = s }
+        }
+        c.line.geometry.attributes.position.needsUpdate = true
+      }
     }
 
     const fitCamera = () => {

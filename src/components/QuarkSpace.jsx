@@ -60,6 +60,7 @@ export default function QuarkSpace() {
   const [waveAmpT, setWaveAmpT] = useState(0.2)
   const [playing, setPlaying] = useState(true)
   const [speed, setSpeed] = useState(1)
+  const [compCount, setCompCount] = useState(20)
 
   // Local amplitude at the arrow (θ = τ1). τ1/τ2 are angles that move
   // the arrow — they never reshape the wave. Mass is carried as amplitude
@@ -399,7 +400,9 @@ export default function QuarkSpace() {
               </p>
               <p>
                 The bright gold curve is the superposition of all three waves —
-                T(s,t) = (w_x, w_y, w_z), the total shape. Press play and every
+                T(s,t) = (w_x, w_y, w_z), the total shape. The faint lines are the
+                first 20 components of each axis, each in its own fundamental's
+                color, so the interference building every wave is visible. Press play and every
                 fundamental oscillates at its own rate f·Ω: the waves interfere,
                 the total shape writhes, and motion appears. This is motion being
                 created from waves.
@@ -411,10 +414,12 @@ export default function QuarkSpace() {
             <div className="graph-title-row">
               <h2 className="graph-title">Space-Time Domain</h2>
             </div>
-            <TimeDomain entropy={entropyT} waveAmp={waveAmpT} playing={playing} speed={speed} />
+            <TimeDomain entropy={entropyT} waveAmp={waveAmpT} playing={playing} speed={speed} compCount={compCount} />
             <p className="graph-note">
               One independent frequency chain per axis — x, y and z each get their
-              own random quarks. Colors mark the dominant fundamental at each
+              own random quarks. The faint lines are the first 20 components of
+              each axis in their own fundamental's color; the brighter wave on
+              each axis is their sum, painted by the dominant fundamental at each
               point; the bright gold curve is the three waves superposed.
             </p>
             <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', padding: '8px 6px 0',
@@ -437,6 +442,7 @@ export default function QuarkSpace() {
                 <span className="eq-label">One wave per axis, over time</span>
                 <span className="eq-line"><Tex tex="w_x(s,t) = \sum_{f=1}^{4} C^xf \cos(fs - f\Omega t)" /></span>
                 <span className="eq-line"><Tex tex="w_y, w_z \text{ the same — each with its own chain}" /></span>
+                <span className="eq-line"><Tex tex="w_{x,k}(s,t) = \dfrac{m_k\sigma_k a}{\sqrt{k+1}} \cos(|q_k|(s-\Omega t))" /></span>
               </div>
               <div className="eq-box">
                 <span className="eq-label">Superposition — the total shape</span>
@@ -576,6 +582,13 @@ export default function QuarkSpace() {
             <Slider label="a" value={waveAmpT} min={0} max={0.2} step={0.01}
               onChange={setWaveAmpT} format={(v) => v.toFixed(2)} />
             <p className="graph-note">One wave per eigenstate at amplitude a/√k on each axis.</p>
+          </div>
+
+          <div className="control-group">
+            <h3>Components</h3>
+            <Slider label="shown" value={compCount} min={0} max={20} step={1}
+              onChange={setCompCount} format={(v) => v.toFixed(0)} />
+            <p className="graph-note">The first 20 eigenstate waves of each axis, drawn faint in their own fundamental's color.</p>
           </div>
 
           <div className="control-group">
