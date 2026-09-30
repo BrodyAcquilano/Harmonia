@@ -62,9 +62,8 @@ export default function QuarkSpace() {
   // resolve wave numbers up to ~√N, so the wave varies at the finest scale
   // the eigenstates can resolve
   const nStates = 1 + Math.round(27 * Math.log(1 + entropy))
-  const waveN = Math.max(1, Math.round(Math.sqrt(nStates)))
   const th = tau1 * D2R, ph = tau2 * D2R
-  const u0 = surfU(th, ph, waveAmp, waveN, nStates)
+  const u0 = surfU(th, waveAmp, nStates)
   const A = R * u0
   const m = A
   const E = A > 0 ? 1 / A : Infinity
@@ -164,7 +163,7 @@ export default function QuarkSpace() {
             </div>
             <ConvolutionSurface
               entropy={entropy} tau1={tau1} tau2={tau2}
-              waveAmp={waveAmp} waveN={waveN}
+              waveAmp={waveAmp}
             />
             <p className="graph-note">
               τ1 and τ2 are angles that move the gold arrow — the labels name the axes
@@ -180,7 +179,7 @@ export default function QuarkSpace() {
             </div>
             <SurfaceMap
               entropy={entropy} tau1={tau1} tau2={tau2}
-              waveAmp={waveAmp} waveN={waveN}
+              waveAmp={waveAmp}
             />
             <p className="graph-note">
               The surface unfolded flat — τ1 across the full circle, τ2 vertical.
@@ -211,8 +210,9 @@ export default function QuarkSpace() {
               </div>
               <div className="eq-box">
                 <span className="eq-label">Convolution surface — one wave per eigenstate</span>
-                <span className="eq-line"><Tex tex="u = 1 + \sum_{j=1}^{N(s)} \frac{a}{j}\sigma_j\cos(j\theta)\cos(n\phi)" /></span>
+                <span className="eq-line"><Tex tex="u = 1 + \sum_{j=1}^{N(s)} \frac{a}{j}\sigma_j\cos(j\theta)" /></span>
                 <span className="eq-line"><Tex tex="\sigma_j = \pm 1 \text{ — fixed signs spread the peaks, left mirrors right}" /></span>
+                <span className="eq-line"><Tex tex="v = f_j\lambda_j = 2\pi f_q \text{ — one wave speed for all eigenstates}" /></span>
                 <span className="eq-line"><Tex tex="N(s) = 1 + 27\,\ln(1 + s) \text{ — entropy sets the eigenstate count}" /></span>
                 <span className="eq-line"><Tex tex="r = R\,u, \quad R = \dfrac{s}{100000}, \quad m = u, \quad E = \dfrac{1}{u}" /></span>
               </div>
@@ -266,7 +266,7 @@ export default function QuarkSpace() {
               onChange={setWaveAmp} format={(v) => v.toFixed(2)} />
             <p className="graph-note">
               Surface u/R range: {(1 - bound).toFixed(2)} – {(1 + bound).toFixed(2)}.
-              One wave per eigenstate at amplitude a/j; n = {waveN} ≈ √N polar bands.
+              One wave per eigenstate at amplitude a/j, uniform along the velocity axis.
             </p>
           </div>
 

@@ -27,7 +27,7 @@ function colorFor(t) {
   return [Math.round(r), Math.round(g), Math.round(b)]
 }
 
-export default function SurfaceMap({ entropy, tau1, tau2, waveAmp = 0.04, waveN = 8 }) {
+export default function SurfaceMap({ entropy, tau1, tau2, waveAmp = 0.04 }) {
   const canvasRef = useRef(null)
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function SurfaceMap({ entropy, tau1, tau2, waveAmp = 0.04, waveN 
       const t2 = (0.5 - (iy + 0.5) / H) * Math.PI // τ2: +90° top .. -90° bottom
       for (let ix = 0; ix < W; ix++) {
         const t1 = ((ix + 0.5) / W - 0.5) * 2 * Math.PI // τ1: full circle across
-        const u = surfU(t1, t2, waveAmp, waveN, N)
+        const u = surfU(t1, waveAmp, N)
         us[iy * W + ix] = u
         if (u < uMin) uMin = u
         if (u > uMax) uMax = u
@@ -74,7 +74,7 @@ export default function SurfaceMap({ entropy, tau1, tau2, waveAmp = 0.04, waveN 
     ctx.lineWidth = 2.5
     ctx.strokeStyle = '#3a3125'
     ctx.stroke()
-  }, [entropy, tau1, tau2, waveAmp, waveN])
+  }, [entropy, tau1, tau2, waveAmp])
 
   return <canvas ref={canvasRef} className="surface-map-canvas" />
 }

@@ -50,12 +50,12 @@ function fibPoint(i, n, r, target) {
   return target.set(r * rad * Math.cos(th), r * y, r * rad * Math.sin(th))
 }
 
-// unit-surface multiplier at (θ,φ): the 1:1 sphere plus one mass wave per
-// eigenstate. The j-th eigenstate adds frequency f_j = j·f_q (f_q the quark
-// frequency quantum from E = hf = mc²). Amplitudes fall as 1/j so the sum
-// stays bounded. Energy is the inverse, E = 1/u — the 180° partner.
-export function surfU(theta, phi, a, n, N) {
-  const env = Math.cos(n * phi)
+// unit-surface multiplier at angle θ: the 1:1 sphere plus one mass wave per
+// eigenstate, uniform along the velocity axis. The j-th eigenstate adds
+// frequency f_j = j·f_q (f_q the quark frequency quantum from E = hf = mc²).
+// Amplitudes fall as 1/j so the sum stays bounded. Energy is the inverse,
+// E = 1/u — the 180° partner. v = fλ holds per harmonic with one wave speed.
+export function surfU(theta, a, N) {
   const gamma = 0.618033988749895 // (sqrt(5)-1)/2
   let u = 1
   for (let j = 1; j <= N; j++) {
@@ -63,12 +63,12 @@ export function surfU(theta, phi, a, n, N) {
     // peaks around the circle instead of piling them at th = 0, while
     // keeping perfect left-right symmetry (unlike a phase shift)
     const sgn = (Math.floor(j * gamma) % 2 === 0) ? 1 : -1
-    u += (a / j) * sgn * Math.cos(j * theta) * env
+    u += (a / j) * sgn * Math.cos(j * theta)
   }
   return Math.max(u, 0.05)
 }
 
-export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAmp = 0.04, waveN = 8 }) {
+export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAmp = 0.04 }) {
   const mountRef = useRef(null)
   const apiRef = useRef(null)
 
@@ -242,7 +242,7 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
       // θ measured in the λ–v plane, φ out-of-plane latitude
       const th = Math.atan2(y, x)
       const ph = Math.asin(Math.max(-1, Math.min(1, z)))
-      const r = surfU(th, ph, waveAmp, waveN, N)
+      const r = surfU(th, waveAmp, N)
       radii[i] = r
       if (r < rMin) rMin = r
       if (r > rMax) rMax = r
@@ -275,7 +275,7 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
         fibPoint(i, n, 1, v)
         const th = Math.atan2(v.y, v.x)
         const ph = Math.asin(Math.max(-1, Math.min(1, v.z)))
-        const rl = R * surfU(th, ph, waveAmp, waveN, N)
+        const rl = R * surfU(th, waveAmp, N)
         attr.setXYZ(i, v.x * rl, v.y * rl, v.z * rl)
       }
     }
@@ -286,7 +286,7 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
     // the eigenvector: τ1/τ2 are angles that move the arrow to the point
     // where the values are read; the labels name the axes
     const TH = tau1 * D2R, PH = tau2 * D2R
-    const u0 = surfU(TH, PH, waveAmp, waveN, N)
+    const u0 = surfU(TH, waveAmp, N)
     const rl = R * u0
     const P = new THREE.Vector3(
       rl * Math.cos(PH) * Math.cos(TH),
@@ -306,7 +306,7 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
       head.position.copy(dir).multiplyScalar(shaftLen + headLen / 2)
       head.quaternion.setFromUnitVectors(UP, dir)
     }
-  }, [entropy, tau1, tau2, waveAmp, waveN])
+  }, [entropy, tau1, tau2, waveAmp])
 
   return <div ref={mountRef} className="quark-canvas-wrap" />
 }
