@@ -42,9 +42,9 @@ export default function QuarkSpace() {
   const [entropy, setEntropy] = useState(0.6)
   const [tau1, setTau1] = useState(45)
   const [tau2, setTau2] = useState(30)
-  const [waveAmp, setWaveAmp] = useState(0.25)
-  const [waveM, setWaveM] = useState(3)
-  const [waveN, setWaveN] = useState(2)
+  const [waveAmp, setWaveAmp] = useState(0.45)
+  const [waveM, setWaveM] = useState(2)
+  const [waveN, setWaveN] = useState(1)
 
   const isWave = sim === 'surface'
 
@@ -177,13 +177,14 @@ export default function QuarkSpace() {
           {isWave && (
             <div className="control-group">
               <h3>Wave</h3>
-              <Slider label="a" value={waveAmp} min={0} max={0.5} step={0.01}
+              <Slider label="a" value={waveAmp} min={0} max={0.8} step={0.01}
                 onChange={setWaveAmp} format={(v) => v.toFixed(2)} />
               <Slider label="m" value={waveM} min={1} max={8} step={1}
                 onChange={setWaveM} format={(v) => v.toFixed(0)} />
               <Slider label="n" value={waveN} min={1} max={8} step={1}
                 onChange={setWaveN} format={(v) => v.toFixed(0)} />
               <p className="graph-note">r = R·(1 + a·cos(mτ1)·cos(nτ2))</p>
+              <p className="graph-note">surface r/R: {(1 - waveAmp).toFixed(2)} – {(1 + waveAmp).toFixed(2)}</p>
             </div>
           )}
 

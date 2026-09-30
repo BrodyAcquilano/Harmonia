@@ -235,7 +235,7 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
         colA.setXYZ(i, 1, 1, 1)
       } else {
         const t = span > 1e-6 ? (radii[i] - rMin) / span : 0.5
-        colA.setXYZ(i, 0.7 + 0.3 * t, 0.8 - 0.02 * t, 1.0 - 0.5 * t)
+        colA.setXYZ(i, 0.55 + 0.45 * t, 0.7 + 0.02 * t, 1.0 - 0.7 * t)
       }
     }
     posA.needsUpdate = true
@@ -244,9 +244,11 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
     if (isWave) {
       sphere.material.color.set(0xffffff)
       sphere.material.opacity = 0.8
+      wire.material.opacity = 0.18
     } else {
       sphere.material.color.set(0xe9d9a6)
       sphere.material.opacity = 0.16
+      wire.material.opacity = 0.07
     }
 
     sphere.visible = R > 1e-4
