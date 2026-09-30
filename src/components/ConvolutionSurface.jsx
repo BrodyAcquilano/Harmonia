@@ -57,8 +57,13 @@ function fibPoint(i, n, r, target) {
 export function surfU(theta, phi, a, n, N) {
   const env = Math.cos(n * phi)
   let u = 1
-  for (let j = 1; j <= N; j++)
-    u += (a / j) * Math.cos(j * theta) * env
+  for (let j = 1; j <= N; j++) {
+    // quadratic phase chirp: the j-th harmonic peaks at th = -2πj/N,
+    // spreading the N harmonics around the full circle instead of
+    // piling them all up at th = 0
+    const dj = (2 * Math.PI * j * j) / N
+    u += (a / j) * Math.cos(j * theta + dj) * env
+  }
   return Math.max(u, 0.05)
 }
 

@@ -210,7 +210,8 @@ export default function QuarkSpace() {
               </div>
               <div className="eq-box">
                 <span className="eq-label">Convolution surface — one wave per eigenstate</span>
-                <span className="eq-line"><Tex tex="u = 1 + \sum_{j=1}^{N(s)} \frac{a}{j}\cos(j\theta)\cos(n\phi)" /></span>
+                <span className="eq-line"><Tex tex="u = 1 + \sum_{j=1}^{N(s)} \frac{a}{j}\cos(j\theta + \delta_j)\cos(n\phi)" /></span>
+                <span className="eq-line"><Tex tex="\delta_j = \frac{2\pi j^2}{N} \text{ — spreads the harmonics around the circle}" /></span>
                 <span className="eq-line"><Tex tex="N(s) = 1 + 27\,\ln(1 + s) \text{ — entropy sets the eigenstate count}" /></span>
                 <span className="eq-line"><Tex tex="r = R\,u, \quad R = \dfrac{s}{100000}, \quad m = u, \quad E = \dfrac{1}{u}" /></span>
               </div>
