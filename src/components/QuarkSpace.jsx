@@ -10,8 +10,9 @@ import ConvolutionSurface, { surfU } from './ConvolutionSurface.jsx'
    wave; τ2 is the amount the energy wave is rotated by the phasor, from its
    default of 180° out of phase. When mass is high energy is low, and when
    mass is low energy is high. The axes are wavelength (λ / −λ), velocity
-   (v / −v, vertical), and the imaginary unit (i / −i). Entropy grows the
-   surface from a point — higher entropy, more eigenstates. */
+   (v / −v, vertical), and the imaginary wavelength axis (iλ / −iλ), from
+   which the phase angle is read. Entropy grows the surface from a point —
+   higher entropy, more eigenstates. */
 
 const D2R = Math.PI / 180
 
@@ -88,11 +89,11 @@ export default function QuarkSpace() {
                 coordinates or two of time.
               </p>
               <p>
-                The three of space are wavelength, phase angle, and velocity: λ on
-                the red axis, phase — rotation by i — on the blue, velocity v on the
-                green. The velocity gives the frequency, relating ω to k; from the
-                frequency we get E = hf, and from the energy E = mc² gives the mass.
-                The velocity is what relates mass to energy.
+                The three of space are wavelength, velocity, and iλ: λ on the red
+                axis, velocity v on the green, iλ on the blue — the phase angle is
+                read from the iλ axis. The velocity gives the frequency, relating ω
+                to k; from the frequency we get E = hf, and from the energy E = mc²
+                gives the mass. The velocity is what relates mass to energy.
                 The two of time are the frequency of the mass wave (τ1) and the phase
                 angle the energy wave is rotated by (τ2). The three spatial coordinates
                 relate the volume inside the sphere to its surface, and the two of time
@@ -185,7 +186,7 @@ export default function QuarkSpace() {
             <div className="readout">
               <Row k="λ" v={fmt(A)} />
               <Row k="v" v={fmt(0)} />
-              <Row k="i" v={fmt(0)} />
+              <Row k="iλ" v={fmt(0)} />
               <Row k="|λ|" v={fmt(A)} />
             </div>
           </div>

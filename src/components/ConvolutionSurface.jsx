@@ -7,7 +7,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
    rotated by the phasor, from its default of 180° out of phase. At τ2 = 0 the
    two waves cancel and the surface is uniform — the 1:1 version.
    Axes are wavelength (X: λ / −λ), velocity (Y: v / −v, vertical), and the
-   imaginary unit (Z: i / −i). The wave's angle θ is measured in the λ–v plane.
+   imaginary wavelength axis (Z: iλ / −iλ) — the phase angle is read from it.
+   The wave's angle θ is measured in the λ–v plane.
    Entropy s in [0,1]: s = 0 is a single point, s = 1 fills the viewport. */
 
 const D2R = Math.PI / 180
@@ -82,11 +83,11 @@ export default function ConvolutionSurface({ entropy, tau1, tau2, waveAmp = 0.04
     scene.add(sun)
 
     // coordinate axes: wavelength X (λ / −λ), velocity Y (v / −v, vertical),
-    // imaginary unit Z (i / −i)
+    // imaginary wavelength Z (iλ / −iλ) — phase is read from this axis
     const axes = [
       { ax: 'x', color: 0xc0563f, plus: 'λ', minus: '−λ' },
       { ax: 'y', color: 0x2e8b6e, plus: 'v', minus: '−v' },
-      { ax: 'z', color: 0x3f6fb5, plus: 'i', minus: '−i' },
+      { ax: 'z', color: 0x3f6fb5, plus: 'iλ', minus: '−iλ' },
     ]
     axes.forEach(({ ax, color, plus, minus }) => {
       const g = new THREE.BufferGeometry()
