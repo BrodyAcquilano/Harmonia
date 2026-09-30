@@ -9,9 +9,9 @@ import ConvolutionSurface, { surfU } from './ConvolutionSurface.jsx'
    energy is just mass 180° phase shifted. τ1 is the frequency of the mass
    wave; τ2 is the amount the energy wave is rotated by the phasor, from its
    default of 180° out of phase. When mass is high energy is low, and when
-   mass is low energy is high. The axes are the complex λ-plane: λ / −λ real,
-   iλ / −iλ imaginary. Entropy grows the surface from a point — higher
-   entropy, more eigenstates. */
+   mass is low energy is high. The axes are wavelength (λ / −λ), velocity
+   (v / −v, vertical), and phase (φ / −φ). Entropy grows the surface from a
+   point — higher entropy, more eigenstates. */
 
 const D2R = Math.PI / 180
 
@@ -82,17 +82,19 @@ export default function QuarkSpace() {
               </p>
               <p>
                 The convolution surface carries the mass wave and the energy wave
-                together. τ1 is the frequency of the mass wave; τ2 is the amount the
-                energy wave is rotated by the phasor, from its default of 180° out of
-                phase. When mass is high, energy is low; when mass is low, energy is
-                high — mass running high shows as green spots on the surface, energy
-                pooling in the red lows. At τ2 = 0 the two waves cancel and the surface
-                is uniform: the 1:1 version.
+                together — two things: the frequency of the mass wave, and the phase
+                of the energy wave. τ1 is the frequency of the mass wave; τ2 is the
+                phase of the energy wave, the amount it is rotated by the phasor from
+                its default of 180° out of phase. When mass is high, energy is low;
+                when mass is low, energy is high — mass running high shows as green
+                spots on the surface, energy pooling in the red lows. At τ2 = 0 the
+                two waves cancel and the surface is uniform: the 1:1 version.
               </p>
               <p>
                 Each point of the convolution surface is an eigenstate, with its
-                direction given on the real axis λ and the imaginary axis iλ. Entropy
-                grows the surface from a single point: higher entropy, more eigenstates.
+                direction given on the three axes: wavelength λ, velocity v, and
+                phase φ. Entropy grows the surface from a single point: higher
+                entropy, more eigenstates.
               </p>
               <p>
                 The big bang was not the moment all matter was a single point — it was
@@ -173,8 +175,9 @@ export default function QuarkSpace() {
           <div className="control-group">
             <h3>Eigenvector (fixed, λ axis)</h3>
             <div className="readout">
-              <Row k="λ (real)" v={fmt(A)} />
-              <Row k="iλ (imag)" v={fmt(0)} />
+              <Row k="λ" v={fmt(A)} />
+              <Row k="v" v={fmt(0)} />
+              <Row k="φ" v={fmt(0)} />
               <Row k="|λ|" v={fmt(A)} />
             </div>
           </div>
