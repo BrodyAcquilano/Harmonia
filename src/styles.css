@@ -1147,3 +1147,54 @@ body {
   color: var(--text);
   font-variant-numeric: tabular-nums;
 }
+
+/* ---------- quark space ---------- */
+
+.quark-canvas-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-height: 320px;
+}
+
+.quark-canvas-wrap canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  cursor: grab;
+}
+
+.quark-canvas-wrap canvas:active {
+  cursor: grabbing;
+}
+
+.readouts {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.readout-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 2px 0;
+}
+
+.readout-key {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.readout-val {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.85rem;
+  color: var(--text);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.readout-unit {
+  color: var(--muted);
+}
