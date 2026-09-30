@@ -43,22 +43,24 @@ export default function QuarkSpace() {
   const [tau1, setTau1] = useState(45)
   const [tau2, setTau2] = useState(30)
   const [waveAmp, setWaveAmp] = useState(0.45)
-  const [waveM, setWaveM] = useState(2)
-  const [waveN, setWaveN] = useState(1)
+  const [waveM, setWaveM] = useState(8)
+  const [waveN, setWaveN] = useState(8)
 
   const isWave = sim === 'surface'
 
   // Local amplitude at the selected point. The uniform sphere is the 1:1
   // version (A = R everywhere); the surface carries a wave so E and m vary
   // across it: r = R·(1 + a·cos(m·τ1)·cos(n·τ2)).
+  // Mass is carried as amplitude (high spots, green); energy is its inverse —
+  // the 180° phase-shifted partner (low spots, red) — so E · m = 1.
   const R = Math.max(entropy, 0)
   const t1 = tau1 * D2R, t2 = tau2 * D2R
   const wR = isWave
     ? Math.max(1 + waveAmp * Math.cos(waveM * t1) * Math.cos(waveN * t2), 0.05)
     : 1
   const A = R * wR
-  const E = A
-  const m = A > 0 ? 1 / A : Infinity
+  const m = A
+  const E = A > 0 ? 1 / A : Infinity
 
   const lx = A * Math.cos(t2) * Math.cos(t1)
   const ly = A * Math.sin(t2)
@@ -147,7 +149,7 @@ export default function QuarkSpace() {
             />
             <p className="graph-note">
               {isWave
-                ? 'A wave wrapped around the sphere — warm where the amplitude (energy) is high, cool where it is low. Move τ1, τ2 and watch E and m trade off across the surface.'
+                ? 'A wave wrapped around the sphere — green where the amplitude (mass) is high, red where it is low (energy). Move τ1, τ2 and watch m and E trade off across the surface.'
                 : 'τ1 and τ2 select the point — λ gives direction, τ gives the time coordinate. Energy and mass are read from the amplitude at that point (uniform here — the 1:1 version).'}
             </p>
           </div>
@@ -179,9 +181,9 @@ export default function QuarkSpace() {
               <h3>Wave</h3>
               <Slider label="a" value={waveAmp} min={0} max={0.8} step={0.01}
                 onChange={setWaveAmp} format={(v) => v.toFixed(2)} />
-              <Slider label="m" value={waveM} min={1} max={8} step={1}
+              <Slider label="m" value={waveM} min={1} max={20} step={1}
                 onChange={setWaveM} format={(v) => v.toFixed(0)} />
-              <Slider label="n" value={waveN} min={1} max={8} step={1}
+              <Slider label="n" value={waveN} min={1} max={20} step={1}
                 onChange={setWaveN} format={(v) => v.toFixed(0)} />
               <p className="graph-note">r = R·(1 + a·cos(mτ1)·cos(nτ2))</p>
               <p className="graph-note">surface r/R: {(1 - waveAmp).toFixed(2)} – {(1 + waveAmp).toFixed(2)}</p>
@@ -191,8 +193,8 @@ export default function QuarkSpace() {
           <div className="control-group">
             <h3>Point energy &amp; mass</h3>
             <div className="readouts">
-              <Row k="E = amplitude" v={fmt(E)} />
-              <Row k="m = 1/amplitude" v={fmt(m)} />
+              <Row k="m = amplitude" v={fmt(m)} />
+              <Row k="E = 1/amplitude" v={fmt(E)} />
               <Row k="E · m" v={A > 0 ? '1' : '—'} />
             </div>
           </div>
@@ -249,15 +251,15 @@ export default function QuarkSpace() {
             <span className="eq-line"><Tex tex="E = mc^2" /></span>
           </div>
           <div className="eq-box">
-            <span className="eq-label">Sphere mapping — energy as amplitude</span>
-            <span className="eq-line"><Tex tex="E = A, \quad m = \dfrac{1}{A}, \quad E \cdot m = 1" /></span>
+            <span className="eq-label">Sphere mapping — mass as amplitude</span>
+            <span className="eq-line"><Tex tex="m = A, \quad E = \dfrac{1}{A}, \quad E \cdot m = 1" /></span>
             <span className="eq-line"><Tex tex="\text{uniform amplitude } A = R \text{ for now}" /></span>
             <span className="eq-line"><Tex tex="\text{energy is mass } 180^\circ \text{ phase shifted}" /></span>
           </div>
           <div className="eq-box">
             <span className="eq-label">Convolution surface — wave-wrapped sphere</span>
             <span className="eq-line"><Tex tex="r = R \, (1 + a \cos m\tau_1 \cos n\tau_2)" /></span>
-            <span className="eq-line"><Tex tex="A = r, \quad E = A, \quad m = \dfrac{1}{A}" /></span>
+            <span className="eq-line"><Tex tex="A = r, \quad m = A, \quad E = \dfrac{1}{A}" /></span>
           </div>
           <div className="eq-box">
             <span className="eq-label">Entropy — Boltzmann</span>

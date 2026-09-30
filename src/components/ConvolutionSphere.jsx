@@ -136,13 +136,6 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
     )
     scene.add(origin)
 
-    // selected eigenstate marker
-    const selPoint = new THREE.Mesh(
-      new THREE.SphereGeometry(0.05, 20, 14),
-      new THREE.MeshStandardMaterial({ color: GOLD, emissive: 0x8a6a1f, emissiveIntensity: 0.7 })
-    )
-    scene.add(selPoint)
-
     // eigenvector arrow: shaft + cone head
     const UP = new THREE.Vector3(0, 1, 0)
     const arrowMat = new THREE.MeshStandardMaterial({ color: GOLD, emissive: 0x8a6a1f, emissiveIntensity: 0.45, roughness: 0.4 })
@@ -184,7 +177,7 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
     }
     loop()
 
-    apiRef.current = { sphere, wire, points, selPoint, arrow, shaft, head, UP, basePos }
+    apiRef.current = { sphere, wire, points, arrow, shaft, head, UP, basePos }
 
     return () => {
       cancelAnimationFrame(raf)
@@ -208,7 +201,7 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
     const api = apiRef.current
     if (!api) return
     const R = Math.max(entropy, 0)
-    const { sphere, wire, points, selPoint, arrow, shaft, head, UP, basePos } = api
+    const { sphere, wire, points, arrow, shaft, head, UP, basePos } = api
     const isWave = mode === 'wave'
     const wv = isWave ? { a: waveAmp, m: waveM, n: waveN } : null
 
@@ -234,8 +227,9 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
       if (!isWave) {
         colA.setXYZ(i, 1, 1, 1)
       } else {
+        // high spots (mass) green, low spots (energy) red
         const t = span > 1e-6 ? (radii[i] - rMin) / span : 0.5
-        colA.setXYZ(i, 0.55 + 0.45 * t, 0.7 + 0.02 * t, 1.0 - 0.7 * t)
+        colA.setXYZ(i, 1.0 - 0.7 * t, 0.3 + 0.6 * t, 0.3)
       }
     }
     posA.needsUpdate = true
@@ -285,9 +279,6 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
       rl * Math.sin(ph),
       rl * Math.cos(ph) * Math.sin(th)
     )
-    selPoint.visible = R > 1e-4
-    selPoint.position.copy(P)
-
     const len = P.length()
     arrow.visible = len > 1e-3
     if (arrow.visible) {
