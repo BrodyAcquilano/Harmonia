@@ -160,16 +160,6 @@ body {
   min-width: 0;
 }
 
-/* Quark Space has a single sim, so no sim nav: two columns */
-.quark-page .lab-layout {
-  grid-template-columns: 1fr 300px;
-}
-@media (max-width: 860px) {
-  .quark-page .lab-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
 .sim-nav {
   order: 1;
   background: var(--panel);

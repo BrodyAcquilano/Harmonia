@@ -84,6 +84,18 @@ export default function QuarkSpace() {
   return (
     <div className="quark-page">
       <div className="lab-layout">
+        <nav className="sim-nav" aria-label="Simulations">
+          <h3>Simulations</h3>
+          <div className="sim-list" role="tablist" aria-label="Simulations">
+            <button
+              className="sim-item"
+              role="tab"
+              aria-selected="true"
+            >
+              Convolution Sphere
+            </button>
+          </div>
+        </nav>
         <div className="lab-stage">
           <div className="graph-box">
             <div className="graph-title-row">
