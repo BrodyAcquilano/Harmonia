@@ -185,9 +185,11 @@ export default function QuarkSpace() {
             />
             <p className="graph-note">
               The surface unfolded flat — −λ left, iλ center, λ right (the +λ half;
-              the −λ half is its 180° opposite). τ2 vertical.
-              Green peaks, red valleys. The yellow dot is the arrow's position,
-              moved by τ1 and τ2.
+              the −λ half is its 180° opposite). Rows build the wave up: the top row
+              is the first eigenstate alone, each row down adds the next frequency,
+              the bottom row is the full wave — so more entropy visibly enriches it.
+              Green peaks, red valleys. The yellow dot sits on the bottom row at the
+              θ the arrow reads, moved by τ1.
             </p>
           </div>
 

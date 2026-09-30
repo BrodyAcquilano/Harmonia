@@ -1,13 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { surfU, MAX_STATES } from './ConvolutionSurface.jsx'
 
-/* Flat projection of the convolution surface: half unfolding — the
+/* Flat map of the convolution surface, as a buildup spectrogram: the
    horizontal runs from −λ (left) through iλ (center) to +λ (right), the +λ
-   half of the wave circle. The −λ half isn't shown: it's the 180°
-   phase-shifted opposite (negation) of this half. τ2 runs vertically.
-   Peaks are green, valleys are red — full color, since the gold arrow
-   isn't drawn here. The τ1/τ2 controls move a yellow dot: the arrow's
-   position on the map (|τ1| folds onto the half shown). */
+   half of the wave circle (the −λ half isn't shown: it's the 180°
+   phase-shifted opposite). Each row adds the next eigenstate — top row is
+   k=1 alone, each row down adds one more frequency, bottom row is the full
+   wave — so raising entropy visibly enriches the map, row by row.
+   Peaks are green, valleys are red. The yellow dot sits on the bottom row
+   (the full wave) at the θ the arrow reads (|τ1| folds onto the half shown). */
 
 const W = 360, H = 180
 
@@ -39,20 +40,20 @@ export default function SurfaceMap({ entropy, tau1, tau2, waveAmp = 0.04 }) {
     const ctx = canvas.getContext('2d')
     const N = Math.min(1 + Math.round(entropy / 50), MAX_STATES)
 
-    // the wave is identical in every row (τ2 only moves the dot), so compute
-    // one column once and copy it down — same pixels, far less work
-    const colU = new Float32Array(W)
-    let uMin = Infinity, uMax = -Infinity
-    for (let ix = 0; ix < W; ix++) {
-      const t1 = Math.PI * (1 - (ix + 0.5) / W) // −λ at left .. +λ at right, iλ center
-      const u = surfU(t1, waveAmp, N)
-      colU[ix] = u
-      if (u < uMin) uMin = u
-      if (u > uMax) uMax = u
-    }
+    // buildup spectrogram: row iy shows the wave with the first K eigenstates,
+    // K growing from 1 (top) to N (bottom) — each row visibly adds frequencies
     const us = new Float32Array(W * H)
-    for (let iy = 0; iy < H; iy++)
-      for (let ix = 0; ix < W; ix++) us[iy * W + ix] = colU[ix]
+    let uMin = Infinity, uMax = -Infinity
+    for (let iy = 0; iy < H; iy++) {
+      const K = 1 + Math.round((iy / (H - 1)) * (N - 1))
+      for (let ix = 0; ix < W; ix++) {
+        const t1 = Math.PI * (1 - (ix + 0.5) / W) // −λ at left .. +λ at right, iλ center
+        const u = surfU(t1, waveAmp, K)
+        us[iy * W + ix] = u
+        if (u < uMin) uMin = u
+        if (u > uMax) uMax = u
+      }
+    }
 
     const img = ctx.createImageData(W, H)
     const d = img.data
@@ -67,9 +68,10 @@ export default function SurfaceMap({ entropy, tau1, tau2, waveAmp = 0.04 }) {
     }
     ctx.putImageData(img, 0, 0)
 
-    // yellow dot: the arrow's position, moved by τ1/τ2
+    // yellow dot: the θ the arrow reads (|τ1| folds onto the half map),
+    // sitting on the bottom row — the full wave
     const dx = ((180 - Math.abs(tau1)) / 180) * W // |τ1| folds onto the half map
-    const dy = ((90 - tau2) / 180) * H
+    const dy = H - 7
     ctx.beginPath()
     ctx.arc(dx, dy, 7, 0, 2 * Math.PI)
     ctx.fillStyle = '#f2c230'
