@@ -4,6 +4,7 @@ import 'katex/dist/katex.min.css'
 import Slider from './Slider.jsx'
 import ConvolutionSurface, { surfU, QUARK_TERMS } from './ConvolutionSurface.jsx'
 import SurfaceMap from './SurfaceMap.jsx'
+import ConvolutionSphere from './ConvolutionSphere.jsx'
 import Fundamental20 from './Fundamental20.jsx'
 
 /* The Quark Space: a convolution of energy and mass and space and time.
@@ -53,6 +54,7 @@ export default function QuarkSpace() {
   const [tau1, setTau1] = useState(0) // angle on the mass-wave-frequency axis — moves the arrow
   const [tau2, setTau2] = useState(0) // angle on the energy-wave-phase axis — moves the arrow
   const [waveAmp, setWaveAmp] = useState(0.2)
+  const [sim, setSim] = useState('surface') // 'surface' | 'sphere'
 
   // Local amplitude at the arrow (θ = τ1). τ1/τ2 are angles that move
   // the arrow — they never reshape the wave. Mass is carried as amplitude
@@ -97,13 +99,24 @@ export default function QuarkSpace() {
             <button
               className="sim-item"
               role="tab"
-              aria-selected="true"
+              aria-selected={sim === 'surface'}
+              onClick={() => setSim('surface')}
             >
               Convolution Surface
+            </button>
+            <button
+              className="sim-item"
+              role="tab"
+              aria-selected={sim === 'sphere'}
+              onClick={() => setSim('sphere')}
+            >
+              Convolution Sphere
             </button>
           </div>
         </nav>
         <div className="lab-stage">
+          {sim === 'surface' && (
+          <>
           <div className="graph-box">
             <div className="graph-title-row">
               <h2 className="graph-title">The Quark Space</h2>
@@ -143,11 +156,14 @@ export default function QuarkSpace() {
                 higher entropy, more eigenstates.
               </p>
               <p>
-                The big bang was not the moment all matter was a single point — it was
-                when all matter operated on the same 1:1 mass-to-energy ratio and
-                vibrated at the same frequency, before quarks were created. All motion
+                Before quarks were created, all matter operated on the same 1:1
+                mass-to-energy ratio and vibrated at the same frequency. All motion
                 since is the adding of new frequencies: new eigenstates built on the
                 same 2/3 building block, each time a quark is absorbed or released.
+                That is how motion was created from waves — proton formation, when
+                electrons were created, forced quarks to group together to remain
+                stable, and changing the frequencies in the gravitational field
+                created gravitational waves.
               </p>
               <p>
                 That release creates a disproportion between energy and mass — −1/3 mass
@@ -294,10 +310,71 @@ export default function QuarkSpace() {
               </div>
             </div>
           </div>
+          </>
+          )}
+          {sim === 'sphere' && (
+          <>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">The Quark Space</h2>
+            </div>
+            <div className="quark-intro-body">
+              <p>
+                The convolution sphere is the quark space before any quarks were
+                created — a uniform 1:1 sphere of mass to energy, E · m = 1
+                everywhere. No eigenstates, no entropy, no frequencies. It is here
+                to teach the axes: λ on the red axis, velocity v on the green
+                (vertical), iλ on the blue — the phase angle is read from the
+                iλ axis.
+              </p>
+              <p>
+                Move τ1 and τ2 and the gold arrow rides the sphere. τ1 is
+                the angle on the mass-wave-frequency axis; τ2 is the phase angle
+                on the energy-wave-phase axis. The labels name the axes; the values
+                are the angles.
+              </p>
+            </div>
+          </div>
+
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Convolution Sphere</h2>
+            </div>
+            <ConvolutionSphere tau1={tau1} tau2={tau2} />
+            <p className="graph-note">
+              The sphere is transparent so the gold arrow stays visible wherever it
+              goes. τ1 swings it around the λ–v plane; τ2 lifts it up
+              the iλ axis.
+            </p>
+          </div>
+
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Equations</h2>
+            </div>
+            <div className="eq-grid">
+              <div className="eq-box">
+                <span className="eq-label">The 1:1 sphere</span>
+                <span className="eq-line"><Tex tex="u = 1" /></span>
+                <span className="eq-line"><Tex tex="m = u, \; E = \dfrac{1}{u}" /></span>
+                <span className="eq-line"><Tex tex="E \cdot m = 1 \text{ everywhere}" /></span>
+              </div>
+              <div className="eq-box">
+                <span className="eq-label">Eigenvector — moved by τ1, τ2</span>
+                <span className="eq-line"><Tex tex="P = (\cos\phi\cos\theta,\, \cos\phi\sin\theta,\, \sin\phi)" /></span>
+                <span className="eq-line"><Tex tex="\theta = \tau_1,\, \phi = \tau_2 \text{ (angles; the labels name the axes)}" /></span>
+                <span className="eq-line"><Tex tex="|P| = 1 \text{ — the arrow rides the unit sphere}" /></span>
+              </div>
+            </div>
+          </div>
+          </>
+          )}
         </div>
 
         <div className="lab-side">
         <div className="lab-controls">
+          {sim === 'surface' && (
+          <>
           <div className="control-group">
             <h3>Entropy</h3>
             <Slider label="s" value={entropy} min={0} max={1000000} step={1}
@@ -378,6 +455,35 @@ export default function QuarkSpace() {
             </div>
             <p className="graph-note">Natural units: c = h = 1.</p>
           </div>
+          </>
+          )}
+          {sim === 'sphere' && (
+          <>
+          <div className="control-group">
+            <h3>τ1 — mass wave frequency</h3>
+            <Slider label="τ1" value={tau1} min={-180} max={180} step={1}
+              onChange={setTau1} format={(v) => `${v.toFixed(0)}°`} />
+            <p className="graph-note">The frequency of the mass wave. Frequency comes from the velocity — the vertical axis.</p>
+          </div>
+
+          <div className="control-group">
+            <h3>τ2 — energy wave phase</h3>
+            <Slider label="τ2" value={tau2} min={-90} max={90} step={1}
+              onChange={setTau2} format={(v) => `${v.toFixed(0)}°`} />
+            <p className="graph-note">The phase angle of the energy wave. Phase is read from the iλ axis.</p>
+          </div>
+
+          <div className="control-group">
+            <h3>Point energy &amp; mass</h3>
+            <div className="readout">
+              <Row k="m" v="1" />
+              <Row k="E" v="1" />
+              <Row k="E · m" v="1" />
+            </div>
+            <p className="graph-note">The 1:1 sphere — energy and mass are equal everywhere.</p>
+          </div>
+          </>
+          )}
         </div>
         </div>
       </div>

@@ -2,15 +2,17 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
-/* Convolution sphere (the 4th dimension, §§8–10), drawn with three.js.
-   Entropy s in [0,1]: s = 0 is a single point, s = 1 fills the viewport.
-   The selected eigenvector is the surface point at time-longitude τ1 and
-   time-latitude τ2; its axes are the wavelengths λx λy λz. */
+/* The simple convolution sphere: the quark space before any quarks — a
+   uniform 1:1 sphere of mass to energy (E · m = 1 everywhere), no
+   eigenstates, no entropy slider, no frequency math, no coloring. It exists
+   to teach the axes and the τ1/τ2 controls: the gold arrow rides the sphere
+   at (τ1, τ2).
+   Axes are wavelength (X: λ / −λ), velocity (Y: v / −v, vertical), and the
+   imaginary wavelength axis (Z: iλ / −iλ) — the phase angle is read from it. */
 
 const D2R = Math.PI / 180
-const AXIS_LEN = 1.32 // axes reach just past the max sphere (radius 1)
+const AXIS_LEN = 1.32 // axes reach just past the sphere (radius 1)
 const GOLD = 0xd9a441
-const MAX_STATES = 320
 
 function makeLabel(text) {
   const c = document.createElement('canvas')
@@ -31,28 +33,7 @@ function makeLabel(text) {
   return sp
 }
 
-// i-th point of an n-point Fibonacci lattice on a sphere of radius r
-function fibPoint(i, n, r, target) {
-  if (n <= 1) return target.set(0, 0, 0)
-  const golden = Math.PI * (3 - Math.sqrt(5))
-  const y = 1 - (i / (n - 1)) * 2
-  const rad = Math.sqrt(Math.max(0, 1 - y * y))
-  const th = golden * i
-  return target.set(r * rad * Math.cos(th), r * y, r * rad * Math.sin(th))
-}
-
-// radial wave wrapped around the sphere: d(θ,φ) = a·cos(m·θ)·cos(n·φ)
-function waveDisp(theta, phi, a, m, n) {
-  return a * Math.cos(m * theta) * Math.cos(n * phi)
-}
-
-// local unit-sphere radius at (θ,φ); wave = {a,m,n} or null for uniform
-function surfRadius(theta, phi, wave) {
-  if (!wave) return 1
-  return Math.max(1 + waveDisp(theta, phi, wave.a, wave.m, wave.n), 0.05)
-}
-
-export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform', waveAmp = 0.25, waveM = 3, waveN = 2 }) {
+export default function ConvolutionSphere({ tau1 = 0, tau2 = 0 }) {
   const mountRef = useRef(null)
   const apiRef = useRef(null)
 
@@ -75,18 +56,29 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
     sun.position.set(5, 8, 6)
     scene.add(sun)
 
-    // coordinate axes + wavelength labels
-    const axisCols = { x: 0xc0563f, y: 0x2e8b6e, z: 0x3f6fb5 }
-    const labels = { x: 'λx', y: 'λy', z: 'λz' }
-    ;['x', 'y', 'z'].forEach((ax) => {
+    // coordinate axes: wavelength X (λ / −λ), velocity Y (v / −v, vertical),
+    // imaginary wavelength Z (iλ / −iλ) — phase is read from this axis
+    const axes = [
+      { ax: 'x', color: 0xc0563f, plus: '−λ', minus: 'λ' },
+      { ax: 'y', color: 0x2e8b6e, plus: 'v', minus: '−v' },
+      { ax: 'z', color: 0x3f6fb5, plus: 'iλ', minus: '−iλ' },
+    ]
+    axes.forEach(({ ax, color, plus, minus }) => {
       const g = new THREE.BufferGeometry()
       const a = new THREE.Vector3(), b = new THREE.Vector3()
       a[ax] = -AXIS_LEN; b[ax] = AXIS_LEN
       g.setFromPoints([a, b])
-      scene.add(new THREE.Line(g, new THREE.LineBasicMaterial({ color: axisCols[ax] })))
-      const lab = makeLabel(labels[ax])
-      lab.position[ax] = AXIS_LEN + 0.16
-      scene.add(lab)
+      scene.add(new THREE.Line(g, new THREE.LineBasicMaterial({ color })))
+      if (plus) {
+        const lab = makeLabel(plus)
+        lab.position[ax] = AXIS_LEN + 0.16
+        scene.add(lab)
+      }
+      if (minus) {
+        const lab = makeLabel(minus)
+        lab.position[ax] = -(AXIS_LEN + 0.16)
+        scene.add(lab)
+      }
     })
 
     // faint floor grid: the coordinate grid the sphere sits on
@@ -96,38 +88,22 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
     grid.position.y = -AXIS_LEN
     scene.add(grid)
 
-    // the convolution sphere: semi-transparent surface + faint wireframe.
-    // in surface mode the unit-sphere vertices are displaced by the wave
-    // and tinted by local amplitude (warm = high energy)
+    // the convolution sphere: plain unit sphere, 1:1 mass to energy —
+    // no wave, no tinting, E · m = 1 everywhere
     const sphereGeo = new THREE.SphereGeometry(1, 64, 48)
-    const basePos = sphereGeo.attributes.position.array.slice()
-    const vCount = sphereGeo.attributes.position.count
-    sphereGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(vCount * 3).fill(1), 3))
     const sphere = new THREE.Mesh(
       sphereGeo,
       new THREE.MeshStandardMaterial({
-        color: 0xffffff, transparent: true, opacity: 0.55,
+        color: 0xf3e8c8, transparent: true, opacity: 0.28,
         roughness: 0.35, metalness: 0.05,
         side: THREE.DoubleSide, depthWrite: false,
-        vertexColors: true,
       })
     )
     const wire = new THREE.Mesh(
       sphereGeo,
-      new THREE.MeshBasicMaterial({ color: 0xb09a5e, wireframe: true, transparent: true, opacity: 0.07 })
+      new THREE.MeshBasicMaterial({ color: 0xb09a5e, wireframe: true, transparent: true, opacity: 0.18 })
     )
     scene.add(sphere, wire)
-
-    // eigenstates: points on the sphere (Fibonacci lattice)
-    const posArr = new Float32Array(MAX_STATES * 3)
-    const ptsGeo = new THREE.BufferGeometry()
-    ptsGeo.setAttribute('position', new THREE.BufferAttribute(posArr, 3))
-    const points = new THREE.Points(
-      ptsGeo,
-      new THREE.PointsMaterial({ color: GOLD, size: 0.05, sizeAttenuation: true, transparent: true, opacity: 0.95 })
-    )
-    points.geometry.setDrawRange(0, 1)
-    scene.add(points)
 
     // origin marker
     const origin = new THREE.Mesh(
@@ -151,7 +127,7 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
       renderer.setSize(w, h)
       camera.aspect = w / h
       camera.updateProjectionMatrix()
-      // distance so the axes (just past the max sphere) fill the smaller view dimension
+      // distance so the axes (just past the sphere) fill the smaller view dimension
       const fov = camera.fov * D2R
       const fitH = AXIS_LEN / Math.tan(fov / 2)
       const dist = Math.max(fitH, fitH / camera.aspect)
@@ -177,7 +153,7 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
     }
     loop()
 
-    apiRef.current = { sphere, wire, points, arrow, shaft, head, UP, basePos }
+    apiRef.current = { arrow, shaft, head, UP }
 
     return () => {
       cancelAnimationFrame(raf)
@@ -196,88 +172,17 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
     }
   }, [])
 
-  // ---- per-prop update: entropy / taus / wave ----
+  // ---- arrow: τ1/τ2 move it on the unit sphere ----
   useEffect(() => {
     const api = apiRef.current
     if (!api) return
-    const R = Math.max(entropy, 0)
-    const { sphere, wire, points, arrow, shaft, head, UP, basePos } = api
-    const isWave = mode === 'wave'
-    const wv = isWave ? { a: waveAmp, m: waveM, n: waveN } : null
+    const { arrow, shaft, head, UP } = api
 
-    // displace the unit-sphere vertices by the wave and tint by amplitude
-    // (cool = low, warm = high); uniform mode stays soft and untinted
-    const posA = sphere.geometry.attributes.position
-    const colA = sphere.geometry.attributes.color
-    const count = posA.count
-    let rMin = Infinity, rMax = -Infinity
-    const radii = new Float32Array(count)
-    for (let i = 0; i < count; i++) {
-      const x = basePos[i * 3], y = basePos[i * 3 + 1], z = basePos[i * 3 + 2]
-      const th = Math.atan2(z, x)
-      const ph = Math.asin(Math.max(-1, Math.min(1, y)))
-      const r = surfRadius(th, ph, wv)
-      radii[i] = r
-      if (r < rMin) rMin = r
-      if (r > rMax) rMax = r
-      posA.setXYZ(i, x * r, y * r, z * r)
-    }
-    const span = rMax - rMin
-    for (let i = 0; i < count; i++) {
-      if (!isWave) {
-        colA.setXYZ(i, 1, 1, 1)
-      } else {
-        // high spots (mass) light green, low spots (energy) light red
-        const t = span > 1e-6 ? (radii[i] - rMin) / span : 0.5
-        colA.setXYZ(i, 1.0 - 0.35 * t, 0.65 + 0.3 * t, 0.65)
-      }
-    }
-    posA.needsUpdate = true
-    colA.needsUpdate = true
-    sphere.geometry.computeVertexNormals()
-    if (isWave) {
-      sphere.material.color.set(0xffffff)
-      sphere.material.opacity = 0.65
-      wire.material.opacity = 0.18
-    } else {
-      sphere.material.color.set(0xe9d9a6)
-      sphere.material.opacity = 0.16
-      wire.material.opacity = 0.07
-    }
-
-    sphere.visible = R > 1e-4
-    wire.visible = R > 1e-4
-    sphere.scale.setScalar(Math.max(R, 1e-4))
-    wire.scale.setScalar(Math.max(R, 1e-4))
-
-    // eigenstates: one point at s = 0, up to 300 at s = 1, riding the surface
-    const attr = points.geometry.attributes.position
-    const v = new THREE.Vector3()
-    let n
-    if (R <= 1e-4) {
-      n = 1
-      attr.setXYZ(0, 0, 0, 0)
-    } else {
-      n = Math.min(1 + Math.round(entropy * 299), MAX_STATES)
-      for (let i = 0; i < n; i++) {
-        fibPoint(i, n, 1, v)
-        const th = Math.atan2(v.z, v.x)
-        const ph = Math.asin(Math.max(-1, Math.min(1, v.y)))
-        const rl = R * surfRadius(th, ph, wv)
-        attr.setXYZ(i, v.x * rl, v.y * rl, v.z * rl)
-      }
-    }
-    attr.needsUpdate = true
-    points.geometry.setDrawRange(0, n)
-    points.geometry.computeBoundingSphere()
-
-    // the selected eigenvector: time-longitude τ1, time-latitude τ2
-    const th = tau1 * D2R, ph = tau2 * D2R
-    const rl = R * surfRadius(th, ph, wv)
+    const TH = tau1 * D2R, PH = tau2 * D2R
     const P = new THREE.Vector3(
-      rl * Math.cos(ph) * Math.cos(th),
-      rl * Math.sin(ph),
-      rl * Math.cos(ph) * Math.sin(th)
+      -Math.cos(PH) * Math.cos(TH),
+      Math.cos(PH) * Math.sin(TH),
+      Math.sin(PH)
     )
     const len = P.length()
     arrow.visible = len > 1e-3
@@ -292,7 +197,7 @@ export default function ConvolutionSphere({ entropy, tau1, tau2, mode = 'uniform
       head.position.copy(dir).multiplyScalar(shaftLen + headLen / 2)
       head.quaternion.setFromUnitVectors(UP, dir)
     }
-  }, [entropy, tau1, tau2, mode, waveAmp, waveM, waveN])
+  }, [tau1, tau2])
 
   return <div ref={mountRef} className="quark-canvas-wrap" />
 }
