@@ -2,10 +2,15 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
-/* Convolution surface: the mass wave plus the energy wave, drawn with three.js.
-   The two time coordinates are the mass-wave frequency (τ1) and the energy-wave
-   phasor rotation from 180° (τ2). At τ2 = 0 the two waves cancel and the surface
-   is uniform — the 1:1 version.
+/* Convolution surface, drawn with three.js.
+   The surface starts as a uniform 1:1 sphere of mass to energy. Each expelled
+   quark — each new eigenstate — adds one new frequency to the mass wave: the
+   j-th eigenstate adds f_j = j·f_q, where the quark frequency quantum
+   f_q = (2/3)·m_q·c²/h comes from E = hf = mc² with m_q·c² = 2 MeV.
+   Energy is the 180° (i²) partner by construction: E = 1/m, so mass peaks are
+   energy troughs — no phase slider needed.
+   The gold arrow is positioned by τ1/τ2: angles on the mass-wave-frequency and
+   energy-wave-phase axes. The labels name the axes; the values are the angles.
    Axes are wavelength (X: λ / −λ), velocity (Y: v / −v, vertical), and the
    imaginary wavelength axis (Z: iλ / −iλ) — the phase angle is read from it.
    The wave's angle θ is measured in the λ–v plane.
@@ -15,10 +20,6 @@ const D2R = Math.PI / 180
 const AXIS_LEN = 1.32 // axes reach just past the max sphere (radius 1)
 const GOLD = 0xd9a441
 const MAX_STATES = 320
-
-// fixed eigenvector direction: θ = 0, φ = 0 (on the λ axis)
-const PT_TH = 0
-const PT_PH = 0
 
 function makeLabel(text) {
   const c = document.createElement('canvas')
@@ -49,17 +50,19 @@ function fibPoint(i, n, r, target) {
   return target.set(r * rad * Math.cos(th), r * y, r * rad * Math.sin(th))
 }
 
-// unit-surface multiplier at (θ,φ): mass wave at frequency τ1 plus the energy
-// wave, 180° out of phase by default, rotated by τ2 (radians)
-export function surfU(theta, phi, tau1, tau2r, a, n) {
+// unit-surface multiplier at (θ,φ): the 1:1 sphere plus one mass wave per
+// eigenstate. The j-th eigenstate adds frequency f_j = j·f_q (f_q the quark
+// frequency quantum from E = hf = mc²). Amplitudes fall as 1/j so the sum
+// stays bounded. Energy is the inverse, E = 1/u — the 180° partner.
+export function surfU(theta, phi, a, n, N) {
   const env = Math.cos(n * phi)
-  const u = 1
-    + a * Math.cos(tau1 * theta) * env
-    + a * Math.cos(tau1 * theta + Math.PI + tau2r) * env
+  let u = 1
+  for (let j = 1; j <= N; j++)
+    u += (a / j) * Math.cos(j * theta) * env
   return Math.max(u, 0.05)
 }
 
-export default function ConvolutionSurface({ entropy, tau1, tau2, waveAmp = 0.04, waveN = 8 }) {
+export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAmp = 0.04, waveN = 8 }) {
   const mountRef = useRef(null)
   const apiRef = useRef(null)
 
@@ -218,7 +221,7 @@ export default function ConvolutionSurface({ entropy, tau1, tau2, waveAmp = 0.04
     const api = apiRef.current
     if (!api) return
     const R = Math.max(entropy, 0)
-    const tau2r = tau2 * D2R
+    const N = Math.min(1 + Math.round(entropy * 299), MAX_STATES)
     const { sphere, wire, points, arrow, shaft, head, UP, basePos } = api
 
     // displace the unit-sphere vertices by the two waves and tint by amplitude
@@ -233,7 +236,7 @@ export default function ConvolutionSurface({ entropy, tau1, tau2, waveAmp = 0.04
       // θ measured in the λ–v plane, φ out-of-plane latitude
       const th = Math.atan2(y, x)
       const ph = Math.asin(Math.max(-1, Math.min(1, z)))
-      const r = surfU(th, ph, tau1, tau2r, waveAmp, waveN)
+      const r = surfU(th, ph, waveAmp, waveN, N)
       radii[i] = r
       if (r < rMin) rMin = r
       if (r > rMax) rMax = r
@@ -261,12 +264,12 @@ export default function ConvolutionSurface({ entropy, tau1, tau2, waveAmp = 0.04
       n = 1
       attr.setXYZ(0, 0, 0, 0)
     } else {
-      n = Math.min(1 + Math.round(entropy * 299), MAX_STATES)
+      n = N
       for (let i = 0; i < n; i++) {
         fibPoint(i, n, 1, v)
         const th = Math.atan2(v.y, v.x)
         const ph = Math.asin(Math.max(-1, Math.min(1, v.z)))
-        const rl = R * surfU(th, ph, tau1, tau2r, waveAmp, waveN)
+        const rl = R * surfU(th, ph, waveAmp, waveN, N)
         attr.setXYZ(i, v.x * rl, v.y * rl, v.z * rl)
       }
     }
@@ -274,13 +277,15 @@ export default function ConvolutionSurface({ entropy, tau1, tau2, waveAmp = 0.04
     points.geometry.setDrawRange(0, n)
     points.geometry.computeBoundingSphere()
 
-    // the eigenvector: fixed on the λ axis, riding the waves beneath it
-    const u0 = surfU(PT_TH, PT_PH, tau1, tau2r, waveAmp, waveN)
+    // the eigenvector: τ1/τ2 are angles that move the arrow to the point
+    // where the values are read; the labels name the axes
+    const TH = tau1 * D2R, PH = tau2 * D2R
+    const u0 = surfU(TH, PH, waveAmp, waveN, N)
     const rl = R * u0
     const P = new THREE.Vector3(
-      rl * Math.cos(PT_PH) * Math.cos(PT_TH),
-      rl * Math.cos(PT_PH) * Math.sin(PT_TH),
-      rl * Math.sin(PT_PH)
+      rl * Math.cos(PH) * Math.cos(TH),
+      rl * Math.cos(PH) * Math.sin(TH),
+      rl * Math.sin(PH)
     )
     const len = P.length()
     arrow.visible = len > 1e-3
