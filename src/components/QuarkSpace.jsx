@@ -52,13 +52,13 @@ export default function QuarkSpace() {
   const [entropy, setEntropy] = useState(60000)
   const [tau1, setTau1] = useState(0) // angle on the mass-wave-frequency axis — moves the arrow
   const [tau2, setTau2] = useState(0) // angle on the energy-wave-phase axis — moves the arrow
-  const [waveAmp, setWaveAmp] = useState(0.04)
+  const [waveAmp, setWaveAmp] = useState(0.2)
 
   // Local amplitude at the arrow (θ = τ1). τ1/τ2 are angles that move
   // the arrow — they never reshape the wave. Mass is carried as amplitude
   // (high spots, green); energy is its inverse — the 180° phase-shifted
   // partner (low spots, red) — so E · m = 1.
-  const R = Math.max(entropy, 0) / 100000 // the sphere scales very slowly with entropy
+  const R = Math.min(Math.max(entropy, 0) / 100000, 1) // the sphere scales very slowly with entropy, holding unit size past s = 100000
   // the eigenstate count sets the surface wave number: N points on a sphere
   // resolve wave numbers up to ~√N, so the wave varies at the finest scale
   // the eigenstates can resolve
@@ -189,7 +189,9 @@ export default function QuarkSpace() {
               iλ center, λ right (the +λ half; the −λ half is its 180° opposite),
               and each row rotates the wave by the τ2 phase: the middle row is the
               base wave (τ2 = 0), −90° at the bottom, +90° at the top.
-              Green peaks, red valleys. The yellow dot marks the arrow's (τ1, τ2).
+              Each pixel takes the color of the fundamental frequency it is most
+              made of — blue 1/3 f_q, red 2/3 f_q, green 1 f_q, yellow 4/3 f_q —
+              shaded by the wave amplitude. The yellow dot marks the arrow's (τ1, τ2).
             </p>
           </div>
 
@@ -282,7 +284,7 @@ export default function QuarkSpace() {
               <div className="eq-box">
                 <span className="eq-label">Entropy</span>
                 <span className="eq-line"><Tex tex="S = k_B \ln \Omega" /></span>
-                <span className="eq-line"><Tex tex="R = \dfrac{s}{100000}, \quad N = 1 + \dfrac{s}{50}" /></span>
+                <span className="eq-line"><Tex tex="R = \min\left(\dfrac{s}{100000}, 1\right), \quad N = 1 + \dfrac{s}{50}" /></span>
                 <span className="eq-line"><Tex tex="\text{entropy grows the radius and the eigenstate count}" /></span>
               </div>
               <div className="eq-box">
@@ -298,7 +300,7 @@ export default function QuarkSpace() {
         <div className="lab-controls">
           <div className="control-group">
             <h3>Entropy</h3>
-            <Slider label="s" value={entropy} min={0} max={100000} step={1}
+            <Slider label="s" value={entropy} min={0} max={1000000} step={1}
               onChange={setEntropy} format={(v) => v.toFixed(0)} />
             <p className="graph-note">Higher entropy, more eigenstates.</p>
           </div>

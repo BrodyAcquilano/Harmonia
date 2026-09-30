@@ -12,6 +12,7 @@
 - [6. Formation wins — why entropy increases](#6-formation-wins--why-entropy-increases)
 - [7. The universe was still — then the first proton formed](#7-the-universe-was-still-then-the-first-proton-formed)
 - [8. A small input, an increasingly complex system](#8-a-small-input-an-increasingly-complex-system)
+- [9. Painting the map by frequency](#9-painting-the-map-by-frequency)
 
 ## 1. Why I built this diagram
 
@@ -90,3 +91,17 @@ Added together, these twenty are the base fundamental frequency — the lowest, 
 ## 8. A small input, an increasingly complex system
 
 This is the part that feels like chaos theory to me. The entire surface — two thousand interfering eigenstates, the whole roiling green-and-red sphere — grows out of two seeds: $2/3$ and $-1/3$. That is the small input. Everything else is the 95/5 dice, rolled two thousand times, each roll adding or subtracting one cosine. No roll knows about the others. And yet the result is not noise — it is a structured, intricate, *specific* surface, different on every page load, sensitive to every early pick. Change one of the first ten frequencies and the whole sphere rearranges; the late ones only ripple the details. A small input created an increasingly complex system, and the complexity never stops growing, because formation keeps winning. That, as far as I can tell, is what the universe has been doing too.
+
+## 9. Painting the map by frequency
+
+The flat map used to show me only one thing: how loud the wave was at each point — green peaks, red valleys. But I kept looking at it and wanting to know something else: *which* frequencies were living *where*. Every eigenstate has a specific frequency, and the map is covered in them — but there are far more eigenstates than pixels, so they have to cluster. I wanted the map to show the clustering.
+
+The trick I landed on is almost embarrassingly simple once you see it. The fourteen quark states are really four families: $|q| = 1, 2, 3, 4$. A $-2/3$ wave and a $+2/3$ wave are the same shape, because $\cos(q\theta)$ doesn't care about the sign — so the sign carries no new information, and the fourteen collapse to four. And the collapse is exact, not an approximation: nothing is lost in the grouping.
+
+So every eigenstate belongs to a family, and its fractional weight gets added to that family's running total. Each new eigenstate enters weaker than the last — the same $1/\sqrt{k}$ falloff the surface already used, where every doubling of the eigenstate count adds the same amount of structure — scaled by how abundant its family is. This is the weighting I was reaching for when I first described the idea: new combinations arrive with a fractional weight set by their parents' abundance and their entropy level, and the late arrivals are small. I had wondered whether it should scale like a logarithm; the $1/\sqrt{k}$ the model already had does the job, and I didn't want to invent a second rule.
+
+Then each point on the map asks one question: of the four families interfering here, which one am I most made of? The pixel takes that family's color — blue for $1/3$, red for $2/3$, green for $1$, yellow for $4/3$ — and the brightness carries the wave amplitude, fading toward white where the wave goes quiet. Eigenstates that never win a point never appear. That is the clustering: thousands of eigenstates collapsing into four colored territories, each pixel wearing the color of its dominant family.
+
+What I see when I drag the entropy slider now is the territories shifting. At low entropy a few loud early eigenstates own huge regions; as entropy climbs, the later, weaker ones carve the territories into finer filaments — the rare $4/3$ yellows show up in thin threads where they can. The exact borders are different on every page load, because the dice are re-rolled each visit, but the *behavior* is always the same: more entropy, more eigenstates, finer structure. It feels like watching the resonator learn new overtones.
+
+Two smaller changes came along with this one: the entropy slider now runs to a million ($N$ reaches $20{,}001$ eigenstates), and the amplitude slider starts at its maximum, since that was where I kept putting it anyway. The 3D surface itself is untouched — same wave, same math, just fast enough now that twenty thousand eigenstates don't slow it down.

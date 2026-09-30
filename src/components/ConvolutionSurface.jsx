@@ -15,13 +15,15 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
    Axes are wavelength (X: λ / −λ), velocity (Y: v / −v, vertical), and the
    imaginary wavelength axis (Z: iλ / −iλ) — the phase angle is read from it.
    The wave's angle θ is measured in the λ–v plane.
-   Entropy s in [0,100000]: s = 0 is a single point; the sphere scales very slowly as R = s/100000. */
+   Entropy s in [0,1000000]: s = 0 is a single point; the sphere scales very
+   slowly as R = min(s/100000, 1) — past s = 100000 it holds unit size and
+   only the eigenstate count keeps growing. */
 
 const D2R = Math.PI / 180
 const TAU = Math.PI * 2
 const AXIS_LEN = 1.32 // axes reach just past the max sphere (radius 1)
 const GOLD = 0xd9a441
-export const MAX_STATES = 2000
+export const MAX_STATES = 20001
 
 function makeLabel(text) {
   const c = document.createElement('canvas')
@@ -126,10 +128,14 @@ export function foldTheta(theta) {
   return [t, s]
 }
 
-// raw signed wave sum at folded angle t (no fold, no floor) — the shared
-// core used by the 3D surface and the flat map
-export function waveSum(t, a, N) {
-  let w = 0
+// Grouped fundamental coefficients: |q_k| only takes the values 1..4 and
+// cos is even, so the whole eigenstate sum is EXACTLY
+//   w(t) = C_1·cos(t) + C_2·cos(2t) + C_3·cos(3t) + C_4·cos(4t)
+// with C_f = Σ_{k<N, |q_k|=f} m_k·σ_k·a/√(k+1) — every eigenstate's 1/√k
+// fractional weight clustered into its fundamental. One O(N) pass replaces
+// N cosines per evaluation, which is what keeps N = 20001 instant.
+export function waveCoeffs(N, a) {
+  const C = [0, 0, 0, 0, 0] // 1-indexed by |q|
   const n = Math.min(N, QUARK_TERMS.length)
   for (let k = 0; k < n; k++) {
     // fixed +/-1 sign pattern (golden-ratio bits): spreads the peaks around
@@ -137,14 +143,33 @@ export function waveSum(t, a, N) {
     // left-right symmetry (unlike a phase shift)
     const sgn = (Math.floor((k + 1) * SGN_GAMMA) % 2 === 0) ? 1 : -1
     const term = QUARK_TERMS[k]
-    w += term.m * (a / Math.sqrt(k + 1)) * sgn * Math.cos(term.q * t)
+    C[Math.abs(term.q)] += term.m * sgn * (a / Math.sqrt(k + 1))
   }
-  return w
+  return C
+}
+
+// 4-cosine evaluation of precomputed coefficients — the fast path for
+// per-vertex / per-pixel work
+export function waveSumFast(t, C) {
+  return C[1] * Math.cos(t) + C[2] * Math.cos(2 * t)
+       + C[3] * Math.cos(3 * t) + C[4] * Math.cos(4 * t)
+}
+
+// raw signed wave sum at folded angle t (no fold, no floor) — the shared
+// core used by the readouts and the arrow (a few calls per render)
+export function waveSum(t, a, N) {
+  return waveSumFast(t, waveCoeffs(N, a))
 }
 
 export function surfU(theta, a, N) {
   const [t, s] = foldTheta(theta)
   return Math.max(1 + s * waveSum(t, a, N), 0.05)
+}
+
+// fast surfU against precomputed coefficients — the per-vertex path
+export function surfUFast(theta, C) {
+  const [t, s] = foldTheta(theta)
+  return Math.max(1 + s * waveSumFast(t, C), 0.05)
 }
 
 // i-th point of an n-point Fibonacci lattice on a sphere of radius r
@@ -315,8 +340,9 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
   useEffect(() => {
     const api = apiRef.current
     if (!api) return
-    const R = Math.max(entropy, 0) / 100000
+    const R = Math.min(Math.max(entropy, 0) / 100000, 1)
     const N = Math.min(1 + Math.round(entropy / 50), MAX_STATES)
+    const C = waveCoeffs(N, waveAmp) // one O(N) pass; vertices evaluate 4 cosines
     const { sphere, wire, points, basePos } = api
 
     // displace the unit-sphere vertices radially by the wave and tint by
@@ -330,7 +356,7 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
       const x = basePos[i * 3], y = basePos[i * 3 + 1], z = basePos[i * 3 + 2]
       // θ measured from +λ in the λ–v plane (+λ is at −X since the swap)
       const th = Math.atan2(y, -x)
-      const r = surfU(th, waveAmp, N)
+      const r = surfUFast(th, C)
       radii[i] = r
       if (r < rMin) rMin = r
       if (r > rMax) rMax = r
@@ -362,7 +388,7 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
       for (let i = 0; i < n; i++) {
         fibPoint(i, n, 1, v)
         const th = Math.atan2(v.y, -v.x)
-        const rl = R * surfU(th, waveAmp, N)
+        const rl = R * surfUFast(th, C)
         attr.setXYZ(i, v.x * rl, v.y * rl, v.z * rl)
       }
     }
@@ -377,7 +403,7 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
   useEffect(() => {
     const api = apiRef.current
     if (!api) return
-    const R = Math.max(entropy, 0) / 100000
+    const R = Math.min(Math.max(entropy, 0) / 100000, 1)
     const N = Math.min(1 + Math.round(entropy / 50), MAX_STATES)
     const { arrow, shaft, head, UP } = api
 
