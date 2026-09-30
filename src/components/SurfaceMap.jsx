@@ -7,7 +7,7 @@ import { surfU } from './ConvolutionSurface.jsx'
    The τ1/τ2 controls move a yellow dot: the arrow's position on the map. */
 
 const MAX_STATES = 320
-const W = 180, H = 360
+const W = 256, H = 256
 
 function colorFor(t) {
   // diverging scale: valley red -> warm neutral -> peak green
