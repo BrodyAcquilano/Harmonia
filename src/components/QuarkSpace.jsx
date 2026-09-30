@@ -184,12 +184,11 @@ export default function QuarkSpace() {
               waveAmp={waveAmp}
             />
             <p className="graph-note">
-              The surface unfolded flat — −λ left, iλ center, λ right (the +λ half;
-              the −λ half is its 180° opposite). Rows build the wave up: the top row
-              is the first eigenstate alone, each row down adds the next frequency,
-              the bottom row is the full wave — so more entropy visibly enriches it.
-              Green peaks, red valleys. The yellow dot sits on the bottom row at the
-              θ the arrow reads, moved by τ1.
+              The wave unfolded flat, like unraveling the globe — θ runs −λ left,
+              iλ center, λ right (the +λ half; the −λ half is its 180° opposite),
+              and each row rotates the wave by the τ2 phase: the middle row is the
+              base wave (τ2 = 0), −90° at the bottom, +90° at the top.
+              Green peaks, red valleys. The yellow dot marks the arrow's (τ1, τ2).
             </p>
           </div>
 

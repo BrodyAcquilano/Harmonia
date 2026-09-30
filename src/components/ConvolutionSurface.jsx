@@ -95,24 +95,38 @@ export const QUARK_FREQS = buildQuarkFreqs(MAX_STATES, (Math.random() * 0xFFFFFF
 // (|θ| > π/2) is the 180° phase-shifted opposite of the +λ half: −λ gives
 // −f. No absolute value — the surface dents inward where the wave goes
 // negative; the 0.05 floor only stops the mesh turning inside-out.
-export function surfU(theta, a, N) {
-  const gamma = 0.618033988749895 // (sqrt(5)-1)/2
+const SGN_GAMMA = 0.618033988749895 // (sqrt(5)-1)/2
+
+// fold θ onto the +λ half: returns [t, s] with t in [-π/2, π/2], s = -1 on
+// the −λ half (the 180° phase-shifted opposite)
+export function foldTheta(theta) {
   let t = theta % TAU
   if (t > Math.PI) t -= TAU
   else if (t < -Math.PI) t += TAU
   let s = 1
   if (t > Math.PI / 2) { t -= Math.PI; s = -1 }
   else if (t < -Math.PI / 2) { t += Math.PI; s = -1 }
+  return [t, s]
+}
+
+// raw signed wave sum at folded angle t (no fold, no floor) — the shared
+// core used by the 3D surface and the flat map
+export function waveSum(t, a, N) {
   let w = 0
   const n = Math.min(N, QUARK_FREQS.length)
   for (let k = 0; k < n; k++) {
     // fixed +/-1 sign pattern (golden-ratio bits): spreads the peaks around
     // the circle instead of piling them at th = 0, while keeping perfect
     // left-right symmetry (unlike a phase shift)
-    const sgn = (Math.floor((k + 1) * gamma) % 2 === 0) ? 1 : -1
+    const sgn = (Math.floor((k + 1) * SGN_GAMMA) % 2 === 0) ? 1 : -1
     w += (a / Math.sqrt(k + 1)) * sgn * Math.cos(QUARK_FREQS[k] * t)
   }
-  return Math.max(1 + s * w, 0.05)
+  return w
+}
+
+export function surfU(theta, a, N) {
+  const [t, s] = foldTheta(theta)
+  return Math.max(1 + s * waveSum(t, a, N), 0.05)
 }
 
 // i-th point of an n-point Fibonacci lattice on a sphere of radius r
