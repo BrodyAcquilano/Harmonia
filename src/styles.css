@@ -1175,7 +1175,7 @@ body {
 .surface-map-canvas {
   display: block;
   width: 100%;
-  aspect-ratio: 2 / 1;
+  aspect-ratio: 1 / 2;
   border-radius: 10px;
 }
 

@@ -183,7 +183,7 @@ export default function QuarkSpace() {
               waveAmp={waveAmp} waveN={waveN}
             />
             <p className="graph-note">
-              The surface unfolded flat — θ across, φ vertical. Green peaks, red valleys.
+              The surface unfolded flat — τ2 across, τ1 vertical. Green peaks, red valleys.
               The yellow dot is the arrow's position, moved by τ1 and τ2.
             </p>
           </div>

@@ -2,12 +2,12 @@ import { useEffect, useRef } from 'react'
 import { surfU } from './ConvolutionSurface.jsx'
 
 /* Flat projection of the convolution surface: the sphere unfolded onto a
-   θ–φ map (θ across, φ vertical), like unfolding a globe. Peaks are green,
+   τ2–τ1 map (τ2 across, τ1 vertical, matching the sphere). Peaks are green,
    valleys are red — full color, since the gold arrow isn't drawn here.
    The τ1/τ2 controls move a yellow dot: the arrow's position on the map. */
 
 const MAX_STATES = 320
-const W = 360, H = 180
+const W = 180, H = 360
 
 function colorFor(t) {
   // diverging scale: valley red -> warm neutral -> peak green
@@ -40,10 +40,10 @@ export default function SurfaceMap({ entropy, tau1, tau2, waveAmp = 0.04, waveN 
     const us = new Float32Array(W * H)
     let uMin = Infinity, uMax = -Infinity
     for (let iy = 0; iy < H; iy++) {
-      const phi = (0.5 - (iy + 0.5) / H) * Math.PI // +90° top .. -90° bottom
+      const t1 = (0.5 - (iy + 0.5) / H) * 2 * Math.PI // τ1: +180° top .. -180° bottom
       for (let ix = 0; ix < W; ix++) {
-        const theta = ((ix + 0.5) / W - 0.5) * 2 * Math.PI // -180° .. 180°
-        const u = surfU(theta, phi, waveAmp, waveN, N)
+        const t2 = ((ix + 0.5) / W - 0.5) * Math.PI // τ2: -90° .. 90° across
+        const u = surfU(t1, t2, waveAmp, waveN, N)
         us[iy * W + ix] = u
         if (u < uMin) uMin = u
         if (u > uMax) uMax = u
@@ -64,8 +64,8 @@ export default function SurfaceMap({ entropy, tau1, tau2, waveAmp = 0.04, waveN 
     ctx.putImageData(img, 0, 0)
 
     // yellow dot: the arrow's position, moved by τ1/τ2
-    const dx = ((tau1 + 180) / 360) * W
-    const dy = ((90 - tau2) / 180) * H
+    const dx = ((tau2 + 90) / 180) * W
+    const dy = ((180 - tau1) / 360) * H
     ctx.beginPath()
     ctx.arc(dx, dy, 7, 0, 2 * Math.PI)
     ctx.fillStyle = '#f2c230'
