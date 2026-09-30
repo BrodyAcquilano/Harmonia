@@ -6,8 +6,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
    τ1 is the frequency of the mass wave; τ2 is the amount the energy wave is
    rotated by the phasor, from its default of 180° out of phase. At τ2 = 0 the
    two waves cancel and the surface is uniform — the 1:1 version.
-   Axes are wavelength (X: λ / −λ), velocity (Y: v / −v, vertical), and phase
-   (Z: φ / −φ). The wave's angle θ is measured in the λ–v plane.
+   Axes are wavelength (X: λ / −λ), velocity (Y: v / −v, vertical), and the
+   imaginary unit (Z: i / −i). The wave's angle θ is measured in the λ–v plane.
    Entropy s in [0,1]: s = 0 is a single point, s = 1 fills the viewport. */
 
 const D2R = Math.PI / 180
@@ -82,11 +82,11 @@ export default function ConvolutionSurface({ entropy, tau1, tau2, waveAmp = 0.04
     scene.add(sun)
 
     // coordinate axes: wavelength X (λ / −λ), velocity Y (v / −v, vertical),
-    // phase Z (φ / −φ)
+    // imaginary unit Z (i / −i)
     const axes = [
       { ax: 'x', color: 0xc0563f, plus: 'λ', minus: '−λ' },
       { ax: 'y', color: 0x2e8b6e, plus: 'v', minus: '−v' },
-      { ax: 'z', color: 0x3f6fb5, plus: 'φ', minus: '−φ' },
+      { ax: 'z', color: 0x3f6fb5, plus: 'i', minus: '−i' },
     ]
     axes.forEach(({ ax, color, plus, minus }) => {
       const g = new THREE.BufferGeometry()

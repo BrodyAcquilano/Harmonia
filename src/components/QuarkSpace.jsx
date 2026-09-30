@@ -10,8 +10,8 @@ import ConvolutionSurface, { surfU } from './ConvolutionSurface.jsx'
    wave; τ2 is the amount the energy wave is rotated by the phasor, from its
    default of 180° out of phase. When mass is high energy is low, and when
    mass is low energy is high. The axes are wavelength (λ / −λ), velocity
-   (v / −v, vertical), and phase (φ / −φ). Entropy grows the surface from a
-   point — higher entropy, more eigenstates. */
+   (v / −v, vertical), and the imaginary unit (i / −i). Entropy grows the
+   surface from a point — higher entropy, more eigenstates. */
 
 const D2R = Math.PI / 180
 
@@ -81,20 +81,28 @@ export default function QuarkSpace() {
                 mass and creates gravitational waves — motion.
               </p>
               <p>
-                The convolution surface carries the mass wave and the energy wave
-                together — two things: the frequency of the mass wave, and the phase
-                of the energy wave. τ1 is the frequency of the mass wave; τ2 is the
-                phase of the energy wave, the amount it is rotated by the phasor from
-                its default of 180° out of phase. When mass is high, energy is low;
-                when mass is low, energy is high — mass running high shows as green
-                spots on the surface, energy pooling in the red lows. At τ2 = 0 the
-                two waves cancel and the surface is uniform: the 1:1 version.
+                The convolution follows specific rules. Energy and mass are convolved,
+                typically in a 1:1 ratio — the energy wave is the mass wave shifted
+                180° out of phase, a rotation by i². There are different ways to
+                describe it, but ultimately an eigenstate needs three spatial
+                coordinates or two of time.
               </p>
               <p>
-                Each point of the convolution surface is an eigenstate, with its
-                direction given on the three axes: wavelength λ, velocity v, and
-                phase φ. Entropy grows the surface from a single point: higher
-                entropy, more eigenstates.
+                The three of space are wavelength, phase angle, and velocity: λ on
+                the red axis, phase — rotation by i — on the blue, velocity v on the
+                green. The velocity gives the frequency, relating ω to k; from the
+                frequency we get E = hf, and from the energy E = mc² gives the mass.
+                The velocity is what relates mass to energy.
+                The two of time are the frequency of the mass wave (τ1) and the phase
+                angle the energy wave is rotated by (τ2). The three spatial coordinates
+                relate the volume inside the sphere to its surface, and the two of time
+                give all the possible values on the surface — two of time, three of
+                space, the way Kepler's T² ∝ a³ counts them. So an eigenstate can be
+                defined either way.
+                When mass is high, energy is low; when mass is low, energy is high —
+                mass running high shows as green spots on the surface, energy pooling
+                in the red lows. Entropy grows the surface from a single point:
+                higher entropy, more eigenstates.
               </p>
               <p>
                 The big bang was not the moment all matter was a single point — it was
@@ -146,7 +154,7 @@ export default function QuarkSpace() {
           </div>
 
           <div className="control-group">
-            <h3>τ2 — energy phasor</h3>
+            <h3>τ2 — energy wave phase</h3>
             <Slider label="τ2" value={tau2} min={-180} max={180} step={1}
               onChange={setTau2} format={(v) => `${v.toFixed(0)}°`} />
             <p className="graph-note">Rotation of the energy wave from 180° out of phase. At 0° the waves cancel.</p>
@@ -177,7 +185,7 @@ export default function QuarkSpace() {
             <div className="readout">
               <Row k="λ" v={fmt(A)} />
               <Row k="v" v={fmt(0)} />
-              <Row k="φ" v={fmt(0)} />
+              <Row k="i" v={fmt(0)} />
               <Row k="|λ|" v={fmt(A)} />
             </div>
           </div>
