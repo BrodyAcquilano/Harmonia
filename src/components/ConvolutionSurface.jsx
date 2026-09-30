@@ -21,7 +21,7 @@ const D2R = Math.PI / 180
 const TAU = Math.PI * 2
 const AXIS_LEN = 1.32 // axes reach just past the max sphere (radius 1)
 const GOLD = 0xd9a441
-const MAX_STATES = 320
+export const MAX_STATES = 2000
 
 function makeLabel(text) {
   const c = document.createElement('canvas')
@@ -42,8 +42,8 @@ function makeLabel(text) {
   return sp
 }
 
-// Deterministic pseudo-random generator (mulberry32): the frequency chain is
-// random-looking but stable — a given entropy always builds the same surface.
+// Pseudo-random generator (mulberry32) for the frequency chain — seeded fresh
+// on every page load, so each visit gets a new set of random frequencies.
 function mulberry32(seed) {
   let t = seed >>> 0
   return function () {
@@ -58,8 +58,8 @@ function mulberry32(seed) {
 // -1/3·f_q are the integers 2 and -1. Integer values keep every cos(q·θ)
 // seamless around the sphere (no branch-cut crack). Each new frequency is a
 // random sum or difference of two earlier ones: newer combinations built from
-// old ones, deduplicated, never zero. The chain is built once; entropy only
-// decides how many of its frequencies are active.
+// old ones, deduplicated, never zero. The chain is built once per page load;
+// entropy only decides how many of its frequencies are active.
 function buildQuarkFreqs(count, seed = 20260930) {
   const qs = [2, -1]
   const seen = new Set([2, 1])
@@ -80,13 +80,18 @@ function buildQuarkFreqs(count, seed = 20260930) {
   return qs
 }
 
-export const QUARK_FREQS = buildQuarkFreqs(MAX_STATES)
+// Fresh random chain on every page load: within a session a given entropy
+// always builds the same surface (no flicker while dragging the slider),
+// but each visit gets a new set of frequencies.
+export const QUARK_FREQS = buildQuarkFreqs(MAX_STATES, (Math.random() * 0xFFFFFFFF) >>> 0)
 
 // unit-surface multiplier on the sphere: the 1:1 sphere plus one mass wave
 // per eigenstate. θ is the angle from +λ in the λ–v plane. The k-th
 // eigenstate adds frequency q_k·(f_q/3) from the combination chain above;
-// amplitudes fall as 1/k — newer combinations are weaker — so the sum stays
-// bounded. Energy is the inverse, E = 1/u — the 180° partner. The −λ half
+// amplitudes fall as 1/√k — newer combinations are weaker, but every doubling
+// of the eigenstate count adds the same visible structure (pink-noise
+// spectrum), so raising entropy always reshapes the surface. Energy is the
+// inverse, E = 1/u — the 180° partner. The −λ half
 // (|θ| > π/2) is the 180° phase-shifted opposite of the +λ half: −λ gives
 // −f. No absolute value — the surface dents inward where the wave goes
 // negative; the 0.05 floor only stops the mesh turning inside-out.
@@ -105,7 +110,7 @@ export function surfU(theta, a, N) {
     // the circle instead of piling them at th = 0, while keeping perfect
     // left-right symmetry (unlike a phase shift)
     const sgn = (Math.floor((k + 1) * gamma) % 2 === 0) ? 1 : -1
-    w += (a / (k + 1)) * sgn * Math.cos(QUARK_FREQS[k] * t)
+    w += (a / Math.sqrt(k + 1)) * sgn * Math.cos(QUARK_FREQS[k] * t)
   }
   return Math.max(1 + s * w, 0.05)
 }
@@ -274,13 +279,13 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
     }
   }, [])
 
-  // ---- per-prop update: entropy / wave / arrow ----
+  // ---- surface rebuild: entropy / wave reshape the sphere (not the arrow) ----
   useEffect(() => {
     const api = apiRef.current
     if (!api) return
     const R = Math.max(entropy, 0) / 100000
-    const N = Math.min(1 + Math.round(27 * Math.log(1 + entropy)), MAX_STATES)
-    const { sphere, wire, points, arrow, shaft, head, UP, basePos } = api
+    const N = Math.min(1 + Math.round(entropy / 50), MAX_STATES)
+    const { sphere, wire, points, basePos } = api
 
     // displace the unit-sphere vertices radially by the wave and tint by
     // amplitude (green = mass high, red = energy low)
@@ -313,7 +318,7 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
     sphere.scale.setScalar(Math.max(R, 1e-4))
     wire.scale.setScalar(Math.max(R, 1e-4))
 
-    // eigenstates: one point at s = 0, up to 320 at s = 1, riding the surface
+    // eigenstates: one point at s = 0, up to MAX_STATES at max entropy, riding the surface
     const attr = points.geometry.attributes.position
     const v = new THREE.Vector3()
     let n
@@ -333,8 +338,17 @@ export default function ConvolutionSurface({ entropy, tau1 = 0, tau2 = 0, waveAm
     points.geometry.setDrawRange(0, n)
     points.geometry.computeBoundingSphere()
 
-    // the eigenvector: τ1/τ2 are angles that move the arrow to the point
-    // where the values are read; the labels name the axes
+  }, [entropy, waveAmp])
+
+  // ---- arrow: τ1/τ2 move it to the point where the values are read, without
+  // ---- rebuilding the surface (the labels name the axes)
+  useEffect(() => {
+    const api = apiRef.current
+    if (!api) return
+    const R = Math.max(entropy, 0) / 100000
+    const N = Math.min(1 + Math.round(entropy / 50), MAX_STATES)
+    const { arrow, shaft, head, UP } = api
+
     const TH = tau1 * D2R, PH = tau2 * D2R
     const u0 = surfU(TH, waveAmp, N)
     const rl = R * u0

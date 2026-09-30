@@ -61,7 +61,7 @@ export default function QuarkSpace() {
   // the eigenstate count sets the surface wave number: N points on a sphere
   // resolve wave numbers up to ~√N, so the wave varies at the finest scale
   // the eigenstates can resolve
-  const nStates = 1 + Math.round(27 * Math.log(1 + entropy))
+  const nStates = Math.min(1 + Math.round(entropy / 50), QUARK_FREQS.length)
   const th = tau1 * D2R, ph = tau2 * D2R
   const u0 = surfU(th, waveAmp, nStates)
   const A = R * u0
@@ -73,10 +73,10 @@ export default function QuarkSpace() {
   const ilam = A * Math.sin(ph)
   // first few frequencies of the combination chain, for the equation box
   const firstTerms = QUARK_FREQS.slice(0, 8).join(', ')
-  // harmonic bound of the eigenstate sum: Σ a/k
+  // typical (rms) roughness of the 1/√k eigenstate sum: a·√(Σ 1/k)
   let hN = 0
   for (let j = 1; j <= nStates; j++) hN += 1 / j
-  const bound = waveAmp * hN
+  const bound = waveAmp * Math.sqrt(hN)
 
   const volume = (4 / 3) * Math.PI * R ** 3
   const area = 4 * Math.PI * R ** 2
@@ -254,7 +254,7 @@ export default function QuarkSpace() {
               </div>
               <div className="eq-box">
                 <span className="eq-label">Convolution surface — one wave per eigenstate</span>
-                <span className="eq-line"><Tex tex="u = 1 + \sum_{k=1}^{N(s)} \frac{a}{k}\sigma_k\cos(q_k\theta)" /></span>
+                <span className="eq-line"><Tex tex="u = 1 + \sum_{k=1}^{N(s)} \frac{a}{\sqrt{k}}\sigma_k\cos(q_k\theta)" /></span>
                 <span className="eq-line"><Tex tex="q_1 = 2,\, q_2 = -1 \text{ — the seeds } \frac{2}{3}f_q, -\frac{1}{3}f_q" /></span>
                 <span className="eq-line"><Tex tex="q_k = q_i \pm q_j \text{ — each new frequency a random sum/difference of two earlier ones}" /></span>
                 <span className="eq-line"><Tex tex="\sigma_k = \pm 1 \text{ — fixed signs spread the peaks, left mirrors right}" /></span>
@@ -262,7 +262,7 @@ export default function QuarkSpace() {
                 <span className="eq-line"><Tex tex="\theta\text{ — angle from } +\lambda\text{ in the }\lambda\text{–}v\text{ plane}" />
                 <span className="eq-line"><Tex tex="w(\theta + \pi) = -w(\theta)\text{ — the } -\lambda\text{ half is the } 180^\circ\text{ phase-shifted opposite}" /></span></span>
                 <span className="eq-line"><Tex tex="v = f_j\lambda_j = 2\pi f_q \text{ — one wave speed for all eigenstates}" /></span>
-                <span className="eq-line"><Tex tex="N(s) = 1 + 27\,\ln(1 + s) \text{ — entropy sets the eigenstate count}" /></span>
+                <span className="eq-line"><Tex tex="N(s) = 1 + \dfrac{s}{50} \text{ — entropy sets the eigenstate count}" /></span>
                 <span className="eq-line"><Tex tex="r = R\,u, \quad R = \dfrac{s}{100000}, \quad m = u, \quad E = \dfrac{1}{u}" /></span>
               </div>
               <div className="eq-box">
@@ -274,7 +274,7 @@ export default function QuarkSpace() {
               <div className="eq-box">
                 <span className="eq-label">Entropy</span>
                 <span className="eq-line"><Tex tex="S = k_B \ln \Omega" /></span>
-                <span className="eq-line"><Tex tex="R = \dfrac{s}{100000}, \quad N = 1 + 27\,\ln(1 + s)" /></span>
+                <span className="eq-line"><Tex tex="R = \dfrac{s}{100000}, \quad N = 1 + \dfrac{s}{50}" /></span>
                 <span className="eq-line"><Tex tex="\text{entropy grows the radius and the eigenstate count}" /></span>
               </div>
               <div className="eq-box">
@@ -314,8 +314,8 @@ export default function QuarkSpace() {
             <Slider label="a" value={waveAmp} min={0} max={0.2} step={0.01}
               onChange={setWaveAmp} format={(v) => v.toFixed(2)} />
             <p className="graph-note">
-              Surface u/R range: 1.00 – {(1 + bound).toFixed(2)} (outward only).
-              One wave per eigenstate at amplitude a/k — newer combinations weaker. Frequencies are a random
+              Surface u/R, typical range: 1 ± {bound.toFixed(2)}.
+              One wave per eigenstate at amplitude a/√k — newer combinations weaker, but every doubling of the eigenstate count adds as much visible structure as the last. Frequencies are a random
               combination chain from the 2/3, −1/3 seeds. No absolute value — the −λ half is the negated +λ half (180° phase shift), so the surface dents inward where the wave goes negative.
             </p>
           </div>

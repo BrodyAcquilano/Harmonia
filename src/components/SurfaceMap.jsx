@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { surfU } from './ConvolutionSurface.jsx'
+import { surfU, MAX_STATES } from './ConvolutionSurface.jsx'
 
 /* Flat projection of the convolution surface: half unfolding — the
    horizontal runs from −λ (left) through iλ (center) to +λ (right), the +λ
@@ -9,7 +9,6 @@ import { surfU } from './ConvolutionSurface.jsx'
    isn't drawn here. The τ1/τ2 controls move a yellow dot: the arrow's
    position on the map (|τ1| folds onto the half shown). */
 
-const MAX_STATES = 320
 const W = 360, H = 180
 
 function colorFor(t) {
@@ -38,20 +37,22 @@ export default function SurfaceMap({ entropy, tau1, tau2, waveAmp = 0.04 }) {
     canvas.width = W
     canvas.height = H
     const ctx = canvas.getContext('2d')
-    const N = Math.min(1 + Math.round(entropy * 3), MAX_STATES)
+    const N = Math.min(1 + Math.round(entropy / 50), MAX_STATES)
 
-    const us = new Float32Array(W * H)
+    // the wave is identical in every row (τ2 only moves the dot), so compute
+    // one column once and copy it down — same pixels, far less work
+    const colU = new Float32Array(W)
     let uMin = Infinity, uMax = -Infinity
-    for (let iy = 0; iy < H; iy++) {
-      const t2 = (0.5 - (iy + 0.5) / H) * Math.PI // τ2: +90° top .. -90° bottom
-      for (let ix = 0; ix < W; ix++) {
-        const t1 = Math.PI * (1 - (ix + 0.5) / W) // −λ at left .. +λ at right, iλ center
-        const u = surfU(t1, waveAmp, N)
-        us[iy * W + ix] = u
-        if (u < uMin) uMin = u
-        if (u > uMax) uMax = u
-      }
+    for (let ix = 0; ix < W; ix++) {
+      const t1 = Math.PI * (1 - (ix + 0.5) / W) // −λ at left .. +λ at right, iλ center
+      const u = surfU(t1, waveAmp, N)
+      colU[ix] = u
+      if (u < uMin) uMin = u
+      if (u > uMax) uMax = u
     }
+    const us = new Float32Array(W * H)
+    for (let iy = 0; iy < H; iy++)
+      for (let ix = 0; ix < W; ix++) us[iy * W + ix] = colU[ix]
 
     const img = ctx.createImageData(W, H)
     const d = img.data
