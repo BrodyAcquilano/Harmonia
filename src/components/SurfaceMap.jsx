@@ -1,11 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { surfU } from './ConvolutionSurface.jsx'
 
-/* Flat projection of the convolution surface: standard unfolding — τ1 runs
-   horizontally around the full circle (0 to 2π), τ2 runs vertically pole to
-   pole. Peaks are green, valleys are red — full color, since the gold arrow
-   isn't drawn here. The τ1/τ2 controls move a yellow dot: the arrow's
-   position on the map. */
+/* Flat unfolding of the vase: θ runs horizontally around the full circle
+   (0 to 2π: λ → iλ → −λ → −iλ), v runs vertically (−c to +c). Peaks are
+   green, valleys are red — full color, since the gold arrow isn't drawn
+   here. The τ1/τ2 controls move a yellow dot: the arrow's position. */
 
 const MAX_STATES = 320
 const W = 360, H = 180
@@ -41,10 +40,10 @@ export default function SurfaceMap({ entropy, tau1, tau2, waveAmp = 0.04 }) {
     const us = new Float32Array(W * H)
     let uMin = Infinity, uMax = -Infinity
     for (let iy = 0; iy < H; iy++) {
-      const t2 = (0.5 - (iy + 0.5) / H) * Math.PI // τ2: +90° top .. -90° bottom
+      const vf = Math.abs(1 - ((iy + 0.5) / H) * 2) // |v|/c: 0 at equator, 1 at ±c
       for (let ix = 0; ix < W; ix++) {
-        const t1 = ((ix + 0.5) / W - 0.5) * 2 * Math.PI // τ1: full circle across
-        const u = surfU(t1, waveAmp, N)
+        const t1 = ((ix + 0.5) / W) * 2 * Math.PI // θ: 0..2π across (λ → iλ → −λ → −iλ)
+        const u = surfU(t1, vf, waveAmp, N)
         us[iy * W + ix] = u
         if (u < uMin) uMin = u
         if (u > uMax) uMax = u
@@ -65,7 +64,7 @@ export default function SurfaceMap({ entropy, tau1, tau2, waveAmp = 0.04 }) {
     ctx.putImageData(img, 0, 0)
 
     // yellow dot: the arrow's position, moved by τ1/τ2
-    const dx = ((tau1 + 180) / 360) * W
+    const dx = ((((tau1 % 360) + 360) % 360) / 360) * W
     const dy = ((90 - tau2) / 180) * H
     ctx.beginPath()
     ctx.arc(dx, dy, 7, 0, 2 * Math.PI)
