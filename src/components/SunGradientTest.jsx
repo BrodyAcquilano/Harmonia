@@ -208,6 +208,134 @@ function resetSurface(P, mode, sCount) {
   }
 }
 
+// ---- the fifth graph: the sun that forgets ----
+// No hand-assigned birth radii this time. All four quark frequencies are
+// born at the same place — the core — and whatever sorting happens (or
+// doesn't) comes only from honest structure and honest opacity:
+//
+// structure — the Lane-Emden n=3 polytrope (the Eddington standard
+//   model), integrated live below: no tables, no fits. θ(0) = 1,
+//   θ′(0) = 0, dθ/dξ = −φ/ξ², dφ/dξ = ξ²θ³; ρ = ρ_c·θ³, T = T_c·θ.
+//
+// opacity — Kramers (free-free + bound-free) + Thomson. Kramers has the
+//   ν⁻³ shape, anchored so κ_ν equals the textbook Rosseland mean
+//   κ_R = 3.7e22·(1+X)·ρ·T^−3.5 (cgs, X = 0.7) at the Wien peak
+//   hν = 2.8kT; Thomson is 0.34 cm²/g, flat in frequency.
+//
+// A packet random-walks outward. One hop on screen (5% of the radius)
+// stands in for (hop/mean-free-path)² honest scatterings — the readout
+// shows that number, ~10²² down in the core. Compton thermalization
+// needs only ~m_e c²/kT ~ a few hundred of those, across centimeters,
+// so each hop the packet's frequency snaps to the local thermal peak
+// 2.8kT/h and rides it outward. Whether the four inputs stay resolved
+// is the experiment. The 5% hop is display coarse-graining, not physics,
+// and is labeled as such wherever it appears.
+const RHO_C = 150 // g/cm³ — standard solar model central density
+const R_CGS = 6.957e10 // cm
+const KAPPA_T = 0.34 // cm²/g — Thomson, fully-ionized solar mix, flat in ν
+const HOP_FRAC = 0.05 // display hop, fraction of R_☉ — coarse-graining
+
+function laneEmden() {
+  // integrate the Lane-Emden equation live; the surface is where θ = 0
+  const xs = [], ths = []
+  const h = 0.002
+  let x = 1e-6
+  let th = 1 - (x * x) / 6 // series start: θ ≈ 1 − ξ²/6
+  let ph = (x * x * x) / 3 // φ = −ξ²θ′ ≈ ξ³/3
+  for (let i = 0; i < 20000; i++) {
+    xs.push(x); ths.push(th)
+    const d = (xx, tt, pp) => [-pp / (xx * xx), xx * xx * tt * tt * tt]
+    const [a1, b1] = d(x, th, ph)
+    const [a2, b2] = d(x + h / 2, th + (h * a1) / 2, ph + (h * b1) / 2)
+    const [a3, b3] = d(x + h / 2, th + (h * a2) / 2, ph + (h * b2) / 2)
+    const [a4, b4] = d(x + h, th + h * a3, ph + h * b3)
+    th += (h * (a1 + 2 * a2 + 2 * a3 + a4)) / 6
+    ph += (h * (b1 + 2 * b2 + 2 * b3 + b4)) / 6
+    x += h
+    if (th <= 0) break
+  }
+  return { xs, ths, x1: x } // x1 ≈ 6.89685
+}
+const LE = laneEmden()
+function structOf(xf) {
+  // fractional radius → { rho in g/cm³, T in K }
+  const x = Math.min(0.9999, Math.max(0, xf)) * LE.x1
+  const { xs, ths } = LE
+  let lo = 0, hi = xs.length - 1
+  while (hi - lo > 1) {
+    const m = (lo + hi) >> 1
+    if (xs[m] <= x) lo = m
+    else hi = m
+  }
+  const f = (x - xs[lo]) / Math.max(xs[hi] - xs[lo], 1e-12)
+  const th = Math.max(ths[lo] + (ths[hi] - ths[lo]) * f, 0)
+  return { rho: RHO_C * th * th * th, T: Math.max(T_CORE * th, 1) }
+}
+function kappaNu(nu, rho, T) {
+  // Kramers ν⁻³ shape anchored at the Wien peak + flat Thomson
+  const kR = 3.7e22 * 1.7 * rho * Math.pow(T, -3.5)
+  const x = (H * nu) / (KB * T)
+  const xw = 2.8
+  const shape = Math.pow(xw / Math.max(x, 1e-9), 3)
+    * (1 - Math.exp(-Math.min(x, 60))) / (1 - Math.exp(-xw))
+  return kR * Math.min(shape, 1e9) + KAPPA_T
+}
+
+const FORGET_N = 48 // 12 packets per quark frequency
+function spawnForgetPacket(rng, band) {
+  // born at the core — the SAME place for all four frequencies.
+  // No assigned radii; whatever sorting happens is the physics'.
+  const r0 = 0.01 * SURF_R0
+  const th = rng() * Math.PI * 2
+  const ph = Math.acos(2 * rng() - 1)
+  return {
+    x: r0 * Math.sin(ph) * Math.cos(th),
+    y: r0 * Math.sin(ph) * Math.sin(th),
+    z: r0 * Math.cos(ph),
+    band,
+    nu: BANDS[band],
+    nscat: 0,
+  }
+}
+function freshForgetExperiment(entropy) {
+  const rng = mulberry32(Math.floor(entropy * 2654435761) % 4294967296)
+  const packets = []
+  for (let i = 0; i < FORGET_N; i++) packets.push(spawnForgetPacket(rng, i % 4))
+  return { t: 0, hopAcc: 0, packets, escapes: [0, 0, 0, 0], rng, version: 0 }
+}
+// one display hop for every packet: an honest 3D random-walk step of
+// HOP_FRAC·R_☉ — no outward drift smuggled in — standing in for
+// (hop/mean-free-path)² real scatterings, with the frequency snapped to
+// the local thermal peak (Compton thermalizes in ~10² scatterings over
+// centimeters, utterly negligible next to one hop's ~10²²)
+function hopForget(exp) {
+  const hopScene = HOP_FRAC * SURF_R0
+  const hopCm = HOP_FRAC * R_CGS
+  for (const p of exp.packets) {
+    const rScene = Math.sqrt(p.x * p.x + p.y * p.y + p.z * p.z)
+    const { rho, T } = structOf(rScene / SURF_R0)
+    const kap = kappaNu(p.nu, rho, T)
+    const l = 1 / Math.max(kap * rho, 1e-300) // cm
+    p.nscat = (hopCm / l) * (hopCm / l)
+    const th = exp.rng() * Math.PI * 2
+    const ph = Math.acos(2 * exp.rng() - 1)
+    let nx = p.x + hopScene * Math.sin(ph) * Math.cos(th)
+    let ny = p.y + hopScene * Math.sin(ph) * Math.sin(th)
+    let nz = p.z + hopScene * Math.cos(ph)
+    let nr = Math.sqrt(nx * nx + ny * ny + nz * nz)
+    if (nr < 1e-9) { nx = hopScene; ny = 0; nz = 0; nr = hopScene }
+    if (nr >= SURF_R0) {
+      exp.escapes[p.band] += 1
+      exp.version += 1
+      Object.assign(p, spawnForgetPacket(exp.rng, p.band))
+      continue
+    }
+    p.x = nx; p.y = ny; p.z = nz
+    const Tn = structOf(nr / SURF_R0).T
+    p.nu = (2.8 * KB * Tn) / H
+  }
+}
+
 function GradientSurface({ expRef, ctlRef, dirtyRef, mode = 'flash' }) {
   // mode: 'flash' (instantaneous), 'hold' (sample-and-hold mosaic),
   // 'thermal' (accumulates heat, cools between hits)
@@ -801,6 +929,196 @@ function LandingPanel({ expRef, playingRef }) {
   return <canvas ref={ref} style={{ display: 'block', width: '100%', height: 400 }} />
 }
 
+// ---- the fifth graph: watch the frequencies forget ----
+function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
+  const mountRef = useRef(null)
+  const trackRef = useRef(null)
+  const readRef = useRef(null)
+
+  useEffect(() => {
+    const S = setupScene(mountRef.current)
+    S.camDirty = false
+    S.controls.addEventListener('change', () => { S.camDirty = true })
+
+    // dim shell + wireframe: the packets live inside, so the skin stays
+    // out of the way
+    const shellGeo = new THREE.SphereGeometry(SURF_R0, 48, 32)
+    const shell = new THREE.Mesh(shellGeo,
+      new THREE.MeshBasicMaterial({ color: 0xd9a441, transparent: true, opacity: 0.07 }))
+    shell.frustumCulled = false
+    const wire = new THREE.Mesh(shellGeo,
+      new THREE.MeshBasicMaterial({ color: 0xb09a5e, wireframe: true, transparent: true, opacity: 0.08 }))
+    wire.frustumCulled = false
+    S.scene.add(shell, wire)
+
+    const posArr = new Float32Array(FORGET_N * 3)
+    const colArr = new Float32Array(FORGET_N * 3)
+    const pGeo = new THREE.BufferGeometry()
+    pGeo.setAttribute('position', new THREE.BufferAttribute(posArr, 3))
+    pGeo.setAttribute('color', new THREE.BufferAttribute(colArr, 3))
+    pGeo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 8)
+    const points = new THREE.Points(pGeo,
+      new THREE.PointsMaterial({ size: 0.11, vertexColors: true, transparent: true, opacity: 0.95, depthWrite: false }))
+    points.frustumCulled = false
+    S.scene.add(points)
+
+    const syncPoints = (exp) => {
+      for (let i = 0; i < FORGET_N; i++) {
+        const p = exp.packets[i]
+        posArr[i * 3] = p.x; posArr[i * 3 + 1] = p.y; posArr[i * 3 + 2] = p.z
+        const c = visibleColor(p.nu)
+        colArr[i * 3] = c[0] / 255; colArr[i * 3 + 1] = c[1] / 255; colArr[i * 3 + 2] = c[2] / 255
+      }
+      pGeo.attributes.position.needsUpdate = true
+      pGeo.attributes.color.needsUpdate = true
+    }
+
+    // the test result, drawn: log frequency against fractional radius.
+    // The gold curve is the local thermal peak 2.8kT/h from the
+    // Lane-Emden structure; the four colored dots are the quark
+    // frequencies at birth — all at the core — with their crash lines.
+    const BAND_COLS = ['#ff6b6b', '#ffa94d', '#69db7c', '#4dabf7']
+    const drawTrack = (exp) => {
+      const cv = trackRef.current
+      if (!cv || !cv.clientWidth) return
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const W = cv.clientWidth, Hh = cv.clientHeight
+      if (cv.width !== Math.round(W * dpr)) {
+        cv.width = Math.round(W * dpr)
+        cv.height = Math.round(Hh * dpr)
+      }
+      const ctx = cv.getContext('2d')
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      ctx.clearRect(0, 0, W, Hh)
+      const L0 = 14, L1 = 21
+      const X = (x) => 46 + x * (W - 62)
+      const Y = (l) => 12 + (1 - (l - L0) / (L1 - L0)) * (Hh - 44)
+      ctx.font = '11px sans-serif'
+      ctx.textAlign = 'left'
+      ctx.strokeStyle = 'rgba(120,90,40,.55)'
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(46, 12); ctx.lineTo(46, Hh - 32); ctx.lineTo(W - 16, Hh - 32)
+      ctx.stroke()
+      ctx.fillStyle = '#8a6d3b'
+      ctx.fillText('r / R☉', W - 52, Hh - 12)
+      ctx.save()
+      ctx.translate(13, Hh / 2); ctx.rotate(-Math.PI / 2)
+      ctx.textAlign = 'center'
+      ctx.fillText('log₁₀ ν (Hz)', 0, 0)
+      ctx.restore()
+      ctx.textAlign = 'left'
+      for (let l = L0; l <= L1; l++) {
+        ctx.fillStyle = 'rgba(138,109,59,.8)'
+        ctx.fillText(String(l), 30, Y(l) + 4)
+        ctx.strokeStyle = 'rgba(120,90,40,.18)'
+        ctx.beginPath(); ctx.moveTo(46, Y(l)); ctx.lineTo(W - 16, Y(l)); ctx.stroke()
+      }
+      ctx.strokeStyle = '#c9962e'
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      for (let i = 0; i <= 120; i++) {
+        const x = (i / 120) * 0.995
+        const { T } = structOf(x)
+        const l = Math.max(Math.log10((2.8 * KB * T) / H), L0)
+        const px = X(x), py = Y(l)
+        if (i) ctx.lineTo(px, py)
+        else ctx.moveTo(px, py)
+      }
+      ctx.stroke()
+      ctx.fillStyle = '#8a6d3b'
+      ctx.fillText('2.8kT/h — the thermal peak', X(0.55), Y(16.6))
+      const { T: Tc } = structOf(0.01)
+      const lw = Math.log10((2.8 * KB * Tc) / H)
+      for (let b = 0; b < 4; b++) {
+        const lb = Math.log10(BANDS[b])
+        ctx.strokeStyle = BAND_COLS[b]
+        ctx.setLineDash([4, 3])
+        ctx.beginPath(); ctx.moveTo(X(0.01), Y(lb)); ctx.lineTo(X(0.01), Y(lw)); ctx.stroke()
+        ctx.setLineDash([])
+        ctx.fillStyle = BAND_COLS[b]
+        ctx.beginPath(); ctx.arc(X(0.01), Y(lb), 4, 0, 7); ctx.fill()
+        ctx.fillText(BAND_NAMES[b], X(0.01) + 9, Y(lb) - 12 + b * 12)
+      }
+      ctx.fillStyle = '#8a6d3b'
+      ctx.fillText('born at the core — same place', X(0.01) + 9, Y(20.92))
+      for (let i = 0; i < Math.min(12, FORGET_N); i++) {
+        const p = exp.packets[i]
+        const r = Math.sqrt(p.x * p.x + p.y * p.y + p.z * p.z) / SURF_R0
+        ctx.fillStyle = BAND_COLS[p.band]
+        ctx.beginPath()
+        ctx.arc(X(Math.min(r, 1)), Y(Math.max(Math.log10(Math.max(p.nu, 1)), L0)), 3, 0, 7)
+        ctx.fill()
+      }
+    }
+
+    const readout = (exp) => {
+      if (!readRef.current) return
+      const p = exp.packets[0]
+      const r = Math.sqrt(p.x * p.x + p.y * p.y + p.z * p.z) / SURF_R0
+      const { T } = structOf(Math.min(r, 1))
+      const eV = (p.nu * H) / EV
+      const eVstr = eV >= 1000 ? (eV / 1000).toFixed(1) + ' keV' : eV.toFixed(2) + ' eV'
+      readRef.current.textContent =
+        'a packet now: r/R☉ = ' + r.toFixed(2) +
+        ' · T = ' + T.toExponential(1) + ' K' +
+        ' · hν = ' + eVstr +
+        ' · one hop ≈ ' + p.nscat.toExponential(0) + ' scatterings'
+    }
+
+    let raf = 0
+    let last = performance.now()
+    let seenDirty = 0
+    const loop = () => {
+      raf = requestAnimationFrame(loop)
+      const now = performance.now()
+      const dt = Math.min((now - last) / 1000, 0.1)
+      last = now
+      const ctl = ctlRef.current
+      const exp = expRef.current
+      if (ctl.playing) {
+        const sdt = dt * ctl.speed
+        exp.t += sdt
+        exp.hopAcc += sdt * 60
+        while (exp.hopAcc >= 1) { hopForget(exp); exp.hopAcc -= 1 }
+        syncPoints(exp)
+        drawTrack(exp)
+        readout(exp)
+        const n = exp.escapes[0] + exp.escapes[1] + exp.escapes[2] + exp.escapes[3]
+        S.timeTag.textContent = 't = ' + exp.t.toFixed(1) + ' s · escaped ' + n
+        S.controls.update()
+        S.renderer.render(S.scene, S.camera)
+        return
+      }
+      // paused: frozen — no recomputation, no renders, until the camera
+      // moves or a parameter changes
+      S.controls.update()
+      let dirty = false
+      if (S.camDirty) { S.camDirty = false; dirty = true }
+      if (dirtyRef.current !== seenDirty) { seenDirty = dirtyRef.current; dirty = true }
+      if (dirty) {
+        syncPoints(exp)
+        drawTrack(exp)
+        readout(exp)
+        S.renderer.render(S.scene, S.camera)
+      }
+    }
+    syncPoints(expRef.current)
+    drawTrack(expRef.current)
+    readout(expRef.current)
+    loop()
+    return () => { cancelAnimationFrame(raf); disposeScene(S) }
+  }, [])
+
+  return (
+    <div className="sim-stage-col">
+      <div ref={mountRef} className="quark-canvas-wrap" />
+      <canvas ref={trackRef} style={{ display: 'block', width: '100%', height: 230, marginTop: 8 }} />
+      <div ref={readRef} className="graph-note" />
+    </div>
+  )
+}
+
 const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹'
 const sup = (e) => String(e).split('').map((d) => SUP[+d]).join('')
 
@@ -825,6 +1143,13 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
   const thExpRef = useRef(null)
   if (!thExpRef.current) thExpRef.current = freshExperiment(entropy)
   const thCtlRef = useRef({})
+  // the forget view: its own experiment — all four frequencies born at
+  // the core, no assigned radii; the physics sorts them (or doesn't)
+  const [frPlaying, setFrPlaying] = useState(false)
+  const [frSpeed, setFrSpeed] = useState(1)
+  const frExpRef = useRef(null)
+  if (!frExpRef.current) frExpRef.current = freshForgetExperiment(entropy)
+  const frCtlRef = useRef({})
   const dirtyRef = useRef(0)
   const playingRef = useRef(false)
   playingRef.current = playing
@@ -846,6 +1171,10 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
     thExpRef.current = freshExperiment(entropy)
     dirtyRef.current += 1
   }, [entropy])
+  useEffect(() => {
+    frExpRef.current = freshForgetExperiment(entropy)
+    dirtyRef.current += 1
+  }, [entropy])
 
   ctlRef.current = {
     playing, speed, entropy, waveAmp, decay,
@@ -861,6 +1190,9 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
     playing: thPlaying, speed: thSpeed, entropy, waveAmp, decay,
     S: 6e7, // locked at the standard scattering count — no slider
     fireRate: 0.5, // slow firing, so the cooling between hits is visible
+  }
+  frCtlRef.current = {
+    playing: frPlaying, speed: frSpeed, entropy,
   }
 
   const Sfmt = (v) => {
@@ -1092,6 +1424,36 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           speed={thSpeed}
           onPlayingChange={setThPlaying}
           onSpeedChange={setThSpeed}
+        />
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">The sun that forgets</div>
+        </div>
+        <ForgetSurface expRef={frExpRef} ctlRef={frCtlRef} dirtyRef={dirtyRef} />
+        <p className="graph-note">
+          Its own experiment, its own play and clock. All four quark
+          frequencies are born at the same place — the core — no assigned
+          radii this time; whatever sorting happens is the physics'. Each
+          packet random-walks outward through a real stellar structure
+          (the Lane-Emden n=3 polytrope, integrated live), one twentieth
+          of a radius per hop — every hop stands in for
+          (hop/mean-free-path)² honest scatterings, about 10²² of them
+          down in the core, and the readout says so. Compton
+          thermalization needs only a few hundred, across centimeters, so
+          each packet's frequency snaps to the local thermal peak, 2.8kT/h,
+          and rides it outward: ultraviolet clamp in the deep interior,
+          cooling through the visible near the surface. The track below
+          is the test result — the four birth frequencies crash onto the
+          one thermal curve within a hundredth of the way out. What
+          escapes is set by the surface, not by the birth.
+        </p>
+        <Transport
+          playing={frPlaying}
+          speed={frSpeed}
+          onPlayingChange={setFrPlaying}
+          onSpeedChange={setFrSpeed}
         />
       </div>
     </>

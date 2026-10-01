@@ -104,6 +104,18 @@ The flash view is instantaneous: between pulses the sphere falls back to its bla
 
 So the fourth view does temperature properly: each patch accumulates the energy of the visible waves that hit it and radiates it away between hits, cooling back down over about forty seconds. A fresh hit flares hot and blue-white; a neglected patch cools through yellow and orange toward dark red. The dark patches are the honest sunspots — regions the waves haven't visited in a while. It runs its own slower-firing experiment, so there's time to watch the cooling happen. Hotter means bluer here, the way a blacksmith reads iron: the blue was never the sunspot, the dark red is. Left alone it settles into orange-yellow; with low decay and high entropy it runs green — the best-looking sun the model has produced. It isn't dialed in, but this is just an experiment. The result is a slowly-evolving mosaic of recent landings: the closest thing in the tab to what the model claims the Sun looks like — not a flickering ball, but light accumulating.
 
+### The sun that forgets
+
+The birth spheres were bothering me \u2014 I had assigned each frequency its own radius by hand, tuned until the table fit, and that "seems incorrect" sat wrong. So the fifth view asks the question properly: birth all four quark frequencies at the same place, the core, let only known rules act, and see whether they sort themselves out.
+
+The rules, nothing else: the star's structure is the Lane-Emden n=3 polytrope \u2014 the Eddington standard model \u2014 integrated live in the page, no tables; the opacity is Kramers (free-free plus bound-free, the \u03bd\u207b\u00b3 shape anchored to the textbook Rosseland mean) plus Thomson scattering at 0.34 cm\u00b2/g, flat in frequency. Each packet random-walks outward with honest 3D steps \u2014 no outward drift smuggled in \u2014 one hop on screen standing in for (hop/mean-free-path)\u00b2 real scatterings, ~10\u00b2\u00b2 of them down in the core, and the readout says so. Compton thermalization needs only a few hundred of those, across centimeters, so each hop the packet's frequency snaps to the local thermal peak, 2.8kT/h, and rides it outward.
+
+The result is the null I should have expected: at MeV energies the opacity is pure Thomson, which doesn't care about frequency, so all four inputs see the same optical depth and thermalize within centimeters of birth. The track plot shows it \u2014 four crash lines into one curve. The inputs are forgotten; what escapes is set by the surface, not by the birth. That was already the model's honest prediction (A \u221d \u03bd_in, "inputs forgotten"), and now it's demonstrated rather than asserted.
+
+Where frequencies genuinely do sort is lower down the spectrum: Kramers' \u03bd\u207b\u00b3 means low frequencies interact far more, so each observed frequency decouples at its own optical depth \u2014 the \u03c4_\u03bd = 2/3 surface. In the real photosphere that's the H\u207b opacity doing the work, which this graph doesn't include. So the sorting I was looking for exists, just not at the quark band. A sixth graph, if I want it.
+
+And the electric-force instinct was right: opacity is Coulomb physics all the way down \u2014 free-free is bremsstrahlung, bound-free is photoionization. Klein-Nishina was simply the one electromagnetic process that doesn't sort by frequency.
+
 On entropy: the Sun's total is $\\sim 10^{35}\\,\\text{J/K}$ (order of magnitude — Wikipedia's "Orders of magnitude (entropy)," citing Bekenstein 1973), far beyond anything simulable. That's why the experiment keeps entropy as the relative 0–1,000,000 dial.
 
 ## 9. The physics anchors
