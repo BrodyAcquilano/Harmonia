@@ -4,7 +4,6 @@ import katex from 'katex'
 import 'katex/dist/katex.min.css'
 import Slider from './Slider.jsx'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { HUES } from './SurfaceMap.jsx'
 import { energyColor, spectrumBounds } from './ColorTheory.jsx'
 
 function Tex({ tex }) {
@@ -34,8 +33,8 @@ function Transport({ playing, speed, onPlayingChange, onSpeedChange }) {
    a wave instead of a mass. Quarks fire at random points inside the cube and
    each firing radiates a spherical wave in every direction — with a velocity
    and a decay rate. The first graph shows the individual components: every
-   live pulse as its expanding wavefront shells, colored by its fundamental
-   (blue 1/3 f_q, red 2/3 f_q, green 1 f_q, yellow 4/3 f_q). The second graph
+   live pulse as its expanding wavefront shells, each burning its energy
+   color on the spectrum. The second graph
    is the superposition on the z = 0 slice — a fair sample of every
    direction. The third graph is the whole: all the pulses summed into one
    surface in 3D space — a sphere sampling the total field, green where the
@@ -323,6 +322,16 @@ export default function PointSources({
       if (sim.pulses.length > MAX_PULSES) sim.pulses.shift()
     }
 
+    // the spectrum bounds refit to the live pulses, so each pulse burns its
+    // energy color on the current scale — the Color Theory color system
+    const refitColors = (sim) => {
+      const qs = []
+      for (let i = 0; i < sim.pulses.length; i++) qs.push(sim.pulses[i].q)
+      const b = spectrumBounds(qs)
+      for (let i = 0; i < sim.pulses.length; i++) {
+        sim.pulses[i].col = energyColor(sim.pulses[i].q, b)
+      }
+    }
     // one pulse's field: a spherical wave in every direction — the wavefront
     // thins geometrically as 1/(1+r) and loses energy with the decay rate
     const field = (p, x, y, z, t, amp, decay) => {
@@ -343,7 +352,7 @@ export default function PointSources({
         const ac = actors[i]
         const dt = t - p.t0
         const damp = decay > 0 ? Math.exp(-decay * dt / DECAY_TAU) : 1
-        const col = trueColors ? p.col : HUES[p.q]
+        const col = p.col
         tmpC.setRGB(col[0] / 255, col[1] / 255, col[2] / 255)
         ac.group.visible = true
         ac.group.position.set(p.ox, p.oy, p.oz)
@@ -480,16 +489,9 @@ export default function PointSources({
         for (let i = sim.pulses.length - 1; i >= 0; i--) {
           if (C * (sim.t - sim.pulses[i].t0) > DIE_R) sim.pulses.splice(i, 1)
         }
-        // true colors: the spectrum bounds refit to the live pulses every
-        // frame, so each pulse burns its color on the current scale
-        if (ctl.trueColors) {
-          const qs = []
-          for (let i = 0; i < sim.pulses.length; i++) qs.push(sim.pulses[i].q)
-          const b = spectrumBounds(qs)
-          for (let i = 0; i < sim.pulses.length; i++) {
-            sim.pulses[i].col = energyColor(sim.pulses[i].q, b)
-          }
-        }
+        // the spectrum bounds refit to the live pulses every frame, so each
+        // pulse burns its energy color on the current scale
+        refitColors(sim)
         update()
         S.timeTag.textContent = 't = ' + sim.t.toFixed(1) + ' s'
         S.controls.update()
@@ -505,6 +507,7 @@ export default function PointSources({
       if (dirtyRef.current[key]) {
         dirtyRef.current[key] = false
         dirty = true
+        refitColors(sim)
         update()
       }
       if (dirty) S.renderer.render(S.scene, S.camera)
@@ -559,9 +562,9 @@ export default function PointSources({
               Every live pulse on its own — a quark fired at a random point,
               radiating a spherical wave in every direction. The nested shells are
               the wave's crests, one wavelength apart, expanding at speed c and
-              fading as the pulse decays. Each pulse keeps its own
-              fundamental's color: blue 1/3 f_q, red 2/3 f_q, green 1 f_q,
-              yellow 4/3 f_q.
+              fading as the pulse decays. Each pulse burns its energy color on
+              the spectrum — dark red (infrared) for the coolest frequency live,
+              light purple (ultraviolet) for the hottest.
             </>
           )}
         </p>

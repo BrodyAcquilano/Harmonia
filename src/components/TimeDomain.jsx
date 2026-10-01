@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import Slider from './Slider.jsx'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { buildQuarkTerms, waveCoeffsFromTerms, MAX_STATES } from './ConvolutionSurface.jsx'
-import { HUES } from './SurfaceMap.jsx'
+import { energyColor, spectrumBounds } from './ColorTheory.jsx'
 
 /* The Space-Time Domain: the same quark-frequency family as the surface, let loose
    in space and time. Each axis — x, y, z — carries its own independent
@@ -11,13 +11,14 @@ import { HUES } from './SurfaceMap.jsx'
    a/√k, the pink-noise family, fundamentals |q| = 1..4). Each axis fans its
    wave across its plane of motion — x and y sweep the xy plane, z sweeps
    the yz plane — so waves propagate in every direction. (z is vertical here.)
-   Each point of each wave is painted by the fundamental it is most made of —
-   blue 1/3 f_q, red 2/3 f_q, green 1 f_q, yellow 4/3 f_q — and the bright
+   Each point of each wave is painted by the energy of the fundamental it is
+   most made of — dark red (infrared) for the coolest, light purple
+   (ultraviolet) for the hottest — and the bright
    gold curve is the superposition of all three: T(s,t) = (w_x, w_y, w_z),
    the total shape. Press play and every fundamental oscillates at its own
    rate f·Ω: the waves interfere, the total shape writhes — motion created
    from waves. The first 20 components of each axis are drawn too — faint
-   lines in their own fundamental's color — so the interference building
+   lines in their energy color on the spectrum — so the interference building
    each axis wave is visible. */
 
 const D2R = Math.PI / 180
@@ -39,9 +40,12 @@ const MAX_COMP = 20 // components drawn per axis
 const SGN_GAMMA = 0.618033988749895 // (sqrt(5)-1)/2 — same sign pattern as the surface
 const sgnK = (k) => (Math.floor((k + 1) * SGN_GAMMA) % 2 === 0) ? 1 : -1
 
-// dominant-frequency colors, 0..1 for vertex colors
+// dominant-frequency colors on the energy spectrum, 0..1 for vertex colors —
+// the Color Theory system: the coolest fundamental burns dark red (infrared),
+// the hottest burns light purple (ultraviolet), the visible spectrum between
+const SPECTRUM_B = spectrumBounds([1, 2, 3, 4])
 const FC = [null]
-for (let f = 1; f <= 4; f++) FC.push(HUES[f].map((v) => v / 255))
+for (let f = 1; f <= 4; f++) FC.push(energyColor(f, SPECTRUM_B).map((v) => v / 255))
 
 function makeLabel(text) {
   const c = document.createElement('canvas')
@@ -147,7 +151,7 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
     scene.add(grid)
 
     // fan of propagation: each axis sweeps its wave across its plane of
-    // motion, vertex-colored by dominant fundamental
+    // motion, vertex-colored by the dominant fundamental's energy color
     const blades = []
     for (let a = 0; a < 3; a++) {
       for (const deg of BLADE_DEG) {
@@ -168,8 +172,8 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
     }
 
     // the components: the first MAX_COMP eigenstate waves of each axis' own
-    // chain — faint lines in their own fundamental's color, so the interference
-    // building each axis wave is visible
+    // chain — faint lines in their energy color on the spectrum, so the
+    // interference building each axis wave is visible
     const compLines = []
     {
       // `chains` is memoized once and never changes, so the setup closure's
@@ -182,9 +186,9 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
           const pos = new Float32Array(SAMPLES * 3)
           geo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
           geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 6)
-          const hue = HUES[qAbs]
+          const ec = energyColor(qAbs, SPECTRUM_B)
           const line = new THREE.Line(geo, new THREE.LineBasicMaterial({
-            color: new THREE.Color(hue[0] / 255, hue[1] / 255, hue[2] / 255),
+            color: new THREE.Color(ec[0] / 255, ec[1] / 255, ec[2] / 255),
             transparent: true, opacity: 0.7,
           }))
           line.frustumCulled = false
@@ -224,7 +228,7 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
 
     // per-sample wave values, shared by the axis waves and the total curve
     const wv = [new Float32Array(SAMPLES), new Float32Array(SAMPLES), new Float32Array(SAMPLES)]
-    // per-axis dominant-fundamental colors (same for every blade of the axis)
+    // per-axis dominant energy colors (same for every blade of the axis)
     const cc = [new Float32Array(SAMPLES * 3), new Float32Array(SAMPLES * 3), new Float32Array(SAMPLES * 3)]
 
     const updateWaves = (t) => {
@@ -247,7 +251,7 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
           if (av > wMax) wMax = av
         }
       }
-      // pass 2: dominant-frequency colors, once per axis
+      // pass 2: dominant energy colors, once per axis
       for (let a = 0; a < 3; a++) {
         const C = C3[a]
         const col = cc[a]

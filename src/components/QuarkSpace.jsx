@@ -9,8 +9,21 @@ import TimeDomain from './TimeDomain.jsx'
 import MassLattice from './MassLattice.jsx'
 import MassCreation from './MassCreation.jsx'
 import PointSources from './PointSources.jsx'
-import ColorTheory, { FrequencyDistribution } from './ColorTheory.jsx'
+import ColorTheory, { FrequencyDistribution, spectrumBounds, spectrumColor } from './ColorTheory.jsx'
 import Fundamental20 from './Fundamental20.jsx'
+
+// the energy-spectrum legend for the Space-Time Domain graphs: the same
+// color system as Color Theory — coolest fundamental at the infrared end,
+// hottest at the ultraviolet end
+const TD_SPECTRUM_B = spectrumBounds([1, 2, 3, 4])
+const TD_SPECTRUM_GRAD = (() => {
+  const stops = []
+  for (let i = 0; i <= 48; i++) {
+    const c = spectrumColor(i / 48, TD_SPECTRUM_B)
+    stops.push(`rgb(${c[0]},${c[1]},${c[2]}) ${(i / 48 * 100).toFixed(1)}%`)
+  }
+  return `linear-gradient(to right, ${stops.join(', ')})`
+})()
 
 /* The Quark Space: a convolution of energy and mass and space and time.
    The two time coordinates are angles: τ1 on the mass-wave-frequency axis,
@@ -431,15 +444,17 @@ export default function QuarkSpace() {
                 a/√k, the pink-noise family. Each axis fans its wave across its
                 plane of motion — x and y sweep the xy plane, z sweeps the zy
                 plane (z is vertical here) — so waves propagate in every
-                direction. Every point of every wave is painted by the
-                fundamental it is most made of — blue 1/3 f_q, red 2/3 f_q,
-                green 1 f_q, yellow 4/3 f_q.
+                direction. Every point of every wave is painted by the energy of
+                the fundamental it is most made of — dark red (infrared) for
+                the coolest, light purple (ultraviolet) for the hottest, the
+                visible spectrum between.
               </p>
               <p>
                 The bright gold curve is the superposition of all three waves —
                 T(s,t) = (w_x, w_y, w_z), the total shape. The faint lines are the
-                first 20 components of each axis, each in its own fundamental's
-                color, so the interference building every wave is visible. Press play and every
+                first 20 components of each axis, each in its energy color on
+                the same spectrum, so the interference building every wave is
+                visible. Press play and every
                 fundamental oscillates at its own rate f·Ω: the waves interfere,
                 the total shape writhes, and motion appears. This is motion being
                 created from waves.
@@ -456,18 +471,19 @@ export default function QuarkSpace() {
               One independent frequency chain per axis — x, y and z each get their
               own random quarks, each fanned across its plane of motion (x and y
               in xy, z in zy). The faint lines are the first 20 components of
-              each axis in their own fundamental's color; the brighter fan waves
-              are their sums, painted by the dominant fundamental at each point;
+              each axis in their energy color on the spectrum; the brighter fan waves
+              are their sums, painted by the dominant fundamental's energy color
+              at each point;
               the bright gold curve is the three waves superposed.
             </p>
-            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', padding: '8px 6px 0',
-                           fontFamily: '"IBM Plex Mono", monospace', fontSize: 12, color: '#715f43' }}>
-              {[['#2563ad', '1/3 f_q'], ['#c0392b', '2/3 f_q'], ['#2e8b6e', '1 f_q'], ['#e6b800', '4/3 f_q']].map(([color, text]) => (
-                <span key={text} style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                  <span style={{ width: 11, height: 11, borderRadius: 2, background: color, display: 'inline-block' }} />
-                  {text}
-                </span>
-              ))}
+            <div style={{ padding: '8px 6px 0' }}>
+              <div style={{ height: 10, borderRadius: 5, background: TD_SPECTRUM_GRAD }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between',
+                             fontFamily: '"IBM Plex Mono", monospace', fontSize: 12,
+                             color: '#715f43', marginTop: 4 }}>
+                <span>1 f_q · infrared</span>
+                <span>4 f_q · ultraviolet</span>
+              </div>
             </div>
           </div>
 
