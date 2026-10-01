@@ -88,6 +88,7 @@ Collecting the pieces this theory stands on, all standard:
 
 - **Compton scattering**: photons scattering off cooler electrons lose a fraction of their energy per collision — a genuine per-collision frequency downshift, repeated $\sim 10^{25}$ times.
 - **Temperature gradient**: $1.5\times10^7\,\text{K}$ core to $5778\,\text{K}$ surface. The scatterings only enforce local equilibrium; the *gradient* does the shifting.
+- **Blackbody radiation**: each layer of the Sun radiates approximately as a blackbody at its own local temperature — so the temperature gradient modulation is really the light being handed from one blackbody curve to the next as it climbs outward, each step re-emitted at a lower temperature, until the photosphere radiates at $5778\,\text{K}$.
 - **Sun's mass** ($1.989\times10^{30}\,\text{kg}$): sets the optical depth and, through hydrostatic equilibrium, the core temperature. The modulator's strength is the star's mass.
 - **Escape time** ($\sim 10^5$ years): the "gets stuck and bounces around" I started from — the random walk is what gives thermalization time to complete.
 - **Thermalization**: the process itself — absorption and re-emission replacing the input spectrum with the local thermal one, entropy rising outward, one high-energy quantum becoming $\sim 10^6$ low-energy ones.
