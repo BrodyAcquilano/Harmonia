@@ -301,7 +301,14 @@ function freshForgetExperiment(entropy) {
   const rng = mulberry32(Math.floor(entropy * 2654435761) % 4294967296)
   const packets = []
   for (let i = 0; i < FORGET_N; i++) packets.push(spawnForgetPacket(rng, i % 4))
-  return { t: 0, hopAcc: 0, packets, escapes: [0, 0, 0, 0], rng, version: 0 }
+  return {
+    t: 0, hopAcc: 0, packets, escapes: [0, 0, 0, 0], rng, version: 0,
+    // landing records, same shape as the original experiment's, so the
+    // same measurement graphs can read this run
+    bins: [0, 1, 2, 3].map(() => ({ n: 0, sumA: 0, sumNu: 0 })),
+    hist: new Float64Array(HIST_N),
+    histN: 0,
+  }
 }
 // one display hop for every packet: an honest 3D random-walk step of
 // HOP_FRAC·R_☉ — no outward drift smuggled in — standing in for
@@ -325,9 +332,23 @@ function hopForget(exp) {
     let nr = Math.sqrt(nx * nx + ny * ny + nz * nz)
     if (nr < 1e-9) { nx = hopScene; ny = 0; nz = 0; nr = hopScene }
     if (nr >= SURF_R0) {
-      exp.escapes[p.band] += 1
+      // the packet is fully thermalized by now — what escapes is the
+      // photosphere's own light, not the birth photon. Same treatment
+      // as the original experiment's land(): sample the escaping
+      // frequency from the Planck distribution at 5778 K.
+      const nuOut = Math.max(samplePlanck(T_PHOT, exp.rng), 1e10)
+      const b = p.band
+      const bin = exp.bins[b]
+      bin.n += 1
+      bin.sumA += BANDS[b] / nuOut
+      bin.sumNu += nuOut
+      const hb = Math.floor(
+        ((Math.log10(nuOut) - HIST_L0) / (HIST_L1 - HIST_L0)) * HIST_N)
+      if (hb >= 0 && hb < HIST_N) exp.hist[hb] += 1
+      exp.histN += 1
+      exp.escapes[b] += 1
       exp.version += 1
-      Object.assign(p, spawnForgetPacket(exp.rng, p.band))
+      Object.assign(p, spawnForgetPacket(exp.rng, b))
       continue
     }
     p.x = nx; p.y = ny; p.z = nz
@@ -932,7 +953,6 @@ function LandingPanel({ expRef, playingRef }) {
 // ---- the fifth graph: watch the frequencies forget ----
 function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
   const mountRef = useRef(null)
-  const trackRef = useRef(null)
   const readRef = useRef(null)
 
   useEffect(() => {
@@ -973,84 +993,6 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       pGeo.attributes.color.needsUpdate = true
     }
 
-    // the test result, drawn: log frequency against fractional radius.
-    // The gold curve is the local thermal peak 2.8kT/h from the
-    // Lane-Emden structure; the four colored dots are the quark
-    // frequencies at birth — all at the core — with their crash lines.
-    const BAND_COLS = ['#ff6b6b', '#ffa94d', '#69db7c', '#4dabf7']
-    const drawTrack = (exp) => {
-      const cv = trackRef.current
-      if (!cv || !cv.clientWidth) return
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      const W = cv.clientWidth, Hh = cv.clientHeight
-      if (cv.width !== Math.round(W * dpr)) {
-        cv.width = Math.round(W * dpr)
-        cv.height = Math.round(Hh * dpr)
-      }
-      const ctx = cv.getContext('2d')
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      ctx.clearRect(0, 0, W, Hh)
-      const L0 = 14, L1 = 21
-      const X = (x) => 46 + x * (W - 62)
-      const Y = (l) => 12 + (1 - (l - L0) / (L1 - L0)) * (Hh - 44)
-      ctx.font = '11px sans-serif'
-      ctx.textAlign = 'left'
-      ctx.strokeStyle = 'rgba(120,90,40,.55)'
-      ctx.lineWidth = 1
-      ctx.beginPath()
-      ctx.moveTo(46, 12); ctx.lineTo(46, Hh - 32); ctx.lineTo(W - 16, Hh - 32)
-      ctx.stroke()
-      ctx.fillStyle = '#8a6d3b'
-      ctx.fillText('r / R☉', W - 52, Hh - 12)
-      ctx.save()
-      ctx.translate(13, Hh / 2); ctx.rotate(-Math.PI / 2)
-      ctx.textAlign = 'center'
-      ctx.fillText('log₁₀ ν (Hz)', 0, 0)
-      ctx.restore()
-      ctx.textAlign = 'left'
-      for (let l = L0; l <= L1; l++) {
-        ctx.fillStyle = 'rgba(138,109,59,.8)'
-        ctx.fillText(String(l), 30, Y(l) + 4)
-        ctx.strokeStyle = 'rgba(120,90,40,.18)'
-        ctx.beginPath(); ctx.moveTo(46, Y(l)); ctx.lineTo(W - 16, Y(l)); ctx.stroke()
-      }
-      ctx.strokeStyle = '#c9962e'
-      ctx.lineWidth = 2
-      ctx.beginPath()
-      for (let i = 0; i <= 120; i++) {
-        const x = (i / 120) * 0.995
-        const { T } = structOf(x)
-        const l = Math.max(Math.log10((2.8 * KB * T) / H), L0)
-        const px = X(x), py = Y(l)
-        if (i) ctx.lineTo(px, py)
-        else ctx.moveTo(px, py)
-      }
-      ctx.stroke()
-      ctx.fillStyle = '#8a6d3b'
-      ctx.fillText('2.8kT/h — the thermal peak', X(0.55), Y(16.6))
-      const { T: Tc } = structOf(0.01)
-      const lw = Math.log10((2.8 * KB * Tc) / H)
-      for (let b = 0; b < 4; b++) {
-        const lb = Math.log10(BANDS[b])
-        ctx.strokeStyle = BAND_COLS[b]
-        ctx.setLineDash([4, 3])
-        ctx.beginPath(); ctx.moveTo(X(0.01), Y(lb)); ctx.lineTo(X(0.01), Y(lw)); ctx.stroke()
-        ctx.setLineDash([])
-        ctx.fillStyle = BAND_COLS[b]
-        ctx.beginPath(); ctx.arc(X(0.01), Y(lb), 4, 0, 7); ctx.fill()
-        ctx.fillText(BAND_NAMES[b], X(0.01) + 9, Y(lb) - 12 + b * 12)
-      }
-      ctx.fillStyle = '#8a6d3b'
-      ctx.fillText('born at the core — same place', X(0.01) + 9, Y(20.92))
-      for (let i = 0; i < Math.min(12, FORGET_N); i++) {
-        const p = exp.packets[i]
-        const r = Math.sqrt(p.x * p.x + p.y * p.y + p.z * p.z) / SURF_R0
-        ctx.fillStyle = BAND_COLS[p.band]
-        ctx.beginPath()
-        ctx.arc(X(Math.min(r, 1)), Y(Math.max(Math.log10(Math.max(p.nu, 1)), L0)), 3, 0, 7)
-        ctx.fill()
-      }
-    }
 
     const readout = (exp) => {
       if (!readRef.current) return
@@ -1082,7 +1024,6 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
         exp.hopAcc += sdt * 60
         while (exp.hopAcc >= 1) { hopForget(exp); exp.hopAcc -= 1 }
         syncPoints(exp)
-        drawTrack(exp)
         readout(exp)
         const n = exp.escapes[0] + exp.escapes[1] + exp.escapes[2] + exp.escapes[3]
         S.timeTag.textContent = 't = ' + exp.t.toFixed(1) + ' s · escaped ' + n
@@ -1098,13 +1039,11 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       if (dirtyRef.current !== seenDirty) { seenDirty = dirtyRef.current; dirty = true }
       if (dirty) {
         syncPoints(exp)
-        drawTrack(exp)
         readout(exp)
         S.renderer.render(S.scene, S.camera)
       }
     }
     syncPoints(expRef.current)
-    drawTrack(expRef.current)
     readout(expRef.current)
     loop()
     return () => { cancelAnimationFrame(raf); disposeScene(S) }
@@ -1113,10 +1052,116 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
   return (
     <div className="sim-stage-col">
       <div ref={mountRef} className="quark-canvas-wrap" />
-      <canvas ref={trackRef} style={{ display: 'block', width: '100%', height: 230, marginTop: 8 }} />
       <div ref={readRef} className="graph-note" />
     </div>
   )
+}
+
+// ---- the crash plot, on its own: birth frequencies onto the thermal curve ----
+function ForgetTrack({ expRef, playingRef }) {
+  const ref = useRef(null)
+  const seen = useRef({ exp: null, version: -1 })
+
+  useEffect(() => {
+    const canvas = ref.current
+    if (!canvas || !canvas.clientWidth) return
+    const ctx = canvas.getContext('2d')
+      // the test result, drawn: log frequency against fractional radius.
+      // The gold curve is the local thermal peak 2.8kT/h from the
+      // Lane-Emden structure; the four colored dots are the quark
+      // frequencies at birth — all at the core — with their crash lines.
+      const BAND_COLS = ['#ff6b6b', '#ffa94d', '#69db7c', '#4dabf7']
+      const draw = (exp) => {
+        const cv = canvas
+        const dpr = Math.min(window.devicePixelRatio || 1, 2)
+        const W = cv.clientWidth, Hh = cv.clientHeight
+        if (cv.width !== Math.round(W * dpr)) {
+          cv.width = Math.round(W * dpr)
+          cv.height = Math.round(Hh * dpr)
+        }
+        const ctx = cv.getContext('2d')
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+        ctx.clearRect(0, 0, W, Hh)
+        const L0 = 14, L1 = 21
+        const X = (x) => 46 + x * (W - 62)
+        const Y = (l) => 12 + (1 - (l - L0) / (L1 - L0)) * (Hh - 44)
+        ctx.font = '11px sans-serif'
+        ctx.textAlign = 'left'
+        ctx.strokeStyle = 'rgba(120,90,40,.55)'
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.moveTo(46, 12); ctx.lineTo(46, Hh - 32); ctx.lineTo(W - 16, Hh - 32)
+        ctx.stroke()
+        ctx.fillStyle = '#8a6d3b'
+        ctx.fillText('r / R☉', W - 52, Hh - 12)
+        ctx.save()
+        ctx.translate(13, Hh / 2); ctx.rotate(-Math.PI / 2)
+        ctx.textAlign = 'center'
+        ctx.fillText('log₁₀ ν (Hz)', 0, 0)
+        ctx.restore()
+        ctx.textAlign = 'left'
+        for (let l = L0; l <= L1; l++) {
+          ctx.fillStyle = 'rgba(138,109,59,.8)'
+          ctx.fillText(String(l), 30, Y(l) + 4)
+          ctx.strokeStyle = 'rgba(120,90,40,.18)'
+          ctx.beginPath(); ctx.moveTo(46, Y(l)); ctx.lineTo(W - 16, Y(l)); ctx.stroke()
+        }
+        ctx.strokeStyle = '#c9962e'
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        for (let i = 0; i <= 120; i++) {
+          const x = (i / 120) * 0.995
+          const { T } = structOf(x)
+          const l = Math.max(Math.log10((2.8 * KB * T) / H), L0)
+          const px = X(x), py = Y(l)
+          if (i) ctx.lineTo(px, py)
+          else ctx.moveTo(px, py)
+        }
+        ctx.stroke()
+        ctx.fillStyle = '#8a6d3b'
+        ctx.fillText('2.8kT/h — the thermal peak', X(0.55), Y(16.6))
+        const { T: Tc } = structOf(0.01)
+        const lw = Math.log10((2.8 * KB * Tc) / H)
+        for (let b = 0; b < 4; b++) {
+          const lb = Math.log10(BANDS[b])
+          ctx.strokeStyle = BAND_COLS[b]
+          ctx.setLineDash([4, 3])
+          ctx.beginPath(); ctx.moveTo(X(0.01), Y(lb)); ctx.lineTo(X(0.01), Y(lw)); ctx.stroke()
+          ctx.setLineDash([])
+          ctx.fillStyle = BAND_COLS[b]
+          ctx.beginPath(); ctx.arc(X(0.01), Y(lb), 4, 0, 7); ctx.fill()
+          ctx.fillText(BAND_NAMES[b], X(0.01) + 9, Y(lb) - 12 + b * 12)
+        }
+        ctx.fillStyle = '#8a6d3b'
+        ctx.fillText('born at the core — same place', X(0.01) + 9, Y(20.92))
+        for (let i = 0; i < Math.min(12, FORGET_N); i++) {
+          const p = exp.packets[i]
+          const r = Math.sqrt(p.x * p.x + p.y * p.y + p.z * p.z) / SURF_R0
+          ctx.fillStyle = BAND_COLS[p.band]
+          ctx.beginPath()
+          ctx.arc(X(Math.min(r, 1)), Y(Math.max(Math.log10(Math.max(p.nu, 1)), L0)), 3, 0, 7)
+          ctx.fill()
+        }
+      }
+
+    let raf = 0
+    const loop = () => {
+      raf = requestAnimationFrame(loop)
+      const exp = expRef.current
+      const q = seen.current
+      if (playingRef.current || exp !== q.exp || exp.version !== q.version) {
+        q.exp = exp; q.version = exp.version
+        draw(exp)
+      }
+    }
+    draw(expRef.current)
+    loop()
+    const ro = new ResizeObserver(() => draw(expRef.current))
+    ro.observe(canvas)
+    return () => { cancelAnimationFrame(raf); ro.disconnect() }
+  }, [])
+
+  return <canvas ref={ref} style={{ display: 'block', width: '100%', height: 230 }} />
 }
 
 const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹'
@@ -1194,6 +1239,8 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
   frCtlRef.current = {
     playing: frPlaying, speed: frSpeed, entropy,
   }
+  const frPlayingRef = useRef(false)
+  frPlayingRef.current = frPlaying
 
   const Sfmt = (v) => {
     const e = Math.floor(v + 1e-9)
@@ -1455,6 +1502,49 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           onPlayingChange={setFrPlaying}
           onSpeedChange={setFrSpeed}
         />
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">Measured vs expected attenuation — the core-born run</div>
+        </div>
+        <AttenuationGraph expRef={frExpRef} playingRef={frPlayingRef} />
+        <p className="graph-note">
+          Same layout as the other run: gold is the expected attenuation
+          from the note's table — the division the old model said each
+          fundamental needed — teal dashed is complete thermalization.
+          The dots are what this run actually produces, per birth band.
+          If the forget model is right, the dots sit on teal, not gold:
+          every input divided down to the same surface light.
+        </p>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">Where the core-born pulses actually land</div>
+        </div>
+        <LandingPanel expRef={frExpRef} playingRef={frPlayingRef} />
+        <p className="graph-note">
+          The visible spectrum on a fixed scale; the four bands mark where
+          their light actually landed on average. Below, every escaped
+          packet builds the escaping spectrum, teal the 5778 K blackbody.
+          If birth is truly forgotten, the four markers pile onto the same
+          place and the bars follow the teal curve.
+        </p>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">Four births, one curve</div>
+        </div>
+        <ForgetTrack expRef={frExpRef} playingRef={frPlayingRef} />
+        <p className="graph-note">
+          The test result, drawn: log frequency against fractional radius.
+          The gold curve is the local thermal peak from the Lane-Emden
+          structure; the four colored dots are the birth frequencies —
+          all at the core — with their crash lines into the one curve.
+          What escapes is set by the surface, not by the birth.
+        </p>
       </div>
     </>
   )
