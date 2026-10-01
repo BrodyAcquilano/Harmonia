@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
@@ -12,6 +12,24 @@ function Tex({ tex }) {
   return <span dangerouslySetInnerHTML={{ __html: html }} />
 }
 
+function Transport({ playing, speed, onPlayingChange, onSpeedChange }) {
+  return (
+    <div className="sim-transport">
+      <button
+        className="sim-item transport-play"
+        onClick={() => onPlayingChange(!playing)}
+        aria-pressed={playing}
+      >
+        {playing ? 'Pause' : 'Play'}
+      </button>
+      <div className="transport-speed">
+        <Slider label="speed" value={speed} min={0.1} max={3} step={0.1}
+          onChange={(v) => onSpeedChange(v)} format={(v) => `${v.toFixed(1)}×`} />
+      </div>
+    </div>
+  )
+}
+
 /* Point Sources: the Mass Creation firing process, but every firing launches
    a wave instead of a mass. Quarks fire at random points inside the cube and
    each firing radiates a spherical wave in every direction — with a velocity
@@ -21,8 +39,8 @@ function Tex({ tex }) {
    is the superposition on the z = 0 slice — a fair sample of every
    direction. The third graph is the whole: all the pulses summed into one
    surface in 3D space — a sphere sampling the total field, green where the
-   total runs high, red where it runs low. All three graphs share one clock,
-   so they always show the same instant. z is vertical.
+   total runs high, red where it runs low. Each graph runs its own clock, so
+   one can play while the others stay paused. z is vertical.
    With trueColors, the same three graphs are remade for Color Theory: each
    pulse burns its energy color on the shifting spectrum, and the slice and
    surface wear the per-point additive mix of the pulses reaching them. */
@@ -178,22 +196,30 @@ export default function PointSources({
   entropy = 60000,
   waveAmp = 0.2,
   decay = 0.35,
-  playing = true,
-  speed = 1,
-  onPlayingChange,
-  onSpeedChange,
   trueColors = false,
 }) {
   const mountARef = useRef(null)
   const mountBRef = useRef(null)
   const mountCRef = useRef(null)
-  const stateRef = useRef({ playing, speed, entropy, waveAmp, decay, trueColors })
-  stateRef.current = { playing, speed, entropy, waveAmp, decay, trueColors }
-  // set when waveAmp/decay change: the paused frame needs one recompute
-  const paramDirtyRef = useRef(true)
+  // Each graph runs its own clock: its own play/pause, its own speed, its
+  // own pulses. All three start paused.
+  const [playingA, setPlayingA] = useState(false)
+  const [speedA, setSpeedA] = useState(1)
+  const [playingB, setPlayingB] = useState(false)
+  const [speedB, setSpeedB] = useState(1)
+  const [playingC, setPlayingC] = useState(false)
+  const [speedC, setSpeedC] = useState(1)
+  const ctlRef = useRef({})
+  ctlRef.current = {
+    playingA, speedA, playingB, speedB, playingC, speedC,
+    entropy, waveAmp, decay, trueColors,
+  }
+  // one dirty flag per graph: a paused graph re-renders once when a
+  // parameter changes, then goes quiet again
+  const dirtyRef = useRef({ A: true, B: true, C: true })
 
   // a paused graph re-renders once when its parameters change
-  useEffect(() => { paramDirtyRef.current = true }, [waveAmp, decay])
+  useEffect(() => { dirtyRef.current = { A: true, B: true, C: true } }, [waveAmp, decay])
 
   useEffect(() => {
     const A = setupScene(mountARef.current)
@@ -278,11 +304,14 @@ export default function PointSources({
     Cc.scene.add(sph, sphWire)
     const Uc = new Float32Array(sCount)
 
-    // ---- the pulses ----
-    const pulses = []
-    const spawn = (t) => {
+    // ---- the pulses: one independent stream per graph, each on its own clock ----
+    const makeSim = () => ({ t: 0, spawnAcc: 0, pulses: [] })
+    const simA = makeSim()
+    const simB = makeSim()
+    const simC = makeSim()
+    const spawnInto = (sim, t) => {
       const q = pickQ()
-      pulses.push({
+      sim.pulses.push({
         ox: (Math.random() * 2 - 1) * SPAWN,
         oy: (Math.random() * 2 - 1) * SPAWN,
         oz: (Math.random() * 2 - 1) * SPAWN,
@@ -291,7 +320,7 @@ export default function PointSources({
         phi: Math.random() * Math.PI * 2,
         t0: t, q,
       })
-      if (pulses.length > MAX_PULSES) pulses.shift()
+      if (sim.pulses.length > MAX_PULSES) sim.pulses.shift()
     }
 
     // one pulse's field: a spherical wave in every direction — the wavefront
@@ -308,7 +337,7 @@ export default function PointSources({
         * Math.exp(-(xi * xi) / (2 * SIG_R * SIG_R)) * damp / (1 + r)
     }
 
-    const updateA = (t, decay, trueColors) => {
+    const updateA = (t, pulses, decay, trueColors) => {
       for (let i = 0; i < pulses.length; i++) {
         const p = pulses[i]
         const ac = actors[i]
@@ -343,7 +372,7 @@ export default function PointSources({
       }
     }
 
-    const updateB = (t, amp, decay, trueColors) => {
+    const updateB = (t, pulses, amp, decay, trueColors) => {
       const posA = surfGeo.attributes.position
       const colA = surfGeo.attributes.color
       let umax = 1e-9
@@ -387,7 +416,7 @@ export default function PointSources({
       surfGeo.computeVertexNormals()
     }
 
-    const updateC = (t, amp, decay, trueColors) => {
+    const updateC = (t, pulses, amp, decay, trueColors) => {
       const posA = sphGeo.attributes.position
       const colA = sphGeo.attributes.color
       let umax = 1e-9
@@ -434,72 +463,66 @@ export default function PointSources({
       sphGeo.computeVertexNormals()
     }
 
+    // One animation frame drives all three graphs, but each graph keeps its
+    // own clock: playing graph A never forces B or C to recompute, pausing
+    // one never pauses the others, and each runs its own pulse stream.
+    const runScene = (S, sim, key, playing, speed, dt, update) => {
+      const ctl = ctlRef.current
+      if (playing) {
+        const sdt = dt * speed
+        sim.t += sdt
+        // more entropy, more quark events
+        sim.spawnAcc += sdt * (2 + ctl.entropy / 120000)
+        while (sim.spawnAcc >= 1) {
+          sim.spawnAcc -= 1
+          spawnInto(sim, sim.t)
+        }
+        for (let i = sim.pulses.length - 1; i >= 0; i--) {
+          if (C * (sim.t - sim.pulses[i].t0) > DIE_R) sim.pulses.splice(i, 1)
+        }
+        // true colors: the spectrum bounds refit to the live pulses every
+        // frame, so each pulse burns its color on the current scale
+        if (ctl.trueColors) {
+          const qs = []
+          for (let i = 0; i < sim.pulses.length; i++) qs.push(sim.pulses[i].q)
+          const b = spectrumBounds(qs)
+          for (let i = 0; i < sim.pulses.length; i++) {
+            sim.pulses[i].col = energyColor(sim.pulses[i].q, b)
+          }
+        }
+        update()
+        S.timeTag.textContent = 't = ' + sim.t.toFixed(1) + ' s'
+        S.controls.update()
+        S.renderer.render(S.scene, S.camera)
+        return
+      }
+      // Paused: the sim clock is frozen, so the scene is static — no field
+      // recomputation and no renders, until the camera moves or a parameter
+      // changes. Orbiting while paused just re-renders the frozen frame.
+      S.controls.update()
+      let dirty = false
+      if (S.camDirty) { S.camDirty = false; dirty = true }
+      if (dirtyRef.current[key]) {
+        dirtyRef.current[key] = false
+        dirty = true
+        update()
+      }
+      if (dirty) S.renderer.render(S.scene, S.camera)
+    }
     let raf = 0
-    let t = 0
-    let spawnAcc = 0
     let last = performance.now()
     const loop = () => {
       raf = requestAnimationFrame(loop)
       const now = performance.now()
       const dt = Math.min((now - last) / 1000, 0.1)
       last = now
-      const st = stateRef.current
-      if (st.playing) {
-        const sdt = dt * st.speed
-        t += sdt
-        // more entropy, more quark events
-        spawnAcc += sdt * (2 + st.entropy / 120000)
-        while (spawnAcc >= 1) {
-          spawnAcc -= 1
-          spawn(t)
-        }
-        for (let i = pulses.length - 1; i >= 0; i--) {
-          if (C * (t - pulses[i].t0) > DIE_R) pulses.splice(i, 1)
-        }
-        // true colors: the spectrum bounds refit to the live pulses every
-        // frame, so each pulse burns its color on the current scale
-        if (st.trueColors) {
-          const qs = []
-          for (let i = 0; i < pulses.length; i++) qs.push(pulses[i].q)
-          const b = spectrumBounds(qs)
-          for (let i = 0; i < pulses.length; i++) {
-            pulses[i].col = energyColor(pulses[i].q, b)
-          }
-        }
-        updateA(t, st.decay, st.trueColors)
-        updateB(t, st.waveAmp, st.decay, st.trueColors)
-        updateC(t, st.waveAmp, st.decay, st.trueColors)
-        const label = 't = ' + t.toFixed(1) + ' s'
-        A.timeTag.textContent = label
-        B.timeTag.textContent = label
-        Cc.timeTag.textContent = label
-        A.controls.update()
-        B.controls.update()
-        Cc.controls.update()
-        A.renderer.render(A.scene, A.camera)
-        B.renderer.render(B.scene, B.camera)
-        Cc.renderer.render(Cc.scene, Cc.camera)
-        return
-      }
-      // Paused: the sim clock is frozen, so the scene is static — no field
-      // recomputation and no renders, until the camera moves or a parameter
-      // changes. Orbiting while paused just re-renders the frozen frame.
-      let camMoved = false
-      for (const S of [A, B, Cc]) {
-        S.controls.update()
-        if (S.camDirty) { S.camDirty = false; camMoved = true }
-      }
-      const paramsChanged = paramDirtyRef.current
-      paramDirtyRef.current = false
-      if (!camMoved && !paramsChanged) return
-      if (paramsChanged) {
-        updateA(t, st.decay, st.trueColors)
-        updateB(t, st.waveAmp, st.decay, st.trueColors)
-        updateC(t, st.waveAmp, st.decay, st.trueColors)
-      }
-      A.renderer.render(A.scene, A.camera)
-      B.renderer.render(B.scene, B.camera)
-      Cc.renderer.render(Cc.scene, Cc.camera)
+      const ctl = ctlRef.current
+      runScene(A, simA, 'A', ctl.playingA, ctl.speedA, dt,
+        () => updateA(simA.t, simA.pulses, ctl.decay, ctl.trueColors))
+      runScene(B, simB, 'B', ctl.playingB, ctl.speedB, dt,
+        () => updateB(simB.t, simB.pulses, ctl.waveAmp, ctl.decay, ctl.trueColors))
+      runScene(Cc, simC, 'C', ctl.playingC, ctl.speedC, dt,
+        () => updateC(simC.t, simC.pulses, ctl.waveAmp, ctl.decay, ctl.trueColors))
     }
     loop()
 
@@ -542,6 +565,7 @@ export default function PointSources({
             </>
           )}
         </p>
+        <Transport playing={playingA} speed={speedA} onPlayingChange={setPlayingA} onSpeedChange={setSpeedA} />
       </div>
 
       <div className="graph-box">
@@ -569,6 +593,7 @@ export default function PointSources({
             </>
           )}
         </p>
+        <Transport playing={playingB} speed={speedB} onPlayingChange={setPlayingB} onSpeedChange={setSpeedB} />
       </div>
 
       <div className="graph-box">
@@ -595,19 +620,7 @@ export default function PointSources({
             </>
           )}
         </p>
-        <div className="sim-transport">
-          <button
-            className="sim-item transport-play"
-            onClick={() => onPlayingChange && onPlayingChange(!playing)}
-            aria-pressed={playing}
-          >
-            {playing ? 'Pause' : 'Play'}
-          </button>
-          <div className="transport-speed">
-            <Slider label="speed" value={speed} min={0.1} max={3} step={0.1}
-              onChange={(v) => onSpeedChange && onSpeedChange(v)} format={(v) => `${v.toFixed(1)}×`} />
-          </div>
-        </div>
+        <Transport playing={playingC} speed={speedC} onPlayingChange={setPlayingC} onSpeedChange={setSpeedC} />
       </div>
 
       <div className="graph-box">

@@ -70,8 +70,6 @@ export default function QuarkSpace() {
   const [speedM, setSpeedM] = useState(1)
   const [playing, setPlaying] = useState(false)
   const [speed, setSpeed] = useState(1)
-  const [playingP, setPlayingP] = useState(false)
-  const [speedP, setSpeedP] = useState(1)
   const [decayP, setDecayP] = useState(0.35)
   const [decayM, setDecayM] = useState(0.35)
   const [decayC, setDecayC] = useState(0.35)
@@ -80,8 +78,6 @@ export default function QuarkSpace() {
   const [showC, setShowC] = useState(12)
   const [playingC1, setPlayingC1] = useState(false)
   const [speedC1, setSpeedC1] = useState(1)
-  const [playingC3, setPlayingC3] = useState(false)
-  const [speedC3, setSpeedC3] = useState(1)
   const [compCount, setCompCount] = useState(20)
 
   // Local amplitude at the arrow (θ = τ1). τ1/τ2 are angles that move
@@ -513,13 +509,13 @@ export default function QuarkSpace() {
                 fundamental's color. The second is the superposition on the
                 z = 0 slice — a fair sample of every direction. The third is
                 the whole: all the waves summed into one surface in 3D space.
-                All three share one clock, so they always show the same
-                instant.
+                Each graph runs its own clock, so one can play while the
+                others stay paused.
               </p>
             </div>
           </div>
 
-          <PointSources entropy={entropyT} waveAmp={waveAmpT} decay={decayP} playing={playingP} speed={speedP} onPlayingChange={setPlayingP} onSpeedChange={setSpeedP} />
+          <PointSources entropy={entropyT} waveAmp={waveAmpT} decay={decayP} />
           </>
           )}
           {sim === 'mass' && (
@@ -662,7 +658,7 @@ export default function QuarkSpace() {
 
           <ColorTheory entropy={entropyC} waveAmp={waveAmpC} shown={showC} showComponents={false} showEquations={false} />
           <FrequencyDistribution entropy={entropyC} shown={showC} />
-          <PointSources trueColors entropy={entropyC} waveAmp={waveAmpC} decay={decayC} playing={playingC3} speed={speedC3} onPlayingChange={setPlayingC3} onSpeedChange={setSpeedC3} />
+          <PointSources trueColors entropy={entropyC} waveAmp={waveAmpC} decay={decayC} />
           <ColorTheory entropy={entropyC} waveAmp={waveAmpC} shown={showC} playing={playingC1} speed={speedC1} onPlayingChange={setPlayingC1} onSpeedChange={setSpeedC1} showScale={false} showEquations={false} />
           </>
           )}
