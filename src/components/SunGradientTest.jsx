@@ -190,11 +190,32 @@ function planckNu(nu, T) {
 // and how fast a held color fades back toward the base color
 const HIT_THRESH = 0.02
 const HOLD_TAU = 40 // seconds to fade back toward the base color
+// thermal surface tuning: patches accumulate wave energy as heat (eV)
+// and radiate it away between hits
+const HEAT_GAIN = 5
+const COOL_TAU = 25 // seconds to cool back toward the base temperature
+const T_BASE = 1.2 // eV — below the visible band: dark red when cold
 
-function GradientSurface({ expRef, ctlRef, dirtyRef, phosphor = false }) {
+// wipe an accumulating surface: 'hold' restarts at the base color,
+// 'thermal' restarts cold
+function resetSurface(P, mode, sCount) {
+  for (let v = 0; v < sCount; v++) {
+    if (mode === 'thermal') {
+      P[v * 3] = T_BASE; P[v * 3 + 1] = 0; P[v * 3 + 2] = 0
+    } else {
+      P[v * 3] = 0.93; P[v * 3 + 1] = 0.91; P[v * 3 + 2] = 0.87
+    }
+  }
+}
+
+function GradientSurface({ expRef, ctlRef, dirtyRef, mode = 'flash' }) {
+  // mode: 'flash' (instantaneous), 'hold' (sample-and-hold mosaic),
+  // 'thermal' (accumulates heat, cools between hits)
+  const isAccum = mode !== 'flash'
   const mountRef = useRef(null)
-  // phosphor state lives in refs: the accumulated colors, which experiment
-  // they belong to, and the last sim-time seen (view-only mode)
+  // accumulated-surface state lives in refs: per-vertex memory (held
+  // colors for 'hold', temperature in eV for 'thermal'), and which
+  // experiment it belongs to
   const phosRef = useRef(null)
   const phosExpRef = useRef(null)
   const seenDirtyRef = useRef(0)
@@ -218,12 +239,10 @@ function GradientSurface({ expRef, ctlRef, dirtyRef, phosphor = false }) {
     sphWire.frustumCulled = false
     S.scene.add(sph, sphWire)
     const Uc = new Float32Array(sCount)
-    if (phosphor) {
-      // the accumulating surface starts at the base color everywhere
+    if (isAccum) {
+      // the accumulating surface starts cold everywhere
       const P = new Float32Array(sCount * 3)
-      for (let v = 0; v < sCount; v++) {
-        P[v * 3] = 0.93; P[v * 3 + 1] = 0.91; P[v * 3 + 2] = 0.87
-      }
+      resetSurface(P, mode, sCount)
       phosRef.current = P
     }
 
@@ -304,55 +323,76 @@ function GradientSurface({ expRef, ctlRef, dirtyRef, phosphor = false }) {
       const posA = sphGeo.attributes.position
       const colA = sphGeo.attributes.color
       const np = exp.pulses.length
-      const P = phosphor ? phosRef.current : null
+      const P = isAccum ? phosRef.current : null
       for (let v = 0; v < sCount; v++) {
         const x = sBase[v * 3], y = sBase[v * 3 + 1], z = sBase[v * 3 + 2]
-        let u = 0, mr = 0, mg = 0, mb = 0
+        let u = 0, mr = 0, mg = 0, mb = 0, er = 0
         for (let i = 0; i < np; i++) {
           const p = exp.pulses[i]
           const f = field(p, x, y, z, exp.t, ctl.waveAmp, ctl.decay)
           u += f // every wave ripples the surface, whatever its color
-          // but the accumulating surface only remembers visible colors:
-          // a hot leading edge or a cold trailing edge passes through
-          // without painting, so the surface keeps the previous color
-          if (P) {
-            const nu = p.E / H
-            if (nu <= VIS_LO || nu >= VIS_HI) continue
+          const w = Math.abs(f)
+          if (mode === 'flash') {
+            // additive mix: each pulse wears its *current* color — watch it
+            // cool as it climbs: ultraviolet clamp, through the visible,
+            // into the infrared clamp
+            const c = p.col
+            mr += w * c[0]; mg += w * c[1]; mb += w * c[2]
+            continue
           }
-          // additive mix: each pulse wears its *current* color — watch it
-          // cool as it climbs: ultraviolet clamp, through the visible,
-          // into the infrared clamp
-          const w = Math.abs(f), c = p.col
-          mr += w * c[0]; mg += w * c[1]; mb += w * c[2]
+          // the accumulating surfaces only see visible light: a hot
+          // leading edge or a cold trailing edge ripples through without
+          // painting or heating, so the surface keeps its previous state
+          const nu = p.E / H
+          if (nu <= VIS_LO || nu >= VIS_HI) continue
+          if (mode === 'hold') {
+            const c = p.col
+            mr += w * c[0]; mg += w * c[1]; mb += w * c[2]
+          } else {
+            er += w * (p.E / EV) // deposit the wave's photon energy, in eV
+          }
         }
         Uc[v] = u
-        if (!P) {
+        if (mode === 'flash') {
           const mx = Math.max(mr, mg, mb)
           if (mx > 1e-6) colA.setXYZ(v, mr / mx, mg / mx, mb / mx)
           else colA.setXYZ(v, 0.93, 0.91, 0.87) // quiet — neutral
           continue
         }
-        // sample-and-hold: the surface keeps the color of the most recent
-        // thing that hit it. A wavefront crossing the hit threshold repaints
-        // the vertex with the flash's hue; otherwise the held color just
-        // fades slowly back toward the base color. No averaging — colors
-        // stay pure, and the sphere becomes a slowly-evolving mosaic of
-        // recent landings instead of flickering back to bland.
         const o = v * 3
-        if (sdt > 0) {
-          const fade = Math.exp(-sdt / HOLD_TAU)
-          P[o] = P[o] * fade + 0.93 * (1 - fade)
-          P[o + 1] = P[o + 1] * fade + 0.91 * (1 - fade)
-          P[o + 2] = P[o + 2] * fade + 0.87 * (1 - fade)
-          const mx = Math.max(mr, mg, mb)
-          if (mx > HIT_THRESH) {
-            const inv = 1 / mx
-            P[o] = mr * inv
-            P[o + 1] = mg * inv
-            P[o + 2] = mb * inv
+        if (mode === 'hold') {
+          // sample-and-hold: the surface keeps the color of the most recent
+          // thing that hit it. A wavefront crossing the hit threshold repaints
+          // the vertex with the flash's hue; otherwise the held color just
+          // fades slowly back toward the base color. No averaging — colors
+          // stay pure, and the sphere becomes a slowly-evolving mosaic of
+          // recent landings instead of flickering back to bland.
+          if (sdt > 0) {
+            const fade = Math.exp(-sdt / HOLD_TAU)
+            P[o] = P[o] * fade + 0.93 * (1 - fade)
+            P[o + 1] = P[o + 1] * fade + 0.91 * (1 - fade)
+            P[o + 2] = P[o + 2] * fade + 0.87 * (1 - fade)
+            const mx = Math.max(mr, mg, mb)
+            if (mx > HIT_THRESH) {
+              const inv = 1 / mx
+              P[o] = mr * inv
+              P[o + 1] = mg * inv
+              P[o + 2] = mb * inv
+            }
           }
+          colA.setXYZ(v, P[o], P[o + 1], P[o + 2])
+          continue
         }
-        colA.setXYZ(v, P[o], P[o + 1], P[o + 2])
+        // thermal: the patch accumulates the energy of the visible waves
+        // that hit it and radiates it away between hits — fresh hits run
+        // hot and blue-white, neglected patches cool toward dark red,
+        // the sunspot-like ones
+        if (sdt > 0) {
+          P[o] += HEAT_GAIN * sdt * er
+          P[o] += (T_BASE - P[o]) * (1 - Math.exp(-sdt / COOL_TAU))
+        }
+        const tc = visibleColor((P[o] * EV) / H)
+        colA.setXYZ(v, tc[0] / 255, tc[1] / 255, tc[2] / 255)
       }
       for (let v = 0; v < sCount; v++) {
         const rNew = Math.max(0.6, Math.min(4.2, SURF_R0 + SURF_G * Uc[v]))
@@ -369,9 +409,9 @@ function GradientSurface({ expRef, ctlRef, dirtyRef, phosphor = false }) {
     // keeps its own experiment and doesn't record.
     const advance = (exp, ctl, sdt, recordLanding) => {
       exp.t += sdt
-      // more entropy, more quark events — firing rate doubled so the
-      // surface sees more action (the physics per journey is unchanged)
-      exp.spawnAcc += sdt * 2 * (2 + ctl.entropy / 120000)
+      // more entropy, more quark events (the physics per journey is
+      // unchanged by the firing rate)
+      exp.spawnAcc += sdt * ctl.fireRate * (2 + ctl.entropy / 120000)
       while (exp.spawnAcc >= 1) {
         exp.spawnAcc -= 1
         spawn(exp, exp.t)
@@ -394,10 +434,7 @@ function GradientSurface({ expRef, ctlRef, dirtyRef, phosphor = false }) {
 
     const resetPhosphor = () => {
       // a new experiment started — the surface forgets everything
-      const P = phosRef.current
-      for (let v = 0; v < sCount; v++) {
-        P[v * 3] = 0.93; P[v * 3 + 1] = 0.91; P[v * 3 + 2] = 0.87
-      }
+      resetSurface(phosRef.current, mode, sCount)
     }
 
     let raf = 0
@@ -409,7 +446,7 @@ function GradientSurface({ expRef, ctlRef, dirtyRef, phosphor = false }) {
       last = now
       const ctl = ctlRef.current
       const exp = expRef.current
-      if (phosphor) {
+      if (isAccum) {
         // independent experiment: its own pulses, its own clock
         if (ctl.playing) {
           const sdt = dt * ctl.speed
@@ -781,6 +818,13 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
   const accExpRef = useRef(null)
   if (!accExpRef.current) accExpRef.current = freshExperiment(entropy)
   const accCtlRef = useRef({})
+  // the thermal view: its own slower-firing experiment, so the cooling
+  // between hits is visible
+  const [thPlaying, setThPlaying] = useState(false)
+  const [thSpeed, setThSpeed] = useState(1)
+  const thExpRef = useRef(null)
+  if (!thExpRef.current) thExpRef.current = freshExperiment(entropy)
+  const thCtlRef = useRef({})
   const dirtyRef = useRef(0)
   const playingRef = useRef(false)
   playingRef.current = playing
@@ -798,14 +842,25 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
     accExpRef.current = freshExperiment(entropy)
     dirtyRef.current += 1
   }, [entropy])
+  useEffect(() => {
+    thExpRef.current = freshExperiment(entropy)
+    dirtyRef.current += 1
+  }, [entropy])
 
   ctlRef.current = {
     playing, speed, entropy, waveAmp, decay,
     S: Math.pow(10, scatLog),
+    fireRate: 2, // doubled so the surface sees more action
   }
   accCtlRef.current = {
     playing: accPlaying, speed: accSpeed, entropy, waveAmp, decay,
     S: 6e7, // locked at the standard scattering count — no slider
+    fireRate: 2,
+  }
+  thCtlRef.current = {
+    playing: thPlaying, speed: thSpeed, entropy, waveAmp, decay,
+    S: 6e7, // locked at the standard scattering count — no slider
+    fireRate: 0.5, // slow firing, so the cooling between hits is visible
   }
 
   const Sfmt = (v) => {
@@ -868,7 +923,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
         <div className="graph-title-row">
           <div className="graph-title">Climbing the gradient</div>
         </div>
-        <GradientSurface expRef={expRef} ctlRef={ctlRef} dirtyRef={dirtyRef} />
+        <GradientSurface expRef={expRef} ctlRef={ctlRef} dirtyRef={dirtyRef} mode="flash" />
         <p className="graph-note">
           Each pulse leaves its own generator sphere carrying its quark
           frequency — MeV gamma, ultraviolet clamp — and cools as it climbs
@@ -995,7 +1050,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
         <div className="graph-title-row">
           <div className="graph-title">The sun that remembers</div>
         </div>
-        <GradientSurface expRef={accExpRef} ctlRef={accCtlRef} dirtyRef={dirtyRef} phosphor />
+        <GradientSurface expRef={accExpRef} ctlRef={accCtlRef} dirtyRef={dirtyRef} mode="hold" />
         <p className="graph-note">
           Its own experiment, its own play and clock — independent of the
           flash view above. This surface keeps the color of the most recent
@@ -1013,6 +1068,30 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           speed={accSpeed}
           onPlayingChange={setAccPlaying}
           onSpeedChange={setAccSpeed}
+        />
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">The sun that cools</div>
+        </div>
+        <GradientSurface expRef={thExpRef} ctlRef={thCtlRef} dirtyRef={dirtyRef} mode="thermal" />
+        <p className="graph-note">
+          Its own experiment, its own play and clock — firing slower, so
+          the cooling between hits is visible. Each patch of surface
+          accumulates the energy of the visible waves that hit it and
+          radiates it away when nothing hits: a fresh hit flares hot and
+          blue-white, then fades through yellow and orange toward dark red
+          as it cools. The dark patches are the honest sunspots — regions
+          the waves haven't visited in a while. Ultraviolet and infrared
+          waves still ripple the surface as they pass; they just don't
+          heat it.
+        </p>
+        <Transport
+          playing={thPlaying}
+          speed={thSpeed}
+          onPlayingChange={setThPlaying}
+          onSpeedChange={setThSpeed}
         />
       </div>
     </>
