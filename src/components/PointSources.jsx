@@ -433,7 +433,10 @@ export default function PointSources({
       const dt = Math.min((now - last) / 1000, 0.1)
       last = now
       const st = stateRef.current
-      if (st.playing) {
+      // Pause freezes the frame completely — no field recomputation and no
+      // renders, so a paused graph costs nothing on the GPU/CPU.
+      if (!st.playing) return
+      {
         const sdt = dt * st.speed
         t += sdt
         // more entropy, more quark events

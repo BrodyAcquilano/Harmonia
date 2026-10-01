@@ -236,9 +236,14 @@ export default function ColorTheory({
       const now = performance.now()
       const dt = Math.min((now - last) / 1000, 0.1)
       last = now
-      if (stateRef.current.playing) simT += dt * stateRef.current.speed
+      // Pause freezes the frame completely — no redraw, so a paused graph
+      // costs nothing on the GPU/CPU. The explicit draw() below still paints
+      // one fresh frame whenever the data (entropy/components) changes.
+      if (!stateRef.current.playing) return
+      simT += dt * stateRef.current.speed
       draw()
     }
+    draw()
     loop()
     const ro = new ResizeObserver(draw)
     ro.observe(canvas)

@@ -180,7 +180,10 @@ export default function MassLattice({
       const st = stateRef.current
       const C = coeffRef.current
       const dt = Math.min(clock.getDelta(), 0.05)
-      if (st.playing) simT += dt * st.speed
+      // Pause freezes the frame completely — no wave recomputation and no
+      // render, so a paused graph costs nothing on the GPU/CPU.
+      if (!st.playing) return
+      simT += dt * st.speed
       const wt = OMEGA * simT
       const Cx = C[0], Cy = C[1], Cz = C[2]
       for (let i = 0; i < N; i++) {

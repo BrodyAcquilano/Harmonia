@@ -227,11 +227,12 @@ export default function MassCreation({
       const st = stateRef.current
       const C = coeffRef.current
       const dt = Math.min(clock.getDelta(), 0.05)
-      if (st.playing) {
-        simT += dt * st.speed
-        spawnAcc += dt * st.speed * SPAWN_RATE
-        while (spawnAcc >= 1) { spawnAcc -= 1; fireQuark() }
-      }
+      // Pause freezes the frame completely — no wave recomputation and no
+      // render, so a paused graph costs nothing on the GPU/CPU.
+      if (!st.playing) return
+      simT += dt * st.speed
+      spawnAcc += dt * st.speed * SPAWN_RATE
+      while (spawnAcc >= 1) { spawnAcc -= 1; fireQuark() }
 
       // displace every unit mass by the resultant wave at its rest position
       const wt = OMEGA * simT

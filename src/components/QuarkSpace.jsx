@@ -78,8 +78,10 @@ export default function QuarkSpace() {
   const [entropyC, setEntropyC] = useState(60000)
   const [waveAmpC, setWaveAmpC] = useState(0.2)
   const [showC, setShowC] = useState(12)
-  const [playingCol, setPlayingCol] = useState(true)
-  const [speedCol, setSpeedCol] = useState(1)
+  const [playingC1, setPlayingC1] = useState(true)
+  const [speedC1, setSpeedC1] = useState(1)
+  const [playingC3, setPlayingC3] = useState(true)
+  const [speedC3, setSpeedC3] = useState(1)
   const [compCount, setCompCount] = useState(20)
 
   // Local amplitude at the arrow (θ = τ1). τ1/τ2 are angles that move
@@ -646,21 +648,22 @@ export default function QuarkSpace() {
                 anymore; energy decides.
               </p>
               <p>
-                The Space-Time Domain's three graphs are remade below in true
-                colors: the individual firings, the slice, and the 3D surface —
-                every point wearing the additive mix of the pulses reaching
-                it. Then the components drawn one by one in 1D, so you can
-                watch the sum wash toward white. Last, the relative abundance
-                of each frequency on the spectrum — which end of the scale
-                the resonator actually lives at.
+                Right below the scale, the relative abundance of each
+                frequency on the spectrum — which end of the scale the
+                resonator actually lives at. Then the Space-Time Domain's
+                three graphs remade in true colors: the individual firings,
+                the slice, and the 3D surface — every point wearing the
+                additive mix of the pulses reaching it. Last, the components
+                drawn one by one in 1D, so you can watch the sum wash toward
+                white.
               </p>
             </div>
           </div>
 
-          <ColorTheory entropy={entropyC} waveAmp={waveAmpC} shown={showC} playing={playingCol} speed={speedCol} onPlayingChange={setPlayingCol} onSpeedChange={setSpeedCol} showComponents={false} showEquations={false} />
-          <PointSources trueColors entropy={entropyC} waveAmp={waveAmpC} decay={decayC} playing={playingCol} speed={speedCol} onPlayingChange={setPlayingCol} onSpeedChange={setSpeedCol} />
-          <ColorTheory entropy={entropyC} waveAmp={waveAmpC} shown={showC} playing={playingCol} speed={speedCol} onPlayingChange={setPlayingCol} onSpeedChange={setSpeedCol} showScale={false} showEquations={false} />
+          <ColorTheory entropy={entropyC} waveAmp={waveAmpC} shown={showC} showComponents={false} showEquations={false} />
           <FrequencyDistribution entropy={entropyC} shown={showC} />
+          <PointSources trueColors entropy={entropyC} waveAmp={waveAmpC} decay={decayC} playing={playingC3} speed={speedC3} onPlayingChange={setPlayingC3} onSpeedChange={setSpeedC3} />
+          <ColorTheory entropy={entropyC} waveAmp={waveAmpC} shown={showC} playing={playingC1} speed={speedC1} onPlayingChange={setPlayingC1} onSpeedChange={setSpeedC1} showScale={false} showEquations={false} />
           </>
           )}
         </div>
