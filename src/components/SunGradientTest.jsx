@@ -193,7 +193,7 @@ const HOLD_TAU = 40 // seconds to fade back toward the base color
 // thermal surface tuning: patches accumulate wave energy as heat (eV)
 // and radiate it away between hits
 const HEAT_GAIN = 5
-const COOL_TAU = 25 // seconds to cool back toward the base temperature
+const COOL_TAU = 40 // seconds to cool back toward the base temperature
 const T_BASE = 1.2 // eV — below the visible band: dark red when cold
 
 // wipe an accumulating surface: 'hold' restarts at the base color,
