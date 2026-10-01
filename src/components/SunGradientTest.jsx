@@ -310,15 +310,15 @@ function GradientSurface({ expRef, ctlRef, dirtyRef, phosphor = false }) {
         let u = 0, mr = 0, mg = 0, mb = 0
         for (let i = 0; i < np; i++) {
           const p = exp.pulses[i]
-          // the accumulating surface only sees visible colors: skip the
-          // ultraviolet/infrared clamps, so a hot leading edge or a cold
-          // trailing edge can't wash out the mosaic
+          const f = field(p, x, y, z, exp.t, ctl.waveAmp, ctl.decay)
+          u += f // every wave ripples the surface, whatever its color
+          // but the accumulating surface only remembers visible colors:
+          // a hot leading edge or a cold trailing edge passes through
+          // without painting, so the surface keeps the previous color
           if (P) {
             const nu = p.E / H
             if (nu <= VIS_LO || nu >= VIS_HI) continue
           }
-          const f = field(p, x, y, z, exp.t, ctl.waveAmp, ctl.decay)
-          u += f
           // additive mix: each pulse wears its *current* color — watch it
           // cool as it climbs: ultraviolet clamp, through the visible,
           // into the infrared clamp
@@ -997,10 +997,11 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           thing that hit it: when a wavefront crosses, the surface takes
           that flash's color and holds it, fading slowly back toward neutral
           until the next wave repaints it. Only visible colors paint it —
-          the ultraviolet and infrared clamps are skipped, so a hot leading
-          edge can't wash out the mosaic. The result is a slowly-evolving
-          mosaic of recent landings instead of a sphere flickering back to
-          bland between flashes.
+          ultraviolet and infrared waves still ripple the surface as they
+          pass, they just don't show their color, so the patch keeps the
+          previous one. The result is a slowly-evolving mosaic of recent
+          landings instead of a sphere flickering back to bland between
+          flashes.
         </p>
         <Transport
           playing={accPlaying}
