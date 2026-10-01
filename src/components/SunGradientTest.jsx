@@ -285,9 +285,7 @@ const FORGET_N = 48 // 12 packets per quark frequency
 // thermal-surface tuning for the forget view: each escape splashes its
 // light's energy as heat onto the patch it exits through, which then
 // cools like the cools view
-const FORGET_GAIN = 3   // peak patch temperature per eV of escaping light, at the splash center
 const SPLASH_SIG = 0.18 // radians — the splash patch size
-const FORGET_COOL_TAU = 90 // seconds — slower fade than the cools view's 40
 // forget sphere: only the visible band produces color — patch temperature
 // mapped to its actual spectral color; infrared and ultraviolet patches
 // are black, invisible to eyes
@@ -1031,23 +1029,24 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       // heat in a small patch around its exit direction
       if (exp.splashes.length) {
         for (const sp of exp.splashes) {
-          // paint the patch up to the splash's own temperature — a fresh
-          // escape repaints its patch, but repeated hits can't stack past
-          // it, so the sphere can't saturate at the ultraviolet clamp
-          const peak = FORGET_GAIN * (sp.nuOut * H) / EV
+          // only visible light paints — ultraviolet and infrared escapes
+          // are ignored by the surface altogether, leaving no trace
+          if (sp.nuOut < VIS_LO || sp.nuOut > VIS_HI) continue
+          // the patch takes the light's actual color — a new visible hit
+          // repaints it, then it cools back to black between hits
+          const peak = (sp.nuOut * H) / EV
           for (let v = 0; v < sCount; v++) {
             const d = uDir[v * 3] * sp.dx + uDir[v * 3 + 1] * sp.dy + uDir[v * 3 + 2] * sp.dz
             if (d < 0.85) continue
             const o = v * 3
-            const target = T_BASE + (peak - T_BASE) * Math.exp(-(1 - d) / (SPLASH_SIG * SPLASH_SIG))
-            if (target > P[o]) P[o] = target
+            P[o] = T_BASE + (peak - T_BASE) * Math.exp(-(1 - d) / (SPLASH_SIG * SPLASH_SIG))
           }
         }
         exp.splashes.length = 0
       }
       const colA = sphGeo.attributes.color
       const posA = sphGeo.attributes.position
-      const coolF = sdt > 0 ? (1 - Math.exp(-sdt / FORGET_COOL_TAU)) : 0
+      const coolF = sdt > 0 ? (1 - Math.exp(-sdt / COOL_TAU)) : 0
       const rippleGain = ctlRef.current.ripple ?? 1
       // prune spent waves — ripples are pushed in time order
       while (exp.ripples.length && exp.t - exp.ripples[0].t0 > 4 * RIPPLE_TAU) exp.ripples.shift()
@@ -1586,15 +1585,15 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           each packet's frequency snaps to the local thermal peak, 2.8kT/h,
           and rides it outward: ultraviolet in the deep interior,
           cooling through the visible near the surface. The sphere itself
-          is painted like the cools view — each escape splashes its light
-          onto the patch it exits through, and only the visible band can
-          color it: patches hotter or cooler than visible show black,
-          invisible to eyes, and glow with their actual spectral color
-          while they cool through the band — and
-          launches a wave there too, its amplitude the escaping photon's
-          energy, rippling outward and dying away (slowed down so we can
-          see it). The ripple slider scales the waves only; the colors
-          are untouched.
+          is painted like the cools view — but only visible light paints:
+          ultraviolet and infrared escapes are ignored by the surface
+          altogether, so they can't overtake the colors. A visible hit
+          paints its patch with its actual color, which cools back to
+          black on the 40-second tau; the next visible hit repaints it —
+          and every escape launches a wave there too, its amplitude the
+          escaping photon's energy, rippling outward and dying away
+          (slowed down so we can see it). The ripple slider scales the
+          waves only; the colors are untouched.
         </p>
         <Transport
           playing={frPlaying}
