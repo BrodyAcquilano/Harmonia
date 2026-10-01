@@ -189,7 +189,7 @@ function planckNu(nu, T) {
 // sample-and-hold tuning: the flash strength that counts as a "hit,"
 // and how fast a held color fades back toward the base color
 const HIT_THRESH = 0.02
-const HOLD_TAU = 25 // seconds to fade back toward the base color
+const HOLD_TAU = 40 // seconds to fade back toward the base color
 
 function GradientSurface({ expRef, ctlRef, dirtyRef, phosphor = false }) {
   const mountRef = useRef(null)
@@ -197,7 +197,6 @@ function GradientSurface({ expRef, ctlRef, dirtyRef, phosphor = false }) {
   // they belong to, and the last sim-time seen (view-only mode)
   const phosRef = useRef(null)
   const phosExpRef = useRef(null)
-  const lastTRef = useRef(0)
   const seenDirtyRef = useRef(0)
 
   useEffect(() => {
@@ -311,6 +310,13 @@ function GradientSurface({ expRef, ctlRef, dirtyRef, phosphor = false }) {
         let u = 0, mr = 0, mg = 0, mb = 0
         for (let i = 0; i < np; i++) {
           const p = exp.pulses[i]
+          // the accumulating surface only sees visible colors: skip the
+          // ultraviolet/infrared clamps, so a hot leading edge or a cold
+          // trailing edge can't wash out the mosaic
+          if (P) {
+            const nu = p.E / H
+            if (nu <= VIS_LO || nu >= VIS_HI) continue
+          }
           const f = field(p, x, y, z, exp.t, ctl.waveAmp, ctl.decay)
           u += f
           // additive mix: each pulse wears its *current* color — watch it
@@ -358,6 +364,42 @@ function GradientSurface({ expRef, ctlRef, dirtyRef, phosphor = false }) {
       sphGeo.computeVertexNormals()
     }
 
+    // one experiment step: spawn, age, cool, and remove landed pulses.
+    // recordLanding feeds the measurement graphs — the accumulating view
+    // keeps its own experiment and doesn't record.
+    const advance = (exp, ctl, sdt, recordLanding) => {
+      exp.t += sdt
+      // more entropy, more quark events — firing rate doubled so the
+      // surface sees more action (the physics per journey is unchanged)
+      exp.spawnAcc += sdt * 2 * (2 + ctl.entropy / 120000)
+      while (exp.spawnAcc >= 1) {
+        exp.spawnAcc -= 1
+        spawn(exp, exp.t)
+      }
+      for (let i = exp.pulses.length - 1; i >= 0; i--) {
+        const p = exp.pulses[i]
+        p.age = (p.age || 0) + sdt
+        // the outward wavefront climbs: x = r/R_sun
+        const xNew = Math.min(1, p.x0 + (C * p.age) / SURF_R0)
+        const dN = ctl.S * p.sq * ((xNew - p.x) / (1 - p.x0))
+        if (dN > 0) p.E = coolStep(p.E, xNew, dN)
+        p.x = xNew
+        p.col = visibleColor(p.E / H)
+        if (xNew >= 1) {
+          if (recordLanding) land(exp, p)
+          exp.pulses.splice(i, 1)
+        }
+      }
+    }
+
+    const resetPhosphor = () => {
+      // a new experiment started — the surface forgets everything
+      const P = phosRef.current
+      for (let v = 0; v < sCount; v++) {
+        P[v * 3] = 0.93; P[v * 3 + 1] = 0.91; P[v * 3 + 2] = 0.87
+      }
+    }
+
     let raf = 0
     let last = performance.now()
     const loop = () => {
@@ -368,11 +410,22 @@ function GradientSurface({ expRef, ctlRef, dirtyRef, phosphor = false }) {
       const ctl = ctlRef.current
       const exp = expRef.current
       if (phosphor) {
-        // view-only: this canvas follows the shared experiment — it never
-        // advances the pulses itself. Colors are deposited only for the
-        // sim-time that actually elapsed since this view's last frame.
-        const sdtEff = ctl.playing ? Math.max(0, exp.t - lastTRef.current) : 0
-        lastTRef.current = exp.t
+        // independent experiment: its own pulses, its own clock
+        if (ctl.playing) {
+          const sdt = dt * ctl.speed
+          if (phosExpRef.current !== exp) {
+            phosExpRef.current = exp
+            resetPhosphor()
+          }
+          advance(exp, ctl, sdt, false)
+          update(sdt)
+          S.timeTag.textContent = 't = ' + exp.t.toFixed(1) + ' s'
+          S.controls.update()
+          S.renderer.render(S.scene, S.camera)
+          return
+        }
+        // paused: frozen — no recomputation, no renders, until the camera
+        // moves or a parameter changes
         S.controls.update()
         let dirty = false
         if (S.camDirty) { S.camDirty = false; dirty = true }
@@ -380,45 +433,20 @@ function GradientSurface({ expRef, ctlRef, dirtyRef, phosphor = false }) {
           seenDirtyRef.current = dirtyRef.current
           dirty = true
         }
-        if (sdtEff > 0 || dirty) {
+        if (dirty) {
           if (phosExpRef.current !== exp) {
-            // a new experiment started — the surface forgets everything
             phosExpRef.current = exp
-            const P = phosRef.current
-            for (let v = 0; v < sCount; v++) {
-              P[v * 3] = 0.93; P[v * 3 + 1] = 0.91; P[v * 3 + 2] = 0.87
-            }
+            resetPhosphor()
           }
-          update(sdtEff)
-          S.timeTag.textContent = 't = ' + exp.t.toFixed(1) + ' s · landed ' + exp.histN
+          update(0)
+          S.timeTag.textContent = 't = ' + exp.t.toFixed(1) + ' s'
           S.renderer.render(S.scene, S.camera)
         }
         return
       }
       if (ctl.playing) {
         const sdt = dt * ctl.speed
-        exp.t += sdt
-        // more entropy, more quark events — firing rate doubled so the
-        // surface sees more action (the physics per journey is unchanged)
-        exp.spawnAcc += sdt * 2 * (2 + ctl.entropy / 120000)
-        while (exp.spawnAcc >= 1) {
-          exp.spawnAcc -= 1
-          spawn(exp, exp.t)
-        }
-        for (let i = exp.pulses.length - 1; i >= 0; i--) {
-          const p = exp.pulses[i]
-          p.age = (p.age || 0) + sdt
-          // the outward wavefront climbs: x = r/R_sun
-          const xNew = Math.min(1, p.x0 + (C * p.age) / SURF_R0)
-          const dN = ctl.S * p.sq * ((xNew - p.x) / (1 - p.x0))
-          if (dN > 0) p.E = coolStep(p.E, xNew, dN)
-          p.x = xNew
-          p.col = visibleColor(p.E / H)
-          if (xNew >= 1) {
-            land(exp, p)
-            exp.pulses.splice(i, 1)
-          }
-        }
+        advance(exp, ctl, sdt, true)
         update(sdt)
         S.timeTag.textContent = 't = ' + exp.t.toFixed(1) + ' s · landed ' + exp.histN
         S.controls.update()
@@ -746,20 +774,32 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
   const [scatLog, setScatLog] = useState(Math.log10(6e7))
   const expRef = useRef(null)
   if (!expRef.current) expRef.current = freshExperiment(entropy)
+  // the accumulating view runs its own experiment — own pulses, own clock,
+  // own play/pause/speed — so the two surfaces are independent
+  const [accPlaying, setAccPlaying] = useState(false)
+  const [accSpeed, setAccSpeed] = useState(1)
+  const accExpRef = useRef(null)
+  if (!accExpRef.current) accExpRef.current = freshExperiment(entropy)
+  const accCtlRef = useRef({})
   const dirtyRef = useRef(0)
   const playingRef = useRef(false)
   playingRef.current = playing
   const ctlRef = useRef({})
 
-  // a new entropy seed or a new scattering count restarts the experiment —
+  // a new entropy seed or a new scattering count restarts both experiments —
   // the graphs rebuild themselves from the new recorded history
   useEffect(() => {
     expRef.current = freshExperiment(entropy)
+    accExpRef.current = freshExperiment(entropy)
     dirtyRef.current += 1
   }, [entropy, scatLog])
 
   ctlRef.current = {
     playing, speed, entropy, waveAmp, decay,
+    S: Math.pow(10, scatLog),
+  }
+  accCtlRef.current = {
+    playing: accPlaying, speed: accSpeed, entropy, waveAmp, decay,
     S: Math.pow(10, scatLog),
   }
 
@@ -950,17 +990,24 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
         <div className="graph-title-row">
           <div className="graph-title">The sun that remembers</div>
         </div>
-        <GradientSurface expRef={expRef} ctlRef={ctlRef} dirtyRef={dirtyRef} phosphor />
+        <GradientSurface expRef={accExpRef} ctlRef={accCtlRef} dirtyRef={dirtyRef} phosphor />
         <p className="graph-note">
-          The same pulses as the experiment above — but this surface keeps
-          the color of the most recent thing that hit it. When a wavefront
-          crosses, the surface takes that flash's color and holds it, fading
-          slowly back toward neutral until the next wave repaints it — so
-          the sphere becomes a slowly-evolving mosaic of recent landings
-          instead of flickering back to bland between flashes. This view
-          follows the experiment — press play above; it needs no controls
-          of its own.
+          Its own experiment, its own play and clock — independent of the
+          flash view above. This surface keeps the color of the most recent
+          thing that hit it: when a wavefront crosses, the surface takes
+          that flash's color and holds it, fading slowly back toward neutral
+          until the next wave repaints it. Only visible colors paint it —
+          the ultraviolet and infrared clamps are skipped, so a hot leading
+          edge can't wash out the mosaic. The result is a slowly-evolving
+          mosaic of recent landings instead of a sphere flickering back to
+          bland between flashes.
         </p>
+        <Transport
+          playing={accPlaying}
+          speed={accSpeed}
+          onPlayingChange={setAccPlaying}
+          onSpeedChange={setAccSpeed}
+        />
       </div>
     </>
   )
