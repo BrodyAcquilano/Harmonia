@@ -8,6 +8,7 @@ import ConvolutionSphere from './ConvolutionSphere.jsx'
 import TimeDomain from './TimeDomain.jsx'
 import MassLattice from './MassLattice.jsx'
 import MassCreation from './MassCreation.jsx'
+import PointSources from './PointSources.jsx'
 import Fundamental20 from './Fundamental20.jsx'
 
 /* The Quark Space: a convolution of energy and mass and space and time.
@@ -68,6 +69,8 @@ export default function QuarkSpace() {
   const [speedM, setSpeedM] = useState(1)
   const [playing, setPlaying] = useState(true)
   const [speed, setSpeed] = useState(1)
+  const [playingP, setPlayingP] = useState(true)
+  const [speedP, setSpeedP] = useState(1)
   const [compCount, setCompCount] = useState(20)
 
   // Local amplitude at the arrow (θ = τ1). τ1/τ2 are angles that move
@@ -472,6 +475,31 @@ export default function QuarkSpace() {
               </div>
             </div>
           </div>
+
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Point Sources</h2>
+            </div>
+            <div className="quark-intro-body">
+              <p>
+                The Mass Creation firing process, but every firing launches a
+                wave instead of a mass: quarks fire at random points inside
+                the cube, each in a random direction in x, y and z. Watch what
+                all the waves look like in 3D space, coming from different
+                points at once.
+              </p>
+              <p>
+                The first graph shows the individual components — every live
+                pulse as its own traveling wave packet, each in its
+                fundamental's color. The second graph is the superposition of
+                all the waves, combined into one surface wave on the z = 0
+                slice. Both graphs share one clock, so they always show the
+                same instant.
+              </p>
+            </div>
+          </div>
+
+          <PointSources entropy={entropyT} waveAmp={waveAmpT} playing={playingP} speed={speedP} onPlayingChange={setPlayingP} onSpeedChange={setSpeedP} />
           </>
           )}
           {sim === 'mass' && (
