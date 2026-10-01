@@ -10,6 +10,7 @@ import MassLattice from './MassLattice.jsx'
 import MassCreation from './MassCreation.jsx'
 import PointSources from './PointSources.jsx'
 import ColorTheory, { FrequencyDistribution, spectrumBounds, spectrumColor } from './ColorTheory.jsx'
+import ModellingSun from './ModellingSun.jsx'
 import Fundamental20 from './Fundamental20.jsx'
 
 // the energy-spectrum legend for the Space-Time Domain graphs: the same
@@ -72,7 +73,7 @@ export default function QuarkSpace() {
   const [tau1, setTau1] = useState(0) // angle on the mass-wave-frequency axis — moves the arrow
   const [tau2, setTau2] = useState(0) // angle on the energy-wave-phase axis — moves the arrow
   const [waveAmp, setWaveAmp] = useState(0.2)
-  const [sim, setSim] = useState('sphere') // 'sphere' | 'surface' | 'time' | 'mass'
+  const [sim, setSim] = useState('sphere') // 'sphere' | 'surface' | 'time' | 'mass' | 'color' | 'sun'
   const [entropyT, setEntropyT] = useState(60000)
   const [waveAmpT, setWaveAmpT] = useState(0.2)
   const [entropyM, setEntropyM] = useState(60000)
@@ -92,6 +93,9 @@ export default function QuarkSpace() {
   const [playingC1, setPlayingC1] = useState(false)
   const [speedC1, setSpeedC1] = useState(1)
   const [compCount, setCompCount] = useState(20)
+  const [entropyS, setEntropyS] = useState(60000)
+  const [waveAmpS, setWaveAmpS] = useState(0.2)
+  const [decayS, setDecayS] = useState(0.35)
 
   // Local amplitude at the arrow (θ = τ1). τ1/τ2 are angles that move
   // the arrow — they never reshape the wave. Mass is carried as amplitude
@@ -172,6 +176,14 @@ export default function QuarkSpace() {
               onClick={() => setSim('color')}
             >
               Color Theory
+            </button>
+            <button
+              className="sim-item"
+              role="tab"
+              aria-selected={sim === 'sun'}
+              onClick={() => setSim('sun')}
+            >
+              Modelling the Sun
             </button>
           </div>
         </nav>
@@ -678,6 +690,11 @@ export default function QuarkSpace() {
           <ColorTheory entropy={entropyC} waveAmp={waveAmpC} shown={showC} playing={playingC1} speed={speedC1} onPlayingChange={setPlayingC1} onSpeedChange={setSpeedC1} showScale={false} showEquations={false} />
           </>
           )}
+          {sim === 'sun' && (
+          <>
+            <ModellingSun entropy={entropyS} waveAmp={waveAmpS} decay={decayS} />
+          </>
+          )}
         </div>
 
         <div className="lab-side">
@@ -878,6 +895,31 @@ export default function QuarkSpace() {
             <Slider label="d" value={decayC} min={0} max={1} step={0.01}
               onChange={setDecayC} format={(v) => v.toFixed(2)} />
             <p className="graph-note">The 3D pulses fade as they age — 0 is no decay, 1 dies fast.</p>
+          </div>
+
+          </>
+          )}
+          {sim === 'sun' && (
+          <>
+          <div className="control-group">
+            <h3>Entropy</h3>
+            <Slider label="s" value={entropyS} min={0} max={1000000} step={1}
+              onChange={setEntropyS} format={(v) => v.toFixed(0)} />
+            <p className="graph-note">Reseeds the firings — and fires the pulses faster.</p>
+          </div>
+
+          <div className="control-group">
+            <h3>Wave</h3>
+            <Slider label="a" value={waveAmpS} min={0} max={0.2} step={0.01}
+              onChange={setWaveAmpS} format={(v) => v.toFixed(2)} />
+            <p className="graph-note">One wave per eigenstate at amplitude a/√k — the surface is normalized, so this sets the ripple height, not the color.</p>
+          </div>
+
+          <div className="control-group">
+            <h3>Decay</h3>
+            <Slider label="d" value={decayS} min={0} max={1} step={0.01}
+              onChange={setDecayS} format={(v) => v.toFixed(2)} />
+            <p className="graph-note">The pulses fade as they age — 0 is no decay, 1 dies fast. The gradient sets the color; decay only thins the waves.</p>
           </div>
 
           </>
