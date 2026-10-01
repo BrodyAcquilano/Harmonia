@@ -95,6 +95,10 @@ const SURF_G = 2.5
 const SURF_SEG = 56
 const SURF_RINGS = 40
 const R_IN = 0.9 // the hidden inner sphere where quarks fire
+// the generator spheres: R_gen = band × GEN_BASE, radii in the ratio
+// 1:2:3:4 — the f_q sphere sits at half the sun's radius, the 4/3 f_q
+// sphere reaches two-thirds of the way out
+const GEN_BASE = 0.5 * SURF_R0
 
 const BANDS = [FQ / 3, (2 * FQ) / 3, FQ, (4 * FQ) / 3]
 const BAND_NAMES = ['1/3 f_q', '2/3 f_q', 'f_q', '4/3 f_q']
@@ -211,10 +215,10 @@ function GradientSurface({ expRef, ctlRef, dirtyRef }) {
       const band = Math.abs(q) / 3 // 1/3, 2/3, 1, 4/3
       // each fundamental is born in its own sphere, radii in the ratio
       // 1:2:3:4 — the 1/3 f_q sphere deepest, the 4/3 f_q sphere reaching
-      // past the old inner sphere toward the surface. Higher-frequency
+      // two-thirds of the way to the surface. Higher-frequency
       // quark combinations assemble where the pressure is lower, so they
       // have less gradient left to climb and cool less.
-      const Rg = band * R_IN
+      const Rg = band * GEN_BASE
       const rr = Rg * Math.cbrt(rng())
       const th = rng() * Math.PI * 2
       const ph = Math.acos(2 * rng() - 1)
@@ -825,9 +829,9 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           </p>
           <p>
             <em>Birth spheres</em> — each fundamental is born in its own
-            sphere of radius R<sub>gen</sub> = (ν<sub>in</sub>/f<sub>q</sub>)·R<sub>in</sub>,
+            sphere of radius R<sub>gen</sub> = (ν<sub>in</sub>/f<sub>q</sub>)·R<sub>☉</sub>/2,
             in the ratio 1:2:3:4: the 1/3 f<sub>q</sub> sphere deepest, the
-            4/3 f<sub>q</sub> sphere reaching 0.52 R<sub>☉</sub>. A journey
+            4/3 f<sub>q</sub> sphere reaching 0.67 R<sub>☉</sub>. A journey
             starting at fractional radius x<sub>0</sub> gets
             S(1−x<sub>0</sub>)<sup>2</sup> scatterings — random-walk scaling,
             steps ∝ (optical depth)<sup>2</sup> — so shallower births
