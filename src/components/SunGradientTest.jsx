@@ -186,8 +186,19 @@ function planckNu(nu, T) {
 }
 
 // ---- the 3D surface: watch the pulses cool as they climb ----
-function GradientSurface({ expRef, ctlRef, dirtyRef }) {
+// sample-and-hold tuning: the flash strength that counts as a "hit,"
+// and how fast a held color fades back toward the base color
+const HIT_THRESH = 0.02
+const HOLD_TAU = 25 // seconds to fade back toward the base color
+
+function GradientSurface({ expRef, ctlRef, dirtyRef, phosphor = false }) {
   const mountRef = useRef(null)
+  // phosphor state lives in refs: the accumulated colors, which experiment
+  // they belong to, and the last sim-time seen (view-only mode)
+  const phosRef = useRef(null)
+  const phosExpRef = useRef(null)
+  const lastTRef = useRef(0)
+  const seenDirtyRef = useRef(0)
 
   useEffect(() => {
     const S = setupScene(mountRef.current)
@@ -208,6 +219,14 @@ function GradientSurface({ expRef, ctlRef, dirtyRef }) {
     sphWire.frustumCulled = false
     S.scene.add(sph, sphWire)
     const Uc = new Float32Array(sCount)
+    if (phosphor) {
+      // the accumulating surface starts at the base color everywhere
+      const P = new Float32Array(sCount * 3)
+      for (let v = 0; v < sCount; v++) {
+        P[v * 3] = 0.93; P[v * 3 + 1] = 0.91; P[v * 3 + 2] = 0.87
+      }
+      phosRef.current = P
+    }
 
     const spawn = (exp, t) => {
       const rng = exp.rng
@@ -235,10 +254,13 @@ function GradientSurface({ expRef, ctlRef, dirtyRef }) {
         x: x0,
         x0,
         // random-walk scaling: the scatterings needed to escape go as the
-        // square of the remaining optical depth, so a journey starting at
-        // x0 gets S(1−x0)² scatterings. Without this, the same S spread
-        // over a shorter path would cool shallow births *more*, not less.
-        sq: (1 - x0) * (1 - x0),
+        // optical depth to the surface raised to a power — 2 for a uniform
+        // medium, steepened to 2.5 here as a small step toward a
+        // centrally-concentrated star, where the optical depth from a birth
+        // radius grows faster than the remaining path. Without this, the
+        // same S spread over a shorter path would cool shallow births
+        // *more*, not less.
+        sq: Math.pow(1 - x0, 2.5),
         nuIn,
         E: H * nuIn,
         col: visibleColor(nuIn), // MeV gamma — ultraviolet clamp
@@ -277,12 +299,13 @@ function GradientSurface({ expRef, ctlRef, dirtyRef }) {
         * Math.exp(-(xi * xi) / (2 * SIG_R * SIG_R)) * damp / (1 + r)
     }
 
-    const update = () => {
+    const update = (sdt = 0) => {
       const ctl = ctlRef.current
       const exp = expRef.current
       const posA = sphGeo.attributes.position
       const colA = sphGeo.attributes.color
       const np = exp.pulses.length
+      const P = phosphor ? phosRef.current : null
       for (let v = 0; v < sCount; v++) {
         const x = sBase[v * 3], y = sBase[v * 3 + 1], z = sBase[v * 3 + 2]
         let u = 0, mr = 0, mg = 0, mb = 0
@@ -297,9 +320,33 @@ function GradientSurface({ expRef, ctlRef, dirtyRef }) {
           mr += w * c[0]; mg += w * c[1]; mb += w * c[2]
         }
         Uc[v] = u
-        const mx = Math.max(mr, mg, mb)
-        if (mx > 1e-6) colA.setXYZ(v, mr / mx, mg / mx, mb / mx)
-        else colA.setXYZ(v, 0.93, 0.91, 0.87) // quiet — neutral
+        if (!P) {
+          const mx = Math.max(mr, mg, mb)
+          if (mx > 1e-6) colA.setXYZ(v, mr / mx, mg / mx, mb / mx)
+          else colA.setXYZ(v, 0.93, 0.91, 0.87) // quiet — neutral
+          continue
+        }
+        // sample-and-hold: the surface keeps the color of the most recent
+        // thing that hit it. A wavefront crossing the hit threshold repaints
+        // the vertex with the flash's hue; otherwise the held color just
+        // fades slowly back toward the base color. No averaging — colors
+        // stay pure, and the sphere becomes a slowly-evolving mosaic of
+        // recent landings instead of flickering back to bland.
+        const o = v * 3
+        if (sdt > 0) {
+          const fade = Math.exp(-sdt / HOLD_TAU)
+          P[o] = P[o] * fade + 0.93 * (1 - fade)
+          P[o + 1] = P[o + 1] * fade + 0.91 * (1 - fade)
+          P[o + 2] = P[o + 2] * fade + 0.87 * (1 - fade)
+          const mx = Math.max(mr, mg, mb)
+          if (mx > HIT_THRESH) {
+            const inv = 1 / mx
+            P[o] = mr * inv
+            P[o + 1] = mg * inv
+            P[o + 2] = mb * inv
+          }
+        }
+        colA.setXYZ(v, P[o], P[o + 1], P[o + 2])
       }
       for (let v = 0; v < sCount; v++) {
         const rNew = Math.max(0.6, Math.min(4.2, SURF_R0 + SURF_G * Uc[v]))
@@ -320,11 +367,40 @@ function GradientSurface({ expRef, ctlRef, dirtyRef }) {
       last = now
       const ctl = ctlRef.current
       const exp = expRef.current
+      if (phosphor) {
+        // view-only: this canvas follows the shared experiment — it never
+        // advances the pulses itself. Colors are deposited only for the
+        // sim-time that actually elapsed since this view's last frame.
+        const sdtEff = ctl.playing ? Math.max(0, exp.t - lastTRef.current) : 0
+        lastTRef.current = exp.t
+        S.controls.update()
+        let dirty = false
+        if (S.camDirty) { S.camDirty = false; dirty = true }
+        if (dirtyRef.current !== seenDirtyRef.current) {
+          seenDirtyRef.current = dirtyRef.current
+          dirty = true
+        }
+        if (sdtEff > 0 || dirty) {
+          if (phosExpRef.current !== exp) {
+            // a new experiment started — the surface forgets everything
+            phosExpRef.current = exp
+            const P = phosRef.current
+            for (let v = 0; v < sCount; v++) {
+              P[v * 3] = 0.93; P[v * 3 + 1] = 0.91; P[v * 3 + 2] = 0.87
+            }
+          }
+          update(sdtEff)
+          S.timeTag.textContent = 't = ' + exp.t.toFixed(1) + ' s · landed ' + exp.histN
+          S.renderer.render(S.scene, S.camera)
+        }
+        return
+      }
       if (ctl.playing) {
         const sdt = dt * ctl.speed
         exp.t += sdt
-        // more entropy, more quark events
-        exp.spawnAcc += sdt * (2 + ctl.entropy / 120000)
+        // more entropy, more quark events — firing rate doubled so the
+        // surface sees more action (the physics per journey is unchanged)
+        exp.spawnAcc += sdt * 2 * (2 + ctl.entropy / 120000)
         while (exp.spawnAcc >= 1) {
           exp.spawnAcc -= 1
           spawn(exp, exp.t)
@@ -343,7 +419,7 @@ function GradientSurface({ expRef, ctlRef, dirtyRef }) {
             exp.pulses.splice(i, 1)
           }
         }
-        update()
+        update(sdt)
         S.timeTag.textContent = 't = ' + exp.t.toFixed(1) + ' s · landed ' + exp.histN
         S.controls.update()
         S.renderer.render(S.scene, S.camera)
@@ -354,10 +430,14 @@ function GradientSurface({ expRef, ctlRef, dirtyRef }) {
       S.controls.update()
       let dirty = false
       if (S.camDirty) { S.camDirty = false; dirty = true }
-      if (dirtyRef.current) { dirtyRef.current = false; dirty = true; update() }
+      if (dirtyRef.current !== seenDirtyRef.current) {
+        seenDirtyRef.current = dirtyRef.current
+        dirty = true
+        update(0)
+      }
       if (dirty) S.renderer.render(S.scene, S.camera)
     }
-    update()
+    update(0)
     loop()
     return () => {
       cancelAnimationFrame(raf)
@@ -663,10 +743,10 @@ const sup = (e) => String(e).split('').map((d) => SUP[+d]).join('')
 export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay = 0.35 }) {
   const [playing, setPlaying] = useState(false)
   const [speed, setSpeed] = useState(1)
-  const [scatLog, setScatLog] = useState(Math.log10(4e7))
+  const [scatLog, setScatLog] = useState(Math.log10(6e7))
   const expRef = useRef(null)
   if (!expRef.current) expRef.current = freshExperiment(entropy)
-  const dirtyRef = useRef(true)
+  const dirtyRef = useRef(0)
   const playingRef = useRef(false)
   playingRef.current = playing
   const ctlRef = useRef({})
@@ -675,7 +755,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
   // the graphs rebuild themselves from the new recorded history
   useEffect(() => {
     expRef.current = freshExperiment(entropy)
-    dirtyRef.current = true
+    dirtyRef.current += 1
   }, [entropy, scatLog])
 
   ctlRef.current = {
@@ -725,9 +805,13 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
             higher-frequency quark combinations assemble where the
             pressure is lower, so they climb less of the gradient and cool
             less. A journey starting further out also escapes in fewer
-            scatterings — a random walk's steps go as the square of the
-            optical depth — so each journey gets S(1−x<sub>0</sub>)<sup>2</sup>
-            scatterings, where x<sub>0</sub> is the birth radius. Watch
+            scatterings — a random walk's steps go as the optical depth to
+            the surface raised to a power: 2 for a uniform medium,
+            steepened to 2.5 here as a small step toward a
+            centrally-concentrated star, where the optical depth from a
+            birth radius grows faster than the remaining path — so each
+            journey gets S(1−x<sub>0</sub>)<sup>2.5</sup> scatterings, where
+            x<sub>0</sub> is the birth radius. Watch
             what this does to the curve: it should bend the measured
             attenuation away from a straight line and toward the table's
             gentler slope.
@@ -833,14 +917,15 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
             in the ratio 1:2:3:4: the 1/3 f<sub>q</sub> sphere deepest, the
             4/3 f<sub>q</sub> sphere reaching 0.67 R<sub>☉</sub>. A journey
             starting at fractional radius x<sub>0</sub> gets
-            S(1−x<sub>0</sub>)<sup>2</sup> scatterings — random-walk scaling,
-            steps ∝ (optical depth)<sup>2</sup> — so shallower births
-            genuinely cool less. (Spreading the same S over a shorter path
-            would do the opposite.)
+            S(1−x<sub>0</sub>)<sup>2.5</sup> scatterings — random-walk
+            scaling, steps ∝ (optical depth)<sup>2</sup> for a uniform
+            medium, steepened slightly toward a centrally-concentrated
+            star — so shallower births genuinely cool less. (Spreading the
+            same S over a shorter path would do the opposite.)
           </p>
           <p>
             <em>Representative scatterings</em> S per journey for a
-            center-born pulse (slider, default 4×10<sup>7</sup>) — standing
+            center-born pulse (slider, default 6×10<sup>7</sup>) — standing
             in for the ~10<sup>25</sup> of the real random walk, which would
             take ~10<sup>5</sup> years of simulated time. The slider sets
             the level of the curve; the birth spheres set its shape.
@@ -859,6 +944,23 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
             relative 0–1,000,000 dial.
           </p>
         </div>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">The sun that remembers</div>
+        </div>
+        <GradientSurface expRef={expRef} ctlRef={ctlRef} dirtyRef={dirtyRef} phosphor />
+        <p className="graph-note">
+          The same pulses as the experiment above — but this surface keeps
+          the color of the most recent thing that hit it. When a wavefront
+          crosses, the surface takes that flash's color and holds it, fading
+          slowly back toward neutral until the next wave repaints it — so
+          the sphere becomes a slowly-evolving mosaic of recent landings
+          instead of flickering back to bland between flashes. This view
+          follows the experiment — press play above; it needs no controls
+          of its own.
+        </p>
       </div>
     </>
   )
