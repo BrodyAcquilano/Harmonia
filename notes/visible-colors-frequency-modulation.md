@@ -82,7 +82,17 @@ I built this into the Quark Space as a simulation ("Modelling the Sun," right af
 
 What you see on the surface is the actual visible spectrum, not our display convention — dark red (infrared) for anything landing below it, light purple (ultraviolet) for anything above. The number line above the surface shows the three fundamentals marked where they land — 1/3 f_q in the red, 2/3 in the yellow, 4/3 in the blue — with the attenuation distribution of each frequency below it. Press play and the colors ripple as wavefronts cross: the modulation, made visible.
 
-## 8. The physics anchors
+## 8. The gradient test
+
+The first model starts with the table's factors — the expected attenuation. But the table was drawn from the temperature-gradient picture, so I should expect an actual gradient model to reproduce it. That's the second model in the "Modelling the Sun" tab: no table in it at all.
+
+Each pulse carries its quark frequency outward through a real temperature profile, $T(x) = T_{\\mathrm{phot}} + (T_{\\mathrm{core}} - T_{\\mathrm{phot}})(1-x)^2$ ($x = r/R_\\odot$, an analytic approximation to the standard solar model with the Sun's actual mass, $1.989\\times10^{30}\\,\\text{kg}$, setting the gradient's strength), shedding energy by Compton scattering at every step — $dE/dn = -(E/m_e c^2)(E - kT)$, integrated exactly. Sped up: $S$ representative scatterings per journey stand in for $\\sim 10^{25}$ (a slider — the model's main condition). When a pulse reaches the surface, the model records how far it was actually divided down: $A = \\nu_{\\mathrm{in}}/\\nu_{\\mathrm{out}}$, with $\\nu_{\\mathrm{out}}$ sampled from the Planck distribution at the landing energy, since the escaping light is re-emitted thermal radiation, not the original gamma. The attenuation graph builds itself from that recorded history — running averages per fundamental that wobble, then settle. Below it, the four fundamentals ($\\frac13f_q$, $\\frac23f_q$, $f_q$, $\\frac43f_q$) position themselves on the visible spectrum where they actually landed, clamped at the infrared/ultraviolet edges, still adjusting until the history settles. Changing the entropy reseeds the experiment; changing $S$ restarts it under different conditions.
+
+What the model says on paper, before running it: once the scatterings are numerous enough, every input forgets where it started — the cooling equation converges too fast for the starting energy to matter — so the measured attenuation comes out proportional to the input frequency ($A \\propto \\nu_{\\mathrm{in}}$), a straight line against the table's curve. The level can be tuned into the table's ballpark with $S$ — the gradient genuinely divides by $\\sim 10^5$–$10^6$, so the FM order of magnitude holds — but the per-color separation doesn't fall out of Compton cooling alone. And there's a reason it can't finish the job: each halving of the energy costs $\\sim m_e c^2/E$ scatterings — cheap at MeV, ruinous at eV — so the cooling stalls in the cold outer layers. The missing piece is true absorption and re-emission, exactly what §3 says the real Sun does. So this is a first attempt, deliberately improvable: change the model, and watch whether the measured points move toward the expected curve or away from it.
+
+On entropy: the Sun's total is $\\sim 10^{35}\\,\\text{J/K}$ (order of magnitude — Wikipedia's "Orders of magnitude (entropy)," citing Bekenstein 1973), far beyond anything simulable. That's why the experiment keeps entropy as the relative 0–1,000,000 dial.
+
+## 9. The physics anchors
 
 Collecting the pieces this theory stands on, all standard:
 
@@ -93,6 +103,6 @@ Collecting the pieces this theory stands on, all standard:
 - **Escape time** ($\sim 10^5$ years): the "gets stuck and bounces around" I started from — the random walk is what gives thermalization time to complete.
 - **Thermalization**: the process itself — absorption and re-emission replacing the input spectrum with the local thermal one, entropy rising outward, one high-energy quantum becoming $\sim 10^6$ low-energy ones.
 
-## 9. Where this stands
+## 10. Where this stands
 
 This is still a theory, and I'm just experimenting with ideas. What I have: a real, checkable mechanism that shifts *frequency* (not amplitude) by roughly the right number of orders, with the Sun's mass setting its strength — and a color-by-color mapping between our quark display spectrum and the actual visible one. What I don't have: the exact non-uniform scaling rule in the table, or anything beyond the Sun (though every photon we've ever seen went through a star, so the Sun may be all the theory needs for light). The 2:3 structure lives in the mass-forming field, untouched by this — light is just passing through.

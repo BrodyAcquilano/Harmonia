@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import Slider from './Slider.jsx'
+import SunGradientTest from './SunGradientTest.jsx'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 /* Modelling the Sun: the Color Theory 3D surface, but every quark frequency
@@ -86,7 +87,7 @@ function pickQ() {
   return 4
 }
 
-function Transport({ playing, speed, onPlayingChange, onSpeedChange }) {
+export function Transport({ playing, speed, onPlayingChange, onSpeedChange }) {
   return (
     <div className="sim-transport">
       <button
@@ -104,7 +105,7 @@ function Transport({ playing, speed, onPlayingChange, onSpeedChange }) {
   )
 }
 
-function setupScene(mount) {
+export function setupScene(mount) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
   renderer.domElement.style.display = 'block'
@@ -146,7 +147,7 @@ function setupScene(mount) {
   return { renderer, scene, camera, controls, timeTag, ro, mount }
 }
 
-function disposeScene(s) {
+export function disposeScene(s) {
   s.ro.disconnect()
   s.controls.dispose()
   s.mount.removeChild(s.timeTag)
@@ -470,8 +471,11 @@ export default function ModellingSun({
         </div>
         <div className="quark-intro-body">
           <p>
-            The quark frequencies don't reach us directly. In this model the
-            Sun is a temperature gradient: quarks fire inside a smaller inner
+            First, we start with our <em>expected</em> attenuation — the
+            per-color factors from the note: the division the temperature
+            gradient would have to perform to land each fundamental on its
+            color. The quark frequencies don't reach us directly. In this
+            model the Sun is a temperature gradient: quarks fire inside a smaller inner
             sphere, hidden from view, and their waves travel outward at their
             normal speed through the gradient — getting frequency-shifted as
             they climb, the frequency modulation from the note. What we see
@@ -508,6 +512,8 @@ export default function ModellingSun({
         </p>
         <Transport playing={playing} speed={speed} onPlayingChange={setPlaying} onSpeedChange={setSpeed} />
       </div>
+
+      <SunGradientTest entropy={entropy} waveAmp={waveAmp} decay={decay} />
     </>
   )
 }
