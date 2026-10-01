@@ -33,6 +33,7 @@ const NOTE_ORDER = [
   '../../notes/the-quantum-resonator.md',
   '../../notes/quark-space.md',
   '../../notes/color-theory.md',
+  '../../notes/mass-formation-from-quarks.md',
 ]
 
 function titleFromPath(path) {
