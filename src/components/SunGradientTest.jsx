@@ -855,7 +855,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
   accCtlRef.current = {
     playing: accPlaying, speed: accSpeed, entropy, waveAmp, decay,
     S: 6e7, // locked at the standard scattering count — no slider
-    fireRate: 1, // base rate — the mosaic turns over lazily
+    fireRate: 0.5, // slow — the mosaic turns over lazily
   }
   thCtlRef.current = {
     playing: thPlaying, speed: thSpeed, entropy, waveAmp, decay,
