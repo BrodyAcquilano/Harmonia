@@ -64,7 +64,19 @@ And the correspondence, per color, with how much each has to scale down:
 
 Note the factors aren't equal — $2.5$ to $6.7\times10^5$ across the band. That's consistent with thermalization rather than a single clean scaling: the mapping is real but not uniform, and I'm not going to pretend I know the exact rule yet. But look at the pattern: the factors *climb with frequency* — $2.5$, $4.2$, $5.7$, $6.7\times10^5$ — so higher frequencies get divided down harder than lower ones. Temperature is acting like a **non-linear modulator**: the modulation depth depends on the input. That's exactly what you'd expect from thermalization rather than multiplicative scaling, and it's why I don't think there's one single "scale factor" to find.
 
-## 6. The physics anchors
+## 6. Attenuation at different temperatures
+
+If temperature is a non-linear modulator, I wanted to see what the modulation looks like at different depths — not just end to end. The idea: at temperature $T$, a photon of frequency $\nu$ sits a factor $h\nu/kT$ above what the local plasma can thermally sustain. That's the attenuation pressure at that depth. Averaging $1/T$ over a temperature range gives the mean attenuation each part of the quark band feels while passing through it. Illustrative model, not exact numbers — the point is the shape.
+
+![Temperature as a non-linear modulator: attenuation of the quark band at different depths in the Sun](/note-images/temperature-attenuation.png)
+
+Three things jump out at me:
+
+1. **Within each panel the curve rises with frequency** — higher frequencies get divided down harder. That's the non-linearity from §5, drawn out: the modulator's strength depends on the input.
+2. **The outer, cooler layers dominate.** Most of the modulation happens where the input is furthest from equilibrium, near the surface. The core's panel sits two orders lower — at $10^7$ K the plasma is "closer" to the input, so there's less left to modulate.
+3. **The fourth panel looks like the outer-Sun curve.** The total end-to-end mapping from the table has the same shape and nearly the same size as the outer range's attenuation. Consistent: the last, coolest stretch does most of the work.
+
+## 7. The physics anchors
 
 Collecting the pieces this theory stands on, all standard:
 
@@ -74,6 +86,6 @@ Collecting the pieces this theory stands on, all standard:
 - **Escape time** ($\sim 10^5$ years): the "gets stuck and bounces around" I started from — the random walk is what gives thermalization time to complete.
 - **Thermalization**: the process itself — absorption and re-emission replacing the input spectrum with the local thermal one, entropy rising outward, one high-energy quantum becoming $\sim 10^6$ low-energy ones.
 
-## 7. Where this stands
+## 8. Where this stands
 
 This is still a theory, and I'm just experimenting with ideas. What I have: a real, checkable mechanism that shifts *frequency* (not amplitude) by roughly the right number of orders, with the Sun's mass setting its strength — and a color-by-color mapping between our quark display spectrum and the actual visible one. What I don't have: the exact non-uniform scaling rule in the table, or anything beyond the Sun (though every photon we've ever seen went through a star, so the Sun may be all the theory needs for light). The 2:3 structure lives in the mass-forming field, untouched by this — light is just passing through.
