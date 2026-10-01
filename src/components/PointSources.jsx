@@ -1,8 +1,15 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
+import katex from 'katex'
+import 'katex/dist/katex.min.css'
 import Slider from './Slider.jsx'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { HUES } from './SurfaceMap.jsx'
+
+function Tex({ tex }) {
+  const html = katex.renderToString(tex, { throwOnError: false })
+  return <span dangerouslySetInnerHTML={{ __html: html }} />
+}
 
 /* Point Sources: the Mass Creation firing process, but every firing launches
    a wave instead of a mass. Quarks fire at random points inside the cube,
