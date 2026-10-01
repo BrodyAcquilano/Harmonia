@@ -157,6 +157,8 @@ export default function ColorTheory({
 
   useEffect(() => {
     const canvas = canvasRef.current
+    // the scale-only mount has no canvas — nothing to draw on
+    if (!canvas) return
     const ctx = canvas.getContext('2d')
     let raf = 0
     let simT = 0
@@ -244,7 +246,7 @@ export default function ColorTheory({
       cancelAnimationFrame(raf)
       ro.disconnect()
     }
-  }, [comps, mixed])
+  }, [comps, mixed, showComponents])
 
   return (
     <>
@@ -373,5 +375,134 @@ export default function ColorTheory({
       </div>
       )}
     </>
+  )
+}
+
+/* Relative abundance of frequencies distribution: a smooth distribution
+   curve over the spectrum — the curve rises where eigenstates pile up, and
+   the area beneath it is filled with the spectrum itself, each point colored
+   by where it sits on the line. No vertical axis: the graph pops up from the
+   number line, and what matters is the shape — a fall from infrared to
+   ultraviolet, or a hump in the middle. */
+export function FrequencyDistribution({ entropy, shown }) {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const canvas = ref.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const w = canvas.clientWidth, h = canvas.clientHeight
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+      canvas.width = Math.round(w * dpr)
+      canvas.height = Math.round(h * dpr)
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    ctx.clearRect(0, 0, w, h)
+
+    const terms = buildQuarkTerms(40, entropy)
+    const n = Math.min(shown, terms.length)
+    const qs = []
+    for (let k = 0; k < n; k++) qs.push(Math.abs(terms[k].q))
+    const bounds = spectrumBounds(qs)
+    const tOf = (q) => (q - bounds.lo) / (bounds.hi - bounds.lo)
+    const ts = qs.map(tOf)
+
+    // smooth distribution: a gaussian kernel on every eigenstate's position
+    const bw = 0.1
+    const gauss = (u) => Math.exp(-0.5 * u * u) / Math.sqrt(2 * Math.PI)
+    const density = (t) => {
+      let s = 0
+      for (const tk of ts) s += gauss((t - tk) / bw)
+      return s / (n * bw)
+    }
+    const M = 240
+    const ds = []
+    let dMax = 1e-9
+    for (let i = 0; i <= M; i++) {
+      const d = density(i / M)
+      ds.push(d)
+      if (d > dMax) dMax = d
+    }
+
+    const padL = 14, padR = 14, padT = 10, plotH = 190
+    const barH = 18, barGap = 8, textH = 36
+    const iw = w - padL - padR
+    const baseY = padT + plotH
+    const X = (t) => padL + t * iw
+    const Y = (d) => baseY - (d / (dMax * 1.08)) * plotH
+
+    // area under the curve, filled with the spectrum itself
+    const grad = ctx.createLinearGradient(padL, 0, padL + iw, 0)
+    for (let i = 0; i <= 48; i++) grad.addColorStop(i / 48, rgb(spectrumColor(i / 48, bounds), 0.55))
+    ctx.beginPath()
+    ctx.moveTo(X(0), baseY)
+    for (let i = 0; i <= M; i++) ctx.lineTo(X(i / M), Y(ds[i]))
+    ctx.lineTo(X(1), baseY)
+    ctx.closePath()
+    ctx.fillStyle = grad
+    ctx.fill()
+
+    // the curve on top
+    ctx.beginPath()
+    for (let i = 0; i <= M; i++) {
+      const x = X(i / M), y = Y(ds[i])
+      if (i === 0) ctx.moveTo(x, y)
+      else ctx.lineTo(x, y)
+    }
+    ctx.strokeStyle = 'rgba(74,63,44,0.85)'
+    ctx.lineWidth = 2
+    ctx.stroke()
+    ctx.lineWidth = 1
+
+    // the number line it pops up from
+    ctx.strokeStyle = 'rgba(107,90,62,0.5)'
+    ctx.beginPath()
+    ctx.moveTo(padL, baseY)
+    ctx.lineTo(padL + iw, baseY)
+    ctx.stroke()
+
+    // spectrum bar beneath, for reference
+    const barY = baseY + barGap
+    const bg = ctx.createLinearGradient(padL, 0, padL + iw, 0)
+    for (let i = 0; i <= 48; i++) bg.addColorStop(i / 48, rgb(spectrumColor(i / 48, bounds)))
+    ctx.fillStyle = bg
+    ctx.fillRect(padL, barY, iw, barH)
+    ctx.strokeStyle = 'rgba(107,90,62,0.35)'
+    ctx.strokeRect(padL, barY, iw, barH)
+    ctx.fillStyle = 'rgba(255,255,255,0.7)'
+    for (const tt of [bounds.tIR, bounds.tUV]) ctx.fillRect(X(tt) - 1, barY, 2, barH)
+
+    // labels: zones on one row, tick frequencies below
+    ctx.font = '11px "IBM Plex Mono", monospace'
+    const row1 = barY + barH + 15, row2 = barY + barH + 31
+    ctx.fillStyle = '#715f43'
+    ctx.textAlign = 'left'
+    ctx.fillText('infrared', padL, row1)
+    ctx.textAlign = 'right'
+    ctx.fillText('ultraviolet', padL + iw, row1)
+    ctx.fillStyle = '#4a3f2c'
+    ctx.textAlign = 'center'
+    ctx.fillText(freqLabel(bounds.qMin), X(bounds.tIR), row2)
+    ctx.fillText(freqLabel(bounds.qMax), X(bounds.tUV), row2)
+  }, [entropy, shown])
+
+  return (
+    <div className="graph-box">
+      <div className="graph-title-row">
+        <h2 className="graph-title">Relative abundance of frequencies distribution</h2>
+      </div>
+      <div style={{ position: 'relative', width: '100%', height: 292 }}>
+        <canvas ref={ref} style={{ display: 'block', width: '100%', height: '100%' }} />
+      </div>
+      <p className="graph-note">
+        A smooth distribution over the spectrum — the curve rises where
+        eigenstates pile up, and the area beneath it is filled with the
+        spectrum itself, each point colored by where it sits on the line.
+        No vertical axis: what matters is the shape — a fall from infrared
+        to ultraviolet, or a hump in the middle. Move entropy or components
+        and watch it change.
+      </p>
+    </div>
   )
 }

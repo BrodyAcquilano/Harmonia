@@ -9,7 +9,7 @@ import TimeDomain from './TimeDomain.jsx'
 import MassLattice from './MassLattice.jsx'
 import MassCreation from './MassCreation.jsx'
 import PointSources from './PointSources.jsx'
-import ColorTheory from './ColorTheory.jsx'
+import ColorTheory, { FrequencyDistribution } from './ColorTheory.jsx'
 import Fundamental20 from './Fundamental20.jsx'
 
 /* The Quark Space: a convolution of energy and mass and space and time.
@@ -650,7 +650,9 @@ export default function QuarkSpace() {
                 colors: the individual firings, the slice, and the 3D surface —
                 every point wearing the additive mix of the pulses reaching
                 it. Then the components drawn one by one in 1D, so you can
-                watch the sum wash toward white.
+                watch the sum wash toward white. Last, the relative abundance
+                of each frequency on the spectrum — which end of the scale
+                the resonator actually lives at.
               </p>
             </div>
           </div>
@@ -658,6 +660,7 @@ export default function QuarkSpace() {
           <ColorTheory entropy={entropyC} waveAmp={waveAmpC} shown={showC} playing={playingCol} speed={speedCol} onPlayingChange={setPlayingCol} onSpeedChange={setSpeedCol} showComponents={false} showEquations={false} />
           <PointSources trueColors entropy={entropyC} waveAmp={waveAmpC} decay={decayC} playing={playingCol} speed={speedCol} onPlayingChange={setPlayingCol} onSpeedChange={setSpeedCol} />
           <ColorTheory entropy={entropyC} waveAmp={waveAmpC} shown={showC} playing={playingCol} speed={speedCol} onPlayingChange={setPlayingCol} onSpeedChange={setSpeedCol} showScale={false} showEquations={false} />
+          <FrequencyDistribution entropy={entropyC} shown={showC} />
           </>
           )}
         </div>

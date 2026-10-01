@@ -9,8 +9,9 @@
 - [3. The scale — stretched between cutoffs](#3-the-scale--stretched-between-cutoffs)
 - [4. The 3D graphs in true colors](#4-the-3d-graphs-in-true-colors)
 - [5. Adding light makes white](#5-adding-light-makes-white)
-- [6. What the whitening might mean](#6-what-the-whitening-might-mean)
-- [7. Open questions](#7-open-questions)
+- [6. The frequency distribution](#6-the-frequency-distribution)
+- [7. What the whitening might mean](#7-what-the-whitening-might-mean)
+- [8. Open questions](#8-open-questions)
 
 ## 1. The colors were only labels
 
@@ -44,15 +45,24 @@ The part I actually wanted to see: draw every eigenstate wave in its energy colo
 
 The decay states are in the mix too — the five percent that get subtracted from the sum instead of added. They still contribute their color (energy is positive even when the wave subtracts), which is the honest version: a decay takes energy *out* of the wave but the energy itself still had a color.
 
-## 6. What the whitening might mean
+## 6. The frequency distribution
+
+The newest box on the tab asks a different question: not what color each frequency burns, but how many eigenstates live at each frequency — the relative abundance across the spectrum. It reads like a graph popping up from the number line: frequency runs along the bottom, a smooth abundance curve rises from it, and the area underneath is filled with the spectrum itself — a gradient, each point colored by where it sits on the line. There is no vertical axis; what matters is the shape. A spectrum bar sits underneath for reference, with the infrared and ultraviolet labels and the lowest/highest frequencies in view.
+
+I had two guesses going in. The first: abundance should fall from infrared to ultraviolet, because the low frequencies are the stablest — they decay the slowest, while the high-entropy combination frequencies get removed first. The second: the 5% decay states keep forming and breaking masses apart as the waves move, churning the middle, so the distribution might hump in the middle like a normal distribution instead.
+
+What the curve actually shows, at the default view (entropy 60000, forty components): $1/3\,f_q$ holds about 35%, $2/3\,f_q$ about 27.5%, $1\,f_q$ about 20%, $4/3\,f_q$ about 17.5%. A decline from infrared to ultraviolet — the first guess wins, at least here. But it's not settled: with only twelve components shown, the same entropy humps at $2/3\,f_q$ (50%), so the shape depends on how much of the chain is in view. The honest caveat is that there are only four frequencies to distribute over — the picks come from a weighted table, $|q| \in \{1, 2, 3, 4\}$ — so the curve is smoothed over four points, and I shouldn't over-read it. Still, move the entropy or components sliders and the curve moves; the question stays open, which is why the box exists.
+
+## 7. What the whitening might mean
 
 Here is where I have to be careful, because this is the part that feels like it means something and I don't yet know what. As entropy rises, the resonator keeps adding eigenstates — more frequencies, more colors — and the sum of all of them tends toward white. White light contains every color. The high-entropy end of the resonator contains every eigenstate. Is "white" just what a complete spectrum looks like from the outside?
 
 It makes me think about the 2:3 story again: the universe as a resonator excited at 2/3, fluctuations as 2/3-structured excitations. If every fluctuation is one more color added to the mix, then the long-run tendency of the whole thing is toward white — not toward any one frequency winning, but toward all of them piling up into something colorless. I'm not claiming that; I'm noticing that the simulation keeps showing it, and I want to know whether it's deep or trivial.
 
-## 7. Open questions
+## 8. Open questions
 
 - Does the whitening saturate, or does it keep approaching pure white as $N$ runs to $20{,}001$? The simulation only shows me the first forty.
+- Does the declining abundance shape survive out to long chains, or does the middle pile up once thousands of eigenstates are in view?
 - Is ten percent the right padding for the cutoff bounds, or should the infrared and ultraviolet bands be wider or narrower? Right now the coolest and hottest frequencies in view sit right at the edges of the flat bands, which is what I wanted — but I picked ten percent by feel.
 - What color would the *energy* wave burn? It's the 180° partner, $E = 1/u$ — the inverse. If mass-wave frequencies map red-to-blue, does the energy wave map blue-to-red?
 - The three Space-Time Domain graphs got recolored; the rest keep their labels for now. Should the flat map and the convolution surface ever get true colors, or do the labels still earn their keep there?
