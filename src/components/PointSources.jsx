@@ -189,11 +189,22 @@ export default function PointSources({
   const mountCRef = useRef(null)
   const stateRef = useRef({ playing, speed, entropy, waveAmp, decay, trueColors })
   stateRef.current = { playing, speed, entropy, waveAmp, decay, trueColors }
+  // set when waveAmp/decay change: the paused frame needs one recompute
+  const paramDirtyRef = useRef(true)
+
+  // a paused graph re-renders once when its parameters change
+  useEffect(() => { paramDirtyRef.current = true }, [waveAmp, decay])
 
   useEffect(() => {
     const A = setupScene(mountARef.current)
     const B = setupScene(mountBRef.current)
     const Cc = setupScene(mountCRef.current)
+
+    // orbit while paused: each scene re-renders when its camera moves
+    for (const S of [A, B, Cc]) {
+      S.camDirty = false
+      S.controls.addEventListener('change', () => { S.camDirty = true })
+    }
 
     const tmpC = new THREE.Color()
 
@@ -433,10 +444,7 @@ export default function PointSources({
       const dt = Math.min((now - last) / 1000, 0.1)
       last = now
       const st = stateRef.current
-      // Pause freezes the frame completely — no field recomputation and no
-      // renders, so a paused graph costs nothing on the GPU/CPU.
-      if (!st.playing) return
-      {
+      if (st.playing) {
         const sdt = dt * st.speed
         t += sdt
         // more entropy, more quark events
@@ -445,32 +453,52 @@ export default function PointSources({
           spawnAcc -= 1
           spawn(t)
         }
-      }
-      for (let i = pulses.length - 1; i >= 0; i--) {
-        if (C * (t - pulses[i].t0) > DIE_R) pulses.splice(i, 1)
-      }
-      // true colors: the spectrum bounds refit to the live pulses every
-      // frame, so each pulse burns its color on the current scale
-      if (st.trueColors) {
-        const qs = []
-        for (let i = 0; i < pulses.length; i++) qs.push(pulses[i].q)
-        const b = spectrumBounds(qs)
-        for (let i = 0; i < pulses.length; i++) {
-          pulses[i].col = energyColor(pulses[i].q, b)
+        for (let i = pulses.length - 1; i >= 0; i--) {
+          if (C * (t - pulses[i].t0) > DIE_R) pulses.splice(i, 1)
         }
+        // true colors: the spectrum bounds refit to the live pulses every
+        // frame, so each pulse burns its color on the current scale
+        if (st.trueColors) {
+          const qs = []
+          for (let i = 0; i < pulses.length; i++) qs.push(pulses[i].q)
+          const b = spectrumBounds(qs)
+          for (let i = 0; i < pulses.length; i++) {
+            pulses[i].col = energyColor(pulses[i].q, b)
+          }
+        }
+        updateA(t, st.decay, st.trueColors)
+        updateB(t, st.waveAmp, st.decay, st.trueColors)
+        updateC(t, st.waveAmp, st.decay, st.trueColors)
+        const label = 't = ' + t.toFixed(1) + ' s'
+        A.timeTag.textContent = label
+        B.timeTag.textContent = label
+        Cc.timeTag.textContent = label
+        A.controls.update()
+        B.controls.update()
+        Cc.controls.update()
+        A.renderer.render(A.scene, A.camera)
+        B.renderer.render(B.scene, B.camera)
+        Cc.renderer.render(Cc.scene, Cc.camera)
+        return
       }
-      updateA(t, st.decay, st.trueColors)
-      updateB(t, st.waveAmp, st.decay, st.trueColors)
-      updateC(t, st.waveAmp, st.decay, st.trueColors)
-      const label = 't = ' + t.toFixed(1) + ' s'
-      A.timeTag.textContent = label
-      B.timeTag.textContent = label
-      Cc.timeTag.textContent = label
-      A.controls.update()
+      // Paused: the sim clock is frozen, so the scene is static — no field
+      // recomputation and no renders, until the camera moves or a parameter
+      // changes. Orbiting while paused just re-renders the frozen frame.
+      let camMoved = false
+      for (const S of [A, B, Cc]) {
+        S.controls.update()
+        if (S.camDirty) { S.camDirty = false; camMoved = true }
+      }
+      const paramsChanged = paramDirtyRef.current
+      paramDirtyRef.current = false
+      if (!camMoved && !paramsChanged) return
+      if (paramsChanged) {
+        updateA(t, st.decay, st.trueColors)
+        updateB(t, st.waveAmp, st.decay, st.trueColors)
+        updateC(t, st.waveAmp, st.decay, st.trueColors)
+      }
       A.renderer.render(A.scene, A.camera)
-      B.controls.update()
       B.renderer.render(B.scene, B.camera)
-      Cc.controls.update()
       Cc.renderer.render(Cc.scene, Cc.camera)
     }
     loop()

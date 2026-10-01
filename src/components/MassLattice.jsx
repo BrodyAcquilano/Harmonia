@@ -48,6 +48,11 @@ export default function MassLattice({
   )
   const coeffRef = useRef(coeffs)
   coeffRef.current = coeffs
+  // set when entropy/waveAmp/decay change: the paused frame needs one recompute
+  const paramDirtyRef = useRef(true)
+
+  // a paused graph re-renders once when its parameters change
+  useEffect(() => { paramDirtyRef.current = true }, [entropy, waveAmp, decay])
 
   useEffect(() => {
     const mount = mountRef.current
@@ -62,6 +67,9 @@ export default function MassLattice({
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true
     controls.dampingFactor = 0.08
+    // orbit while paused: re-render when the camera moves
+    let camDirty = true // first frame renders
+    controls.addEventListener('change', () => { camDirty = true })
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.85))
     const key = new THREE.DirectionalLight(0xfff2d8, 1.6)
@@ -176,14 +184,10 @@ export default function MassLattice({
     const onResize = () => fitCamera()
     window.addEventListener('resize', onResize)
 
-    const animate = () => {
-      const st = stateRef.current
+    // displace the lattice by the wave at each rest position
+    const updateInstances = () => {
       const C = coeffRef.current
-      const dt = Math.min(clock.getDelta(), 0.05)
-      // Pause freezes the frame completely — no wave recomputation and no
-      // render, so a paused graph costs nothing on the GPU/CPU.
-      if (!st.playing) return
-      simT += dt * st.speed
+      const st = stateRef.current
       const wt = OMEGA * simT
       const Cx = C[0], Cy = C[1], Cz = C[2]
       for (let i = 0; i < N; i++) {
@@ -203,8 +207,26 @@ export default function MassLattice({
         lattice.setMatrixAt(i, dummy.matrix)
       }
       lattice.instanceMatrix.needsUpdate = true
-      timeTag.textContent = 't = ' + simT.toFixed(1) + ' s'
+    }
+
+    const animate = () => {
+      const st = stateRef.current
+      const dt = Math.min(clock.getDelta(), 0.05)
       controls.update()
+      const moved = camDirty; camDirty = false
+      const paramsChanged = paramDirtyRef.current; paramDirtyRef.current = false
+      if (st.playing) {
+        simT += dt * st.speed
+        updateInstances()
+        timeTag.textContent = 't = ' + simT.toFixed(1) + ' s'
+        renderer.render(scene, camera)
+        return
+      }
+      // Paused: the sim clock is frozen, so the lattice is static — no wave
+      // recomputation and no renders, until the camera moves or a parameter
+      // changes. Orbiting while paused just re-renders the frozen frame.
+      if (!moved && !paramsChanged) return
+      if (paramsChanged) updateInstances()
       renderer.render(scene, camera)
     }
     renderer.setAnimationLoop(animate)

@@ -55,6 +55,11 @@ export default function MassCreation({
   )
   const coeffRef = useRef(coeffs)
   coeffRef.current = coeffs
+  // set when entropy/waveAmp/decay change: the paused frame needs one recompute
+  const paramDirtyRef = useRef(true)
+
+  // a paused graph re-renders once when its parameters change
+  useEffect(() => { paramDirtyRef.current = true }, [entropy, waveAmp, decay])
 
   useEffect(() => {
     const mount = mountRef.current
@@ -69,6 +74,9 @@ export default function MassCreation({
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true
     controls.dampingFactor = 0.08
+    // orbit while paused: re-render when the camera moves
+    let camDirty = true // first frame renders
+    controls.addEventListener('change', () => { camDirty = true })
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.85))
     const key = new THREE.DirectionalLight(0xfff2d8, 1.6)
@@ -223,17 +231,11 @@ export default function MassCreation({
       }
     }
 
-    const animate = () => {
+    // displace the masses and rebuild the cluster spheres — the static
+    // recompute, run every playing frame and once on paused param changes
+    const updateStatic = () => {
       const st = stateRef.current
       const C = coeffRef.current
-      const dt = Math.min(clock.getDelta(), 0.05)
-      // Pause freezes the frame completely — no wave recomputation and no
-      // render, so a paused graph costs nothing on the GPU/CPU.
-      if (!st.playing) return
-      simT += dt * st.speed
-      spawnAcc += dt * st.speed * SPAWN_RATE
-      while (spawnAcc >= 1) { spawnAcc -= 1; fireQuark() }
-
       // displace every unit mass by the resultant wave at its rest position
       const wt = OMEGA * simT
       const Cx = C[0], Cy = C[1], Cz = C[2]
@@ -323,23 +325,43 @@ export default function MassCreation({
       }
       massMesh.count = nCl
       massMesh.instanceMatrix.needsUpdate = true
+    }
 
-      // flashes shrink away
-      let nf = 0
-      for (let i = 0; i < MAX_FLASH; i++) {
-        if (flashLife[i] <= 0) continue
-        flashLife[i] -= dt * 1.2
-        const l = Math.max(0, flashLife[i])
-        dummy.position.set(flashPos[i * 3], flashPos[i * 3 + 1], flashPos[i * 3 + 2])
-        dummy.scale.setScalar(0.09 * l + 0.001)
-        dummy.updateMatrix()
-        flashMesh.setMatrixAt(nf++, dummy.matrix)
-      }
-      flashMesh.count = nf
-      flashMesh.instanceMatrix.needsUpdate = true
-
-      timeTag.textContent = 't = ' + simT.toFixed(1) + ' s'
+    const animate = () => {
+      const st = stateRef.current
+      const dt = Math.min(clock.getDelta(), 0.05)
       controls.update()
+      const moved = camDirty; camDirty = false
+      const paramsChanged = paramDirtyRef.current; paramDirtyRef.current = false
+      if (st.playing) {
+        simT += dt * st.speed
+        spawnAcc += dt * st.speed * SPAWN_RATE
+        while (spawnAcc >= 1) { spawnAcc -= 1; fireQuark() }
+        updateStatic()
+
+        // flashes shrink away
+        let nf = 0
+        for (let i = 0; i < MAX_FLASH; i++) {
+          if (flashLife[i] <= 0) continue
+          flashLife[i] -= dt * 1.2
+          const l = Math.max(0, flashLife[i])
+          dummy.position.set(flashPos[i * 3], flashPos[i * 3 + 1], flashPos[i * 3 + 2])
+          dummy.scale.setScalar(0.09 * l + 0.001)
+          dummy.updateMatrix()
+          flashMesh.setMatrixAt(nf++, dummy.matrix)
+        }
+        flashMesh.count = nf
+        flashMesh.instanceMatrix.needsUpdate = true
+
+        timeTag.textContent = 't = ' + simT.toFixed(1) + ' s'
+        renderer.render(scene, camera)
+        return
+      }
+      // Paused: the sim clock is frozen — no wave recomputation and no
+      // renders, until the camera moves or a parameter changes. Orbiting
+      // while paused just re-renders the frozen frame.
+      if (!moved && !paramsChanged) return
+      if (paramsChanged) updateStatic()
       renderer.render(scene, camera)
     }
     renderer.setAnimationLoop(animate)

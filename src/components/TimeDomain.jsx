@@ -91,6 +91,9 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
   useEffect(() => { ampRef.current = waveAmp }, [waveAmp])
   useEffect(() => { compCountRef.current = compCount }, [compCount])
   useEffect(() => { coeffsRef.current = coeffs }, [coeffs])
+  // set when entropy/waveAmp/compCount change: the paused frame needs one recompute
+  const paramDirtyRef = useRef(true)
+  useEffect(() => { paramDirtyRef.current = true }, [entropy, waveAmp, compCount])
 
   // ---- one-time scene setup ----
   useEffect(() => {
@@ -105,6 +108,9 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
     camera.up.set(0, 0, 1) // z is vertical in the space-time domain
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true
+    // orbit while paused: re-render when the camera moves
+    let camDirty = true // first frame renders
+    controls.addEventListener('change', () => { camDirty = true })
     controls.dampingFactor = 0.08
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.95))
@@ -348,11 +354,22 @@ export default function TimeDomain({ entropy, waveAmp = 0.2, playing = true, spe
     }
     const loop = () => {
       raf = requestAnimationFrame(loop)
-      if (playRef.current) t += clock() * speedRef.current
-      else clock()
-      updateWaves(t)
-      timeTag.textContent = 't = ' + t.toFixed(1) + ' s'
       controls.update()
+      const moved = camDirty; camDirty = false
+      const paramsChanged = paramDirtyRef.current; paramDirtyRef.current = false
+      if (playRef.current) {
+        t += clock() * speedRef.current
+        updateWaves(t)
+        timeTag.textContent = 't = ' + t.toFixed(1) + ' s'
+        renderer.render(scene, camera)
+        return
+      }
+      clock()
+      // Paused: the sim clock is frozen — no wave recomputation and no
+      // renders, until the camera moves or a parameter changes. Orbiting
+      // while paused just re-renders the frozen frame.
+      if (!moved && !paramsChanged) return
+      if (paramsChanged) updateWaves(t)
       renderer.render(scene, camera)
     }
     loop()
