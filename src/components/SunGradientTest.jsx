@@ -287,10 +287,13 @@ const FORGET_N = 48 // 12 packets per quark frequency
 // cools like the cools view
 const FORGET_GAIN = 3   // peak patch temperature per eV of escaping light, at the splash center
 const SPLASH_SIG = 0.18 // radians — the splash patch size
-// forget sphere: patch temperature mapped straight onto the visible
-// rainbow — cold = red, hot = violet, no infrared/ultraviolet clamps
+// forget sphere: only the visible band produces color — patch temperature
+// mapped to its actual spectral color; infrared and ultraviolet patches
+// are black, invisible to eyes
 function forgetColor(T) {
-  return rainbow(((T * EV) / H - VIS_LO) / (VIS_HI - VIS_LO))
+  const nu = (T * EV) / H
+  if (nu < VIS_LO || nu > VIS_HI) return [0, 0, 0]
+  return rainbow((nu - VIS_LO) / (VIS_HI - VIS_LO))
 }
 // forget ripples: each escaping photon launches a wave on the sphere.
 // the amplitude carries the photon's energy; the oscillation rate and
@@ -1583,8 +1586,10 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           and rides it outward: ultraviolet in the deep interior,
           cooling through the visible near the surface. The sphere itself
           is painted like the cools view — each escape splashes its light
-          onto the patch it exits through, flaring violet, then
-          cooling back through the spectrum to red between hits — and
+          onto the patch it exits through, and only the visible band can
+          color it: patches hotter or cooler than visible show black,
+          invisible to eyes, and glow with their actual spectral color
+          while they cool through the band — and
           launches a wave there too, its amplitude the escaping photon's
           energy, rippling outward and dying away (slowed down so we can
           see it). The ripple slider scales the waves only; the colors
