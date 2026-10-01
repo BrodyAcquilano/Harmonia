@@ -13,6 +13,7 @@
 - [7. What the whitening might mean](#7-what-the-whitening-might-mean)
 - [8. Open questions](#8-open-questions)
 - [9. The sign doesn't matter](#9-the-sign-doesnt-matter)
+- [10. A display convention, not a measurement](#10-a-display-convention-not-a-measurement)
 
 ## 1. The colors were only labels
 
@@ -79,3 +80,37 @@ A wave can travel in any direction, and quarks fire in random directions. A $-\t
 That's why the spectrum runs $1/3$ to $4/3$ and not $-4/3$ to $4/3$ — and it's why the code takes $|q|$ everywhere it colors: the bounds, the energy color, the distribution. It was already in the code; it just wasn't in the note. The flat-map section of the Quark Space note (§9 there) already knew this — the fourteen quark states collapse to four families by $|q|$, exactly, nothing lost.
 
 There's a companion thought: we care more about the *differences* in frequencies than the actual frequencies. Two components $f$ and $f'$ beat at $|f - f'|$ — the fast parts average out and what persists is the difference. Motion is relative, so it makes sense that our perception of color would be relative too. What we see isn't the frequencies; it's the changes in the field. When a lot of one frequency piles up in one area, that pile-up is the change we predominantly see.
+
+## 10. A display convention, not a measurement
+
+*Added 2026-10-01.*
+
+I should be honest about what the spectrum bar actually is: a way of assigning colors to frequencies based on the range of frequency variance I have. I can't say these are the actual frequencies that cause the colors. They're just what's available. From quarks alone, these are the relative abundances in the field and the distribution of energies, with colors assigned. Other frequencies could form from other particle interactions — electrons, the rest of the zoo — and those would let me recalibrate the scale. Until then, the bar shows the quark slice of the field, not the whole field.
+
+And we can check the numbers, because $f_q$ is defined in the convolution surface's equations section:
+
+$$f_q = \frac{(2/3)\,m_q c^2}{h}, \qquad m_q c^2 = 2\,\text{MeV}$$
+
+so $f_q = \tfrac{4}{3}\,\text{MeV}/h \approx 3.2 \times 10^{20}\,\text{Hz}$. The bar's endpoints are $\tfrac{1}{3}f_q \approx 1.1 \times 10^{20}\,\text{Hz}$ and $\tfrac{4}{3}f_q \approx 4.3 \times 10^{20}\,\text{Hz}$ — wavelengths of $2.8$ and $0.7$ picometers, energies of $0.44$ and $1.78$ MeV. Visible light lives at $4$–$8 \times 10^{14}\,\text{Hz}$, roughly a million times lower. These are gamma rays, not red and blue light. So no — the colors on the bar are not the physical colors of these frequencies. They're a relative mapping, coolest-here to hottest-here, stretched over the two octaves the quarks give me. If other particles' frequencies ever join the field, the scale gets recalibrated and the colors move. For now, red-to-violet here means "lowest quark energy to highest quark energy," nothing more.
+
+Side by side, so the gap is impossible to miss — the four quark states with the colors the bar assigns them:
+
+| Quark state | Assigned color | Frequency | Wavelength | Energy |
+|---|---|---|---|---|
+| $\tfrac{1}{3}f_q$ ($\|q\| = 1$) | red | $1.07 \times 10^{20}$ Hz | $2.79$ pm | $0.44$ MeV |
+| $\tfrac{2}{3}f_q$ ($\|q\| = 2$) | yellow | $2.15 \times 10^{20}$ Hz | $1.39$ pm | $0.89$ MeV |
+| $1f_q$ ($\|q\| = 3$) | teal-green | $3.22 \times 10^{20}$ Hz | $0.93$ pm | $1.33$ MeV |
+| $\tfrac{4}{3}f_q$ ($\|q\| = 4$) | blue | $4.30 \times 10^{20}$ Hz | $0.70$ pm | $1.78$ MeV |
+
+against the actual visible spectrum:
+
+| Color | Wavelength | Frequency |
+|---|---|---|
+| Red | $620$–$750$ nm | $400$–$484$ THz |
+| Orange | $590$–$620$ nm | $484$–$508$ THz |
+| Yellow | $570$–$590$ nm | $508$–$526$ THz |
+| Green | $495$–$570$ nm | $526$–$606$ THz |
+| Blue | $450$–$495$ nm | $606$–$666$ THz |
+| Violet | $380$–$450$ nm | $666$–$789$ THz |
+
+The *highest* visible frequency — the violet edge at $789$ THz — is still about $136{,}000$ times *lower* than the *lowest* quark frequency. Five orders of magnitude of daylight between them. Whatever the colors on the bar are, they are not these frequencies' real colors. They're placeholders with honest spacing: the ordering is right (cooler to hotter), the proportions within the quark range are right, and everything else is a label waiting for the rest of the field to show up and recalibrate it.
