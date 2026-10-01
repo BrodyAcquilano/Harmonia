@@ -9,6 +9,7 @@ import TimeDomain from './TimeDomain.jsx'
 import MassLattice from './MassLattice.jsx'
 import MassCreation from './MassCreation.jsx'
 import PointSources from './PointSources.jsx'
+import ColorTheory from './ColorTheory.jsx'
 import Fundamental20 from './Fundamental20.jsx'
 
 /* The Quark Space: a convolution of energy and mass and space and time.
@@ -73,6 +74,11 @@ export default function QuarkSpace() {
   const [speedP, setSpeedP] = useState(1)
   const [decayP, setDecayP] = useState(0.35)
   const [decayM, setDecayM] = useState(0.35)
+  const [entropyC, setEntropyC] = useState(60000)
+  const [waveAmpC, setWaveAmpC] = useState(0.2)
+  const [showC, setShowC] = useState(12)
+  const [playingCol, setPlayingCol] = useState(true)
+  const [speedCol, setSpeedCol] = useState(1)
   const [compCount, setCompCount] = useState(20)
 
   // Local amplitude at the arrow (θ = τ1). τ1/τ2 are angles that move
@@ -146,6 +152,14 @@ export default function QuarkSpace() {
               onClick={() => setSim('mass')}
             >
               Mass Lattice
+            </button>
+            <button
+              className="sim-item"
+              role="tab"
+              aria-selected={sim === 'color'}
+              onClick={() => setSim('color')}
+            >
+              Color Theory
             </button>
           </div>
         </nav>
@@ -615,6 +629,33 @@ export default function QuarkSpace() {
           </div>
           </>
           )}
+          {sim === 'color' && (
+          <>
+          <div className="graph-box">
+            <div className="graph-title-row">
+              <h2 className="graph-title">Color Theory</h2>
+            </div>
+            <div className="quark-intro-body">
+              <p>
+                Every eigenstate gets the color of its energy. Low frequencies
+                burn red, high frequencies burn blue — the way starlight
+                works — and the combination frequencies at higher entropies
+                take their color from the same scale. Nothing here is labeled
+                by quark type anymore; energy decides.
+              </p>
+              <p>
+                The first graph is the scale itself. The second draws the
+                eigenstate waves in their energy colors, faint, with their sum
+                on top in the additive mix of all of them. Watch as more
+                components join: the hues pile up, and the sum washes toward
+                white.
+              </p>
+            </div>
+          </div>
+
+          <ColorTheory entropy={entropyC} waveAmp={waveAmpC} shown={showC} playing={playingCol} speed={speedCol} onPlayingChange={setPlayingCol} onSpeedChange={setSpeedCol} />
+          </>
+          )}
         </div>
 
         <div className="lab-side">
@@ -783,6 +824,31 @@ export default function QuarkSpace() {
             <Slider label="d" value={decayM} min={0} max={1} step={0.01}
               onChange={setDecayM} format={(v) => v.toFixed(2)} />
             <p className="graph-note">Wave motion fades with distance from the center — 0 is no decay, 1 falls off fast.</p>
+          </div>
+
+          </>
+          )}
+          {sim === 'color' && (
+          <>
+          <div className="control-group">
+            <h3>Entropy</h3>
+            <Slider label="s" value={entropyC} min={0} max={1000000} step={1}
+              onChange={setEntropyC} format={(v) => v.toFixed(0)} />
+            <p className="graph-note">Reseeds the eigenstate chain — each entropy is a fresh random universe.</p>
+          </div>
+
+          <div className="control-group">
+            <h3>Wave</h3>
+            <Slider label="a" value={waveAmpC} min={0} max={0.2} step={0.01}
+              onChange={setWaveAmpC} format={(v) => v.toFixed(2)} />
+            <p className="graph-note">One wave per eigenstate at amplitude a/√k — newer combinations weaker.</p>
+          </div>
+
+          <div className="control-group">
+            <h3>Components</h3>
+            <Slider label="shown" value={showC} min={1} max={40} step={1}
+              onChange={setShowC} format={(v) => v.toFixed(0)} />
+            <p className="graph-note">How many eigenstate waves join the sum — watch the sum's color wash toward white.</p>
           </div>
 
           </>

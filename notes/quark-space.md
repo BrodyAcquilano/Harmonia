@@ -16,6 +16,9 @@
 - [10. The Space-Time Domain — giving the waves somewhere to go](#10-the-space-time-domain--giving-the-waves-somewhere-to-go)
 - [11. The Mass Lattice — 343 masses riding the resultant](#11-the-mass-lattice--343-masses-riding-the-resultant)
 - [12. Mass Creation — formation, then motion](#12-mass-creation--formation-then-motion)
+- [13. Point Sources — one firing at a time, then all of them](#13-point-sources--one-firing-at-a-time-then-all-of-them)
+- [14. Decay — waves lose energy](#14-decay--waves-lose-energy)
+- [15. The Mass Lattice, continued — transport and decay](#15-the-mass-lattice-continued--transport-and-decay)
 
 ## 1. Why I built this diagram
 
@@ -136,3 +139,19 @@ So below the lattice there is a second graph, with its own clock and its own pla
 Every formed mass then rides the same resultant as the lattice masses — perpendicular to the energy wave, $180^\circ$ out of phase — and because the frequencies are integers, each mass traces a closed loop. When two masses bump they merge into a single rendered sphere, sized by the total unit masses inside ($R \propto M^{1/3}$); the program still counts every unit mass separately, and when they drift apart the cluster breaks up again. Masses that form in the same spot pile onto the same sphere, so it grows — accumulation made visible.
 
 What I watch for: does the field clump? Do the mergers build anything that lasts, or does the wave motion always pull clusters apart again? At low entropy the loops are wide and slow and mergers are rare; I haven't yet found the entropy where they start to stick. That question is the next one.
+
+## 13. Point Sources — one firing at a time, then all of them
+
+The beam version came first, and it was wrong in an instructive way. Pulses fired off in random directions as little wave packets, with rings trailing behind them — and the rings were stylized markers of how long ago each wavefront had passed, not the wave itself. They read as physical objects sitting in space. I asked what the circles even represented, and the honest answer was nothing: decoration I had mistaken for physics. So the pulses became what I had pictured all along — spherical waves in every direction, a messy entanglement of waves from random points in space.
+
+Three graphs, one clock. First, the individual components: each pulse's expanding nested shells, the crests one wavelength apart, each in its fundamental's color — the firings, one at a time. Second, the slice: the $z = 0$ plane, the sum of every pulse sampled fairly in all directions — this one survived from the beam version because it was always honest. Third, the whole: a sphere out in 3D space with $r = R_0 + G\,U$, the superposition surface the slice was hinting at. One simulation, three views: the components, the cut, the whole.
+
+## 14. Decay — waves lose energy
+
+Every pulse in the new graphs carries a decay rate. Part of it is geometric and unavoidable: the $1/(1 + r)$ thinning as a wavefront spreads over a larger and larger sphere — the same energy, more room. The rest is the slider, $d \in [0, 1]$, sitting in the sidebar: each pulse fades as $\exp(-d\,\Delta t / \tau_0)$ from the moment it fires. At $d = 0$ nothing decays; at $d = 1$ the old pulses are gone almost as fast as the new ones arrive. The default sits at $0.35$, where you can watch a pulse live and die without it vanishing mid-thought.
+
+On the mass tab, decay reads differently, and I want to be honest about why. The lattice masses have no birth times — there is no moment to age them from — so instead the wave-riding motion fades with distance from the center, $\exp(-d\,r_0 / L)$. Same slider, same $0$ to $1$, different reading of the same idea: waves lose energy as they travel, whether the traveling is through time or through space.
+
+## 15. The Mass Lattice, continued — transport and decay
+
+Two smaller changes since §11, recorded here because the date rule says the newest description wins. Every graph with a clock — the Space-Time Domain, the lattice, the mass creation, and now the color theory — got the same transport row under its canvas: play/pause plus a speed control, with the sim clock sitting top-right of the graph box. The duplicate Time controls that used to live in the sidebar are gone; one clock, one place. And the lattice and mass-creation graphs got the decay slider from §14, applied spatially the way §14 describes. Nothing else about the lattice changed — still 343 green spheres, still the gain of $g = 2$ standing in for the entropy I can't reach.
