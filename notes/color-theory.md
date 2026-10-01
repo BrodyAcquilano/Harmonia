@@ -12,6 +12,7 @@
 - [6. The frequency distribution](#6-the-frequency-distribution)
 - [7. What the whitening might mean](#7-what-the-whitening-might-mean)
 - [8. Open questions](#8-open-questions)
+- [9. The sign doesn't matter](#9-the-sign-doesnt-matter)
 
 ## 1. The colors were only labels
 
@@ -66,3 +67,15 @@ It makes me think about the 2:3 story again: the universe as a resonator excited
 - Is ten percent the right padding for the cutoff bounds, or should the infrared and ultraviolet bands be wider or narrower? Right now the coolest and hottest frequencies in view sit right at the edges of the flat bands, which is what I wanted — but I picked ten percent by feel.
 - What color would the *energy* wave burn? It's the 180° partner, $E = 1/u$ — the inverse. If mass-wave frequencies map red-to-blue, does the energy wave map blue-to-red?
 - The three Space-Time Domain graphs got recolored; the rest keep their labels for now. Should the flat map and the convolution surface ever get true colors, or do the labels still earn their keep there?
+
+## 9. The sign doesn't matter
+
+*Added 2026-10-01, from the mass-formation work.*
+
+Something I should have written down sooner: color doesn't care about the sign of a frequency. Only the magnitude.
+
+A wave can travel in any direction, and quarks fire in random directions. A $-\tfrac{1}{3}$ wave heading one way is the same physical thing as a $+\tfrac{1}{3}$ wave heading the other way — $\cos(q\theta)$ doesn't care about the sign, and flipping $q$ just flips the direction of travel. Energy is $E = h\nu$, and $\nu$ is a magnitude. So when I think about color, $-\tfrac{1}{3}$ *is* $\tfrac{1}{3}$. The sign tells you which way the wave is going; the magnitude tells you what it is.
+
+That's why the spectrum runs $1/3$ to $4/3$ and not $-4/3$ to $4/3$ — and it's why the code takes $|q|$ everywhere it colors: the bounds, the energy color, the distribution. It was already in the code; it just wasn't in the note. The flat-map section of the Quark Space note (§9 there) already knew this — the fourteen quark states collapse to four families by $|q|$, exactly, nothing lost.
+
+There's a companion thought: we care more about the *differences* in frequencies than the actual frequencies. Two components $f$ and $f'$ beat at $|f - f'|$ — the fast parts average out and what persists is the difference. Motion is relative, so it makes sense that our perception of color would be relative too. What we see isn't the frequencies; it's the changes in the field. When a lot of one frequency piles up in one area, that pile-up is the change we predominantly see.

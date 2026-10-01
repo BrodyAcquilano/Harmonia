@@ -45,6 +45,8 @@ And I think that's telling us something physical, not just something about my co
 
 Really all waves are just superpositions of these changes, so their relative abundance determines what each wave is most likely made of — what it's superimposed from, base pairs upward. And it's not those frequencies we really see but the changes in the field. When a lot of one frequency piles up in one area, that pile-up *is* the change we predominantly see. The frequency is the ingredient; the change is the observation.
 
+There's a related point I want to get down because it matters for the color theory: we care more about the *magnitudes* of frequencies than their signs. A wave can travel in any direction, and quarks fire in random directions — a $-\tfrac{1}{3}$ wave heading one way is the same physical thing as a $+\tfrac{1}{3}$ wave heading the other way. $\cos(q\theta)$ doesn't care about the sign; flipping $q$ just flips the direction of travel. Energy is $E = h\nu$, and $\nu$ is a magnitude. So when I think about color, $-\tfrac{1}{3}$ *is* $\tfrac{1}{3}$. The sign tells you which way the wave is going; the magnitude tells you what it is. That's why the spectrum runs $1/3$ to $4/3$ and not $-4/3$ to $4/3$, and why the code takes $|q|$ everywhere it colors. It was already in the code; it just wasn't written down.
+
 So even though this system is inherently random in how it generates quarks, it produces a distribution we can predict. Slightly different every time — a fresh universe each page load — but the relative abundance converges. Which actually supports quantum theory, and the strange way the universe is seemingly probabilistic but also deterministic at the same time. The process generating matter results from seemingly random collisions, but with a predictable relative abundance. Patterns begin to emerge, and on a large scale the rules governing things become predictable. I didn't set out to reproduce that; it fell out of the tables.
 
 ## The math: does the algorithm make mass where wavelengths agree 1:1?
@@ -104,6 +106,14 @@ And the relative abundance, snapshotted by running the algorithm itself — 40 q
 ![Relative abundance of frequencies, from a run of the quark generator](/note-images/mass-formation-abundance.png)
 
 This particular universe drew $|q| = [2, 1, 2, 1, 1, 3, 2, 2, 2, 2, 3, 4]$ — heavy on the 2s, as the weights say it should be. The curve humps in the yellow-green: the middle frequencies most abundant, the IR tail of slow-decaying lows, the UV fringe of rare highs. Next page load it will be slightly different, and the shape will be recognizably the same. That's the whole thesis in one picture.
+
+## On entropy, scale, and what this isn't
+
+I have to keep something in mind, and so should anyone reading this: the total entropy here is pretty low compared to the entropy of the universe. And the way I've calculated entropy — eigenstate count from a slider — may be a different thing from what the universe means by entropy. But it is still an entropy calculation nonetheless: a count of accessible states, growing as the system gets room to explore.
+
+Relatedly: we don't know enough yet to get the exact relative abundance of each quark's frequency. My tables are anchored to one data point (the proton) plus educated guessing. And the scale here is relatively small — a cube a few units across, hundreds of eigenstates, not $10^{80}$ particles. So we should expect errors. Plenty of them, probably.
+
+None of that bothers me much. This is an interesting set of experiments in the quark space nonetheless, and they produce interesting ideas and visualizations — and every so often, like the 1:1 result above, an idea that survives being checked. The errors are where the next questions live.
 
 ## Next: electrons, and one field instead of particles
 
