@@ -282,6 +282,11 @@ function kappaNu(nu, rho, T) {
 }
 
 const FORGET_N = 48 // 12 packets per quark frequency
+// thermal-surface tuning for the forget view: each escape splashes its
+// light's energy as heat onto the patch it exits through, which then
+// cools like the cools view
+const FORGET_GAIN = 3   // eV deposited per eV of escaping light, at the splash center
+const SPLASH_SIG = 0.18 // radians — the splash patch size
 function spawnForgetPacket(rng, band) {
   // born at the core — the SAME place for all four frequencies.
   // No assigned radii; whatever sorting happens is the physics'.
@@ -308,6 +313,8 @@ function freshForgetExperiment(entropy) {
     bins: [0, 1, 2, 3].map(() => ({ n: 0, sumA: 0, sumNu: 0 })),
     hist: new Float64Array(HIST_N),
     histN: 0,
+    // escape splashes, drained by the 3D view to paint the surface
+    splashes: [],
   }
 }
 // one display hop for every packet: an honest 3D random-walk step of
@@ -342,6 +349,11 @@ function hopForget(exp) {
       bin.n += 1
       bin.sumA += BANDS[b] / nuOut
       bin.sumNu += nuOut
+      // a splash for the 3D view: exit direction + escaping frequency,
+      // so the surface can flare where this packet got out
+      if (exp.splashes.length < 128) {
+        exp.splashes.push({ dx: nx / nr, dy: ny / nr, dz: nz / nr, nuOut })
+      }
       const hb = Math.floor(
         ((Math.log10(nuOut) - HIST_L0) / (HIST_L1 - HIST_L0)) * HIST_N)
       if (hb >= 0 && hb < HIST_N) exp.hist[hb] += 1
@@ -954,45 +966,66 @@ function LandingPanel({ expRef, playingRef }) {
 function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
   const mountRef = useRef(null)
   const readRef = useRef(null)
+  const phosRef = useRef(null)
+  const phosExpRef = useRef(null)
 
   useEffect(() => {
     const S = setupScene(mountRef.current)
     S.camDirty = false
     S.controls.addEventListener('change', () => { S.camDirty = true })
 
-    // dim shell + wireframe: the packets live inside, so the skin stays
-    // out of the way
-    const shellGeo = new THREE.SphereGeometry(SURF_R0, 48, 32)
-    const shell = new THREE.Mesh(shellGeo,
-      new THREE.MeshBasicMaterial({ color: 0xd9a441, transparent: true, opacity: 0.07 }))
-    shell.frustumCulled = false
-    const wire = new THREE.Mesh(shellGeo,
-      new THREE.MeshBasicMaterial({ color: 0xb09a5e, wireframe: true, transparent: true, opacity: 0.08 }))
-    wire.frustumCulled = false
-    S.scene.add(shell, wire)
-
-    const posArr = new Float32Array(FORGET_N * 3)
-    const colArr = new Float32Array(FORGET_N * 3)
-    const pGeo = new THREE.BufferGeometry()
-    pGeo.setAttribute('position', new THREE.BufferAttribute(posArr, 3))
-    pGeo.setAttribute('color', new THREE.BufferAttribute(colArr, 3))
-    pGeo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 8)
-    const points = new THREE.Points(pGeo,
-      new THREE.PointsMaterial({ size: 0.11, vertexColors: true, transparent: true, opacity: 0.95, depthWrite: false }))
-    points.frustumCulled = false
-    S.scene.add(points)
-
-    const syncPoints = (exp) => {
-      for (let i = 0; i < FORGET_N; i++) {
-        const p = exp.packets[i]
-        posArr[i * 3] = p.x; posArr[i * 3 + 1] = p.y; posArr[i * 3 + 2] = p.z
-        const c = visibleColor(p.nu)
-        colArr[i * 3] = c[0] / 255; colArr[i * 3 + 1] = c[1] / 255; colArr[i * 3 + 2] = c[2] / 255
-      }
-      pGeo.attributes.position.needsUpdate = true
-      pGeo.attributes.color.needsUpdate = true
+    // the thermal treatment, like the cools view: the sphere itself is
+    // painted by escaping light — fresh escapes flare blue-white,
+    // neglected patches cool back to dark red
+    const sphGeo = new THREE.SphereGeometry(SURF_R0, SURF_SEG, SURF_RINGS)
+    const sCount = sphGeo.attributes.position.count
+    const sBase = sphGeo.attributes.position.array
+    const uDir = new Float32Array(sCount * 3)
+    for (let v = 0; v < sCount; v++) {
+      const l = Math.hypot(sBase[v * 3], sBase[v * 3 + 1], sBase[v * 3 + 2]) || 1
+      uDir[v * 3] = sBase[v * 3] / l
+      uDir[v * 3 + 1] = sBase[v * 3 + 1] / l
+      uDir[v * 3 + 2] = sBase[v * 3 + 2] / l
     }
+    sphGeo.setAttribute('color',
+      new THREE.BufferAttribute(new Float32Array(sCount * 3).fill(1), 3))
+    sphGeo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 8)
+    const sph = new THREE.Mesh(sphGeo,
+      new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, metalness: 0.05 }))
+    sph.frustumCulled = false
+    const wire = new THREE.Mesh(sphGeo,
+      new THREE.MeshBasicMaterial({ color: 0xb09a5e, wireframe: true, transparent: true, opacity: 0.1 }))
+    wire.frustumCulled = false
+    S.scene.add(sph, wire)
+    const P = new Float32Array(sCount * 3)
+    resetSurface(P, 'thermal', sCount)
+    phosRef.current = P
+    phosExpRef.current = expRef.current
 
+    const paintSurface = (exp, sdt) => {
+      // drain the escape splashes: each deposits its escaping light as
+      // heat in a small patch around its exit direction
+      if (exp.splashes.length) {
+        for (const sp of exp.splashes) {
+          const add = FORGET_GAIN * (sp.nuOut * H) / EV
+          for (let v = 0; v < sCount; v++) {
+            const d = uDir[v * 3] * sp.dx + uDir[v * 3 + 1] * sp.dy + uDir[v * 3 + 2] * sp.dz
+            if (d < 0.85) continue
+            P[v * 3] += add * Math.exp(-(1 - d) / (SPLASH_SIG * SPLASH_SIG))
+          }
+        }
+        exp.splashes.length = 0
+      }
+      const colA = sphGeo.attributes.color
+      const coolF = sdt > 0 ? (1 - Math.exp(-sdt / COOL_TAU)) : 0
+      for (let v = 0; v < sCount; v++) {
+        const o = v * 3
+        if (coolF > 0) P[o] += (T_BASE - P[o]) * coolF
+        const tc = visibleColor((P[o] * EV) / H)
+        colA.setXYZ(v, tc[0] / 255, tc[1] / 255, tc[2] / 255)
+      }
+      colA.needsUpdate = true
+    }
 
     const readout = (exp) => {
       if (!readRef.current) return
@@ -1002,10 +1035,10 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       const eV = (p.nu * H) / EV
       const eVstr = eV >= 1000 ? (eV / 1000).toFixed(1) + ' keV' : eV.toFixed(2) + ' eV'
       readRef.current.textContent =
-        'a packet now: r/R☉ = ' + r.toFixed(2) +
-        ' · T = ' + T.toExponential(1) + ' K' +
-        ' · hν = ' + eVstr +
-        ' · one hop ≈ ' + p.nscat.toExponential(0) + ' scatterings'
+        'a packet now: r/R\u2609 = ' + r.toFixed(2) +
+        ' \u00b7 T = ' + T.toExponential(1) + ' K' +
+        ' \u00b7 h\u03bd = ' + eVstr +
+        ' \u00b7 one hop \u2248 ' + p.nscat.toExponential(0) + ' scatterings'
     }
 
     let raf = 0
@@ -1018,15 +1051,19 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       last = now
       const ctl = ctlRef.current
       const exp = expRef.current
+      if (phosExpRef.current !== exp) {
+        phosExpRef.current = exp
+        resetSurface(phosRef.current, 'thermal', sCount)
+      }
       if (ctl.playing) {
         const sdt = dt * ctl.speed
         exp.t += sdt
         exp.hopAcc += sdt * 60
         while (exp.hopAcc >= 1) { hopForget(exp); exp.hopAcc -= 1 }
-        syncPoints(exp)
+        paintSurface(exp, sdt)
         readout(exp)
         const n = exp.escapes[0] + exp.escapes[1] + exp.escapes[2] + exp.escapes[3]
-        S.timeTag.textContent = 't = ' + exp.t.toFixed(1) + ' s · escaped ' + n
+        S.timeTag.textContent = 't = ' + exp.t.toFixed(1) + ' s \u00b7 escaped ' + n
         S.controls.update()
         S.renderer.render(S.scene, S.camera)
         return
@@ -1038,12 +1075,12 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       if (S.camDirty) { S.camDirty = false; dirty = true }
       if (dirtyRef.current !== seenDirty) { seenDirty = dirtyRef.current; dirty = true }
       if (dirty) {
-        syncPoints(exp)
+        paintSurface(exp, 0)
         readout(exp)
         S.renderer.render(S.scene, S.camera)
       }
     }
-    syncPoints(expRef.current)
+    paintSurface(expRef.current, 0)
     readout(expRef.current)
     loop()
     return () => { cancelAnimationFrame(raf); disposeScene(S) }
@@ -1491,10 +1528,10 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           thermalization needs only a few hundred, across centimeters, so
           each packet's frequency snaps to the local thermal peak, 2.8kT/h,
           and rides it outward: ultraviolet clamp in the deep interior,
-          cooling through the visible near the surface. The track below
-          is the test result — the four birth frequencies crash onto the
-          one thermal curve within a hundredth of the way out. What
-          escapes is set by the surface, not by the birth.
+          cooling through the visible near the surface. The sphere itself
+          is painted like the cools view — each escape splashes its light
+          onto the patch it exits through, flaring blue-white, then
+          cooling back to dark red between hits.
         </p>
         <Transport
           playing={frPlaying}
