@@ -282,17 +282,34 @@ function kappaNu(nu, rho, T) {
 }
 
 const FORGET_N = 48 // 12 packets per quark frequency
-// thermal-surface tuning for the forget view: each escape splashes its
-// light's energy as heat onto the patch it exits through, which then
-// cools like the cools view
-const SPLASH_SIG = 0.18 // radians — the splash patch size
-// forget sphere: only the visible band produces color — patch temperature
-// mapped to its actual spectral color; infrared and ultraviolet patches
-// are black, invisible to eyes
-function forgetColor(T) {
-  const nu = (T * EV) / H
-  if (nu < VIS_LO || nu > VIS_HI) return [0, 0, 0]
-  return rainbow((nu - VIS_LO) / (VIS_HI - VIS_LO))
+// thermal-surface tuning for the forget view: every escape deposits its
+// photon's energy as heat in a small patch around its exit direction —
+// the surface temperature is the local escaping energy flux — and each
+// patch cools by Newton's law, like the cools view
+const FORGET_GAIN = 0.5 // eV deposited per eV of escaping photon, at the splash center
+const SPLASH_SIG = 0.12 // radians — the splash patch size
+// blackbody surface: a patch at temperature T (eV) glows with the visible
+// light a blackbody at T produces — the hue is the spectral color of kT,
+// the brightness is the real Planck integral over the visible band,
+// normalized at the band's top edge. cold patches make almost no visible
+// light, so they sit near black; hot ones blaze
+const BB_N = 48, BB_T0 = 0.5, BB_T1 = 8
+const bbVis = new Float64Array(BB_N + 1)
+for (let i = 0; i <= BB_N; i++) {
+  const T = BB_T0 + (BB_T1 - BB_T0) * i / BB_N
+  let s = 0
+  for (let j = 0; j < 48; j++) {
+    const nu = VIS_LO + (VIS_HI - VIS_LO) * (j + 0.5) / 48
+    s += Math.pow(nu, 3) / (Math.exp((nu * H / EV) / T) - 1)
+  }
+  bbVis[i] = s
+}
+const BB_REF = bbVis[Math.round((3.26 - BB_T0) / (BB_T1 - BB_T0) * BB_N)]
+function visBrightness(T) {
+  const x = Math.min(BB_N, Math.max(0, (T - BB_T0) / (BB_T1 - BB_T0) * BB_N))
+  const i = Math.floor(x), f = x - i
+  const v = bbVis[i] * (1 - f) + bbVis[Math.min(BB_N, i + 1)] * f
+  return Math.min(1, v / BB_REF)
 }
 // forget ripples: each escaping photon launches a wave on the sphere.
 // the amplitude carries the photon's energy; the oscillation rate and
@@ -1025,21 +1042,16 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
     phosExpRef.current = expRef.current
 
     const paintSurface = (exp, sdt) => {
-      // drain the escape splashes: each deposits its escaping light as
-      // heat in a small patch around its exit direction
+      // drain the escape splashes: every escape deposits its photon's
+      // energy as heat — each patch's temperature is the local escaping
+      // energy flux
       if (exp.splashes.length) {
         for (const sp of exp.splashes) {
-          // only visible light paints — ultraviolet and infrared escapes
-          // are ignored by the surface altogether, leaving no trace
-          if (sp.nuOut < VIS_LO || sp.nuOut > VIS_HI) continue
-          // the patch takes the light's actual color — a new visible hit
-          // repaints it, then it cools back to black between hits
-          const peak = (sp.nuOut * H) / EV
+          const eV = (sp.nuOut * H) / EV
           for (let v = 0; v < sCount; v++) {
             const d = uDir[v * 3] * sp.dx + uDir[v * 3 + 1] * sp.dy + uDir[v * 3 + 2] * sp.dz
             if (d < 0.85) continue
-            const o = v * 3
-            P[o] = T_BASE + (peak - T_BASE) * Math.exp(-(1 - d) / (SPLASH_SIG * SPLASH_SIG))
+            P[v * 3] += FORGET_GAIN * eV * Math.exp(-(1 - d) / (SPLASH_SIG * SPLASH_SIG))
           }
         }
         exp.splashes.length = 0
@@ -1053,8 +1065,11 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       for (let v = 0; v < sCount; v++) {
         const o = v * 3
         if (coolF > 0) P[o] += (T_BASE - P[o]) * coolF
-        const tc = forgetColor(P[o])
-        colA.setXYZ(v, tc[0] / 255, tc[1] / 255, tc[2] / 255)
+        // blackbody color: hue from the spectral color of kT, brightness
+        // from the real visible-band Planck integral at T
+        const tc = visibleColor((P[o] * EV) / H)
+        const br = visBrightness(P[o])
+        colA.setXYZ(v, (tc[0] / 255) * br, (tc[1] / 255) * br, (tc[2] / 255) * br)
       }
       colA.needsUpdate = true
       // waves: every escaping photon radiates a damped ring from its exit
@@ -1569,7 +1584,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
 
       <div className="graph-box">
         <div className="graph-title-row">
-          <div className="graph-title">The sun that forgets</div>
+          <div className="graph-title">Temperature based on energy flux</div>
         </div>
         <ForgetSurface expRef={frExpRef} ctlRef={frCtlRef} dirtyRef={dirtyRef} />
         <p className="graph-note">
@@ -1584,12 +1599,15 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           thermalization needs only a few hundred, across centimeters, so
           each packet's frequency snaps to the local thermal peak, 2.8kT/h,
           and rides it outward: ultraviolet in the deep interior,
-          cooling through the visible near the surface. The sphere itself
-          is painted like the cools view — but only visible light paints:
-          ultraviolet and infrared escapes are ignored by the surface
-          altogether, so they can't overtake the colors. A visible hit
-          paints its patch with its actual color, which cools back to
-          black on the 40-second tau; the next visible hit repaints it —
+          cooling through the visible near the surface. The sphere is a
+          blackbody surface: every escape deposits its photon's energy
+          as heat in a small patch around its exit direction, so each
+          patch's temperature is the local escaping energy flux, cooling
+          by Newton's law between hits. A patch glows with the visible
+          light a blackbody at its temperature produces — the hue is the
+          spectral color of its thermal energy, the brightness the real
+          Planck integral over the visible band: cold patches make almost
+          no visible light and sit near black, hot ones blaze violet —
           and every escape launches a wave there too, its amplitude the
           escaping photon's energy, rippling outward and dying away
           (slowed down so we can see it). The ripple slider scales the
