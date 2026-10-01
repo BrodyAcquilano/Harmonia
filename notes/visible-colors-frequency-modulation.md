@@ -76,7 +76,13 @@ Three things jump out at me:
 2. **The outer, cooler layers dominate.** Most of the modulation happens where the input is furthest from equilibrium, near the surface. The core's panel sits two orders lower — at $10^7$ K the plasma is "closer" to the input, so there's less left to modulate.
 3. **The fourth panel looks like the outer-Sun curve.** The total end-to-end mapping from the table has the same shape and nearly the same size as the outer range's attenuation. Consistent: the last, coolest stretch does most of the work.
 
-## 7. The physics anchors
+## 7. Modelling it — the Sun simulation
+
+I built this into the Quark Space as a simulation ("Modelling the Sun," right after the Color Theory tab), so I can watch the mapping happen instead of just tabulating it. The setup mirrors the model in this note: quarks fire inside a smaller inner sphere, hidden from view, and their waves travel outward at their normal speed through the temperature gradient, getting frequency-shifted as they climb. Each pulse is colored once — by where its frequency lands after the full trip through the gradient, using the end-to-end factors from the table in §5, interpolated log-log between the three anchors. The surface is the photosphere: normalized, relative emission only, rippling as wavefronts cross it — the gradient changes nothing but the color.
+
+What you see on the surface is the actual visible spectrum, not our display convention — dark red (infrared) for anything landing below it, light purple (ultraviolet) for anything above. The number line above the surface shows the three fundamentals marked where they land — 1/3 f_q in the red, 2/3 in the yellow, 4/3 in the blue — with the attenuation distribution of each frequency below it. Press play and the colors ripple as wavefronts cross: the modulation, made visible.
+
+## 8. The physics anchors
 
 Collecting the pieces this theory stands on, all standard:
 
@@ -86,6 +92,6 @@ Collecting the pieces this theory stands on, all standard:
 - **Escape time** ($\sim 10^5$ years): the "gets stuck and bounces around" I started from — the random walk is what gives thermalization time to complete.
 - **Thermalization**: the process itself — absorption and re-emission replacing the input spectrum with the local thermal one, entropy rising outward, one high-energy quantum becoming $\sim 10^6$ low-energy ones.
 
-## 8. Where this stands
+## 9. Where this stands
 
 This is still a theory, and I'm just experimenting with ideas. What I have: a real, checkable mechanism that shifts *frequency* (not amplitude) by roughly the right number of orders, with the Sun's mass setting its strength — and a color-by-color mapping between our quark display spectrum and the actual visible one. What I don't have: the exact non-uniform scaling rule in the table, or anything beyond the Sun (though every photon we've ever seen went through a star, so the Sun may be all the theory needs for light). The 2:3 structure lives in the mass-forming field, untouched by this — light is just passing through.

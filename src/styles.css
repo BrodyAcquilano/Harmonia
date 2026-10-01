@@ -939,6 +939,13 @@ body {
   min-width: 0;
 }
 
+.note-body img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 12px auto;
+}
+
 .note-body h1,
 .note-body h2,
 .note-body h3 {
