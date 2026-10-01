@@ -74,6 +74,7 @@ export default function QuarkSpace() {
   const [speedP, setSpeedP] = useState(1)
   const [decayP, setDecayP] = useState(0.35)
   const [decayM, setDecayM] = useState(0.35)
+  const [decayC, setDecayC] = useState(0.35)
   const [entropyC, setEntropyC] = useState(60000)
   const [waveAmpC, setWaveAmpC] = useState(0.2)
   const [showC, setShowC] = useState(12)
@@ -637,23 +638,26 @@ export default function QuarkSpace() {
             </div>
             <div className="quark-intro-body">
               <p>
-                Every eigenstate gets the color of its energy. Low frequencies
-                burn red, high frequencies burn blue — the way starlight
-                works — and the combination frequencies at higher entropies
-                take their color from the same scale. Nothing here is labeled
-                by quark type anymore; energy decides.
+                Every eigenstate gets the color of its energy, on the real
+                spectrum: dark red (infrared) for the coolest frequency in
+                view, light purple (ultraviolet) for the hottest. The scale
+                stretches between two cutoff bounds and refits every time new
+                frequencies appear — nothing here is labeled by quark type
+                anymore; energy decides.
               </p>
               <p>
-                The first graph is the scale itself. The second draws the
-                eigenstate waves in their energy colors, faint, with their sum
-                on top in the additive mix of all of them. Watch as more
-                components join: the hues pile up, and the sum washes toward
-                white.
+                The Space-Time Domain's three graphs are remade below in true
+                colors: the individual firings, the slice, and the 3D surface —
+                every point wearing the additive mix of the pulses reaching
+                it. Then the components drawn one by one in 1D, so you can
+                watch the sum wash toward white.
               </p>
             </div>
           </div>
 
-          <ColorTheory entropy={entropyC} waveAmp={waveAmpC} shown={showC} playing={playingCol} speed={speedCol} onPlayingChange={setPlayingCol} onSpeedChange={setSpeedCol} />
+          <ColorTheory entropy={entropyC} waveAmp={waveAmpC} shown={showC} playing={playingCol} speed={speedCol} onPlayingChange={setPlayingCol} onSpeedChange={setSpeedCol} showComponents={false} showEquations={false} />
+          <PointSources trueColors entropy={entropyC} waveAmp={waveAmpC} decay={decayC} playing={playingCol} speed={speedCol} onPlayingChange={setPlayingCol} onSpeedChange={setSpeedCol} />
+          <ColorTheory entropy={entropyC} waveAmp={waveAmpC} shown={showC} playing={playingCol} speed={speedCol} onPlayingChange={setPlayingCol} onSpeedChange={setSpeedCol} showScale={false} showEquations={false} />
           </>
           )}
         </div>
@@ -834,7 +838,7 @@ export default function QuarkSpace() {
             <h3>Entropy</h3>
             <Slider label="s" value={entropyC} min={0} max={1000000} step={1}
               onChange={setEntropyC} format={(v) => v.toFixed(0)} />
-            <p className="graph-note">Reseeds the eigenstate chain — each entropy is a fresh random universe.</p>
+            <p className="graph-note">Reseeds the 1D component chain — and fires the 3D pulses faster.</p>
           </div>
 
           <div className="control-group">
@@ -849,6 +853,13 @@ export default function QuarkSpace() {
             <Slider label="shown" value={showC} min={1} max={40} step={1}
               onChange={setShowC} format={(v) => v.toFixed(0)} />
             <p className="graph-note">How many eigenstate waves join the sum — watch the sum's color wash toward white.</p>
+          </div>
+
+          <div className="control-group">
+            <h3>Decay</h3>
+            <Slider label="d" value={decayC} min={0} max={1} step={0.01}
+              onChange={setDecayC} format={(v) => v.toFixed(2)} />
+            <p className="graph-note">The 3D pulses fade as they age — 0 is no decay, 1 dies fast.</p>
           </div>
 
           </>

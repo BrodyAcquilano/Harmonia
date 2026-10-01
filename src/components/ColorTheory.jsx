@@ -9,10 +9,11 @@ function Tex({ tex }) {
   return <span dangerouslySetInnerHTML={{ __html: html }} />
 }
 
-/* Color Theory: every eigenstate gets the color of its energy. Low
-   frequencies burn red, high frequencies burn blue — the way starlight
-   works — and the combination frequencies at higher entropies take their
-   color from the same scale. The eigenstate waves are drawn in their energy
+/* Color Theory: every eigenstate gets the color of its energy, on the real
+   spectrum — dark red (infrared) for the coolest frequency in view, light
+   purple (ultraviolet) for the hottest. The scale stretches between two
+   cutoff bounds padded past what's present, and refits every time new
+   frequencies are added. The eigenstate waves are drawn in their energy
    colors, faint; their sum is drawn on top in the additive mix of all of
    them. The more components join, the closer the sum washes toward white. */
 
@@ -21,30 +22,66 @@ const OMEGA = 0.6
 const X_MAX = Math.PI * 4
 const STEPS = 420
 
-// the energy scale: |q| in units of f_q/3 — 1 → red, 2 → yellow,
-// 3 → teal-green, ≥4 → blue; hotter combinations saturate at blue
-const STOPS = [
-  [0, [231, 76, 60]],
-  [1 / 3, [241, 196, 15]],
-  [2 / 3, [46, 204, 160]],
-  [1, [52, 120, 246]],
+// the physical color spectrum, from the cool end to the hot end.
+// infrared and ultraviolet are each one flat color — dark red and light
+// purple — with the visible spectrum filling the reasonable range in the
+// middle. The middle range comes from the cutoff bounds: the visible
+// spectrum spans exactly the frequencies in view.
+const IR_RGB = [110, 20, 20]      // infrared — one color
+const UV_RGB = [216, 191, 216]    // ultraviolet — one color
+const VISIBLE_STOPS = [
+  [255, 0, 0],     // red
+  [255, 127, 0],   // orange
+  [255, 255, 0],   // yellow
+  [0, 200, 0],     // green
+  [0, 200, 255],   // cyan
+  [0, 0, 255],     // blue
+  [139, 0, 255],   // violet
 ]
+const DEF_BANDS = { tIR: 1 / 12, tUV: 11 / 12 }
 
-function energyColor(q) {
-  const t = Math.max(0, Math.min(1, (Math.abs(q) - 1) / 3))
-  for (let s = 0; s < STOPS.length - 1; s++) {
-    const [t0, c0] = STOPS[s]
-    const [t1, c1] = STOPS[s + 1]
-    if (t >= t0 && t <= t1) {
-      const f = (t - t0) / (t1 - t0 || 1)
-      return [
-        Math.round(c0[0] + (c1[0] - c0[0]) * f),
-        Math.round(c0[1] + (c1[1] - c0[1]) * f),
-        Math.round(c0[2] + (c1[2] - c0[2]) * f),
-      ]
-    }
+export function spectrumColor(t, b = DEF_BANDS) {
+  const tc = Math.max(0, Math.min(1, t))
+  if (tc <= b.tIR) return IR_RGB.slice()
+  if (tc >= b.tUV) return UV_RGB.slice()
+  const s = (tc - b.tIR) / (b.tUV - b.tIR)
+  const x = s * (VISIBLE_STOPS.length - 1)
+  const i = Math.min(VISIBLE_STOPS.length - 2, Math.floor(x))
+  const f = x - i
+  const a = VISIBLE_STOPS[i], b2 = VISIBLE_STOPS[i + 1]
+  return [
+    Math.round(a[0] + (b2[0] - a[0]) * f),
+    Math.round(a[1] + (b2[1] - a[1]) * f),
+    Math.round(a[2] + (b2[2] - a[2]) * f),
+  ]
+}
+
+// color from energy, on a shifting scale. The scale stretches between two
+// cutoff bounds — each padded 10% beyond the frequencies in view — so the
+// coolest frequency present lands in dark red (infrared) and the hottest in
+// light purple (ultraviolet), with the real spectrum between. Every time new
+// frequencies are added, the bounds are refit: the scale always spans what is
+// actually here.
+export function spectrumBounds(qs) {
+  let qMin = Infinity, qMax = -Infinity
+  for (const q of qs) {
+    const aq = Math.abs(q)
+    if (aq < qMin) qMin = aq
+    if (aq > qMax) qMax = aq
   }
-  return STOPS[STOPS.length - 1][1].slice()
+  if (!isFinite(qMin)) { qMin = 1; qMax = 4 }
+  const pad = qMax > qMin ? 0.1 * (qMax - qMin) : 0.5
+  const lo = qMin - pad, hi = qMax + pad
+  // where the visible spectrum starts and ends on the bar — derived from
+  // the cutoff bounds, so the visible range always spans what's in view
+  const tIR = (qMin - lo) / (hi - lo)
+  const tUV = (qMax - lo) / (hi - lo)
+  return { lo, hi, qMin, qMax, tIR, tUV }
+}
+
+export function energyColor(q, b) {
+  const t = b.hi > b.lo ? (Math.abs(q) - b.lo) / (b.hi - b.lo) : 0.5
+  return spectrumColor(t, b)
 }
 
 const rgb = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`
@@ -66,6 +103,9 @@ export default function ColorTheory({
   speed = 1,
   onPlayingChange,
   onSpeedChange,
+  showScale = true,
+  showComponents = true,
+  showEquations = true,
 }) {
   const canvasRef = useRef(null)
   const stateRef = useRef({ playing, speed })
@@ -74,6 +114,16 @@ export default function ColorTheory({
   // a fresh random chain per entropy value — stable while the slider sits still
   const terms = useMemo(() => buildQuarkTerms(40, entropy), [entropy])
 
+  // the spectrum bounds, fit to the frequencies in view and stretched
+  // between two padded cutoff bounds — refit every time new frequencies
+  // are added
+  const bounds = useMemo(() => {
+    const n = Math.min(shown, terms.length)
+    const qs = []
+    for (let k = 0; k < n; k++) qs.push(terms[k].q)
+    return spectrumBounds(qs)
+  }, [terms, shown])
+
   const comps = useMemo(() => {
     const n = Math.min(shown, terms.length)
     const out = []
@@ -81,10 +131,10 @@ export default function ColorTheory({
       const term = terms[k]
       const sgn = (Math.floor((k + 1) * SGN_GAMMA) % 2 === 0) ? 1 : -1
       const amp = term.m * sgn * (waveAmp / Math.sqrt(k + 1))
-      out.push({ q: term.q, amp, color: energyColor(term.q) })
+      out.push({ q: term.q, amp, color: energyColor(term.q, bounds) })
     }
     return out
-  }, [terms, shown, waveAmp])
+  }, [terms, shown, waveAmp, bounds])
 
   // additive mix of the component colors, weighted by |amplitude| —
   // scaled so the brightest channel hits full: hues pile up toward white
@@ -101,12 +151,9 @@ export default function ColorTheory({
 
   const scaleCSS = useMemo(() => {
     const samples = []
-    for (let i = 0; i <= 24; i++) {
-      const c = energyColor(1 + (i / 24) * 3.2)
-      samples.push(rgb(c))
-    }
+    for (let i = 0; i <= 48; i++) samples.push(rgb(spectrumColor(i / 48, bounds)))
     return `linear-gradient(to right, ${samples.join(',')})`
-  }, [])
+  }, [bounds])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -201,47 +248,73 @@ export default function ColorTheory({
 
   return (
     <>
+      {showScale && (
       <div className="graph-box">
         <div className="graph-title-row">
           <h2 className="graph-title">The energy scale</h2>
         </div>
         <div style={{ padding: '6px 18px 2px' }}>
-          <div
-            style={{
-              height: 26,
-              borderRadius: 6,
-              background: scaleCSS,
-              border: '1px solid rgba(107,90,62,0.35)',
-            }}
-          />
-          <div style={{ position: 'relative', height: 30, marginTop: 4 }}>
-            {[
-              ['0%', '1/3 f_q'],
-              ['33.3%', '2/3 f_q'],
-              ['66.7%', '1 f_q'],
-              ['100%', '4/3 f_q +'],
-            ].map(([left, label]) => (
-              <span
-                key={label}
-                style={{
-                  position: 'absolute', left, transform: 'translateX(-50%)',
-                  font: '11px "IBM Plex Mono", monospace', color: '#715f43',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {label}
-              </span>
+          <div style={{ position: 'relative' }}>
+            <div
+              style={{
+                height: 26,
+                borderRadius: 6,
+                background: scaleCSS,
+                border: '1px solid rgba(107,90,62,0.35)',
+              }}
+            />
+            {/* ticks where the visible spectrum starts and ends */}
+            {[bounds.tIR, bounds.tUV].map((tt, i) => (
+              <div key={i} style={{
+                position: 'absolute', top: 0, bottom: 0,
+                left: `${tt * 100}%`, width: 2,
+                background: 'rgba(255,255,255,0.7)',
+                transform: 'translateX(-1px)',
+              }} />
             ))}
+          </div>
+          <div style={{ position: 'relative', height: 42, marginTop: 6 }}>
+            <span style={{
+              position: 'absolute', left: 0, top: 0,
+              font: '11px "IBM Plex Mono", monospace', color: '#715f43',
+            }}>
+              infrared
+            </span>
+            <span style={{
+              position: 'absolute', right: 0, top: 0, textAlign: 'right',
+              font: '11px "IBM Plex Mono", monospace', color: '#715f43',
+            }}>
+              ultraviolet
+            </span>
+            <span style={{
+              position: 'absolute', left: `${bounds.tIR * 100}%`, top: 18,
+              transform: 'translateX(-50%)', whiteSpace: 'nowrap',
+              font: '11px "IBM Plex Mono", monospace', color: '#4a3f2c',
+            }}>
+              {freqLabel(bounds.qMin)}
+            </span>
+            <span style={{
+              position: 'absolute', left: `${bounds.tUV * 100}%`, top: 18,
+              transform: 'translateX(-50%)', whiteSpace: 'nowrap',
+              font: '11px "IBM Plex Mono", monospace', color: '#4a3f2c',
+            }}>
+              {freqLabel(bounds.qMax)}
+            </span>
           </div>
         </div>
         <p className="graph-note">
-          Color from energy, E = hν — the cooler the frequency, the redder;
-          the hotter, the bluer. Combination frequencies at higher entropies
-          take their color from the same scale; anything hotter than 4/3 f_q
-          saturates at blue.
+          Color from energy, E = hν, on a shifting scale — drawn as a number
+          line. The scale stretches between two cutoff bounds, each padded
+          past the frequencies in view; the visible spectrum fills the
+          reasonable range in the middle, with flat infrared (dark red)
+          below the coolest frequency and flat ultraviolet (light purple)
+          above the hottest. Every time new frequencies are added, the
+          bounds are refit — the scale always spans what is actually here.
         </p>
       </div>
+      )}
 
+      {showComponents && (
       <div className="graph-box">
         <div className="graph-title-row">
           <h2 className="graph-title">Components in their energy colors</h2>
@@ -251,37 +324,12 @@ export default function ColorTheory({
             <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', padding: '8px 18px 0' }}>
-          {comps.map((c, i) => (
-            <span
-              key={i}
-              title={`${freqLabel(c.q)}${c.amp < 0 ? ' (decay, subtracted)' : ''}`}
-              style={{
-                width: 20, height: 20, borderRadius: 4,
-                background: rgb(c.color),
-                border: '1px solid rgba(107,90,62,0.35)',
-              }}
-            />
-          ))}
-          <span style={{ margin: '0 4px', color: '#715f43' }}>→</span>
-          <span
-            title="the additive mix of every component"
-            style={{
-              width: 34, height: 34, borderRadius: 6,
-              background: rgb(mixed),
-              border: '2px solid rgba(107,90,62,0.5)',
-            }}
-          />
-          <span style={{ font: '12px "IBM Plex Mono", monospace', color: '#715f43' }}>
-            the sum's color
-          </span>
-        </div>
         <p className="graph-note">
           Every eigenstate wave in its energy color, faint; their sum on top
           in the additive mix. Adding light doesn't average toward grey the
           way paint does — the hues pile up and the sum washes toward white.
-          Hover a swatch for its frequency; decay states are subtracted from
-          the sum.
+          Match each wave's color off the spectrum bar above; decay states
+          are subtracted from the sum.
         </p>
         <div className="sim-transport">
           <button
@@ -297,16 +345,19 @@ export default function ColorTheory({
           </div>
         </div>
       </div>
+      )}
 
+      {showEquations && (
       <div className="graph-box">
         <div className="graph-title-row">
           <h2 className="graph-title">Equations</h2>
         </div>
         <div className="eq-grid">
           <div className="eq-box">
-            <span className="eq-label">Color from energy</span>
-            <span className="eq-line"><Tex tex="E = h\nu \;\Rightarrow\; \nu_k = |q_k|\,\dfrac{f_q}{3}" /></span>
-            <span className="eq-line"><Tex tex="\text{red } |q|=1 \;\to\; \text{yellow } |q|=2 \;\to\; \text{blue } |q|\ge 4" /></span>
+            <span className="eq-label">Color from energy — a shifting scale</span>
+            <span className="eq-line"><Tex tex="t_k = \dfrac{|q_k| - q_{\mathrm{lo}}}{q_{\mathrm{hi}} - q_{\mathrm{lo}}},\quad \mathbf{C}_k = \mathrm{spectrum}(t_k)" /></span>
+            <span className="eq-line"><Tex tex="q_{\mathrm{lo/hi}} = q_{\min/\max} \mp 10\% \text{ — cutoffs padded past what's in view}" /></span>
+            <span className="eq-line"><Tex tex="t \le t_{\mathrm{IR}} \to \text{dark red},\ t \ge t_{\mathrm{UV}} \to \text{light purple — the visible spectrum fills the middle}" /></span>
           </div>
           <div className="eq-box">
             <span className="eq-label">The components</span>
@@ -320,6 +371,7 @@ export default function ColorTheory({
           </div>
         </div>
       </div>
+      )}
     </>
   )
 }

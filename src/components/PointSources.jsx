@@ -5,6 +5,7 @@ import 'katex/dist/katex.min.css'
 import Slider from './Slider.jsx'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { HUES } from './SurfaceMap.jsx'
+import { energyColor, spectrumBounds } from './ColorTheory.jsx'
 
 function Tex({ tex }) {
   const html = katex.renderToString(tex, { throwOnError: false })
@@ -21,7 +22,10 @@ function Tex({ tex }) {
    direction. The third graph is the whole: all the pulses summed into one
    surface in 3D space — a sphere sampling the total field, green where the
    total runs high, red where it runs low. All three graphs share one clock,
-   so they always show the same instant. z is vertical. */
+   so they always show the same instant. z is vertical.
+   With trueColors, the same three graphs are remade for Color Theory: each
+   pulse burns its energy color on the shifting spectrum, and the slice and
+   surface wear the per-point additive mix of the pulses reaching them. */
 
 const AXIS_LEN = 2.62
 const HALF = 2.6 // sim cube half-size; the slice spans [-HALF, HALF]^2
@@ -178,12 +182,13 @@ export default function PointSources({
   speed = 1,
   onPlayingChange,
   onSpeedChange,
+  trueColors = false,
 }) {
   const mountARef = useRef(null)
   const mountBRef = useRef(null)
   const mountCRef = useRef(null)
-  const stateRef = useRef({ playing, speed, entropy, waveAmp, decay })
-  stateRef.current = { playing, speed, entropy, waveAmp, decay }
+  const stateRef = useRef({ playing, speed, entropy, waveAmp, decay, trueColors })
+  stateRef.current = { playing, speed, entropy, waveAmp, decay, trueColors }
 
   useEffect(() => {
     const A = setupScene(mountARef.current)
@@ -292,14 +297,14 @@ export default function PointSources({
         * Math.exp(-(xi * xi) / (2 * SIG_R * SIG_R)) * damp / (1 + r)
     }
 
-    const updateA = (t, decay) => {
+    const updateA = (t, decay, trueColors) => {
       for (let i = 0; i < pulses.length; i++) {
         const p = pulses[i]
         const ac = actors[i]
         const dt = t - p.t0
         const damp = decay > 0 ? Math.exp(-decay * dt / DECAY_TAU) : 1
-        const hue = HUES[p.q]
-        tmpC.setRGB(hue[0] / 255, hue[1] / 255, hue[2] / 255)
+        const col = trueColors ? p.col : HUES[p.q]
+        tmpC.setRGB(col[0] / 255, col[1] / 255, col[2] / 255)
         ac.group.visible = true
         ac.group.position.set(p.ox, p.oy, p.oz)
         // nested wavefront shells: the crests, one wavelength apart
@@ -327,56 +332,91 @@ export default function PointSources({
       }
     }
 
-    const updateB = (t, amp, decay) => {
+    const updateB = (t, amp, decay, trueColors) => {
       const posA = surfGeo.attributes.position
       const colA = surfGeo.attributes.color
       let umax = 1e-9
+      const np = pulses.length
       for (let v = 0; v < vCount; v++) {
         const x = posA.getX(v), y = posA.getY(v)
-        let u = 0
-        for (let i = 0; i < pulses.length; i++) {
-          u += field(pulses[i], x, y, 0, t, amp, decay)
+        let u = 0, mr = 0, mg = 0, mb = 0
+        for (let i = 0; i < np; i++) {
+          const p = pulses[i]
+          const f = field(p, x, y, 0, t, amp, decay)
+          u += f
+          if (trueColors) {
+            // additive mix: every pulse reaching this point contributes its
+            // true color, weighted by how strongly it reaches
+            const w = Math.abs(f), c = p.col
+            mr += w * c[0]; mg += w * c[1]; mb += w * c[2]
+          }
         }
         U[v] = u
-        const au = Math.abs(u)
-        if (au > umax) umax = au
-      }
-      for (let v = 0; v < vCount; v++) {
-        const u = U[v]
         posA.setZ(v, Math.max(-HALF, Math.min(HALF, u)))
-        // shade toward white where the total is weak — like the flat map
-        const b = 0.35 + 0.65 * Math.min(1, Math.abs(u) / umax)
-        const hue = u >= 0 ? GREEN_RGB : RED_RGB
-        colA.setXYZ(v, 1 - (1 - hue[0]) * b, 1 - (1 - hue[1]) * b, 1 - (1 - hue[2]) * b)
+        if (trueColors) {
+          const mx = Math.max(mr, mg, mb)
+          if (mx > 1e-6) colA.setXYZ(v, mr / mx, mg / mx, mb / mx)
+          else colA.setXYZ(v, 0.93, 0.91, 0.87) // quiet — neutral
+        } else {
+          const au = Math.abs(u)
+          if (au > umax) umax = au
+        }
+      }
+      if (!trueColors) {
+        for (let v = 0; v < vCount; v++) {
+          const u = U[v]
+          // shade toward white where the total is weak — like the flat map
+          const b = 0.35 + 0.65 * Math.min(1, Math.abs(u) / umax)
+          const hue = u >= 0 ? GREEN_RGB : RED_RGB
+          colA.setXYZ(v, 1 - (1 - hue[0]) * b, 1 - (1 - hue[1]) * b, 1 - (1 - hue[2]) * b)
+        }
       }
       posA.needsUpdate = true
       colA.needsUpdate = true
       surfGeo.computeVertexNormals()
     }
 
-    const updateC = (t, amp, decay) => {
+    const updateC = (t, amp, decay, trueColors) => {
       const posA = sphGeo.attributes.position
       const colA = sphGeo.attributes.color
       let umax = 1e-9
+      const np = pulses.length
       for (let v = 0; v < sCount; v++) {
         const x = sBase[v * 3], y = sBase[v * 3 + 1], z = sBase[v * 3 + 2]
-        let u = 0
-        for (let i = 0; i < pulses.length; i++) {
-          u += field(pulses[i], x, y, z, t, amp, decay)
+        let u = 0, mr = 0, mg = 0, mb = 0
+        for (let i = 0; i < np; i++) {
+          const p = pulses[i]
+          const f = field(p, x, y, z, t, amp, decay)
+          u += f
+          if (trueColors) {
+            // additive mix: every pulse reaching this point contributes its
+            // true color, weighted by how strongly it reaches
+            const w = Math.abs(f), c = p.col
+            mr += w * c[0]; mg += w * c[1]; mb += w * c[2]
+          }
         }
         Uc[v] = u
-        const au = Math.abs(u)
-        if (au > umax) umax = au
+        if (!trueColors) {
+          const au = Math.abs(u)
+          if (au > umax) umax = au
+        }
+        if (trueColors) {
+          const mx = Math.max(mr, mg, mb)
+          if (mx > 1e-6) colA.setXYZ(v, mr / mx, mg / mx, mb / mx)
+          else colA.setXYZ(v, 0.93, 0.91, 0.87) // quiet — neutral
+        }
       }
       for (let v = 0; v < sCount; v++) {
         const u = Uc[v]
         const rNew = Math.max(0.6, Math.min(4.2, SURF_R0 + SURF_G * u))
         const f = rNew / SURF_R0
         posA.setXYZ(v, sBase[v * 3] * f, sBase[v * 3 + 1] * f, sBase[v * 3 + 2] * f)
-        // shade toward white where the total is weak — like the flat map
-        const b = 0.35 + 0.65 * Math.min(1, Math.abs(u) / umax)
-        const hue = u >= 0 ? GREEN_RGB : RED_RGB
-        colA.setXYZ(v, 1 - (1 - hue[0]) * b, 1 - (1 - hue[1]) * b, 1 - (1 - hue[2]) * b)
+        if (!trueColors) {
+          // shade toward white where the total is weak — like the flat map
+          const b = 0.35 + 0.65 * Math.min(1, Math.abs(u) / umax)
+          const hue = u >= 0 ? GREEN_RGB : RED_RGB
+          colA.setXYZ(v, 1 - (1 - hue[0]) * b, 1 - (1 - hue[1]) * b, 1 - (1 - hue[2]) * b)
+        }
       }
       posA.needsUpdate = true
       colA.needsUpdate = true
@@ -406,9 +446,19 @@ export default function PointSources({
       for (let i = pulses.length - 1; i >= 0; i--) {
         if (C * (t - pulses[i].t0) > DIE_R) pulses.splice(i, 1)
       }
-      updateA(t, st.decay)
-      updateB(t, st.waveAmp, st.decay)
-      updateC(t, st.waveAmp, st.decay)
+      // true colors: the spectrum bounds refit to the live pulses every
+      // frame, so each pulse burns its color on the current scale
+      if (st.trueColors) {
+        const qs = []
+        for (let i = 0; i < pulses.length; i++) qs.push(pulses[i].q)
+        const b = spectrumBounds(qs)
+        for (let i = 0; i < pulses.length; i++) {
+          pulses[i].col = energyColor(pulses[i].q, b)
+        }
+      }
+      updateA(t, st.decay, st.trueColors)
+      updateB(t, st.waveAmp, st.decay, st.trueColors)
+      updateC(t, st.waveAmp, st.decay, st.trueColors)
       const label = 't = ' + t.toFixed(1) + ' s'
       A.timeTag.textContent = label
       B.timeTag.textContent = label
@@ -440,12 +490,26 @@ export default function PointSources({
           <div ref={mountARef} className="quark-canvas-wrap" />
         </div>
         <p className="graph-note">
-          Every live pulse on its own — a quark fired at a random point,
-          radiating a spherical wave in every direction. The nested shells are
-          the wave's crests, one wavelength apart, expanding at speed c and
-          fading as the pulse decays. Each pulse keeps its own
-          fundamental's color: blue 1/3 f_q, red 2/3 f_q, green 1 f_q,
-          yellow 4/3 f_q.
+          {trueColors ? (
+            <>
+              Every live pulse on its own — a quark fired at a random point,
+              radiating a spherical wave in every direction. The nested shells
+              are the wave's crests, one wavelength apart, expanding at speed
+              c and fading as the pulse decays. Each pulse burns its energy
+              color on the shifting spectrum — dark red (infrared) for the
+              coolest frequency live, light purple (ultraviolet) for the
+              hottest — and the bounds refit as new frequencies fire.
+            </>
+          ) : (
+            <>
+              Every live pulse on its own — a quark fired at a random point,
+              radiating a spherical wave in every direction. The nested shells are
+              the wave's crests, one wavelength apart, expanding at speed c and
+              fading as the pulse decays. Each pulse keeps its own
+              fundamental's color: blue 1/3 f_q, red 2/3 f_q, green 1 f_q,
+              yellow 4/3 f_q.
+            </>
+          )}
         </p>
       </div>
 
@@ -457,10 +521,22 @@ export default function PointSources({
           <div ref={mountBRef} className="quark-canvas-wrap" />
         </div>
         <p className="graph-note">
-          The same firings summed on the z = 0 slice — a fair sample of every
-          direction, green where the total runs high, red where it runs low.
-          Where two wavefronts cross, the surface spikes or cancels:
-          interference, made visible.
+          {trueColors ? (
+            <>
+              The same firings summed on the z = 0 slice — a fair sample of
+              every direction. Every point wears the additive mix of the
+              pulses reaching it: one pulse's color where one dominates,
+              washing toward white where many overlap. Where two wavefronts
+              cross, the surface spikes or cancels: interference, made visible.
+            </>
+          ) : (
+            <>
+              The same firings summed on the z = 0 slice — a fair sample of every
+              direction, green where the total runs high, red where it runs low.
+              Where two wavefronts cross, the surface spikes or cancels:
+              interference, made visible.
+            </>
+          )}
         </p>
       </div>
 
@@ -472,10 +548,21 @@ export default function PointSources({
           <div ref={mountCRef} className="quark-canvas-wrap" />
         </div>
         <p className="graph-note">
-          The whole at once: a sphere in 3D space sampling the total field —
-          every firing summed, in every direction. Each expanding shell dents
-          the surface as it crosses; green where the total runs high, red
-          where it runs low. This is the surface the slice was hinting at.
+          {trueColors ? (
+            <>
+              The whole at once: a sphere in 3D space sampling the total
+              field — every firing summed, in every direction. Every point
+              wears the additive mix of the pulses reaching it — the
+              whitening, in 3D. This is the surface the slice was hinting at.
+            </>
+          ) : (
+            <>
+              The whole at once: a sphere in 3D space sampling the total field —
+              every firing summed, in every direction. Each expanding shell dents
+              the surface as it crosses; green where the total runs high, red
+              where it runs low. This is the surface the slice was hinting at.
+            </>
+          )}
         </p>
         <div className="sim-transport">
           <button
@@ -527,6 +614,26 @@ export default function PointSources({
             <span className="eq-line"><Tex tex="U(\mathbf{x},t) = \sum_i u_i(\mathbf{x},t)" /></span>
             <span className="eq-line"><Tex tex="\text{slice: } U(x,y,0,t) \text{ — surface: } r = R_0 + G\,U \text{ on the sphere}" /></span>
           </div>
+          {trueColors && (
+          <>
+          <div className="eq-box">
+            <span className="eq-label">True colors — a shifting spectrum</span>
+            <span className="eq-line"><Tex tex="t_i = \dfrac{|q_i| - q_{\mathrm{lo}}}{q_{\mathrm{hi}} - q_{\mathrm{lo}}},\quad \mathbf{C}_i = \mathrm{spectrum}(t_i)" /></span>
+            <span className="eq-line"><Tex tex="q_{\mathrm{lo/hi}} = q_{\min/\max} \mp 10\% \text{ — cutoffs refit as new frequencies fire}" /></span>
+            <span className="eq-line"><Tex tex="t \le t_{\mathrm{IR}} \to \text{dark red},\ t \ge t_{\mathrm{UV}} \to \text{light purple — the visible spectrum fills the middle}" /></span>
+          </div>
+          <div className="eq-box">
+            <span className="eq-label">True colors — the mix</span>
+            <span className="eq-line"><Tex tex="\mathbf{C}(\mathbf{x},t) = \sum_i |u_i(\mathbf{x},t)|\,\mathbf{C}_i" /></span>
+            <span className="eq-line"><Tex tex="\text{brightest channel scaled to 1 — one color where one pulse dominates, white where many overlap}" /></span>
+          </div>
+          <div className="eq-box">
+            <span className="eq-label">The 1D components — adding to white</span>
+            <span className="eq-line"><Tex tex="w_k(x,t) = a_k\cos(|q_k|(x-\Omega t)),\quad a_k = \dfrac{m_k\sigma_k a}{\sqrt{k+1}}" /></span>
+            <span className="eq-line"><Tex tex="\mathbf{C}_{\mathrm{sum}} = \sum_k |a_k|\,\mathbf{C}_k \text{ — the sum's color washes toward white}" /></span>
+          </div>
+          </>
+          )}
         </div>
       </div>
     </>
