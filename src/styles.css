@@ -915,7 +915,8 @@ body {
   position: sticky;
   top: 18px;
   max-height: calc(100vh - 36px);
-  overflow-y: auto;
+  overflow-y: scroll;
+  padding-right: 4px;
 }
 
 .notes-sidebar-title {
