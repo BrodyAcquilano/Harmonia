@@ -208,10 +208,18 @@ function GradientSurface({ expRef, ctlRef, dirtyRef }) {
     const spawn = (exp, t) => {
       const rng = exp.rng
       const q = pickQ(rng)
-      const rr = R_IN * Math.cbrt(rng())
+      const band = Math.abs(q) / 3 // 1/3, 2/3, 1, 4/3
+      // each fundamental is born in its own sphere, radii in the ratio
+      // 1:2:3:4 — the 1/3 f_q sphere deepest, the 4/3 f_q sphere reaching
+      // past the old inner sphere toward the surface. Higher-frequency
+      // quark combinations assemble where the pressure is lower, so they
+      // have less gradient left to climb and cool less.
+      const Rg = band * R_IN
+      const rr = Rg * Math.cbrt(rng())
       const th = rng() * Math.PI * 2
       const ph = Math.acos(2 * rng() - 1)
       const nuIn = (Math.abs(q) / 3) * FQ
+      const x0 = rr / SURF_R0
       exp.pulses.push({
         ox: rr * Math.sin(ph) * Math.cos(th),
         oy: rr * Math.sin(ph) * Math.sin(th),
@@ -220,8 +228,13 @@ function GradientSurface({ expRef, ctlRef, dirtyRef }) {
         phi: rng() * Math.PI * 2,
         born: t, q,
         r0: rr,
-        x: rr / SURF_R0,
-        x0: rr / SURF_R0,
+        x: x0,
+        x0,
+        // random-walk scaling: the scatterings needed to escape go as the
+        // square of the remaining optical depth, so a journey starting at
+        // x0 gets S(1−x0)² scatterings. Without this, the same S spread
+        // over a shorter path would cool shallow births *more*, not less.
+        sq: (1 - x0) * (1 - x0),
         nuIn,
         E: H * nuIn,
         col: visibleColor(nuIn), // MeV gamma — ultraviolet clamp
@@ -317,7 +330,7 @@ function GradientSurface({ expRef, ctlRef, dirtyRef }) {
           p.age = (p.age || 0) + sdt
           // the outward wavefront climbs: x = r/R_sun
           const xNew = Math.min(1, p.x0 + (C * p.age) / SURF_R0)
-          const dN = ctl.S * ((xNew - p.x) / (1 - p.x0))
+          const dN = ctl.S * p.sq * ((xNew - p.x) / (1 - p.x0))
           if (dN > 0) p.E = coolStep(p.E, xNew, dN)
           p.x = xNew
           p.col = visibleColor(p.E / H)
@@ -646,7 +659,7 @@ const sup = (e) => String(e).split('').map((d) => SUP[+d]).join('')
 export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay = 0.35 }) {
   const [playing, setPlaying] = useState(false)
   const [speed, setSpeed] = useState(1)
-  const [scatLog, setScatLog] = useState(Math.log10(2e7))
+  const [scatLog, setScatLog] = useState(Math.log10(4e7))
   const expRef = useRef(null)
   if (!expRef.current) expRef.current = freshExperiment(entropy)
   const dirtyRef = useRef(true)
@@ -699,6 +712,22 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
             watch whether the measured points move toward the expected curve
             or away from it.
           </p>
+          <p>
+            One condition changed since the first version: the four
+            fundamentals are no longer all born in the same sphere. Each
+            gets its own generator sphere, radii in the ratio 1:2:3:4 — the
+            1/3 f<sub>q</sub> sphere deepest, the 4/3 f<sub>q</sub> sphere
+            reaching furthest toward the surface. The idea is that
+            higher-frequency quark combinations assemble where the
+            pressure is lower, so they climb less of the gradient and cool
+            less. A journey starting further out also escapes in fewer
+            scatterings — a random walk's steps go as the square of the
+            optical depth — so each journey gets S(1−x<sub>0</sub>)<sup>2</sup>
+            scatterings, where x<sub>0</sub> is the birth radius. Watch
+            what this does to the curve: it should bend the measured
+            attenuation away from a straight line and toward the table's
+            gentler slope.
+          </p>
         </div>
       </div>
 
@@ -708,7 +737,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
         </div>
         <GradientSurface expRef={expRef} ctlRef={ctlRef} dirtyRef={dirtyRef} />
         <p className="graph-note">
-          Each pulse leaves the hidden inner sphere carrying its quark
+          Each pulse leaves its own generator sphere carrying its quark
           frequency — MeV gamma, ultraviolet clamp — and cools as it climbs
           the gradient: violet, through the visible, into the infrared
           clamp. What reaches the surface escapes as thermal light, and its
@@ -795,10 +824,22 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
             h = 6.62607015×10<sup>−34</sup> J·s.
           </p>
           <p>
-            <em>Representative scatterings</em> S per journey (slider,
-            default 2×10<sup>7</sup>) — standing in for the ~10<sup>25</sup>
-            of the real random walk, which would take ~10<sup>5</sup> years
-            of simulated time.
+            <em>Birth spheres</em> — each fundamental is born in its own
+            sphere of radius R<sub>gen</sub> = (ν<sub>in</sub>/f<sub>q</sub>)·R<sub>in</sub>,
+            in the ratio 1:2:3:4: the 1/3 f<sub>q</sub> sphere deepest, the
+            4/3 f<sub>q</sub> sphere reaching 0.52 R<sub>☉</sub>. A journey
+            starting at fractional radius x<sub>0</sub> gets
+            S(1−x<sub>0</sub>)<sup>2</sup> scatterings — random-walk scaling,
+            steps ∝ (optical depth)<sup>2</sup> — so shallower births
+            genuinely cool less. (Spreading the same S over a shorter path
+            would do the opposite.)
+          </p>
+          <p>
+            <em>Representative scatterings</em> S per journey for a
+            center-born pulse (slider, default 4×10<sup>7</sup>) — standing
+            in for the ~10<sup>25</sup> of the real random walk, which would
+            take ~10<sup>5</sup> years of simulated time. The slider sets
+            the level of the curve; the birth spheres set its shape.
           </p>
           <p>
             <em>Attenuation</em> A = ν<sub>in</sub>/ν<sub>out</sub> ·
