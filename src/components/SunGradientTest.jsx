@@ -287,6 +287,7 @@ const FORGET_N = 48 // 12 packets per quark frequency
 // cools like the cools view
 const FORGET_GAIN = 3   // peak patch temperature per eV of escaping light, at the splash center
 const SPLASH_SIG = 0.18 // radians — the splash patch size
+const FORGET_COOL_TAU = 90 // seconds — slower fade than the cools view's 40
 // forget sphere: only the visible band produces color — patch temperature
 // mapped to its actual spectral color; infrared and ultraviolet patches
 // are black, invisible to eyes
@@ -1046,7 +1047,7 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       }
       const colA = sphGeo.attributes.color
       const posA = sphGeo.attributes.position
-      const coolF = sdt > 0 ? (1 - Math.exp(-sdt / COOL_TAU)) : 0
+      const coolF = sdt > 0 ? (1 - Math.exp(-sdt / FORGET_COOL_TAU)) : 0
       const rippleGain = ctlRef.current.ripple ?? 1
       // prune spent waves — ripples are pushed in time order
       while (exp.ripples.length && exp.t - exp.ripples[0].t0 > 4 * RIPPLE_TAU) exp.ripples.shift()
