@@ -786,13 +786,18 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
   playingRef.current = playing
   const ctlRef = useRef({})
 
-  // a new entropy seed or a new scattering count restarts both experiments —
-  // the graphs rebuild themselves from the new recorded history
+  // a new entropy seed or a new scattering count restarts the flash
+  // experiment — the graphs rebuild themselves from the new recorded
+  // history. The accumulating view is locked at the standard S, so it
+  // only restarts on a new entropy seed.
   useEffect(() => {
     expRef.current = freshExperiment(entropy)
-    accExpRef.current = freshExperiment(entropy)
     dirtyRef.current += 1
   }, [entropy, scatLog])
+  useEffect(() => {
+    accExpRef.current = freshExperiment(entropy)
+    dirtyRef.current += 1
+  }, [entropy])
 
   ctlRef.current = {
     playing, speed, entropy, waveAmp, decay,
@@ -800,7 +805,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
   }
   accCtlRef.current = {
     playing: accPlaying, speed: accSpeed, entropy, waveAmp, decay,
-    S: Math.pow(10, scatLog),
+    S: 6e7, // locked at the standard scattering count — no slider
   }
 
   const Sfmt = (v) => {
@@ -881,8 +886,8 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           <Slider
             label="scatterings per journey"
             value={scatLog}
-            min={5}
-            max={8}
+            min={Math.log10(2e7)}
+            max={Math.log10(2e8)}
             step={0.01}
             onChange={setScatLog}
             format={Sfmt}
