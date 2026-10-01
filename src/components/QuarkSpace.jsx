@@ -71,6 +71,8 @@ export default function QuarkSpace() {
   const [speed, setSpeed] = useState(1)
   const [playingP, setPlayingP] = useState(true)
   const [speedP, setSpeedP] = useState(1)
+  const [decayP, setDecayP] = useState(0.35)
+  const [decayM, setDecayM] = useState(0.35)
   const [compCount, setCompCount] = useState(20)
 
   // Local amplitude at the arrow (θ = τ1). τ1/τ2 are angles that move
@@ -484,22 +486,23 @@ export default function QuarkSpace() {
               <p>
                 The Mass Creation firing process, but every firing launches a
                 wave instead of a mass: quarks fire at random points inside
-                the cube, each in a random direction in x, y and z. Watch what
-                all the waves look like in 3D space, coming from different
-                points at once.
+                the cube, and each firing radiates a spherical wave in every
+                direction — with a velocity and a decay rate. Watch the waves
+                entangle in 3D space, coming from different points at once.
               </p>
               <p>
                 The first graph shows the individual components — every live
-                pulse as its own traveling wave packet, each in its
-                fundamental's color. The second graph is the superposition of
-                all the waves, combined into one surface wave on the z = 0
-                slice. Both graphs share one clock, so they always show the
-                same instant.
+                pulse as its expanding wavefront shells, each in its
+                fundamental's color. The second is the superposition on the
+                z = 0 slice — a fair sample of every direction. The third is
+                the whole: all the waves summed into one surface in 3D space.
+                All three share one clock, so they always show the same
+                instant.
               </p>
             </div>
           </div>
 
-          <PointSources entropy={entropyT} waveAmp={waveAmpT} playing={playingP} speed={speedP} onPlayingChange={setPlayingP} onSpeedChange={setSpeedP} />
+          <PointSources entropy={entropyT} waveAmp={waveAmpT} decay={decayP} playing={playingP} speed={speedP} onPlayingChange={setPlayingP} onSpeedChange={setSpeedP} />
           </>
           )}
           {sim === 'mass' && (
@@ -530,11 +533,12 @@ export default function QuarkSpace() {
             <div className="graph-title-row">
               <h2 className="graph-title">Mass Lattice</h2>
             </div>
-            <MassLattice entropy={entropyM} waveAmp={waveAmpM} playing={playingM} speed={speedM} onPlayingChange={setPlayingM} onSpeedChange={setSpeedM} />
+            <MassLattice entropy={entropyM} waveAmp={waveAmpM} decay={decayM} playing={playingM} speed={speedM} onPlayingChange={setPlayingM} onSpeedChange={setSpeedM} />
             <p className="graph-note">
               343 green unit masses on a 7×7×7 grid, constant size. Each one
               rides the amplified resultant wave motion at its position. Press
-              play and watch the whole cube ripple.
+              play and watch the whole cube ripple. Decay damps the motion
+              with distance from the center.
             </p>
           </div>
 
@@ -567,12 +571,13 @@ export default function QuarkSpace() {
             <div className="graph-title-row">
               <h2 className="graph-title">Mass Creation Field</h2>
             </div>
-            <MassCreation entropy={entropyM} waveAmp={waveAmpM} playing={playingC} speed={speedC} onPlayingChange={setPlayingC} onSpeedChange={setSpeedC} />
+            <MassCreation entropy={entropyM} waveAmp={waveAmpM} decay={decayM} playing={playingC} speed={speedC} onPlayingChange={setPlayingC} onSpeedChange={setSpeedC} />
             <p className="graph-note">
               Green spheres are formed masses — watch them appear, drift in
               closed loops, merge when they bump, and split apart again. Red
               flashes are the 5%: energy released with no mass. Up to 900 unit
-              masses; its own clock, its own play button.
+              masses; its own clock, its own play button. Decay damps their
+              wave-riding motion away from the center.
             </p>
           </div>
 
@@ -600,6 +605,11 @@ export default function QuarkSpace() {
                 <span className="eq-label">Merging — one rendered sphere</span>
                 <span className="eq-line"><Tex tex="M = \sum_i m_i,\quad R \propto M^{1/3}" /></span>
                 <span className="eq-line"><Tex tex="|\mathbf{p}_i - \mathbf{p}_j| < r_m \text{ merges — splits apart beyond it}" /></span>
+              </div>
+              <div className="eq-box">
+                <span className="eq-label">Decay</span>
+                <span className="eq-line"><Tex tex="\text{motion} \times e^{-d\,r_0/L},\quad r_0 = |\mathbf{p}_0|" /></span>
+                <span className="eq-line"><Tex tex="d \in [0,1] \text{ — the decay slider; waves lose energy traveling out}" /></span>
               </div>
             </div>
           </div>
@@ -737,6 +747,13 @@ export default function QuarkSpace() {
           </div>
 
           <div className="control-group">
+            <h3>Decay</h3>
+            <Slider label="d" value={decayP} min={0} max={1} step={0.01}
+              onChange={setDecayP} format={(v) => v.toFixed(2)} />
+            <p className="graph-note">Each pulse loses energy as it travels — 0 is no decay, 1 is fast decay.</p>
+          </div>
+
+          <div className="control-group">
             <h3>Components</h3>
             <Slider label="shown" value={compCount} min={0} max={20} step={1}
               onChange={setCompCount} format={(v) => v.toFixed(0)} />
@@ -759,6 +776,13 @@ export default function QuarkSpace() {
             <Slider label="a" value={waveAmpM} min={0} max={0.2} step={0.01}
               onChange={setWaveAmpM} format={(v) => v.toFixed(2)} />
             <p className="graph-note">Drives the motion — larger a, wilder masses.</p>
+          </div>
+
+          <div className="control-group">
+            <h3>Decay</h3>
+            <Slider label="d" value={decayM} min={0} max={1} step={0.01}
+              onChange={setDecayM} format={(v) => v.toFixed(2)} />
+            <p className="graph-note">Wave motion fades with distance from the center — 0 is no decay, 1 falls off fast.</p>
           </div>
 
           </>

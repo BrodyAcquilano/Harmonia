@@ -12,25 +12,29 @@ import { buildQuarkTerms, waveCoeffsFromTerms, MAX_STATES } from './ConvolutionS
    evaluated at every point at once. The motion is amplified by a visual
    gain g: at the entropies we can simulate only a few combinations have
    built up, so the raw wave motion is small next to the real universe's —
-   the gain stands in for all the entropy we can't. z is vertical here. */
+   the gain stands in for all the entropy we can't. The decay slider damps
+   the motion with distance from the center — waves lose energy as they
+   travel outward. z is vertical here. */
 
 const AXIS_LEN = 2.2
 const MASS_GREEN = 0x2e8b6e
 const GRID_N = 7
 const GRID_SPAN = 1.4 // tight — wavelength sizes, so the motion shows
 const MOTION_GAIN = 2 // visual gain: stands in for un-simulatable entropy
+const DECAY_L = 2.0 // decay length: motion falls as exp(-d·r0/DECAY_L)
 
 export default function MassLattice({
   entropy = 500,
   waveAmp = 0.15,
+  decay = 0,
   playing = false,
   speed = 1,
   onPlayingChange,
   onSpeedChange,
 }) {
   const mountRef = useRef(null)
-  const stateRef = useRef({ playing, speed, entropy, waveAmp })
-  stateRef.current = { playing, speed, entropy, waveAmp }
+  const stateRef = useRef({ playing, speed, entropy, waveAmp, decay })
+  stateRef.current = { playing, speed, entropy, waveAmp, decay }
 
   // three independent chains, one per axis
   const chains = useMemo(
@@ -188,7 +192,10 @@ export default function MassLattice({
           dy += Cy[f] * Math.cos(f * y0 - f * wt)
           dz += Cz[f] * Math.cos(f * z0 - f * wt)
         }
-        dummy.position.set(x0 + MOTION_GAIN * dx, y0 + MOTION_GAIN * dy, z0 + MOTION_GAIN * dz)
+        // decay: the wave loses energy traveling out from the center
+        const r0 = Math.sqrt(x0 * x0 + y0 * y0 + z0 * z0)
+        const env = st.decay > 0 ? Math.exp(-st.decay * r0 / DECAY_L) : 1
+        dummy.position.set(x0 + MOTION_GAIN * dx * env, y0 + MOTION_GAIN * dy * env, z0 + MOTION_GAIN * dz * env)
         dummy.updateMatrix()
         lattice.setMatrixAt(i, dummy.matrix)
       }

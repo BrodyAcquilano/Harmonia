@@ -25,6 +25,7 @@ const MERGE_R = 0.35 // bump distance: merge into one rendered sphere
 const BASE_R = 0.11 // rendered radius of one unit mass
 const GAIN = 2 // same visual gain as the lattice
 const OMEGA = 0.6
+const DECAY_L = 2.0 // decay length: wave-riding motion falls as exp(-d·r0/DECAY_L)
 const GREEN = 0x2e8b6e
 const REDFLASH = 0xc0392b
 const MAX_FLASH = 48
@@ -32,14 +33,15 @@ const MAX_FLASH = 48
 export default function MassCreation({
   entropy = 60000,
   waveAmp = 0.15,
+  decay = 0,
   playing = false,
   speed = 1,
   onPlayingChange,
   onSpeedChange,
 }) {
   const mountRef = useRef(null)
-  const stateRef = useRef({ playing, speed, entropy, waveAmp })
-  stateRef.current = { playing, speed, entropy, waveAmp }
+  const stateRef = useRef({ playing, speed, entropy, waveAmp, decay })
+  stateRef.current = { playing, speed, entropy, waveAmp, decay }
 
   // three independent chains, one per axis — same field recipe as the lattice
   const chains = useMemo(
@@ -243,9 +245,12 @@ export default function MassCreation({
           dy += Cy[f] * Math.cos(f * y0 - f * wt)
           dz += Cz[f] * Math.cos(f * z0 - f * wt)
         }
-        pos[o] = x0 + GAIN * dx
-        pos[o + 1] = y0 + GAIN * dy
-        pos[o + 2] = z0 + GAIN * dz
+        // decay: the wave loses energy traveling out from the center
+        const r0 = Math.sqrt(x0 * x0 + y0 * y0 + z0 * z0)
+        const env = st.decay > 0 ? Math.exp(-st.decay * r0 / DECAY_L) : 1
+        pos[o] = x0 + GAIN * dx * env
+        pos[o + 1] = y0 + GAIN * dy * env
+        pos[o + 2] = z0 + GAIN * dz * env
       }
 
       // cluster by bump distance: spatial hash + union-find

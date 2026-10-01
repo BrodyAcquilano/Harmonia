@@ -12,30 +12,33 @@ function Tex({ tex }) {
 }
 
 /* Point Sources: the Mass Creation firing process, but every firing launches
-   a wave instead of a mass. Quarks fire at random points inside the cube,
-   each in a random direction — about as often as Mass Creation fires, scaled
-   by entropy. The first graph shows the individual components: every live
-   pulse as its own traveling wave packet, colored by its fundamental
+   a wave instead of a mass. Quarks fire at random points inside the cube and
+   each firing radiates a spherical wave in every direction — with a velocity
+   and a decay rate. The first graph shows the individual components: every
+   live pulse as its expanding wavefront shells, colored by its fundamental
    (blue 1/3 f_q, red 2/3 f_q, green 1 f_q, yellow 4/3 f_q). The second graph
-   is the superposition: all the pulses summed on the z = 0 slice, one
-   surface wave — green where the total runs high, red where it runs low.
-   Both graphs share one clock, so they always show the same instant.
-   z is vertical. */
+   is the superposition on the z = 0 slice — a fair sample of every
+   direction. The third graph is the whole: all the pulses summed into one
+   surface in 3D space — a sphere sampling the total field, green where the
+   total runs high, red where it runs low. All three graphs share one clock,
+   so they always show the same instant. z is vertical. */
 
 const AXIS_LEN = 2.62
 const HALF = 2.6 // sim cube half-size; the slice spans [-HALF, HALF]^2
 const SPAWN = 1.7 // pulses are born inside [-SPAWN, SPAWN]^3
 const C = 1.0 // wave speed, units per sim-second
 const LAMBDA0 = 0.9 // wavelength of the q = 1 fundamental
-const SIG_L = 1.15 // packet length along the beam
-const SIG_T = 0.55 // packet width across the beam
+const SIG_R = 0.45 // radial width of the wave packet
+const DECAY_TAU = 2.0 // decay slider d in [0,1] damps as exp(-d·dt/DECAY_TAU)
 const MAX_PULSES = 48
-const DIE_W = 6.8 // a pulse dies once its front has traveled this far
-const GRID_N = 48 // superposition mesh segments per side
-const RINGS = 3 // trailing wavefront rings drawn per pulse
-const RING_R = 0.66 // ring radius, about the transverse envelope width
+const DIE_R = 7.5 // a pulse dies once its front radius passes this
+const SHELLS = 3 // nested wavefront shells drawn per pulse
+const GRID_N = 48 // slice mesh segments per side
+const SURF_R0 = 2.3 // the superposition surface is a sphere of this radius
+const SURF_G = 2.5 // surface displacement gain
+const SURF_SEG = 56
+const SURF_RINGS = 40
 
-const Z_AXIS = new THREE.Vector3(0, 0, 1)
 const GREEN_RGB = [0x2e / 255, 0x8b / 255, 0x6e / 255]
 const RED_RGB = [0xc0 / 255, 0x39 / 255, 0x2b / 255]
 
@@ -47,14 +50,6 @@ function pickQ() {
   if (r < 5 / 7) return 2
   if (r < 6 / 7) return 3
   return 4
-}
-
-function randomDir(v) {
-  const u = Math.random() * 2 - 1
-  const th = Math.random() * Math.PI * 2
-  const s = Math.sqrt(Math.max(0, 1 - u * u))
-  v.set(s * Math.cos(th), s * Math.sin(th), u)
-  return v
 }
 
 function makeLabel(text) {
@@ -178,6 +173,7 @@ function disposeScene(s) {
 export default function PointSources({
   entropy = 60000,
   waveAmp = 0.2,
+  decay = 0.35,
   playing = true,
   speed = 1,
   onPlayingChange,
@@ -185,53 +181,39 @@ export default function PointSources({
 }) {
   const mountARef = useRef(null)
   const mountBRef = useRef(null)
-  const stateRef = useRef({ playing, speed, entropy, waveAmp })
-  stateRef.current = { playing, speed, entropy, waveAmp }
+  const mountCRef = useRef(null)
+  const stateRef = useRef({ playing, speed, entropy, waveAmp, decay })
+  stateRef.current = { playing, speed, entropy, waveAmp, decay }
 
   useEffect(() => {
     const A = setupScene(mountARef.current)
     const B = setupScene(mountBRef.current)
+    const Cc = setupScene(mountCRef.current)
 
-    const tmpV = new THREE.Vector3()
     const tmpC = new THREE.Color()
 
-    // ---- graph A: one actor group per pulse slot ----
-    const circleGeo = (() => {
-      const pts = []
-      for (let i = 0; i <= 40; i++) {
-        const a = (i / 40) * Math.PI * 2
-        pts.push(new THREE.Vector3(Math.cos(a) * RING_R, Math.sin(a) * RING_R, 0))
-      }
-      return new THREE.BufferGeometry().setFromPoints(pts)
-    })()
-    const frontGeo = new THREE.SphereGeometry(0.055, 12, 10)
+    // ---- graph A: expanding wavefront shells, one actor group per pulse slot ----
+    const shellGeo = new THREE.SphereGeometry(1, 20, 14)
     const flashGeo = new THREE.SphereGeometry(0.1, 12, 10)
     const actors = []
     for (let i = 0; i < MAX_PULSES; i++) {
       const group = new THREE.Group()
-      const front = new THREE.Mesh(frontGeo,
-        new THREE.MeshBasicMaterial({ transparent: true }))
-      const rings = []
-      for (let j = 0; j < RINGS; j++) {
-        const r = new THREE.LineLoop(circleGeo,
-          new THREE.LineBasicMaterial({ transparent: true }))
-        rings.push(r)
-        group.add(r)
+      const shells = []
+      for (let j = 0; j < SHELLS; j++) {
+        const m = new THREE.Mesh(shellGeo,
+          new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }))
+        shells.push(m)
+        group.add(m)
       }
-      const spokeGeo = new THREE.BufferGeometry()
-      spokeGeo.setAttribute('position',
-        new THREE.BufferAttribute(new Float32Array(6), 3))
-      const spoke = new THREE.Line(spokeGeo,
-        new THREE.LineBasicMaterial({ transparent: true, opacity: 0.18 }))
       const flash = new THREE.Mesh(flashGeo,
-        new THREE.MeshBasicMaterial({ transparent: true }))
-      group.add(front, spoke, flash)
+        new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }))
+      group.add(flash)
       group.visible = false
       A.scene.add(group)
-      actors.push({ group, front, rings, spoke, flash })
+      actors.push({ group, shells, flash })
     }
 
-    // ---- graph B: the superposition surface on the z = 0 slice ----
+    // ---- graph B: the superposition on the z = 0 slice ----
     const surfGeo = new THREE.PlaneGeometry(HALF * 2, HALF * 2, GRID_N, GRID_N)
     const vCount = surfGeo.attributes.position.count
     surfGeo.setAttribute('color',
@@ -260,16 +242,34 @@ export default function PointSources({
     B.scene.add(frame)
     const U = new Float32Array(vCount)
 
+    // ---- graph C: the superposition as one surface in 3D space ----
+    const sphGeo = new THREE.SphereGeometry(SURF_R0, SURF_SEG, SURF_RINGS)
+    const sCount = sphGeo.attributes.position.count
+    const sBase = new Float32Array(sphGeo.attributes.position.array) // rest shape
+    sphGeo.setAttribute('color',
+      new THREE.BufferAttribute(new Float32Array(sCount * 3).fill(1), 3))
+    sphGeo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 8)
+    const sph = new THREE.Mesh(sphGeo,
+      new THREE.MeshStandardMaterial({
+        vertexColors: true, roughness: 0.5, metalness: 0.05,
+      }))
+    sph.frustumCulled = false
+    const sphWire = new THREE.Mesh(sphGeo,
+      new THREE.MeshBasicMaterial({
+        color: 0xb09a5e, wireframe: true, transparent: true, opacity: 0.1,
+      }))
+    sphWire.frustumCulled = false
+    Cc.scene.add(sph, sphWire)
+    const Uc = new Float32Array(sCount)
+
     // ---- the pulses ----
     const pulses = []
     const spawn = (t) => {
-      randomDir(tmpV)
       const q = pickQ()
       pulses.push({
         ox: (Math.random() * 2 - 1) * SPAWN,
         oy: (Math.random() * 2 - 1) * SPAWN,
         oz: (Math.random() * 2 - 1) * SPAWN,
-        dx: tmpV.x, dy: tmpV.y, dz: tmpV.z,
         k: q * 2 * Math.PI / LAMBDA0,
         lambda: LAMBDA0 / q,
         phi: Math.random() * Math.PI * 2,
@@ -278,66 +278,56 @@ export default function PointSources({
       if (pulses.length > MAX_PULSES) pulses.shift()
     }
 
-    // one pulse's field: a wave train behind the front at distance w,
-    // Gaussian in the beam frame — ξ along the beam, ρ across it
-    const field = (p, x, y, z, t, amp) => {
-      const w = C * (t - p.t0)
+    // one pulse's field: a spherical wave in every direction — the wavefront
+    // thins geometrically as 1/(1+r) and loses energy with the decay rate
+    const field = (p, x, y, z, t, amp, decay) => {
+      const dt = t - p.t0
+      if (dt <= 0) return 0
       const rx = x - p.ox, ry = y - p.oy, rz = z - p.oz
-      const s = rx * p.dx + ry * p.dy + rz * p.dz
-      const xi = s - w
-      if (xi > 4 * SIG_L || xi < -4 * SIG_L) return 0
-      const rho2 = rx * rx + ry * ry + rz * rz - s * s
-      const e = (xi * xi) / (2 * SIG_L * SIG_L) + rho2 / (2 * SIG_T * SIG_T)
-      if (e > 9) return 0
-      return amp * Math.cos(p.k * xi + p.phi) * Math.exp(-e)
+      const r = Math.sqrt(rx * rx + ry * ry + rz * rz)
+      const xi = r - C * dt
+      if (xi > 4 * SIG_R || xi < -4 * SIG_R) return 0
+      const damp = decay > 0 ? Math.exp(-decay * dt / DECAY_TAU) : 1
+      return amp * Math.cos(p.k * xi + p.phi)
+        * Math.exp(-(xi * xi) / (2 * SIG_R * SIG_R)) * damp / (1 + r)
     }
 
-    const updateA = (t) => {
+    const updateA = (t, decay) => {
       for (let i = 0; i < pulses.length; i++) {
         const p = pulses[i]
         const ac = actors[i]
-        const w = C * (t - p.t0)
-        const fade = Math.max(0, 1 - w / DIE_W)
+        const dt = t - p.t0
+        const damp = decay > 0 ? Math.exp(-decay * dt / DECAY_TAU) : 1
         const hue = HUES[p.q]
         tmpC.setRGB(hue[0] / 255, hue[1] / 255, hue[2] / 255)
-        tmpV.set(p.dx, p.dy, p.dz)
         ac.group.visible = true
-        // the front
-        ac.front.position.set(p.ox + p.dx * w, p.oy + p.dy * w, p.oz + p.dz * w)
-        ac.front.material.color.copy(tmpC)
-        ac.front.material.opacity = Math.min(1, fade * 2)
-        // trailing wavefront rings, one wavelength apart
-        for (let j = 0; j < RINGS; j++) {
-          const r = ac.rings[j]
-          const back = w - (j + 1) * p.lambda
-          r.position.set(p.ox + p.dx * back, p.oy + p.dy * back, p.oz + p.dz * back)
-          r.quaternion.setFromUnitVectors(Z_AXIS, tmpV)
-          r.material.color.copy(tmpC)
-          r.material.opacity = 0.8 * fade * (1 - j / (RINGS + 1))
-          r.visible = back > -1
+        ac.group.position.set(p.ox, p.oy, p.oz)
+        // nested wavefront shells: the crests, one wavelength apart
+        for (let j = 0; j < SHELLS; j++) {
+          const s = ac.shells[j]
+          const rad = C * dt - j * p.lambda
+          const show = rad > 0.05 && damp > 0.02
+          s.visible = show
+          if (show) {
+            s.scale.setScalar(rad)
+            s.material.color.copy(tmpC)
+            s.material.opacity = 0.15 * damp * (1 - j / (SHELLS + 1))
+              * Math.max(0, 1 - rad / (DIE_R * 1.2))
+          }
         }
-        // faint spoke from birth point to front
-        const sp = ac.spoke.geometry.attributes.position
-        sp.setXYZ(0, p.ox, p.oy, p.oz)
-        sp.setXYZ(1, p.ox + p.dx * w, p.oy + p.dy * w, p.oz + p.dz * w)
-        sp.needsUpdate = true
-        ac.spoke.material.color.copy(tmpC)
-        ac.spoke.material.opacity = 0.18 * fade
         // birth flash, gone in well under a second
-        const age = t - p.t0
-        const ff = Math.max(0, 1 - age / 0.6)
+        const ff = Math.max(0, 1 - dt / 0.6)
         ac.flash.visible = ff > 0
-        ac.flash.position.set(p.ox, p.oy, p.oz)
         ac.flash.material.color.copy(tmpC)
         ac.flash.material.opacity = 0.7 * ff
-        ac.flash.scale.setScalar(1 + age * 2.5)
+        ac.flash.scale.setScalar(1 + dt * 2.5)
       }
       for (let i = pulses.length; i < MAX_PULSES; i++) {
         actors[i].group.visible = false
       }
     }
 
-    const updateB = (t, amp) => {
+    const updateB = (t, amp, decay) => {
       const posA = surfGeo.attributes.position
       const colA = surfGeo.attributes.color
       let umax = 1e-9
@@ -345,7 +335,7 @@ export default function PointSources({
         const x = posA.getX(v), y = posA.getY(v)
         let u = 0
         for (let i = 0; i < pulses.length; i++) {
-          u += field(pulses[i], x, y, 0, t, amp)
+          u += field(pulses[i], x, y, 0, t, amp, decay)
         }
         U[v] = u
         const au = Math.abs(u)
@@ -362,6 +352,35 @@ export default function PointSources({
       posA.needsUpdate = true
       colA.needsUpdate = true
       surfGeo.computeVertexNormals()
+    }
+
+    const updateC = (t, amp, decay) => {
+      const posA = sphGeo.attributes.position
+      const colA = sphGeo.attributes.color
+      let umax = 1e-9
+      for (let v = 0; v < sCount; v++) {
+        const x = sBase[v * 3], y = sBase[v * 3 + 1], z = sBase[v * 3 + 2]
+        let u = 0
+        for (let i = 0; i < pulses.length; i++) {
+          u += field(pulses[i], x, y, z, t, amp, decay)
+        }
+        Uc[v] = u
+        const au = Math.abs(u)
+        if (au > umax) umax = au
+      }
+      for (let v = 0; v < sCount; v++) {
+        const u = Uc[v]
+        const rNew = Math.max(0.6, Math.min(4.2, SURF_R0 + SURF_G * u))
+        const f = rNew / SURF_R0
+        posA.setXYZ(v, sBase[v * 3] * f, sBase[v * 3 + 1] * f, sBase[v * 3 + 2] * f)
+        // shade toward white where the total is weak — like the flat map
+        const b = 0.35 + 0.65 * Math.min(1, Math.abs(u) / umax)
+        const hue = u >= 0 ? GREEN_RGB : RED_RGB
+        colA.setXYZ(v, 1 - (1 - hue[0]) * b, 1 - (1 - hue[1]) * b, 1 - (1 - hue[2]) * b)
+      }
+      posA.needsUpdate = true
+      colA.needsUpdate = true
+      sphGeo.computeVertexNormals()
     }
 
     let raf = 0
@@ -385,17 +404,21 @@ export default function PointSources({
         }
       }
       for (let i = pulses.length - 1; i >= 0; i--) {
-        if (C * (t - pulses[i].t0) > DIE_W) pulses.splice(i, 1)
+        if (C * (t - pulses[i].t0) > DIE_R) pulses.splice(i, 1)
       }
-      updateA(t)
-      updateB(t, st.waveAmp)
+      updateA(t, st.decay)
+      updateB(t, st.waveAmp, st.decay)
+      updateC(t, st.waveAmp, st.decay)
       const label = 't = ' + t.toFixed(1) + ' s'
       A.timeTag.textContent = label
       B.timeTag.textContent = label
+      Cc.timeTag.textContent = label
       A.controls.update()
       A.renderer.render(A.scene, A.camera)
       B.controls.update()
       B.renderer.render(B.scene, B.camera)
+      Cc.controls.update()
+      Cc.renderer.render(Cc.scene, Cc.camera)
     }
     loop()
 
@@ -403,6 +426,7 @@ export default function PointSources({
       cancelAnimationFrame(raf)
       disposeScene(A)
       disposeScene(B)
+      disposeScene(Cc)
     }
   }, [])
 
@@ -416,9 +440,10 @@ export default function PointSources({
           <div ref={mountARef} className="quark-canvas-wrap" />
         </div>
         <p className="graph-note">
-          Every live pulse on its own — a quark fired at a random point in a
-          random direction, drawn as its traveling wave packet with the
-          wavefront rings trailing behind it. Each pulse keeps its own
+          Every live pulse on its own — a quark fired at a random point,
+          radiating a spherical wave in every direction. The nested shells are
+          the wave's crests, one wavelength apart, expanding at speed c and
+          fading as the pulse decays. Each pulse keeps its own
           fundamental's color: blue 1/3 f_q, red 2/3 f_q, green 1 f_q,
           yellow 4/3 f_q.
         </p>
@@ -426,17 +451,31 @@ export default function PointSources({
 
       <div className="graph-box">
         <div className="graph-title-row">
-          <h2 className="graph-title">Superposition — one surface wave</h2>
+          <h2 className="graph-title">Superposition — one slice of space</h2>
         </div>
         <div className="sim-stage-col">
           <div ref={mountBRef} className="quark-canvas-wrap" />
         </div>
         <p className="graph-note">
-          The other way to read the same firings: quarks being created at a
-          single point, light emanating from a single point. Every pulse
-          above added together on the z = 0 slice — one surface wave, green
-          where the total runs high, red where it runs low. Where two packets
-          cross, the surface spikes or cancels: interference, made visible.
+          The same firings summed on the z = 0 slice — a fair sample of every
+          direction, green where the total runs high, red where it runs low.
+          Where two wavefronts cross, the surface spikes or cancels:
+          interference, made visible.
+        </p>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <h2 className="graph-title">Superposition — one surface in 3D space</h2>
+        </div>
+        <div className="sim-stage-col">
+          <div ref={mountCRef} className="quark-canvas-wrap" />
+        </div>
+        <p className="graph-note">
+          The whole at once: a sphere in 3D space sampling the total field —
+          every firing summed, in every direction. Each expanding shell dents
+          the surface as it crosses; green where the total runs high, red
+          where it runs low. This is the surface the slice was hinting at.
         </p>
         <div className="sim-transport">
           <button
@@ -459,10 +498,9 @@ export default function PointSources({
         </div>
         <div className="eq-grid">
           <div className="eq-box">
-            <span className="eq-label">One pulse — a wave packet on a beam</span>
-            <span className="eq-line"><Tex tex="u_i(\mathbf{x},t) = A\cos(k_q\xi + \varphi_i)\,e^{-\xi^2/2\sigma_\parallel^2}\,e^{-\rho^2/2\sigma_\perp^2}" /></span>
-            <span className="eq-line"><Tex tex="\xi = \mathbf{d}_i\cdot(\mathbf{x}-\mathbf{x}_i) - c(t-t_i), \quad \rho \text{ — distance across the beam}" /></span>
-            <span className="eq-line"><Tex tex="\mathbf{x}_i \text{ — random firing point, } \mathbf{d}_i \text{ — random direction}" /></span>
+            <span className="eq-label">One pulse — a spherical wave in every direction</span>
+            <span className="eq-line"><Tex tex="u_i(\mathbf{x},t) = A\,\dfrac{\cos(k_q(r - c(t-t_i)) + \varphi_i)}{1+r}\,e^{-(r-c(t-t_i))^2/2\sigma_r^2}\,e^{-d(t-t_i)/\tau_0}" /></span>
+            <span className="eq-line"><Tex tex="r = |\mathbf{x} - \mathbf{x}_i| \text{ — distance from the random firing point}" /></span>
           </div>
           <div className="eq-box">
             <span className="eq-label">Pulse frequencies</span>
@@ -475,9 +513,19 @@ export default function PointSources({
             <span className="eq-line"><Tex tex="\text{more entropy, more quark events}" /></span>
           </div>
           <div className="eq-box">
-            <span className="eq-label">Superposition — the surface wave</span>
-            <span className="eq-line"><Tex tex="U(x,y,t) = \sum_i u_i(x,y,0,t)" /></span>
-            <span className="eq-line"><Tex tex="\text{every pulse summed on the } z = 0 \text{ slice — one wave}" /></span>
+            <span className="eq-label">Wavefront shells</span>
+            <span className="eq-line"><Tex tex="R_n(t) = c(t-t_i) - n\lambda_q,\quad n = 0,1,2" /></span>
+            <span className="eq-line"><Tex tex="\text{the expanding crests drawn in the first graph}" /></span>
+          </div>
+          <div className="eq-box">
+            <span className="eq-label">Decay</span>
+            <span className="eq-line"><Tex tex="d \in [0,1] \text{ — the decay slider}" /></span>
+            <span className="eq-line"><Tex tex="\frac{1}{1+r} \text{ — the wavefront spreads and thins, } e^{-d\Delta t/\tau_0} \text{ — the decay rate}" /></span>
+          </div>
+          <div className="eq-box">
+            <span className="eq-label">Superposition — the whole</span>
+            <span className="eq-line"><Tex tex="U(\mathbf{x},t) = \sum_i u_i(\mathbf{x},t)" /></span>
+            <span className="eq-line"><Tex tex="\text{slice: } U(x,y,0,t) \text{ — surface: } r = R_0 + G\,U \text{ on the sphere}" /></span>
           </div>
         </div>
       </div>
