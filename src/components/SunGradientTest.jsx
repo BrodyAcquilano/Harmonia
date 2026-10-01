@@ -285,8 +285,22 @@ const FORGET_N = 48 // 12 packets per quark frequency
 // thermal-surface tuning for the forget view: each escape splashes its
 // light's energy as heat onto the patch it exits through, which then
 // cools like the cools view
-const FORGET_GAIN = 3   // eV deposited per eV of escaping light, at the splash center
+const FORGET_GAIN = 3   // peak patch temperature per eV of escaping light, at the splash center
 const SPLASH_SIG = 0.18 // radians — the splash patch size
+// forget sphere: patch temperature mapped straight onto the visible
+// rainbow — cold = red, hot = violet, no infrared/ultraviolet clamps
+function forgetColor(T) {
+  return rainbow(((T * EV) / H - VIS_LO) / (VIS_HI - VIS_LO))
+}
+// forget ripples: each escaping photon launches a wave on the sphere.
+// the amplitude carries the photon's energy; the oscillation rate and
+// wavelength are slowed and widened so we can see them — visualization
+// choices, like the coarse-grained hops
+const RIPPLE_K = 18    // angular wavenumber — ring wavelength ~0.35 rad
+const RIPPLE_W = 6     // visual oscillation rate, radians per sim-second
+const RIPPLE_SIG = 0.5 // angular decay of the wave, radians
+const RIPPLE_TAU = 2.5 // wave lifetime, sim-seconds
+const RIPPLE_G = 0.02  // fractional radius per eV of wave amplitude, at slider 1
 function spawnForgetPacket(rng, band) {
   // born at the core — the SAME place for all four frequencies.
   // No assigned radii; whatever sorting happens is the physics'.
@@ -315,6 +329,8 @@ function freshForgetExperiment(entropy) {
     histN: 0,
     // escape splashes, drained by the 3D view to paint the surface
     splashes: [],
+    // escape ripples: each escaping photon launches a wave on the surface
+    ripples: [],
   }
 }
 // one display hop for every packet: an honest 3D random-walk step of
@@ -350,9 +366,13 @@ function hopForget(exp) {
       bin.sumA += BANDS[b] / nuOut
       bin.sumNu += nuOut
       // a splash for the 3D view: exit direction + escaping frequency,
-      // so the surface can flare where this packet got out
+      // so the surface can flare where this packet got out — and a wave,
+      // launched at the exit point with the photon's energy
       if (exp.splashes.length < 128) {
         exp.splashes.push({ dx: nx / nr, dy: ny / nr, dz: nz / nr, nuOut })
+      }
+      if (exp.ripples.length < 256) {
+        exp.ripples.push({ dx: nx / nr, dy: ny / nr, dz: nz / nr, t0: exp.t, amp: (nuOut * H) / EV })
       }
       const hb = Math.floor(
         ((Math.log10(nuOut) - HIST_L0) / (HIST_L1 - HIST_L0)) * HIST_N)
@@ -979,7 +999,7 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
     // neglected patches cool back to dark red
     const sphGeo = new THREE.SphereGeometry(SURF_R0, SURF_SEG, SURF_RINGS)
     const sCount = sphGeo.attributes.position.count
-    const sBase = sphGeo.attributes.position.array
+    const sBase = new Float32Array(sphGeo.attributes.position.array) // pristine copy — ripples displace from this
     const uDir = new Float32Array(sCount * 3)
     for (let v = 0; v < sCount; v++) {
       const l = Math.hypot(sBase[v * 3], sBase[v * 3 + 1], sBase[v * 3 + 2]) || 1
@@ -1007,24 +1027,56 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       // heat in a small patch around its exit direction
       if (exp.splashes.length) {
         for (const sp of exp.splashes) {
-          const add = FORGET_GAIN * (sp.nuOut * H) / EV
+          // paint the patch up to the splash's own temperature — a fresh
+          // escape repaints its patch, but repeated hits can't stack past
+          // it, so the sphere can't saturate at the ultraviolet clamp
+          const peak = FORGET_GAIN * (sp.nuOut * H) / EV
           for (let v = 0; v < sCount; v++) {
             const d = uDir[v * 3] * sp.dx + uDir[v * 3 + 1] * sp.dy + uDir[v * 3 + 2] * sp.dz
             if (d < 0.85) continue
-            P[v * 3] += add * Math.exp(-(1 - d) / (SPLASH_SIG * SPLASH_SIG))
+            const o = v * 3
+            const target = T_BASE + (peak - T_BASE) * Math.exp(-(1 - d) / (SPLASH_SIG * SPLASH_SIG))
+            if (target > P[o]) P[o] = target
           }
         }
         exp.splashes.length = 0
       }
       const colA = sphGeo.attributes.color
+      const posA = sphGeo.attributes.position
       const coolF = sdt > 0 ? (1 - Math.exp(-sdt / COOL_TAU)) : 0
+      const rippleGain = ctlRef.current.ripple ?? 1
+      // prune spent waves — ripples are pushed in time order
+      while (exp.ripples.length && exp.t - exp.ripples[0].t0 > 4 * RIPPLE_TAU) exp.ripples.shift()
       for (let v = 0; v < sCount; v++) {
         const o = v * 3
         if (coolF > 0) P[o] += (T_BASE - P[o]) * coolF
-        const tc = visibleColor((P[o] * EV) / H)
+        const tc = forgetColor(P[o])
         colA.setXYZ(v, tc[0] / 255, tc[1] / 255, tc[2] / 255)
       }
       colA.needsUpdate = true
+      // waves: every escaping photon radiates a damped ring from its exit
+      // point — amplitude carries the photon's energy, the ripple slider
+      // scales it all, colors untouched
+      for (let v = 0; v < sCount; v++) {
+        const o = v * 3
+        let h = 0
+        if (rippleGain > 0 && exp.ripples.length) {
+          const ux = uDir[o], uy = uDir[o + 1], uz = uDir[o + 2]
+          for (let r = 0; r < exp.ripples.length; r++) {
+            const rp = exp.ripples[r]
+            const age = exp.t - rp.t0
+            let d = ux * rp.dx + uy * rp.dy + uz * rp.dz
+            d = d > 1 ? 1 : d < -1 ? -1 : d
+            const th = Math.acos(d)
+            h += rp.amp * Math.cos(RIPPLE_K * th - RIPPLE_W * age)
+              * Math.exp(-th / RIPPLE_SIG) * Math.exp(-age / RIPPLE_TAU)
+          }
+        }
+        const f = 1 + RIPPLE_G * rippleGain * h
+        posA.setXYZ(v, sBase[o] * f, sBase[o + 1] * f, sBase[o + 2] * f)
+      }
+      posA.needsUpdate = true
+      sphGeo.computeVertexNormals()
     }
 
     const readout = (exp) => {
@@ -1229,6 +1281,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
   // the core, no assigned radii; the physics sorts them (or doesn't)
   const [frPlaying, setFrPlaying] = useState(false)
   const [frSpeed, setFrSpeed] = useState(1)
+  const [frRipple, setFrRipple] = useState(1)
   const frExpRef = useRef(null)
   if (!frExpRef.current) frExpRef.current = freshForgetExperiment(entropy)
   const frCtlRef = useRef({})
@@ -1274,7 +1327,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
     fireRate: 0.5, // slow firing, so the cooling between hits is visible
   }
   frCtlRef.current = {
-    playing: frPlaying, speed: frSpeed, entropy,
+    playing: frPlaying, speed: frSpeed, entropy, ripple: frRipple,
   }
   const frPlayingRef = useRef(false)
   frPlayingRef.current = frPlaying
@@ -1527,11 +1580,15 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           down in the core, and the readout says so. Compton
           thermalization needs only a few hundred, across centimeters, so
           each packet's frequency snaps to the local thermal peak, 2.8kT/h,
-          and rides it outward: ultraviolet clamp in the deep interior,
+          and rides it outward: ultraviolet in the deep interior,
           cooling through the visible near the surface. The sphere itself
           is painted like the cools view — each escape splashes its light
-          onto the patch it exits through, flaring blue-white, then
-          cooling back to dark red between hits.
+          onto the patch it exits through, flaring violet, then
+          cooling back through the spectrum to red between hits — and
+          launches a wave there too, its amplitude the escaping photon's
+          energy, rippling outward and dying away (slowed down so we can
+          see it). The ripple slider scales the waves only; the colors
+          are untouched.
         </p>
         <Transport
           playing={frPlaying}
@@ -1539,6 +1596,10 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           onPlayingChange={setFrPlaying}
           onSpeedChange={setFrSpeed}
         />
+        <div className="transport-speed">
+          <Slider label="ripple" value={frRipple} min={0} max={3} step={0.1}
+            onChange={setFrRipple} format={(v) => `${v.toFixed(1)}×`} />
+        </div>
       </div>
 
       <div className="graph-box">
