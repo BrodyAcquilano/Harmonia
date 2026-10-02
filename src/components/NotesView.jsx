@@ -36,7 +36,7 @@ const NOTE_ORDER = [
   '../../notes/mass-formation-from-quarks.md',
   '../../notes/visible-colors-frequency-modulation.md',
   '../../notes/the-sun.md',
-  '../../notes/the-final-sun.md',
+  '../../notes/the-sun-filter.md',
 ]
 
 function titleFromPath(path) {
