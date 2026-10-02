@@ -11,6 +11,7 @@ import MassCreation from './MassCreation.jsx'
 import PointSources from './PointSources.jsx'
 import ColorTheory, { FrequencyDistribution, spectrumBounds, spectrumColor } from './ColorTheory.jsx'
 import ModellingSun from './ModellingSun.jsx'
+import TheSun from './TheSun.jsx'
 import Fundamental20 from './Fundamental20.jsx'
 
 // the energy-spectrum legend for the Space-Time Domain graphs: the same
@@ -184,6 +185,14 @@ export default function QuarkSpace() {
               onClick={() => setSim('sun')}
             >
               Modelling the Sun
+            </button>
+            <button
+              className="sim-item"
+              role="tab"
+              aria-selected={sim === 'thesun'}
+              onClick={() => setSim('thesun')}
+            >
+              The Sun
             </button>
           </div>
         </nav>
@@ -693,6 +702,11 @@ export default function QuarkSpace() {
           {sim === 'sun' && (
           <>
             <ModellingSun entropy={entropyS} waveAmp={waveAmpS} decay={decayS} />
+          </>
+          )}
+          {sim === 'thesun' && (
+          <>
+            <TheSun />
           </>
           )}
         </div>

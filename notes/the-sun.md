@@ -1,6 +1,6 @@
 # The Sun
 
-*2026-10-01 — This note replaces the visible-colors frequency-modulation note as the working document for the new "The Sun" simulation. The old note stays where it is — it's the history of how I got here — but this is the clean one: everything I learned, one sim, one note.*
+*2026-10-02 — This note is the working document for "The Sun", its own tab in the Quark Space — the finished version. "Modelling the Sun" (the other tab) was the trial run: flash, remember, cool, and the forget view that asked whether birth is forgotten. The old frequency-modulation note stays where it is — it's the history of how I got here — but this is the clean one: everything I learned, one sim, one note.*
 
 ## 1. The correction that started it
 
@@ -20,9 +20,9 @@ One correction I owe myself: I wondered if the sun is at the iron stage. It isn'
 
 ## 3. How the firing works
 
-The core fires as a Poisson process — the honest statistics of "each little volume has a constant probability per unit time of fusing." About 2.4 packets per sim-second, each born at the core ($0.01\,R_\odot$) with the 2 MeV quantum, each walking out independently.
+The core fires as a Poisson process — the honest statistics of "each little volume has a constant probability per unit time of fusing." About 7 packets per sim-second, each born at the core ($0.01\,R_\odot$) with the 2 MeV quantum, each walking out independently.
 
-The coarse-graining, stated plainly: the sun fuses $\sim 10^{38}$ pairs per real second and a photon walks $\sim 10^5$ years to escape; the sim fires 2.4 packets per sim-second and walks out in $\sim 20$ sim-seconds. Each packet stands in for $\sim 10^{49}$ real fusions. The absolute scale is compressed away — what's preserved is the statistical structure: steady Poisson firing at the center, random-walk delay, immediate thermalization.
+The coarse-graining, stated plainly: the sun fuses $\sim 10^{38}$ pairs per real second and a photon walks $\sim 10^5$ years to escape; the sim fires 7 packets per sim-second and walks out in $\sim 20$ sim-seconds. Each packet stands in for $\sim 4\\times 10^{48}$ real fusions. The absolute scale is compressed away — what's preserved is the statistical structure: steady Poisson firing at the center, random-walk delay, immediate thermalization.
 
 ## 4. The journey: birth forgotten on the first hop
 

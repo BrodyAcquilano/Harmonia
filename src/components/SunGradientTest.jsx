@@ -328,14 +328,15 @@ const WARM_STOPS = [
   [255, 225, 60],  // yellow
   [255, 245, 190], // whitish yellow — hot clamp
 ]
-// adaptive warping: inverse-density mapping.
+// adaptive warping: inverse-density mapping with a cold-stretch bias.
 // x(T) is FLAT where the amplitude is high — dense regions get wide
 // temperature ranges per color, so the color "stretches" over the bulk
 // (the sun reads mostly orange) — and STEEP where thin (narrow ranges,
-// "compressed"). higher amplitudes stretch the color range because
-// theres more area there; lower areas compress. red compresses less
-// than ultraviolet because the cold tail carries more mass. recomputed
-// from the live histogram, so it tracks the simulation as it unfolds.
+// "compressed"). the weight tilts with T^2 on top: red compresses less
+// than ultraviolet, so the cold side stretches wide and calm while the
+// hot side compresses. higher amplitudes stretch the color range because
+// theres more area there; lower areas compress. recomputed from the live
+// histogram, so it tracks the simulation as it unfolds.
 // infrared is displayed as dark, not filtered out.
 const AD_N = 96, AD_T0 = 1.0, AD_T1 = 6.0, AD_TAU = 45
 const adHist = new Float64Array(AD_N)
@@ -425,16 +426,16 @@ function freshForgetExperiment(entropy) {
 // frequency. the core fires as a Poisson process: the sun fuses
 // ~1.8e38 pp pairs per real second and a photon walks ~1e5 yr to
 // escape; the sim fires SUN_LAMBDA packets per sim-second and walks
-// out in ~20 sim-s — each packet stands in for ~1e49 real fusions.
+// out in ~20 sim-s — each packet stands in for ~4e48 real fusions.
 // the absolute scale is compressed away; the Poisson statistics and
 // the walk are what's preserved.
 const FUSION_EV = 2.0e6
 const FUSION_NU = FUSION_EV * EV / H
-const SUN_LAMBDA = 2.4 // packets per sim-second, Poisson firing at the core
-const SUN_N = 48
+const SUN_LAMBDA = 7.0 // packets per sim-second, Poisson firing at the core
+const SUN_N = 120
 const SUN_R_BIRTH = 0.01 // the core, in R_☉
 const SUN_MAX_PACKETS = 256
-const SUN_ENTROPY = 7777777777
+export const SUN_ENTROPY = 7777777777
 function poisson(rng, lam) {
   const L = Math.exp(-lam)
   let k = 0, p = 1
@@ -459,7 +460,7 @@ function spawnSunPacket(rng, t) {
     tBirth: t,
   }
 }
-function freshSunExperiment(entropy) {
+export function freshSunExperiment(entropy) {
   const rng = mulberry32(Math.floor(entropy * 2654435761) % 4294967296)
   const packets = []
   // prefill: the reactor is already running — packets mid-walk at random
@@ -1061,7 +1062,7 @@ function planckNorm() {
   return tot
 }
 
-function LandingPanel({ expRef, playingRef, markers = true }) {
+export function LandingPanel({ expRef, playingRef, markers = true }) {
   const ref = useRef(null)
   const seen = useRef({ exp: null, version: -1 })
 
@@ -1210,7 +1211,7 @@ function LandingPanel({ expRef, playingRef, markers = true }) {
 // the colors read); dashed = the design assumption the original fixed
 // scale was tuned against. the strip below shows the live color
 // assignment — which temperatures get which colors right now.
-function TempDistPanel({ playingRef }) {
+export function TempDistPanel({ playingRef }) {
   const ref = useRef(null)
 
   useEffect(() => {
@@ -1329,7 +1330,7 @@ function TempDistPanel({ playingRef }) {
 }
 
 // ---- the fifth graph: watch the frequencies forget ----
-function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
+export function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
   const mountRef = useRef(null)
   const readRef = useRef(null)
   const phosRef = useRef(null)
@@ -1400,28 +1401,35 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
           const b = Math.min(AD_N - 1, Math.max(0, Math.floor((P[v * 3] - AD_T0) / (AD_T1 - AD_T0) * AD_N)))
           adHist[b] += 1
         }
-        // data range: 0.2% to 99.8% percentiles, so empty tails waste no
+        // data range: 1% to 99% percentiles, so empty tails waste no
         // gradient room
         let tot = 0
         for (let i = 0; i < AD_N; i++) tot += adHist[i]
         let cum = 0, loB = 0, hiB = AD_N - 1
         for (let i = 0; i < AD_N; i++) {
           cum += adHist[i]
-          if (cum / tot < 0.002) loB = i + 1
-          if (cum / tot < 0.998) hiB = i
+          if (cum / tot < 0.01) loB = i + 1
+          if (cum / tot < 0.99) hiB = i
         }
         loB = Math.max(0, Math.min(loB, AD_N - 2))
         hiB = Math.min(AD_N - 1, Math.max(hiB, loB + 1))
         let hMax = 1e-9
         for (let i = loB; i <= hiB; i++) hMax = Math.max(hMax, adHist[i])
         const eps = 0.1 * hMax
+        // weight tilts with T^2: red compresses less than ultraviolet —
+        // the cold side stretches wide and calm, the hot side compresses,
+        // on top of the density-driven inverse warping
+        const wOf = (i) => {
+          const T = AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
+          return (T * T) / 4.0 / (adHist[i] + eps)
+        }
         let wSum = 0
-        for (let i = loB; i <= hiB; i++) wSum += 1 / (adHist[i] + eps)
+        for (let i = loB; i <= hiB; i++) wSum += wOf(i)
         cum = 0
         for (let i = 0; i < AD_N; i++) {
           if (i < loB) adX[i] = 0
           else if (i > hiB) adX[i] = 1
-          else { cum += 1 / (adHist[i] + eps); adX[i] = cum / wSum }
+          else { cum += wOf(i); adX[i] = cum / wSum }
         }
       }
       // prune spent waves — ripples are pushed in time order
@@ -1530,7 +1538,7 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
 }
 
 // ---- the crash plot, on its own: birth frequencies onto the thermal curve ----
-function ForgetTrack({ expRef, playingRef, single = false }) {
+export function ForgetTrack({ expRef, playingRef, single = false }) {
   const ref = useRef(null)
   const seen = useRef({ exp: null, version: -1 })
 
@@ -1672,16 +1680,15 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
   const thExpRef = useRef(null)
   if (!thExpRef.current) thExpRef.current = freshExperiment(entropy)
   const thCtlRef = useRef({})
-  // The Sun: its own experiment — core fusion firing, Poisson births,
-  // one base frequency; own play/clock, fixed seed, decoupled from the
-  // entropy slider like the forget view was
-  const [sunPlaying, setSunPlaying] = useState(false)
-  const [sunSpeed, setSunSpeed] = useState(1)
-  const [sunRipple, setSunRipple] = useState(1)
-  const [sunRippleTau, setSunRippleTau] = useState(2.5)
-  const sunExpRef = useRef(null)
-  if (!sunExpRef.current) sunExpRef.current = freshSunExperiment(SUN_ENTROPY)
-  const sunCtlRef = useRef({})
+  // the forget view: its own experiment — all four frequencies born at
+  // the core, no assigned radii; the physics sorts them (or doesn't)
+  const [frPlaying, setFrPlaying] = useState(false)
+  const [frSpeed, setFrSpeed] = useState(1)
+  const [frRipple, setFrRipple] = useState(1)
+  const [frRippleTau, setFrRippleTau] = useState(2.5)
+  const frExpRef = useRef(null)
+  if (!frExpRef.current) frExpRef.current = freshForgetExperiment(FORGET_ENTROPY)
+  const frCtlRef = useRef({})
   const dirtyRef = useRef(0)
   const playingRef = useRef(false)
   playingRef.current = playing
@@ -1719,12 +1726,12 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
     S: 6e7, // locked at the standard scattering count — no slider
     fireRate: 0.5, // slow firing, so the cooling between hits is visible
   }
-  sunCtlRef.current = {
-    playing: sunPlaying, speed: sunSpeed, entropy, ripple: sunRipple,
-    rippleTau: sunRippleTau,
+  frCtlRef.current = {
+    playing: frPlaying, speed: frSpeed, entropy, ripple: frRipple,
+    rippleTau: frRippleTau,
   }
-  const sunPlayingRef = useRef(false)
-  sunPlayingRef.current = sunPlaying
+  const frPlayingRef = useRef(false)
+  frPlayingRef.current = frPlaying
 
   const Sfmt = (v) => {
     const e = Math.floor(v + 1e-9)
@@ -1957,114 +1964,129 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           onSpeedChange={setThSpeed}
         />
       </div>
-      <div className="graph-box">
-        <div className="graph-title-row">
-          <div className="graph-title">The Sun</div>
-        </div>
-        <ForgetSurface expRef={sunExpRef} ctlRef={sunCtlRef} dirtyRef={dirtyRef} />
-        <p className="graph-note">
-          Its own experiment, its own play and clock, its own fixed seed —
-          decoupled from the entropy slider. Fusion flips quarks
-          (up↔down), it doesn't create them: every packet is born at the
-          core with the one fusion quantum — a full unit of charge
-          flipped, 2/3−(−1/3)=1, 2 MeV — fired as a Poisson process, about
-          2.4 packets per sim-second, each standing in for ~1e49 real
-          fusions. Each packet random-walks outward through a real stellar
-          structure (the Lane-Emden n=3 polytrope, integrated live), one
-          twentieth of a radius per hop — every hop stands in for
-          (hop/mean-free-path)² honest scatterings, about 10²² of them
-          down in the core, and the readout says so. Compton
-          thermalization needs only a few hundred, across centimeters, so
-          the birth frequency is forgotten on the first hop: the packet's
-          frequency is sampled from the Planck distribution at the local
-          temperature and rides the local temperature outward. The sphere
-          is a blackbody surface: every escape deposits its photon's
-          energy as heat in a small patch around its exit direction, so
-          each patch's temperature is the local escaping energy flux,
-          cooling by Newton's law between hits. A patch glows with the
-          visible light a blackbody at its temperature produces, seen
-          through a warm filter — a custom sun scale from deep red-orange
-          through orange, amber and gold to a whitish-yellow hot clamp,
-          assigned by inverse-density warping: the mapping is flat where
-          the amplitude is high, so dense temperature ranges get wide
-          color ranges (the sun reads mostly orange), and steep where
-          thin (narrow ranges, compressed) — red compresses less than
-          ultraviolet because the cold tail carries more mass, and the
-          infrared shows as dark rather than being filtered out; the
-          brightness is the real Planck integral over the visible band:
-          cold patches make almost no visible light and sit near black,
-          hot ones blaze whitish-yellow — and every escape launches a
-          wave there too, carrying its photon: amplitude the escaping
-          photon's energy, wavelength and frequency the photon's own
-          wavelength scaled so green light makes the reference ripple —
-          hot blue photons tight fast ringlets, cool infrared ones broad
-          slow swells, all travelling at the same speed (slowed down so we
-          can see them). The ripple slider scales the waves' amplitude
-          only, the lifetime slider how long they live; the colors are
-          untouched by either.
-        </p>
-        <Transport
-          playing={sunPlaying}
-          speed={sunSpeed}
-          onPlayingChange={setSunPlaying}
-          onSpeedChange={setSunSpeed}
-        />
-        <div className="transport-speed">
-          <Slider label="ripple" value={sunRipple} min={0} max={3} step={0.1}
-            onChange={setSunRipple} format={(v) => `${v.toFixed(1)}×`} />
-          <Slider label="ripple lifetime" value={sunRippleTau} min={0} max={40} step={0.1}
-            onChange={setSunRippleTau} format={(v) => `${v.toFixed(1)} s`} />
-        </div>
-      </div>
+            <div className="graph-box">
+              <div className="graph-title-row">
+                <div className="graph-title">Temperature based on energy flux</div>
+              </div>
+              <ForgetSurface expRef={frExpRef} ctlRef={frCtlRef} dirtyRef={dirtyRef} />
+              <p className="graph-note">
+                Its own experiment, its own play and clock, its own fixed entropy
+                seed — decoupled from the entropy slider, which no longer
+                reseeds this view. Packets are born
+                across the proton-forming shell, 0.2–0.7 R_☉, equal chance at
+                each radius, each with a frequency drawn from the Planck
+                distribution at its birth radius's own temperature. Each
+                packet random-walks outward through a real stellar structure
+                (the Lane-Emden n=3 polytrope, integrated live), one twentieth
+                of a radius per hop — every hop stands in for
+                (hop/mean-free-path)² honest scatterings, about 10²² of them
+                down in the core, and the readout says so. Compton
+                thermalization needs only a few hundred, across centimeters, so
+                each hop fully thermalizes the packet: its frequency is sampled
+                from the Planck distribution at the local temperature — a real
+                thermalized photon is a draw from the distribution, not the peak
+                value — and rides the local temperature outward: ultraviolet in
+                the deep interior, cooling through the visible near the surface.
+                The deeper-born take longer to random-walk out — about twice the
+                hops from 0.2 as from 0.7 — so their surface hits arrive later;
+                the relative time delay is the walk itself. The sphere is a
+                blackbody surface: every escape deposits its photon's energy
+                as heat in a small patch around its exit direction, so each
+                patch's temperature is the local escaping energy flux, cooling
+                by Newton's law between hits. A patch glows with the visible
+                light a blackbody at its temperature produces, seen through a
+                warm filter — a custom sun scale from deep red-orange through
+                orange, amber and gold to a whitish-yellow hot clamp, assigned
+                by inverse-density warping: the mapping is flat where the
+                amplitude is high, so dense temperature ranges get wide color
+                ranges (the sun reads mostly orange), and steep where thin
+                (narrow ranges, compressed) — red compresses less than
+                ultraviolet because the cold tail carries more mass, and the
+                infrared shows as dark rather than being filtered out; the
+                brightness is the real Planck integral over the
+                visible band: cold patches make almost no visible light and sit
+                near black, hot ones blaze whitish-yellow — and
+                every escape launches a wave there too, its amplitude the
+                escaping photon's energy, rippling outward and dying away
+                (slowed down so we can see it). The ripple slider scales the
+                waves' amplitude only, the lifetime slider how long they live;
+                the colors are untouched by either.
+              </p>
+              <Transport
+                playing={frPlaying}
+                speed={frSpeed}
+                onPlayingChange={setFrPlaying}
+                onSpeedChange={setFrSpeed}
+              />
+              <div className="transport-speed">
+                <Slider label="ripple" value={frRipple} min={0} max={3} step={0.1}
+                  onChange={setFrRipple} format={(v) => `${v.toFixed(1)}×`} />
+                <Slider label="ripple lifetime" value={frRippleTau} min={0} max={40} step={0.1}
+                  onChange={setFrRippleTau} format={(v) => `${v.toFixed(1)} s`} />
+              </div>
+            </div>
 
-      <div className="graph-box">
-        <div className="graph-title-row">
-          <div className="graph-title">Patch temperature distribution</div>
-        </div>
-        <TempDistPanel playingRef={sunPlayingRef} />
-        <p className="graph-note">
-          What the sphere's colors are assigned from. Orange is the live
-          simulated patch-temperature distribution — the histogram the
-          adaptive colors read every frame; dashed is the design
-          assumption the original fixed scale was tuned against. Where
-          they differ, a fixed scale mismatches the data, which is why
-          the colors track the live one instead. The strip shows the
-          live color assignment: which temperatures get which colors
-          right now, with ruler marks at twelve evenly spaced gradient
-          positions — watch them spread where the color range stretches
-          and bunch where it compresses. The landing panel below is the
-          check: it compares the escaping light against the 5778 K
-          blackbody, the expected radiation from the sun.
-        </p>
-      </div>
+            <div className="graph-box">
+              <div className="graph-title-row">
+                <div className="graph-title">Patch temperature distribution</div>
+              </div>
+              <TempDistPanel playingRef={frPlayingRef} />
+              <p className="graph-note">
+                What the sphere's colors are assigned from. Orange is the live
+                simulated patch-temperature distribution — the histogram the
+                adaptive colors read every frame; dashed is the design
+                assumption the original fixed scale was tuned against. Where
+                they differ, a fixed scale mismatches the data, which is why
+                the colors track the live one instead. The strip shows the
+                live color assignment: which temperatures get which colors
+                right now. The landing panel below is untouched — it still
+                compares the escaping light against the 5778 K blackbody,
+                the expected radiation from the sun.
+              </p>
+            </div>
 
-      <div className="graph-box">
-        <div className="graph-title-row">
-          <div className="graph-title">Where the sunlight actually lands</div>
-        </div>
-        <LandingPanel expRef={sunExpRef} playingRef={sunPlayingRef} markers={false} />
-        <p className="graph-note">
-          The visible spectrum on a fixed scale; every escaped packet
-          builds the escaping spectrum below it, teal the 5778 K
-          blackbody. If birth is truly forgotten, the bars follow the
-          teal curve — one input frequency in, the sun's own light out.
-        </p>
-      </div>
+            <div className="graph-box">
+              <div className="graph-title-row">
+                <div className="graph-title">Measured vs expected attenuation — the shell-born run</div>
+              </div>
+              <AttenuationGraph expRef={frExpRef} playingRef={frPlayingRef} />
+              <p className="graph-note">
+                Same layout as the other run: gold is the expected attenuation
+                from the note's table — the division the old model said each
+                fundamental needed — teal dashed is complete thermalization.
+                The dots are what this run actually produces, per birth band.
+                If the forget model is right, the dots sit on teal, not gold:
+                every input divided down to the same surface light.
+              </p>
+            </div>
 
-      <div className="graph-box">
-        <div className="graph-title-row">
-          <div className="graph-title">One birth, one curve</div>
-        </div>
-        <ForgetTrack expRef={sunExpRef} playingRef={sunPlayingRef} single />
-        <p className="graph-note">
-          The test result, drawn: log frequency against fractional
-          radius. The gold curve is the local thermal peak from the
-          Lane-Emden structure; the yellow dot is the one fusion quantum
-          at birth — 2 MeV — with its crash line into the thermal curve
-          on the first hop. What escapes is set by the surface, not by
-          the birth.
-        </p>
-      </div>
-    </>
-  )
-}
+            <div className="graph-box">
+              <div className="graph-title-row">
+                <div className="graph-title">Where the shell-born pulses actually land</div>
+              </div>
+              <LandingPanel expRef={frExpRef} playingRef={frPlayingRef} />
+              <p className="graph-note">
+                The visible spectrum on a fixed scale; the four bands mark where
+                their light actually landed on average. Below, every escaped
+                packet builds the escaping spectrum, teal the 5778 K blackbody.
+                If birth is truly forgotten, the four markers pile onto the same
+                place and the bars follow the teal curve.
+              </p>
+            </div>
+
+            <div className="graph-box">
+              <div className="graph-title-row">
+                <div className="graph-title">Four births, one curve</div>
+              </div>
+              <ForgetTrack expRef={frExpRef} playingRef={frPlayingRef} />
+              <p className="graph-note">
+                The test result, drawn: log frequency against fractional radius.
+                The gold curve is the local thermal peak from the Lane-Emden
+                structure; the four colored dots are the birth frequencies —
+                all at the core — with their crash lines into the one curve.
+                What escapes is set by the surface, not by the birth.
+              </p>
+            </div>
+          </>
+        )
+      }
