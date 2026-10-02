@@ -316,15 +316,32 @@ function visBrightness(T) {
   const v = bbVis[i] * (1 - f) + bbVis[Math.min(BB_N, i + 1)] * f
   return Math.min(1, v / BB_REF)
 }
-// warm filter: the thermal hue is compressed onto the black→red→orange→
-// yellow range — green through violet are filtered out, so the sphere
-// reads as sun colors. the window sits so the typical patch temperature
-// lands between yellow and orange; hotter patches clamp to yellow.
-const WARM_T0 = 1.65 // eV — red edge of the visible band
-const WARM_T1 = 2.61 // eV — yellow; hotter clamps to yellow
+// warm filter: a custom sun scale from deep red-orange to whitish-yellow.
+// more stops than the rainbow's three warm ones, spread wide across the
+// mid-range temperatures — so the oranges actually show instead of
+// everything clamping to yellow. green through violet are filtered out.
+const WARM_STOPS = [
+  [160, 30, 0],    // dark red-orange — cold end
+  [230, 70, 0],    // red-orange
+  [255, 120, 0],   // orange
+  [255, 165, 0],   // amber
+  [255, 200, 0],   // golden yellow
+  [255, 225, 60],  // yellow
+  [255, 245, 190], // whitish yellow — hot clamp
+]
+const WARM_T0 = 1.5 // eV — below this clamps to the cold end
+const WARM_T1 = 3.4 // eV — above this clamps to whitish yellow
 function warmHue(T) {
   const x = Math.min(1, Math.max(0, (T - WARM_T0) / (WARM_T1 - WARM_T0)))
-  return rainbow(x / 3) // rainbow 0→1/3 spans red→orange→yellow
+  const sx = x * (WARM_STOPS.length - 1)
+  const i = Math.min(WARM_STOPS.length - 2, Math.floor(sx))
+  const f = sx - i
+  const a = WARM_STOPS[i], b = WARM_STOPS[i + 1]
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * f),
+    Math.round(a[1] + (b[1] - a[1]) * f),
+    Math.round(a[2] + (b[2] - a[2]) * f),
+  ]
 }
 // this view is decoupled from the entropy slider — its own fixed seed.
 // (a bigger seed isn't "more random"; it just picks a different stream,
@@ -1638,11 +1655,12 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           patch's temperature is the local escaping energy flux, cooling
           by Newton's law between hits. A patch glows with the visible
           light a blackbody at its temperature produces, seen through a
-          warm filter — the hue runs only black→red→orange→yellow, green
-          through violet filtered out, centered so the typical patch glows
-          between yellow and orange; the brightness is the real Planck
-          integral over the visible band: cold patches make almost no
-          visible light and sit near black, hot ones blaze yellow — and
+          warm filter — a custom sun scale from deep red-orange through
+          orange, amber and gold to a whitish-yellow hot clamp, spread
+          wide enough that the mid-range temperatures show as distinct
+          oranges; the brightness is the real Planck integral over the
+          visible band: cold patches make almost no visible light and sit
+          near black, hot ones blaze whitish-yellow — and
           every escape launches a wave there too, its amplitude the
           escaping photon's energy, rippling outward and dying away
           (slowed down so we can see it). The ripple slider scales the
