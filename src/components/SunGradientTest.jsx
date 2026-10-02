@@ -1156,6 +1156,20 @@ function TempDistPanel({ playingRef }) {
       }
       ctx.strokeStyle = 'rgba(107,90,62,0.35)'
       ctx.strokeRect(padL, stripY, iw, stripH)
+      // ruler marks: 12 evenly spaced gradient positions, drawn at the
+      // temperatures they currently map to — they spread out where the
+      // color range stretches (dense) and bunch up where it compresses
+      // (thin), and visibly shift as the warping updates
+      ctx.fillStyle = '#3a3125'
+      for (let k = 1; k < 12; k++) {
+        const xk = k / 12
+        let b = 0
+        while (b < AD_N - 2 && adX[b + 1] < xk) b++
+        const x0 = adX[b], x1 = adX[b + 1]
+        const f = x1 > x0 ? Math.min(1, Math.max(0, (xk - x0) / (x1 - x0))) : 0
+        const T = AD_T0 + (AD_T1 - AD_T0) * (b + 0.5 + f) / AD_N
+        if (T >= T0 && T <= T1) ctx.fillRect(X(T) - 0.5, stripY - 4, 1, 4)
+      }
     }
 
     let raf = 0
