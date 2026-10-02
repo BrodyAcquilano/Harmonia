@@ -10,12 +10,16 @@ import Slider from './Slider.jsx'
 // the attenuation curve is smoothly interpolated between them.
 const POINTS = [
   { lam: 380, label: '380' },
-  { lam: 433, label: '433' },
-  { lam: 486, label: '486' },
-  { lam: 539, label: '539' },
-  { lam: 592, label: '592' },
-  { lam: 645, label: '645' },
-  { lam: 698, label: '698' },
+  { lam: 414, label: '414' },
+  { lam: 448, label: '448' },
+  { lam: 482, label: '482' },
+  { lam: 516, label: '516' },
+  { lam: 550, label: '550' },
+  { lam: 584, label: '584' },
+  { lam: 618, label: '618' },
+  { lam: 652, label: '652' },
+  { lam: 686, label: '686' },
+  { lam: 720, label: '720' },
   { lam: 750, label: '750' },
 ]
 
@@ -73,7 +77,7 @@ export function buildFilteredLut(attens) {
 
 // standard atmosphere across the visible band: Rayleigh scattering
 // slopes the blue; the green-yellow-red passes nearly untouched.
-const ATMOS_ATTENS = [0.55, 0.68, 0.80, 0.92, 0.95, 0.93, 0.90, 0.88]
+const ATMOS_ATTENS = [0.55, 0.62, 0.70, 0.78, 0.88, 0.93, 0.95, 0.94, 0.92, 0.90, 0.89, 0.88]
 
 // the filtered blackbody curve: baseline 5778 K Planck distribution with
 // the smooth filter applied. area filled with spectral colors, dimmed
@@ -166,35 +170,57 @@ function FilterEQ({ attens, onChange }) {
     onChange(next)
   }
   const reset = () => onChange(attens.map(() => 1))
+  // spectrum gradient for the bar, built from the actual spectral colors
+  const gradStops = []
+  for (let j = 0; j <= 12; j++) {
+    const lam = 380 + (750 - 380) * j / 12
+    const pct = (j / 12) * 100
+    gradStops.push(`rgb(${spectralRGB(lam).map(Math.round).join(',')}) ${pct}%`)
+  }
   return (
     <div className="graph-box">
       <div className="graph-title-row">
         <div className="graph-title">Filter EQ</div>
         <button className="graph-reset" onClick={reset}>reset</button>
       </div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, padding: '8px 4px', overflowX: 'auto' }}>
+      <div style={{ position: 'relative', height: 170, margin: '4px 8px 0' }}>
         {POINTS.map((pt, i) => {
+          const leftPct = ((pt.lam - 380) / (750 - 380)) * 100
           const col = `rgb(${spectralRGB(pt.lam).map(Math.round).join(',')})`
           return (
-            <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 40 }}>
+            <div
+              key={i}
+              style={{
+                position: 'absolute', left: `${leftPct}%`, top: 0,
+                transform: 'translateX(-50%)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+              }}
+            >
               <input
                 type="range" min={0} max={100} value={Math.round(attens[i] * 100)}
                 onChange={(e) => set(i, +e.target.value)}
-                style={{ writingMode: 'vertical-lr', direction: 'rtl', width: 24, height: 110, accentColor: col }}
-                aria-label={`${pt.label} attenuation`}
+                style={{ writingMode: 'vertical-lr', direction: 'rtl', width: 22, height: 100, accentColor: col }}
+                aria-label={`${pt.label} nm attenuation`}
               />
-              <div style={{ fontSize: 9, color: '#715f43', marginTop: 4, fontFamily: '"IBM Plex Mono", monospace' }}>
+              <div style={{ fontSize: 8, color: '#715f43', marginTop: 2, fontFamily: '"IBM Plex Mono", monospace' }}>
                 {pt.label}
               </div>
-              <div style={{ width: 22, height: 6, background: col, borderRadius: 2, marginTop: 2, opacity: 0.85 }} />
             </div>
           )
         })}
+        <div
+          style={{
+            position: 'absolute', left: 0, right: 0, bottom: 0, height: 16,
+            background: `linear-gradient(to right, ${gradStops.join(', ')})`,
+            borderRadius: 3, border: '1px solid rgba(107,90,62,0.35)',
+          }}
+        />
       </div>
       <p className="graph-note">
-        Each slider moves a single point on the attenuation curve; the
-        curve stays smooth between them. 100% = pass, 0% = blocked. The
-        filter removes color from the view, never energy from the physics.
+        Each slider sits above its wavelength on the spectrum bar and moves
+        a single point on the attenuation curve; the curve stays smooth
+        between them. 100% = pass, 0% = blocked. The filter removes color
+        from the view, never energy from the physics.
       </p>
     </div>
   )
