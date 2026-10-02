@@ -175,12 +175,15 @@ export default function TheSun() {
           their amplitudes and relative abundance there. That visible
           energy becomes the dominant energy source for the color a patch
           gets. Patches colder than the band (infrared) or hotter
-          (ultraviolet) show black — no color assigned. Everything else
+          (ultraviolet) are discarded from the sphere entirely — not
+          painted black — so instead of dark spots piling up you see
+          only the visible parts. Everything else
           is the same experiment: core fusion firing, Poisson births,
-          random-walk out, heat deposited per escape, frequency-carrying
-          ripples. The distribution panel below still shows the full
-          patch-temperature spectrum developing, dark red included — but
-          its color strip carries no colors outside the visible band.
+          random-walk out, heat deposited per escape. Only visible
+          photons launch ripples here. The distribution panel below
+          still shows the full patch-temperature spectrum developing,
+          dark red included — but its color strip carries no colors
+          outside the visible band.
         </p>
         <Transport
           playing={sunVisPlaying}
@@ -202,13 +205,13 @@ export default function TheSun() {
         </div>
         <TempDistPanel playingRef={sunVisPlayingRef} vis />
         <p className="graph-note">
-          The full distribution still develops here — orange is every
-          patch, dark red infrared included — but the color strip below
-          it carries colors only in the visible band. Outside 1.65–3.26
-          eV it stays black: no color assigned to infrared or
-          ultraviolet. The ruler marks are the visible band's own
-          warping, spreading where its colors stretch and bunching where
-          they compress.
+          The full distribution still develops and piles up here — but
+          its bars are colored by band: dark red rectangles for
+          infrared, the assigned visible colors inside the band, light
+          purple for ultraviolet. The color strip below carries colors
+          only in the visible band; outside 1.65–3.26 eV it stays black.
+          The ruler marks are the visible band's own warping, spreading
+          where its colors stretch and bunching where they compress.
         </p>
       </div>
 

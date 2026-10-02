@@ -1297,21 +1297,39 @@ export function TempDistPanel({ playingRef, vis = false }) {
       ctx.font = '10px "IBM Plex Mono", monospace'
       ctx.textAlign = 'center'
       ctx.fillText('visible band', (X(1.65) + X(3.26)) / 2, padT + 12)
-      // simulated: the live histogram, normalized to its peak
+      // simulated: the live histogram, normalized to its peak. in visible
+      // mode the bars are colored by band — dark red rectangles for
+      // infrared, the assigned visible colors in the band, light purple
+      // for ultraviolet — so the full spectrum piles up visibly.
       let hMax = 1e-9
       for (let i = 0; i < AD_N; i++) hMax = Math.max(hMax, adHist[i])
-      ctx.beginPath()
-      let started = false
-      for (let i = 0; i < AD_N; i++) {
-        const T = AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
-        if (T < T0 || T > T1) continue
-        const x = X(T), y = Y(adHist[i] / hMax)
-        if (!started) { ctx.moveTo(x, y); started = true } else ctx.lineTo(x, y)
+      if (vis) {
+        for (let i = 0; i < AD_N; i++) {
+          const T = AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
+          if (T < T0 || T > T1) continue
+          const Tlo = AD_T0 + (AD_T1 - AD_T0) * i / AD_N
+          const Thi = AD_T0 + (AD_T1 - AD_T0) * (i + 1) / AD_N
+          const x0 = X(Math.max(Tlo, T0)), x1 = X(Math.min(Thi, T1))
+          const y = Y(adHist[i] / hMax)
+          if (T < VIS_T_LO) ctx.fillStyle = '#8b1a1a'
+          else if (T > VIS_T_HI) ctx.fillStyle = '#c8a0ff'
+          else ctx.fillStyle = rgb(warmHueVis(T))
+          ctx.fillRect(x0, y, Math.max(1, x1 - x0), Y(0) - y)
+        }
+      } else {
+        ctx.beginPath()
+        let started = false
+        for (let i = 0; i < AD_N; i++) {
+          const T = AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
+          if (T < T0 || T > T1) continue
+          const x = X(T), y = Y(adHist[i] / hMax)
+          if (!started) { ctx.moveTo(x, y); started = true } else ctx.lineTo(x, y)
+        }
+        ctx.strokeStyle = '#c46a1a'
+        ctx.lineWidth = 2
+        ctx.stroke()
+        ctx.lineWidth = 1
       }
-      ctx.strokeStyle = '#c46a1a'
-      ctx.lineWidth = 2
-      ctx.stroke()
-      ctx.lineWidth = 1
       // expected: the design assumption (gaussian, mu 2.4 eV, sigma 0.6)
       ctx.beginPath()
       ctx.setLineDash([5, 4])
@@ -1419,9 +1437,24 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false }) {
     }
     sphGeo.setAttribute('color',
       new THREE.BufferAttribute(new Float32Array(sCount * 3).fill(1), 3))
+    // per-vertex visibility for the visible-band view: 1 = visible band,
+    // 0 = infrared/ultraviolet (discarded in the shader, not painted black)
+    sphGeo.setAttribute('visAlpha', new THREE.BufferAttribute(new Float32Array(sCount).fill(1), 1))
     sphGeo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 8)
-    const sph = new THREE.Mesh(sphGeo,
-      new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, metalness: 0.05 }))
+    const sphMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, metalness: 0.05 })
+    if (vis) {
+      // visible-band view: discard infrared/ultraviolet fragments entirely
+      // — the sphere shows only the visible parts, no dark spots piling up
+      sphMat.onBeforeCompile = (shader) => {
+        shader.vertexShader = shader.vertexShader
+          .replace('#include <common>', '#include <common>\nattribute float visAlpha;\nvarying float vVisAlpha;')
+          .replace('#include <color_vertex>', '#include <color_vertex>\nvVisAlpha = visAlpha;')
+        shader.fragmentShader = shader.fragmentShader
+          .replace('#include <common>', '#include <common>\nvarying float vVisAlpha;')
+          .replace('#include <dithering_fragment>', 'if (vVisAlpha < 0.5) discard;\n#include <dithering_fragment>')
+      }
+    }
+    const sph = new THREE.Mesh(sphGeo, sphMat)
     sph.frustumCulled = false
     S.scene.add(sph)
     const P = new Float32Array(sCount * 3)
@@ -1445,6 +1478,7 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false }) {
         exp.splashes.length = 0
       }
       const colA = sphGeo.attributes.color
+      const visA = sphGeo.attributes.visAlpha
       const posA = sphGeo.attributes.position
       const coolF = sdt > 0 ? (1 - Math.exp(-sdt / COOL_TAU)) : 0
       const rippleGain = ctlRef.current.ripple ?? 1
@@ -1481,12 +1515,18 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false }) {
         const o = v * 3
         if (coolF > 0) P[o] += (T_BASE - P[o]) * coolF
         // blackbody color across the full spectrum: hue from the warping,
-        // brightness from the real visible-band Planck integral at T
-        const tc = visRef.current ? warmHueVis(P[o]) : warmHue(P[o])
-        const br = visBrightness(P[o])
+        // brightness from the real visible-band Planck integral at T.
+        // in the visible-band view, infrared/ultraviolet patches are
+        // flagged invisible (discarded by the shader) instead of black.
+        const isVis = visRef.current
+        const T = P[o]
+        const tc = isVis ? warmHueVis(T) : warmHue(T)
+        const br = visBrightness(T)
         colA.setXYZ(v, (tc[0] / 255) * br, (tc[1] / 255) * br, (tc[2] / 255) * br)
+        if (isVis) visA.setX(v, (T >= VIS_T_LO && T <= VIS_T_HI) ? 1 : 0)
       }
       colA.needsUpdate = true
+      if (visRef.current) visA.needsUpdate = true
       // waves: every escaping photon radiates a damped ring from its exit
       // point — amplitude carries the photon's energy, the ripple slider
       // scales it all, colors untouched
@@ -1497,6 +1537,9 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false }) {
           const ux = uDir[o], uy = uDir[o + 1], uz = uDir[o + 2]
           for (let r = 0; r < exp.ripples.length; r++) {
             const rp = exp.ripples[r]
+            // visible-band view: only visible photons radiate here —
+            // infrared/ultraviolet escapes are ignored on this sphere
+            if (visRef.current && (rp.amp < VIS_T_LO || rp.amp > VIS_T_HI)) continue
             const age = exp.t - rp.t0
             let d = ux * rp.dx + uy * rp.dy + uz * rp.dz
             d = d > 1 ? 1 : d < -1 ? -1 : d
