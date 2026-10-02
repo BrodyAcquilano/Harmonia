@@ -376,7 +376,7 @@ const FORGET_ENTROPY = 8888888888
 const RIPPLE_K = 18    // angular wavenumber — ring wavelength ~0.35 rad
 const RIPPLE_W = 6     // visual oscillation rate, radians per sim-second
 const RIPPLE_SIG = 0.5 // angular decay of the wave, radians
-const RIPPLE_TAU = 0.5 // wave lifetime, sim-seconds — higher decay, short-lived ripples
+const RIPPLE_TAU = 2.5 // default wave lifetime, sim-seconds — the slider takes over
 const RIPPLE_G = 0.02  // fractional radius per eV of wave amplitude, at slider 1
 function spawnForgetPacket(rng, band, t) {
   // born across the proton-forming shell, 0.2–0.7 R_☉ — equal chance at
@@ -1128,8 +1128,10 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       const posA = sphGeo.attributes.position
       const coolF = sdt > 0 ? (1 - Math.exp(-sdt / COOL_TAU)) : 0
       const rippleGain = ctlRef.current.ripple ?? 1
+      // ripple lifetime from the slider, clamped above zero (0 ≈ no waves)
+      const rippleTau = Math.max(1e-3, ctlRef.current.rippleTau ?? RIPPLE_TAU)
       // prune spent waves — ripples are pushed in time order
-      while (exp.ripples.length && exp.t - exp.ripples[0].t0 > 4 * RIPPLE_TAU) exp.ripples.shift()
+      while (exp.ripples.length && exp.t - exp.ripples[0].t0 > 4 * rippleTau) exp.ripples.shift()
       for (let v = 0; v < sCount; v++) {
         const o = v * 3
         if (coolF > 0) P[o] += (T_BASE - P[o]) * coolF
@@ -1155,7 +1157,7 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
             d = d > 1 ? 1 : d < -1 ? -1 : d
             const th = Math.acos(d)
             h += rp.amp * Math.cos(RIPPLE_K * th - RIPPLE_W * age)
-              * Math.exp(-th / RIPPLE_SIG) * Math.exp(-age / RIPPLE_TAU)
+              * Math.exp(-th / RIPPLE_SIG) * Math.exp(-age / rippleTau)
           }
         }
         const f = 1 + RIPPLE_G * rippleGain * h
@@ -1368,6 +1370,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
   const [frPlaying, setFrPlaying] = useState(false)
   const [frSpeed, setFrSpeed] = useState(1)
   const [frRipple, setFrRipple] = useState(1)
+  const [frRippleTau, setFrRippleTau] = useState(2.5)
   const frExpRef = useRef(null)
   if (!frExpRef.current) frExpRef.current = freshForgetExperiment(FORGET_ENTROPY)
   const frCtlRef = useRef({})
@@ -1410,6 +1413,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
   }
   frCtlRef.current = {
     playing: frPlaying, speed: frSpeed, entropy, ripple: frRipple,
+    rippleTau: frRippleTau,
   }
   const frPlayingRef = useRef(false)
   frPlayingRef.current = frPlaying
@@ -1689,7 +1693,8 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           every escape launches a wave there too, its amplitude the
           escaping photon's energy, rippling outward and dying away
           (slowed down so we can see it). The ripple slider scales the
-          waves only; the colors are untouched.
+          waves' amplitude only, the lifetime slider how long they live;
+          the colors are untouched by either.
         </p>
         <Transport
           playing={frPlaying}
@@ -1700,6 +1705,8 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
         <div className="transport-speed">
           <Slider label="ripple" value={frRipple} min={0} max={3} step={0.1}
             onChange={setFrRipple} format={(v) => `${v.toFixed(1)}×`} />
+          <Slider label="ripple lifetime" value={frRippleTau} min={0} max={10} step={0.1}
+            onChange={setFrRippleTau} format={(v) => `${v.toFixed(1)} s`} />
         </div>
       </div>
 
