@@ -604,10 +604,9 @@ function falseColor(lamNm) {
 
 function buildFalseColorLut(attens) {
   const N = 256, lut = new Float32Array(N * 3)
-  // sum the Planck-weighted false colors; UV (mapped to bright yellow)
-  // pushes the sum past white — "higher white" — then normalize once
-  let gmax = 1e-30
-  const tmp = new Float32Array(N * 3)
+  // sum the Planck-weighted false colors per temperature, normalized
+  // per-T so hue carries the temperature: hot T weights the
+  // bright-yellow (UV) end, cool T weights the dark-red end
   for (let i = 0; i < N; i++) {
     const T = (i / (N - 1)) * 8
     const TK = Math.max(0.05, T * BB_T_SCALE) * 11604.5
@@ -618,11 +617,9 @@ function buildFalseColorLut(attens) {
       const [cr, cg, cb] = falseColor(lamNm)
       r += w * cr; g += w * cg; b += w * cb
     }
-    tmp[i * 3] = r; tmp[i * 3 + 1] = g; tmp[i * 3 + 2] = b
-    const m = Math.max(r, g, b)
-    if (m > gmax) gmax = m
+    const m = Math.max(r, g, b, 1e-30)
+    lut[i * 3] = r / m * 255; lut[i * 3 + 1] = g / m * 255; lut[i * 3 + 2] = b / m * 255
   }
-  for (let i = 0; i < N * 3; i++) lut[i] = tmp[i] / gmax * 255
   return lut
 }
 
