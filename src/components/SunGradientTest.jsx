@@ -381,7 +381,7 @@ const VIS_T_HI = 3.26
 //     (hue × photon energy × gain × spatial gaussian;
 //      a central hit saturates to full color, then fades;
 //      a 3.26 eV blue photon deposits ~2× the intensity of a 1.65 eV red)
-//   per frame: RGB *= exp(-dt/120s)  (slow fade on its own clock, so
+//   per frame: RGB *= exp(-dt/80s)  (slow fade on its own clock, so
 //     hits accumulate toward the peach steady state instead of dying
 //     between hits; starts dark)
 //   display: clamp(RGB, 0, 1)
@@ -391,7 +391,7 @@ const MIX_COLOR_GAIN = 1.0
 // color fades on its own slower clock than the thermal cooling, so that
 // repeated hits accumulate toward the peach steady state instead of
 // dying back to black between hits
-const MIX_TAU = 120
+const MIX_TAU = 80
 // spectral color of a photon energy (eV), 0-1 RGB. null if not visible.
 function photonRGB(eV) {
   if (eV < VIS_T_LO || eV > VIS_T_HI) return null
