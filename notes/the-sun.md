@@ -59,3 +59,13 @@ I'm not claiming this *is* the solar cycle — the real one is an 11-year magnet
 ## 9. What's retired, and why
 
 The attenuation graph is gone — it measured per-band divisions ($A = \nu_{in}/\nu_{out}$) against the note's table, and the answer came back "complete thermalization," which the new sim takes as given rather than re-measuring. The four birth bands are gone — one quantum, one dot. The shell-birth radii (0.2–0.7 $R_\odot$, then band-dependent spheres) are gone — everything fires at the core, because that's where fusion happens. None of it was wasted: each piece was scaffolding for the question "does the input survive?", and the answer — no, within centimeters — is what let me build this clean.
+
+## 11. The Sun — on the visible band
+
+A second view of the same sun, added 2026-10-02. The sphere ignores infrared and ultraviolet and only plots the visible spectrum part. The colors are assigned the same way — inverse-density warping with the cold-stretch tilt — but only within the visible band: 1.65–3.26 eV, the photon energies of 750–380 nm. Only the visible band feeds its warping histogram, so the stretch and compress is driven only by the energy produced by frequencies in that band — by their amplitudes and their relative abundance there. In effect the visible energy becomes the dominant energy source for the color a patch gets.
+
+Patches colder than 1.65 eV (infrared) or hotter than 3.26 eV (ultraviolet) get no color at all — they show black. Everything else is the same experiment: the same Poisson core firing, the same random walk, the same heat deposited per escape, the same frequency-carrying ripples, just a second run of it.
+
+The distribution panel still shows the full patch-temperature spectrum developing — the orange curve, dark red infrared included — but the color strip below it carries no colors outside the visible band. The infrared and ultraviolet regions stay black. The ruler marks are the visible band's own warping: spreading where its colors stretch, bunching where they compress.
+
+Why this view: the first sphere shows the whole thermal story, including the dark infrared bulk. This one asks what the sun looks like if you only listen to the band we can actually see — which patches dominate the visible light, and how the visible colors share themselves out.

@@ -362,6 +362,63 @@ function warmHue(T) {
     Math.round(a[2] + (b[2] - a[2]) * sf),
   ]
 }
+// visible-band warping: the same rules, but only the visible band feeds
+// the histogram and only it gets colors. below 1.65 eV (750 nm) is
+// infrared, above 3.26 eV (380 nm) is ultraviolet — both display as
+// black, no color assigned. the stretch/compress is driven only by the
+// energy in the visible band.
+const VIS_T_LO = 1.65
+const VIS_T_HI = 3.26
+const adHistVis = new Float64Array(AD_N)
+const adXVis = new Float64Array(AD_N)
+for (let i = 0; i < AD_N; i++) {
+  const T = AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
+  adHistVis[i] = 2337 * Math.exp(-(((T - 2.4) / 1.5) ** 2))
+  adXVis[i] = i / (AD_N - 1)
+}
+function warmHueVis(T) {
+  if (T < VIS_T_LO || T > VIS_T_HI) return [0, 0, 0]
+  const bx = Math.min(AD_N - 1, Math.max(0, Math.floor((T - AD_T0) / (AD_T1 - AD_T0) * AD_N)))
+  const x = adXVis[bx]
+  const sx = x * (SPECTRUM_STOPS.length - 1)
+  const si = Math.min(SPECTRUM_STOPS.length - 2, Math.floor(sx))
+  const sf = sx - si
+  const a = SPECTRUM_STOPS[si], b = SPECTRUM_STOPS[si + 1]
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * sf),
+    Math.round(a[1] + (b[1] - a[1]) * sf),
+    Math.round(a[2] + (b[2] - a[2]) * sf),
+  ]
+}
+// rebuild the adaptive warping from a histogram: 1%/99% data range,
+// inverse-density weights with the T^2 cold-stretch tilt.
+function rebuildWarping(hist, X) {
+  let tot = 0
+  for (let i = 0; i < AD_N; i++) tot += hist[i]
+  let cum = 0, loB = 0, hiB = AD_N - 1
+  for (let i = 0; i < AD_N; i++) {
+    cum += hist[i]
+    if (cum / tot < 0.01) loB = i + 1
+    if (cum / tot < 0.99) hiB = i
+  }
+  loB = Math.max(0, Math.min(loB, AD_N - 2))
+  hiB = Math.min(AD_N - 1, Math.max(hiB, loB + 1))
+  let hMax = 1e-9
+  for (let i = loB; i <= hiB; i++) hMax = Math.max(hMax, hist[i])
+  const eps = 0.1 * hMax
+  const wOf = (i) => {
+    const T = AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
+    return (T * T) / 4.0 / (hist[i] + eps)
+  }
+  let wSum = 0
+  for (let i = loB; i <= hiB; i++) wSum += wOf(i)
+  cum = 0
+  for (let i = 0; i < AD_N; i++) {
+    if (i < loB) X[i] = 0
+    else if (i > hiB) X[i] = 1
+    else { cum += wOf(i); X[i] = cum / wSum }
+  }
+}
 // this view is decoupled from the entropy slider — its own fixed seed.
 // (a bigger seed isn't "more random"; it just picks a different stream,
 // so the value only needs to be fixed, not large.)
@@ -1212,7 +1269,7 @@ export function LandingPanel({ expRef, playingRef, markers = true }) {
 // the colors read); dashed = the design assumption the original fixed
 // scale was tuned against. the strip below shows the live color
 // assignment — which temperatures get which colors right now.
-export function TempDistPanel({ playingRef }) {
+export function TempDistPanel({ playingRef, vis = false }) {
   const ref = useRef(null)
 
   useEffect(() => {
@@ -1290,11 +1347,13 @@ export function TempDistPanel({ playingRef }) {
       ctx.setLineDash([])
       ctx.fillStyle = '#4a3f2c'
       ctx.fillText('design assumption', padL + 222, 15)
-      // live color strip: which temperatures get which colors right now
+      // live color strip: which temperatures get which colors right now.
+      // in visible mode only the visible band carries color — infrared
+      // and ultraviolet show black.
       const stripY = padT + ih + 40, stripH = 12
       for (let px = 0; px < iw; px++) {
         const T = T0 + (px / iw) * (T1 - T0)
-        ctx.fillStyle = rgb(warmHue(T))
+        ctx.fillStyle = rgb(vis ? warmHueVis(T) : warmHue(T))
         ctx.fillRect(padL + px, stripY, 1, stripH)
       }
       ctx.strokeStyle = 'rgba(107,90,62,0.35)'
@@ -1304,11 +1363,12 @@ export function TempDistPanel({ playingRef }) {
       // color range stretches (dense) and bunch up where it compresses
       // (thin), and visibly shift as the warping updates
       ctx.fillStyle = '#3a3125'
+      const markX = vis ? adXVis : adX
       for (let k = 1; k < 12; k++) {
         const xk = k / 12
         let b = 0
-        while (b < AD_N - 2 && adX[b + 1] < xk) b++
-        const x0 = adX[b], x1 = adX[b + 1]
+        while (b < AD_N - 2 && markX[b + 1] < xk) b++
+        const x0 = markX[b], x1 = markX[b + 1]
         const f = x1 > x0 ? Math.min(1, Math.max(0, (xk - x0) / (x1 - x0))) : 0
         const T = AD_T0 + (AD_T1 - AD_T0) * (b + 0.5 + f) / AD_N
         if (T >= T0 && T <= T1) ctx.fillRect(X(T) - 0.5, stripY - 4, 1, 4)
@@ -1331,11 +1391,13 @@ export function TempDistPanel({ playingRef }) {
 }
 
 // ---- the fifth graph: watch the frequencies forget ----
-export function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
+export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false }) {
   const mountRef = useRef(null)
   const readRef = useRef(null)
   const phosRef = useRef(null)
   const phosExpRef = useRef(null)
+  const visRef = useRef(vis)
+  visRef.current = vis
 
   useEffect(() => {
     const S = setupScene(mountRef.current)
@@ -1390,44 +1452,27 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       const rippleTau = Math.max(1e-3, ctlRef.current.rippleTau ?? RIPPLE_TAU)
       // adaptive colors: fold the current patch temperatures into the
       // running histogram (it forgets on AD_TAU), then rebuild the
-      // inverse-density warping from the live distribution
+      // inverse-density warping from the live distribution. in visible
+      // mode only the visible band feeds the histogram.
       if (sdt > 0) {
         const hDecay = Math.exp(-sdt / AD_TAU)
         const hFloor = 0.5 * (1 - hDecay)
-        for (let i = 0; i < AD_N; i++) adHist[i] = adHist[i] * hDecay + hFloor
-        for (let v = 0; v < sCount; v++) {
-          const b = Math.min(AD_N - 1, Math.max(0, Math.floor((P[v * 3] - AD_T0) / (AD_T1 - AD_T0) * AD_N)))
-          adHist[b] += 1
-        }
-        // data range: 1% to 99% percentiles, so empty tails waste no
-        // gradient room
-        let tot = 0
-        for (let i = 0; i < AD_N; i++) tot += adHist[i]
-        let cum = 0, loB = 0, hiB = AD_N - 1
-        for (let i = 0; i < AD_N; i++) {
-          cum += adHist[i]
-          if (cum / tot < 0.01) loB = i + 1
-          if (cum / tot < 0.99) hiB = i
-        }
-        loB = Math.max(0, Math.min(loB, AD_N - 2))
-        hiB = Math.min(AD_N - 1, Math.max(hiB, loB + 1))
-        let hMax = 1e-9
-        for (let i = loB; i <= hiB; i++) hMax = Math.max(hMax, adHist[i])
-        const eps = 0.1 * hMax
-        // weight tilts with T^2: red compresses less than ultraviolet —
-        // the cold side stretches wide and calm, the hot side compresses,
-        // on top of the density-driven inverse warping
-        const wOf = (i) => {
-          const T = AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
-          return (T * T) / 4.0 / (adHist[i] + eps)
-        }
-        let wSum = 0
-        for (let i = loB; i <= hiB; i++) wSum += wOf(i)
-        cum = 0
-        for (let i = 0; i < AD_N; i++) {
-          if (i < loB) adX[i] = 0
-          else if (i > hiB) adX[i] = 1
-          else { cum += wOf(i); adX[i] = cum / wSum }
+        if (visRef.current) {
+          for (let i = 0; i < AD_N; i++) adHistVis[i] = adHistVis[i] * hDecay + hFloor
+          for (let v = 0; v < sCount; v++) {
+            const T = P[v * 3]
+            if (T < VIS_T_LO || T > VIS_T_HI) continue
+            const b = Math.min(AD_N - 1, Math.max(0, Math.floor((T - AD_T0) / (AD_T1 - AD_T0) * AD_N)))
+            adHistVis[b] += 1
+          }
+          rebuildWarping(adHistVis, adXVis)
+        } else {
+          for (let i = 0; i < AD_N; i++) adHist[i] = adHist[i] * hDecay + hFloor
+          for (let v = 0; v < sCount; v++) {
+            const b = Math.min(AD_N - 1, Math.max(0, Math.floor((P[v * 3] - AD_T0) / (AD_T1 - AD_T0) * AD_N)))
+            adHist[b] += 1
+          }
+          rebuildWarping(adHist, adX)
         }
       }
       // prune spent waves — ripples are pushed in time order
@@ -1437,7 +1482,7 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
         if (coolF > 0) P[o] += (T_BASE - P[o]) * coolF
         // blackbody color across the full spectrum: hue from the warping,
         // brightness from the real visible-band Planck integral at T
-        const tc = warmHue(P[o])
+        const tc = visRef.current ? warmHueVis(P[o]) : warmHue(P[o])
         const br = visBrightness(P[o])
         colA.setXYZ(v, (tc[0] / 255) * br, (tc[1] / 255) * br, (tc[2] / 255) * br)
       }

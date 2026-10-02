@@ -32,6 +32,24 @@ export default function TheSun() {
   const sunPlayingRef = useRef(false)
   sunPlayingRef.current = sunPlaying
 
+  // second view: the visible band only. same experiment shape, own run —
+  // the sphere ignores infrared and ultraviolet and only plots the
+  // visible spectrum part. colors assigned the same way, but the
+  // stretch/compress is driven only by the visible band's energy.
+  const [sunVisPlaying, setSunVisPlaying] = useState(false)
+  const [sunVisSpeed, setSunVisSpeed] = useState(1)
+  const [sunVisRipple, setSunVisRipple] = useState(1)
+  const [sunVisRippleTau, setSunVisRippleTau] = useState(2.5)
+  const sunVisExpRef = useRef(null)
+  if (!sunVisExpRef.current) sunVisExpRef.current = freshSunExperiment(SUN_ENTROPY)
+  const sunVisCtlRef = useRef({})
+  sunVisCtlRef.current = {
+    playing: sunVisPlaying, speed: sunVisSpeed, ripple: sunVisRipple,
+    rippleTau: sunVisRippleTau,
+  }
+  const sunVisPlayingRef = useRef(false)
+  sunVisPlayingRef.current = sunVisPlaying
+
   return (
     <>
       <div className="graph-box">
@@ -139,6 +157,82 @@ export default function TheSun() {
           at birth — 2 MeV — with its crash line into the thermal curve
           on the first hop. What escapes is set by the surface, not by
           the birth.
+        </p>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">The Sun — on the visible band</div>
+        </div>
+        <ForgetSurface expRef={sunVisExpRef} ctlRef={sunVisCtlRef} dirtyRef={dirtyRef} vis />
+        <p className="graph-note">
+          The same sun, but the sphere ignores infrared and ultraviolet
+          and only plots the visible spectrum part. Colors are assigned
+          the same way — inverse-density warping with the cold-stretch
+          tilt — but only within the visible band (1.65–3.26 eV, the 750–
+          380 nm photon energies): the stretch and compress is driven
+          only by the energy produced by frequencies in that band, by
+          their amplitudes and relative abundance there. That visible
+          energy becomes the dominant energy source for the color a patch
+          gets. Patches colder than the band (infrared) or hotter
+          (ultraviolet) show black — no color assigned. Everything else
+          is the same experiment: core fusion firing, Poisson births,
+          random-walk out, heat deposited per escape, frequency-carrying
+          ripples. The distribution panel below still shows the full
+          patch-temperature spectrum developing, dark red included — but
+          its color strip carries no colors outside the visible band.
+        </p>
+        <Transport
+          playing={sunVisPlaying}
+          speed={sunVisSpeed}
+          onPlayingChange={setSunVisPlaying}
+          onSpeedChange={setSunVisSpeed}
+        />
+        <div className="transport-speed">
+          <Slider label="ripple" value={sunVisRipple} min={0} max={3} step={0.1}
+            onChange={setSunVisRipple} format={(v) => `${v.toFixed(1)}×`} />
+          <Slider label="ripple lifetime" value={sunVisRippleTau} min={0} max={40} step={0.1}
+            onChange={setSunVisRippleTau} format={(v) => `${v.toFixed(1)} s`} />
+        </div>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">Patch temperature distribution — visible band</div>
+        </div>
+        <TempDistPanel playingRef={sunVisPlayingRef} vis />
+        <p className="graph-note">
+          The full distribution still develops here — orange is every
+          patch, dark red infrared included — but the color strip below
+          it carries colors only in the visible band. Outside 1.65–3.26
+          eV it stays black: no color assigned to infrared or
+          ultraviolet. The ruler marks are the visible band's own
+          warping, spreading where its colors stretch and bunching where
+          they compress.
+        </p>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">Where the sunlight actually lands — visible band</div>
+        </div>
+        <LandingPanel expRef={sunVisExpRef} playingRef={sunVisPlayingRef} markers={false} />
+        <p className="graph-note">
+          Same check as above, on this run's own experiment: every
+          escaped packet builds the escaping spectrum, teal the 5778 K
+          blackbody. One input frequency in, the sun's own light out.
+        </p>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">One birth, one curve — visible band</div>
+        </div>
+        <ForgetTrack expRef={sunVisExpRef} playingRef={sunVisPlayingRef} single />
+        <p className="graph-note">
+          Same test, this run: the one fusion quantum at birth — 2 MeV —
+          crashing into the thermal curve on the first hop. What escapes
+          is set by the surface, not by the birth.
         </p>
       </div>
     </>
