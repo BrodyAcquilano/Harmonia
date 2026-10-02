@@ -6,19 +6,17 @@ import {
 import { Transport } from './ModellingSun.jsx'
 import Slider from './Slider.jsx'
 
-// control points: wavelength (nm) and label. sliders move these points;
+// control points across the visible band. sliders move these points;
 // the attenuation curve is smoothly interpolated between them.
 const POINTS = [
-  { lam: 300, label: 'UV' },
   { lam: 380, label: '380' },
-  { lam: 445, label: '445' },
-  { lam: 510, label: '510' },
-  { lam: 575, label: '575' },
-  { lam: 640, label: '640' },
-  { lam: 705, label: '705' },
-  { lam: 770, label: '770' },
-  { lam: 885, label: 'IR' },
-  { lam: 1000, label: '1000' },
+  { lam: 433, label: '433' },
+  { lam: 486, label: '486' },
+  { lam: 539, label: '539' },
+  { lam: 592, label: '592' },
+  { lam: 645, label: '645' },
+  { lam: 698, label: '698' },
+  { lam: 750, label: '750' },
 ]
 
 function spectralRGB(lamNm) {
@@ -73,9 +71,9 @@ export function buildFilteredLut(attens) {
   return lut
 }
 
-// standard atmosphere as smooth control-point attenuations: ozone dips
-// the UV, Rayleigh scattering slopes the blue, water vapor dents the IR.
-const ATMOS_ATTENS = [0.06, 0.30, 0.62, 0.80, 0.95, 0.93, 0.89, 0.84, 0.72, 0.60]
+// standard atmosphere across the visible band: Rayleigh scattering
+// slopes the blue; the green-yellow-red passes nearly untouched.
+const ATMOS_ATTENS = [0.55, 0.68, 0.80, 0.92, 0.95, 0.93, 0.90, 0.88]
 
 // the filtered blackbody curve: baseline 5778 K Planck distribution with
 // the smooth filter applied. area filled with spectral colors, dimmed
@@ -94,7 +92,7 @@ function FilterCurve({ attens, title, note }) {
       ctx.clearRect(0, 0, w, h)
       const padL = 14, padR = 14, padT = 16, padB = 30
       const iw = w - padL - padR, ih = h - padT - padB
-      const L0 = 300, L1 = 1000, TK = 5778
+      const L0 = 380, L1 = 750, TK = 5778
       const X = (l) => padL + ((l - L0) / (L1 - L0)) * iw
       // curve values
       const vals = []
@@ -111,10 +109,7 @@ function FilterCurve({ attens, title, note }) {
         const lamNm = L0 + (L1 - L0) * px / iw
         const f = vals[px] / peak
         const y = Y(vals[px])
-        let rgb
-        if (lamNm < 380) rgb = [150, 100, 220]
-        else if (lamNm > 750) rgb = [140, 40, 20]
-        else rgb = spectralRGB(lamNm)
+        const rgb = spectralRGB(lamNm)
         ctx.fillStyle = `rgb(${Math.round(rgb[0] * f)},${Math.round(rgb[1] * f)},${Math.round(rgb[2] * f)})`
         ctx.fillRect(padL + px, y, 1, padT + ih - y)
       }
@@ -146,9 +141,9 @@ function FilterCurve({ attens, title, note }) {
       ctx.fillStyle = '#715f43'
       ctx.font = '10px "IBM Plex Mono", monospace'
       ctx.textAlign = 'center'
-      ctx.fillText('300 nm', X(300), padT + ih + 16)
-      ctx.fillText('visible', X(565), padT + ih + 16)
-      ctx.fillText('1000 nm', X(1000), padT + ih + 16)
+      ctx.fillText('380 nm', X(380), padT + ih + 16)
+      ctx.fillText('565 nm', X(565), padT + ih + 16)
+      ctx.fillText('750 nm', X(750), padT + ih + 16)
     }
     draw()
     const ro = new ResizeObserver(draw)
@@ -179,11 +174,7 @@ function FilterEQ({ attens, onChange }) {
       </div>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, padding: '8px 4px', overflowX: 'auto' }}>
         {POINTS.map((pt, i) => {
-          const mid = pt.lam
-          let col
-          if (mid < 380) col = '#966fd6'
-          else if (mid > 750) col = '#a03020'
-          else col = `rgb(${spectralRGB(mid).map(Math.round).join(',')})`
+          const col = `rgb(${spectralRGB(pt.lam).map(Math.round).join(',')})`
           return (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 40 }}>
               <input
@@ -202,10 +193,8 @@ function FilterEQ({ attens, onChange }) {
       </div>
       <p className="graph-note">
         Each slider moves a single point on the attenuation curve; the
-        curve stays smooth between them. 100% = pass, 0% = blocked. Only
-        the visible points change the sphere — the surface shows visible
-        light only — but UV and IR points reshape the curve. The filter
-        removes color from the view, never energy from the physics.
+        curve stays smooth between them. 100% = pass, 0% = blocked. The
+        filter removes color from the view, never energy from the physics.
       </p>
     </div>
   )
@@ -303,10 +292,9 @@ export default function SunFilter() {
         note={
           <>
             The same sun, seen through Earth's atmosphere instead of your
-            sliders. Ozone dips the ultraviolet, Rayleigh scattering
-            slopes the blue, water vapor dents the infrared — the curve
-            below is the standard transmission, smooth with dips. The
-            sphere yellows because the sky took the blue.
+            sliders. Rayleigh scattering slopes the blue — the curve
+            below is the standard transmission, smooth. The sphere
+            yellows because the sky took the blue.
           </>
         }
       >
@@ -316,9 +304,9 @@ export default function SunFilter() {
           note={
             <>
               Static filter: the 5778 K blackbody seen through air.
-              Ozone below ~340 nm, Rayleigh scattering through the blue,
-              water vapor out in the infrared. This is what the atmosphere
-              does to sunlight before it reaches you.
+              Rayleigh scattering attenuates the blue; green through red
+              passes nearly untouched. This is what the atmosphere does
+              to sunlight before it reaches you.
             </>
           }
         />
