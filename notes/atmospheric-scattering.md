@@ -10,19 +10,19 @@ What changes is what you're allowed to see.
 
 ## 2. The Final Sun
 
-The first graph is the thermometer sun — the direct blackbody color per patch — seen through a graphic EQ. Sixteen attenuation sliders sit along the spectrum: two for ultraviolet, twelve across the visible band, two for infrared. Each one scales the light at its wavelengths from full pass to fully blocked.
+The first graph is the thermometer sun — the direct blackbody color per patch — seen through a graphic EQ. Ten sliders sit along the spectrum from 300 to 1000 nm. Each one moves a single point on the attenuation curve; the curve stays smooth between them, cosine-interpolated, so a slider never makes a step.
 
 The filter is display-only. It doesn't touch the temperatures, the photons, or the energy. It only decides which colors reach your eye.
 
-Turn down the yellow and the sphere loses its yellow. Turn down everything but green and the sphere goes black except where green light is falling — you're seeing the green component of the sunlight, isolated. The spectrogram underneath shows the result: the sun's 5778 K emission spectrum with your filter applied, the blocked bands collapsed into gaps.
+Turn down the yellow and the sphere loses its yellow. Turn down everything but green and the sphere goes black except where green light is falling — you're seeing the green component of the sunlight, isolated. The curve underneath shows the result: the baseline 5778 K blackbody distribution with your filter applied, the area filled with spectral colors dimmed where the curve runs low, blocked bands sinking into smooth gaps.
 
-The infrared and ultraviolet sliders reshape the spectrogram but never the sphere — the surface shows visible light only, so there's nothing there for them to remove.
+The infrared and ultraviolet points reshape the curve but never the sphere — the surface shows visible light only, so there's nothing there for them to remove.
 
 ## 3. Atmospheric Scattering
 
-The second graph is the same sun, but the filter isn't yours — it's Earth's. A static transmission curve replaces the sliders: ozone eats the ultraviolet below ~340 nm, Rayleigh scattering steals the blue, water vapor bites the infrared.
+The second graph is the same sun, but the filter isn't yours — it's Earth's. A static smooth curve replaces the sliders: ozone dips the ultraviolet, Rayleigh scattering slopes the blue, water vapor dents the infrared — attenuation as dips in a continuous curve, not steps.
 
-The sphere yellows because the sky took the blue. That's not a metaphor — it's the same reason the sun looks yellow from the ground while being white in space. The spectrogram underneath shows the sunlight as the ground receives it, gaps and all.
+The sphere yellows because the sky took the blue. That's not a metaphor — it's the same reason the sun looks yellow from the ground while being white in space. The curve underneath shows the sunlight as the ground receives it.
 
 This is the filter I mentioned at the end of the sun note: atmospheric scattering as a frequency filter. Here it is, drawn.
 
