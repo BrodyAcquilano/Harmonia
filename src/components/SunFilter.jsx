@@ -597,8 +597,11 @@ function fcAtten(lamNm, attens) {
 
 // false-color: wavelength mapped by energy onto the thermal scale.
 // UV (300 nm, highest energy) -> bright yellow; red (750 nm) -> dark red.
+// power-law compresses the visible band toward the dark-red end so the
+// sun's ~500 nm peak reads dark red and only blue/UV burns yellow.
 function falseColor(lamNm) {
-  const t = (750 - lamNm) / (750 - 300) // 1 at 300 nm, 0 at 750 nm
+  const tLin = (750 - lamNm) / (750 - 300) // 1 at 300 nm, 0 at 750 nm
+  const t = Math.pow(tLin, 2.5)
   return fcScaleColor(t)
 }
 
