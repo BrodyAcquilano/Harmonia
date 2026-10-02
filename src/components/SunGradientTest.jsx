@@ -1360,10 +1360,7 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
     const sph = new THREE.Mesh(sphGeo,
       new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, metalness: 0.05 }))
     sph.frustumCulled = false
-    const wire = new THREE.Mesh(sphGeo,
-      new THREE.MeshBasicMaterial({ color: 0xb09a5e, wireframe: true, transparent: true, opacity: 0.1 }))
-    wire.frustumCulled = false
-    S.scene.add(sph, wire)
+    S.scene.add(sph)
     const P = new Float32Array(sCount * 3)
     resetSurface(P, 'thermal', sCount)
     phosRef.current = P
