@@ -208,10 +208,12 @@ function resetSurface(P, mode, sCount) {
   }
 }
 
-// ---- the fifth graph: the sun that forgets ----
-// No hand-assigned birth radii this time. All four quark frequencies are
-// born at the same place — the core — and whatever sorting happens (or
-// doesn't) comes only from honest structure and honest opacity:
+// ---- the fifth graph: temperature based on energy flux ----
+// Packets are born across the proton-forming shell, 0.2–0.7 R_☉ — equal
+// chance at each radius — each with a frequency drawn from the Planck
+// distribution at its birth radius's own temperature. Whatever sorting
+// happens (or doesn't) comes only from honest structure and honest
+// opacity, plus the longer random-walk out for the deeper-born:
 //
 // structure — the Lane-Emden n=3 polytrope (the Eddington standard
 //   model), integrated live below: no tables, no fits. θ(0) = 1,
@@ -323,25 +325,31 @@ const RIPPLE_W = 6     // visual oscillation rate, radians per sim-second
 const RIPPLE_SIG = 0.5 // angular decay of the wave, radians
 const RIPPLE_TAU = 2.5 // wave lifetime, sim-seconds
 const RIPPLE_G = 0.02  // fractional radius per eV of wave amplitude, at slider 1
-function spawnForgetPacket(rng, band) {
-  // born at the core — the SAME place for all four frequencies.
-  // No assigned radii; whatever sorting happens is the physics'.
-  const r0 = 0.01 * SURF_R0
+function spawnForgetPacket(rng, band, t) {
+  // born across the proton-forming shell, 0.2–0.7 R_☉ — equal chance at
+  // each radius — with a frequency drawn from the Planck distribution at
+  // the birth radius's own temperature. the deeper-born take longer to
+  // random-walk out, so their surface hits arrive later: the relative
+  // time delay is the walk itself (~2x the hops from 0.2 as from 0.7).
+  const r0 = (0.2 + 0.5 * rng()) * SURF_R0
   const th = rng() * Math.PI * 2
   const ph = Math.acos(2 * rng() - 1)
+  const T0 = structOf(r0 / SURF_R0).T
   return {
     x: r0 * Math.sin(ph) * Math.cos(th),
     y: r0 * Math.sin(ph) * Math.sin(th),
     z: r0 * Math.cos(ph),
     band,
-    nu: BANDS[band],
+    nu: Math.max(samplePlanck(T0, rng), 1e10),
     nscat: 0,
+    rBirth: r0 / SURF_R0,
+    tBirth: t,
   }
 }
 function freshForgetExperiment(entropy) {
   const rng = mulberry32(Math.floor(entropy * 2654435761) % 4294967296)
   const packets = []
-  for (let i = 0; i < FORGET_N; i++) packets.push(spawnForgetPacket(rng, i % 4))
+  for (let i = 0; i < FORGET_N; i++) packets.push(spawnForgetPacket(rng, i % 4, 0))
   return {
     t: 0, hopAcc: 0, packets, escapes: [0, 0, 0, 0], rng, version: 0,
     // landing records, same shape as the original experiment's, so the
@@ -403,7 +411,7 @@ function hopForget(exp) {
       exp.histN += 1
       exp.escapes[b] += 1
       exp.version += 1
-      Object.assign(p, spawnForgetPacket(exp.rng, b))
+      Object.assign(p, spawnForgetPacket(exp.rng, b, exp.t))
       continue
     }
     p.x = nx; p.y = ny; p.z = nz
@@ -1595,9 +1603,10 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
         </div>
         <ForgetSurface expRef={frExpRef} ctlRef={frCtlRef} dirtyRef={dirtyRef} />
         <p className="graph-note">
-          Its own experiment, its own play and clock. All four quark
-          frequencies are born at the same place — the core — no assigned
-          radii this time; whatever sorting happens is the physics'. Each
+          Its own experiment, its own play and clock. Packets are born
+          across the proton-forming shell, 0.2–0.7 R_☉, equal chance at
+          each radius, each with a frequency drawn from the Planck
+          distribution at its birth radius's own temperature. Each
           packet random-walks outward through a real stellar structure
           (the Lane-Emden n=3 polytrope, integrated live), one twentieth
           of a radius per hop — every hop stands in for
@@ -1608,7 +1617,10 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           from the Planck distribution at the local temperature — a real
           thermalized photon is a draw from the distribution, not the peak
           value — and rides the local temperature outward: ultraviolet in
-          the deep interior, cooling through the visible near the surface. The sphere is a
+          the deep interior, cooling through the visible near the surface.
+          The deeper-born take longer to random-walk out — about twice the
+          hops from 0.2 as from 0.7 — so their surface hits arrive later;
+          the relative time delay is the walk itself. The sphere is a
           blackbody surface: every escape deposits its photon's energy
           as heat in a small patch around its exit direction, so each
           patch's temperature is the local escaping energy flux, cooling
@@ -1636,7 +1648,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
 
       <div className="graph-box">
         <div className="graph-title-row">
-          <div className="graph-title">Measured vs expected attenuation — the core-born run</div>
+          <div className="graph-title">Measured vs expected attenuation — the shell-born run</div>
         </div>
         <AttenuationGraph expRef={frExpRef} playingRef={frPlayingRef} />
         <p className="graph-note">
@@ -1651,7 +1663,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
 
       <div className="graph-box">
         <div className="graph-title-row">
-          <div className="graph-title">Where the core-born pulses actually land</div>
+          <div className="graph-title">Where the shell-born pulses actually land</div>
         </div>
         <LandingPanel expRef={frExpRef} playingRef={frPlayingRef} />
         <p className="graph-note">
