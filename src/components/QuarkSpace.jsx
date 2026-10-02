@@ -12,6 +12,7 @@ import PointSources from './PointSources.jsx'
 import ColorTheory, { FrequencyDistribution, spectrumBounds, spectrumColor } from './ColorTheory.jsx'
 import ModellingSun from './ModellingSun.jsx'
 import TheSun from './TheSun.jsx'
+import SunFilter from './SunFilter.jsx'
 import Fundamental20 from './Fundamental20.jsx'
 
 // the energy-spectrum legend for the Space-Time Domain graphs: the same
@@ -193,6 +194,14 @@ export default function QuarkSpace() {
               onClick={() => setSim('thesun')}
             >
               The Sun
+            </button>
+            <button
+              className="sim-item"
+              role="tab"
+              aria-selected={sim === 'sunfilter'}
+              onClick={() => setSim('sunfilter')}
+            >
+              Sun Filter
             </button>
           </div>
         </nav>
@@ -707,6 +716,11 @@ export default function QuarkSpace() {
           {sim === 'thesun' && (
           <>
             <TheSun />
+          </>
+          )}
+          {sim === 'sunfilter' && (
+          <>
+            <SunFilter />
           </>
           )}
         </div>

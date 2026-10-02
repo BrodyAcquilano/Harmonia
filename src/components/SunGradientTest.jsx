@@ -319,7 +319,7 @@ function visBrightness(T) {
 // full spectrum: dark red through orange, yellow, green, blue, purple
 // to violet. the warping decides which temperatures get which colors —
 // the palette itself spans the whole visible range.
-const SPECTRUM_STOPS = [
+export const SPECTRUM_STOPS = [
   [120, 10, 0],    // dark red — cold end
   [220, 50, 0],    // red-orange
   [255, 130, 0],   // orange
@@ -413,7 +413,7 @@ function photonRGB(eV) {
 // (~3.5 eV) reach the 5778 K sun-surface yellow-white; cooler spots read
 // red-orange. (anchoring the typical 2.4 eV to 5778 K pushed the hot end
 // into blue-white, which isn't the sun.)
-const BB_T_SCALE = 5778 / (3.5 * 11604.5)
+export const BB_T_SCALE = 5778 / (3.5 * 11604.5)
 const BB_LUT_N = 256, BB_LUT_T0 = 0, BB_LUT_T1 = 8
 const bbLut = new Float32Array(BB_LUT_N * 3)
 for (let i = 0; i < BB_LUT_N; i++) {
@@ -441,6 +441,11 @@ function bbHue(T) {
   const i = Math.min(BB_LUT_N - 1, Math.max(0,
     Math.round((T - BB_LUT_T0) / (BB_LUT_T1 - BB_LUT_T0) * (BB_LUT_N - 1))))
   return [bbLut[i * 3], bbLut[i * 3 + 1], bbLut[i * 3 + 2]]
+}
+export function bbHueFromLut(T, lut) {
+  const i = Math.min(BB_LUT_N - 1, Math.max(0,
+    Math.round((T - BB_LUT_T0) / (BB_LUT_T1 - BB_LUT_T0) * (BB_LUT_N - 1))))
+  return [lut[i * 3], lut[i * 3 + 1], lut[i * 3 + 2]]
 }
 // brightness reference: visible flux at the typical 2.4 eV patch (scaled),
 // so the thermometer reads full brightness there and dims/brightens
@@ -1503,7 +1508,7 @@ export function TempDistPanel({ playingRef, vis = false, bare = false, mix = fal
 }
 
 // ---- the fifth graph: watch the frequencies forget ----
-export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = false, bb = false }) {
+export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = false, bb = false, lutRef = null }) {
   const mountRef = useRef(null)
   const readRef = useRef(null)
   const phosRef = useRef(null)
@@ -1641,7 +1646,10 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = fal
           // direct blackbody: the honest thermometer — color is the
           // blackbody at this temperature, no warping, no history.
           // brightness normalized to the typical patch so it reads.
-          const tc = bbHue(T)
+          // an optional filter LUT (from the Sun Filter tab) attenuates
+          // the spectrum before the color is read — display only.
+          const lut = lutRef && lutRef.current
+          const tc = lut ? bbHueFromLut(T, lut) : bbHue(T)
           cr = tc[0]; cg = tc[1]; cb = tc[2]
           br = Math.min(1, visBrightness(T * BB_T_SCALE) / BB_BR_REF)
         } else if (mixRef.current) {
