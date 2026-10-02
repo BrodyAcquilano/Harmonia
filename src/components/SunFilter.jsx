@@ -554,27 +554,32 @@ const FC_POINTS = [
   { lam: 750, label: '750' },
 ]
 
-function falseColor(lamNm) {
-  if (lamNm >= 380) {
-    // visible, compressed toward the red end: 750 nm stays red,
-    // 380 nm lands on blue (not violet) — room left at the top for UV
-    const x = ((750 - lamNm) / (750 - 380)) * 0.62
-    const sx = x * (SPECTRUM_STOPS.length - 1)
-    const si = Math.min(SPECTRUM_STOPS.length - 2, Math.floor(sx))
-    const sf = sx - si
-    const a = SPECTRUM_STOPS[si], b = SPECTRUM_STOPS[si + 1]
-    return [
-      a[0] + (b[0] - a[0]) * sf,
-      a[1] + (b[1] - a[1]) * sf,
-      a[2] + (b[2] - a[2]) * sf,
-    ]
-  }
-  // ultraviolet: purple at 380 nm rising to white at 300 nm — hotter than white
-  const t = (380 - lamNm) / 80
+// false-color scale: dark red (coolest) -> orange -> yellow ->
+// bright yellow (hottest, near-white). many stops for smooth gradation.
+const FC_SCALE = [
+  [80, 8, 0],     // dark red
+  [140, 20, 0],
+  [190, 45, 0],
+  [225, 80, 0],   // red-orange
+  [245, 120, 0],  // orange
+  [252, 160, 10],
+  [255, 195, 30], // yellow-orange
+  [255, 220, 70], // yellow
+  [255, 235, 120],
+  [255, 245, 170],// bright yellow
+  [255, 250, 215],// near-white yellow (hottest)
+]
+
+function fcScaleColor(t) {
+  // t in [0,1]: 0 = coolest, 1 = hottest
+  const x = Math.min(1, Math.max(0, t)) * (FC_SCALE.length - 1)
+  const i = Math.min(FC_SCALE.length - 2, Math.floor(x))
+  const f = x - i
+  const a = FC_SCALE[i], b = FC_SCALE[i + 1]
   return [
-    160 + (255 - 160) * t,
-    90 + (255 - 90) * t,
-    230 + (255 - 230) * t,
+    a[0] + (b[0] - a[0]) * f,
+    a[1] + (b[1] - a[1]) * f,
+    a[2] + (b[2] - a[2]) * f,
   ]
 }
 
@@ -592,20 +597,46 @@ function fcAtten(lamNm, attens) {
 
 function buildFalseColorLut(attens) {
   const N = 256, lut = new Float32Array(N * 3)
+  // precompute UV normalization: max UV energy at hottest T
+  let uvMax = 1e-30
   for (let i = 0; i < N; i++) {
     const T = (i / (N - 1)) * 8
     const TK = Math.max(0.05, T * BB_T_SCALE) * 11604.5
-    let r = 0, g = 0, b = 0
-    for (let j = 0; j < 32; j++) {
-      const lamNm = 300 + (750 - 300) * j / 31
-      const atten = fcAtten(lamNm, attens)
-      if (atten <= 0) continue
-      const Bl = planck(lamNm * 1e-9, TK)
-      const [cr, cg, cb] = falseColor(lamNm)
-      r += Bl * cr * atten; g += Bl * cg * atten; b += Bl * cb * atten
+    let uv = 0
+    for (let j = 0; j < 16; j++) {
+      const lamNm = 300 + (380 - 300) * j / 15
+      uv += planck(lamNm * 1e-9, TK) * fcAtten(lamNm, attens)
     }
-    const m = Math.max(r, g, b, 1e-30)
-    lut[i * 3] = r / m * 255; lut[i * 3 + 1] = g / m * 255; lut[i * 3 + 2] = b / m * 255
+    if (uv > uvMax) uvMax = uv
+  }
+  for (let i = 0; i < N; i++) {
+    const T = (i / (N - 1)) * 8
+    const TK = Math.max(0.05, T * BB_T_SCALE) * 11604.5
+    // 1. add the true visible colors (380-750 nm), Planck-weighted, attenuated
+    let r = 0, g = 0, b = 0, visSum = 0
+    for (let j = 0; j < 24; j++) {
+      const lamNm = 380 + (750 - 380) * j / 23
+      const w = planck(lamNm * 1e-9, TK) * fcAtten(lamNm, attens)
+      const [cr, cg, cb] = spectralRGB(lamNm)
+      r += w * cr; g += w * cg; b += w * cb
+      visSum += w
+    }
+    // normalize visible to 0-255
+    const vm = Math.max(r, g, b, 1e-30)
+    const nr = r / vm * 255, ng = g / vm * 255, nb = b / vm * 255
+    // 2. UV (300-380 nm) adds as extra white — pushes past 255 toward 350
+    let uv = 0
+    for (let j = 0; j < 16; j++) {
+      const lamNm = 300 + (380 - 300) * j / 15
+      uv += planck(lamNm * 1e-9, TK) * fcAtten(lamNm, attens)
+    }
+    const uvBoost = (uv / uvMax) * 95 // 0-95 extra
+    // 3. total "whiteness" on a 0-350 scale
+    const total = (nr + ng + nb) / 3 + uvBoost
+    const t = Math.min(1, total / 350)
+    // 4. map onto the false-color scale
+    const [fr, fg, fb] = fcScaleColor(t)
+    lut[i * 3] = fr; lut[i * 3 + 1] = fg; lut[i * 3 + 2] = fb
   }
   return lut
 }
@@ -624,7 +655,7 @@ function FalseColorSection() {
   const reset = () => setAttens(attens.map(() => 1))
 
   // actual-spectrum gradient (UV as purple, though invisible) and the
-  // false-color assignment bar below it
+  // false-color scale bar below it (dark red -> bright yellow)
   const actualStops = []
   const falseStops = []
   for (let j = 0; j <= 16; j++) {
@@ -634,7 +665,11 @@ function FalseColorSection() {
     if (lam < 380) actual = [150, 100, 220]
     else actual = spectralRGB(lam)
     actualStops.push(`rgb(${actual.map(Math.round).join(',')}) ${pct}%`)
-    const fc = falseColor(lam)
+  }
+  for (let j = 0; j <= 16; j++) {
+    const t = j / 16
+    const pct = (j / 16) * 100
+    const fc = fcScaleColor(t)
     falseStops.push(`rgb(${fc.map(Math.round).join(',')}) ${pct}%`)
   }
 
@@ -644,13 +679,13 @@ function FalseColorSection() {
       lutRef={lutRef}
       note={
         <>
-          The thermometer sun in NASA colors. Ultraviolet (300–380 nm)
-          joins the spectrum, mapped to purples rising to white — hotter
-          than white — while the visible band is shifted down toward the
-          red to make room. The brightest spots burn purple-white where
-          the UV lives. The EQ below filters actual wavelengths (UV shown
-          as purple, though invisible); the sphere shows the false-color
-          assignment.
+          The thermometer sun in thermal-camera colors. True spectral
+          colors are added up (visible 380–750 nm), then ultraviolet
+          (300–380 nm) adds as extra white — pushing the sum past 255
+          toward 350, a "higher white." The total is mapped onto a
+          dark-red to bright-yellow scale: cool patches glow dark red,
+          the hottest burn bright yellow. The EQ below filters actual
+          wavelengths (UV shown as purple, though invisible).
         </>
       }
     >
@@ -702,9 +737,10 @@ function FalseColorSection() {
         </div>
         <p className="graph-note">
           Top bar: the actual spectrum you're filtering (UV as purple,
-          though invisible). Bottom bar: the false-color assignment the
-          sphere displays. Sliders move single points; the curve stays
-          smooth. Filtering UV dims the purple-white hot spots.
+          though invisible). Bottom bar: the false-color scale the sphere
+          displays — dark red (cool) to bright yellow (hot). Sliders move
+          single points; the curve stays smooth. Filtering UV dims the
+          hottest spots.
         </p>
       </div>
       <FilterCurveFC attens={attens} />

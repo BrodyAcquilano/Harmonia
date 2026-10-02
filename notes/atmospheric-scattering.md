@@ -24,11 +24,11 @@ The sphere yellows because the sky took the blue. That's not a metaphor — it's
 
 ## 4. False Color + UV
 
-The third graph asks: what if the ultraviolet came along? White is already the brightest thing the visible spectrum can make, so there's no room above it — the visible band has to shift down to make room for something hotter.
+The third graph asks: what if the ultraviolet came along? White is already the brightest thing the visible spectrum can make, so there's no room above it for something hotter — unless you let the sum go past white.
 
-So the visible spectrum is compressed toward the red (violet becomes blue, blue becomes green, and so on down), and the ultraviolet (300–380 nm) takes the top end as purples rising to white. That's the NASA move: assign the invisible a color and let relative differences carry the information, not the literal hues.
+So the true spectral colors are added normally (visible 380–750 nm), then the ultraviolet (300–380 nm) adds as extra white, pushing the total from 256 toward 350 — a "higher white." Only after the addition and the filtering is done does the result get mapped onto the false-color scale: dark red for the coolest, through orange and yellow, to bright yellow (near-white) for the hottest. That's the NASA/thermal-camera move: let relative differences carry the information, not the literal hues.
 
-The hottest patches — the ones with real UV in their blackbody curve — burn purple-white. The EQ filters actual wavelengths (UV shown as purple, though invisible), with the false-color assignment drawn as a second bar underneath so you can read the mapping. Filtering the UV sliders dims the hot spots directly.
+The hottest patches — the ones with real UV in their blackbody curve — burn bright yellow. The EQ filters actual wavelengths (UV shown as purple, though invisible), with the false-color scale drawn as a second bar underneath. Filtering the UV sliders dims the hot spots directly.
 
 This is the filter I mentioned at the end of the sun note: atmospheric scattering as a frequency filter. Here it is, drawn.
 
