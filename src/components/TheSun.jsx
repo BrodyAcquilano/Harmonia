@@ -50,6 +50,23 @@ export default function TheSun() {
   const sunVisPlayingRef = useRef(false)
   sunVisPlayingRef.current = sunVisPlaying
 
+  // third view: additive mixing. same experiment shape, own run — no
+  // warping, no stretch/compress. each patch's color is the sum of its
+  // visible frequencies weighted by Planck intensity at its temperature.
+  const [sunMixPlaying, setSunMixPlaying] = useState(false)
+  const [sunMixSpeed, setSunMixSpeed] = useState(1)
+  const [sunMixRipple, setSunMixRipple] = useState(1)
+  const [sunMixRippleTau, setSunMixRippleTau] = useState(2.5)
+  const sunMixExpRef = useRef(null)
+  if (!sunMixExpRef.current) sunMixExpRef.current = freshSunExperiment(SUN_ENTROPY)
+  const sunMixCtlRef = useRef({})
+  sunMixCtlRef.current = {
+    playing: sunMixPlaying, speed: sunMixSpeed, ripple: sunMixRipple,
+    rippleTau: sunMixRippleTau,
+  }
+  const sunMixPlayingRef = useRef(false)
+  sunMixPlayingRef.current = sunMixPlaying
+
   return (
     <>
       <div className="graph-box">
@@ -233,6 +250,76 @@ export default function TheSun() {
           <div className="graph-title">One birth, one curve — visible band</div>
         </div>
         <ForgetTrack expRef={sunVisExpRef} playingRef={sunVisPlayingRef} single />
+        <p className="graph-note">
+          Same test, this run: the one fusion quantum at birth — 2 MeV —
+          crashing into the thermal curve on the first hop. What escapes
+          is set by the surface, not by the birth.
+        </p>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">The Sun — by adding light</div>
+        </div>
+        <ForgetSurface expRef={sunMixExpRef} ctlRef={sunMixCtlRef} dirtyRef={dirtyRef} mix />
+        <p className="graph-note">
+          A third way to color the same sun: no warping, no stretch or
+          compress. Each patch's color is the sum of its visible
+          frequencies, each weighted by its Planck intensity at the
+          patch's temperature — the frequencies are added, not shifted.
+          Where many frequencies shine comparably the mix goes white;
+          where red dominates it stays red; red and orange mix to
+          orange. Cool patches read orange-red, sun-like patches warm
+          white, hot patches blue-white — the actual blackbody sequence.
+          Temperatures are scaled so the typical 2.4 eV patch matches
+          the 5778 K photosphere. Same experiment underneath: Poisson
+          core firing, random-walk out, heat per escape,
+          frequency-carrying ripples.
+        </p>
+        <Transport
+          playing={sunMixPlaying}
+          speed={sunMixSpeed}
+          onPlayingChange={setSunMixPlaying}
+          onSpeedChange={setSunMixSpeed}
+        />
+        <div className="transport-speed">
+          <Slider label="ripple" value={sunMixRipple} min={0} max={3} step={0.1}
+            onChange={setSunMixRipple} format={(v) => `${v.toFixed(1)}×`} />
+          <Slider label="ripple lifetime" value={sunMixRippleTau} min={0} max={40} step={0.1}
+            onChange={setSunMixRippleTau} format={(v) => `${v.toFixed(1)} s`} />
+        </div>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">Patch temperature distribution — by adding light</div>
+        </div>
+        <TempDistPanel playingRef={sunMixPlayingRef} bare />
+        <p className="graph-note">
+          The temperature distribution on this run, plain: the live
+          histogram in orange against the design assumption, dashed. No
+          color strip here — there is no warping to display, colors come
+          straight from adding the spectrum.
+        </p>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">Where the sunlight actually lands — by adding light</div>
+        </div>
+        <LandingPanel expRef={sunMixExpRef} playingRef={sunMixPlayingRef} markers={false} />
+        <p className="graph-note">
+          Same check, this run's own experiment: every escaped packet
+          builds the escaping spectrum, teal the 5778 K blackbody. One
+          input frequency in, the sun's own light out.
+        </p>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">One birth, one curve — by adding light</div>
+        </div>
+        <ForgetTrack expRef={sunMixExpRef} playingRef={sunMixPlayingRef} single />
         <p className="graph-note">
           Same test, this run: the one fusion quantum at birth — 2 MeV —
           crashing into the thermal curve on the first hop. What escapes

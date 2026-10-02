@@ -364,11 +364,55 @@ function warmHue(T) {
 }
 // visible-band warping: the same rules, but only the visible band feeds
 // the histogram and only it gets colors. below 1.65 eV (750 nm) is
-// infrared, above 3.26 eV (380 nm) is ultraviolet — both display as
-// black, no color assigned. the stretch/compress is driven only by the
-// energy in the visible band.
+// infrared, above 3.26 eV (380 nm) is ultraviolet. the stretch/compress
+// is driven only by the energy in the visible band.
 const VIS_T_LO = 1.65
 const VIS_T_HI = 3.26
+// additive mixing: assign color by adding the relative intensities of
+// each visible frequency at the patch's temperature. sample the visible
+// band, weight each wavelength's spectral color by its Planck intensity,
+// add them. many comparable frequencies -> white; red-dominated -> red.
+// the patch temperature (energy flux, eV) is scaled so the typical
+// 2.4 eV patch matches the 5778 K photosphere — otherwise every patch
+// would sit at 10,000K+ and the whole sphere would read blue-white.
+const MIX_T_SCALE = 5778 / (2.4 * 11604.5)
+const MIX_N = 24
+const mixLam = new Float64Array(MIX_N) // nm
+const mixRGB = new Float64Array(MIX_N * 3) // spectral color per wavelength
+for (let i = 0; i < MIX_N; i++) {
+  const lamNm = 380 + (750 - 380) * i / (MIX_N - 1)
+  mixLam[i] = lamNm
+  const x = (750 - lamNm) / (750 - 380)
+  const sx = x * (SPECTRUM_STOPS.length - 1)
+  const si = Math.min(SPECTRUM_STOPS.length - 2, Math.floor(sx))
+  const sf = sx - si
+  const a = SPECTRUM_STOPS[si], b = SPECTRUM_STOPS[si + 1]
+  mixRGB[i * 3] = a[0] + (b[0] - a[0]) * sf
+  mixRGB[i * 3 + 1] = a[1] + (b[1] - a[1]) * sf
+  mixRGB[i * 3 + 2] = a[2] + (b[2] - a[2]) * sf
+}
+// lookup table: mixed chromaticity vs patch temperature (eV), so the
+// per-frame cost is one array read, not 24 Planck evaluations
+const MIX_LUT_N = 256, MIX_LUT_T0 = 0, MIX_LUT_T1 = 8
+const mixLut = new Float32Array(MIX_LUT_N * 3)
+for (let i = 0; i < MIX_LUT_N; i++) {
+  const T = MIX_LUT_T0 + (MIX_LUT_T1 - MIX_LUT_T0) * i / (MIX_LUT_N - 1)
+  const TK = Math.max(0.05, T * MIX_T_SCALE) * 11604.5
+  const c1 = 3.7418e-16, c2 = 1.4388e-2
+  let r = 0, g = 0, b = 0
+  for (let j = 0; j < MIX_N; j++) {
+    const lamM = mixLam[j] * 1e-9
+    const Bl = c1 / Math.pow(lamM, 5) / (Math.exp(c2 / (lamM * TK)) - 1)
+    r += Bl * mixRGB[j * 3]; g += Bl * mixRGB[j * 3 + 1]; b += Bl * mixRGB[j * 3 + 2]
+  }
+  const m = Math.max(r, g, b, 1e-30)
+  mixLut[i * 3] = r / m * 255; mixLut[i * 3 + 1] = g / m * 255; mixLut[i * 3 + 2] = b / m * 255
+}
+function mixHue(T) {
+  const i = Math.min(MIX_LUT_N - 1, Math.max(0,
+    Math.round((T - MIX_LUT_T0) / (MIX_LUT_T1 - MIX_LUT_T0) * (MIX_LUT_N - 1))))
+  return [mixLut[i * 3], mixLut[i * 3 + 1], mixLut[i * 3 + 2]]
+}
 const adHistVis = new Float64Array(AD_N)
 const adXVis = new Float64Array(AD_N)
 for (let i = 0; i < AD_N; i++) {
@@ -1269,7 +1313,7 @@ export function LandingPanel({ expRef, playingRef, markers = true }) {
 // the colors read); dashed = the design assumption the original fixed
 // scale was tuned against. the strip below shows the live color
 // assignment — which temperatures get which colors right now.
-export function TempDistPanel({ playingRef, vis = false }) {
+export function TempDistPanel({ playingRef, vis = false, bare = false }) {
   const ref = useRef(null)
 
   useEffect(() => {
@@ -1297,39 +1341,22 @@ export function TempDistPanel({ playingRef, vis = false }) {
       ctx.font = '10px "IBM Plex Mono", monospace'
       ctx.textAlign = 'center'
       ctx.fillText('visible band', (X(1.65) + X(3.26)) / 2, padT + 12)
-      // simulated: the live histogram, normalized to its peak. in visible
-      // mode the bars are colored by band — dark red rectangles for
-      // infrared, the assigned visible colors in the band, light purple
-      // for ultraviolet — so the full spectrum piles up visibly.
+      // simulated: the live histogram, normalized to its peak — the same
+      // orange line as the first graph
       let hMax = 1e-9
       for (let i = 0; i < AD_N; i++) hMax = Math.max(hMax, adHist[i])
-      if (vis) {
-        for (let i = 0; i < AD_N; i++) {
-          const T = AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
-          if (T < T0 || T > T1) continue
-          const Tlo = AD_T0 + (AD_T1 - AD_T0) * i / AD_N
-          const Thi = AD_T0 + (AD_T1 - AD_T0) * (i + 1) / AD_N
-          const x0 = X(Math.max(Tlo, T0)), x1 = X(Math.min(Thi, T1))
-          const y = Y(adHist[i] / hMax)
-          if (T < VIS_T_LO) ctx.fillStyle = '#8b1a1a'
-          else if (T > VIS_T_HI) ctx.fillStyle = '#c8a0ff'
-          else ctx.fillStyle = rgb(warmHueVis(T))
-          ctx.fillRect(x0, y, Math.max(1, x1 - x0), Y(0) - y)
-        }
-      } else {
-        ctx.beginPath()
-        let started = false
-        for (let i = 0; i < AD_N; i++) {
-          const T = AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
-          if (T < T0 || T > T1) continue
-          const x = X(T), y = Y(adHist[i] / hMax)
-          if (!started) { ctx.moveTo(x, y); started = true } else ctx.lineTo(x, y)
-        }
-        ctx.strokeStyle = '#c46a1a'
-        ctx.lineWidth = 2
-        ctx.stroke()
-        ctx.lineWidth = 1
+      ctx.beginPath()
+      let started = false
+      for (let i = 0; i < AD_N; i++) {
+        const T = AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
+        if (T < T0 || T > T1) continue
+        const x = X(T), y = Y(adHist[i] / hMax)
+        if (!started) { ctx.moveTo(x, y); started = true } else ctx.lineTo(x, y)
       }
+      ctx.strokeStyle = '#c46a1a'
+      ctx.lineWidth = 2
+      ctx.stroke()
+      ctx.lineWidth = 1
       // expected: the design assumption (gaussian, mu 2.4 eV, sigma 0.6)
       ctx.beginPath()
       ctx.setLineDash([5, 4])
@@ -1367,29 +1394,32 @@ export function TempDistPanel({ playingRef, vis = false }) {
       ctx.fillText('design assumption', padL + 222, 15)
       // live color strip: which temperatures get which colors right now.
       // in visible mode only the visible band carries color — infrared
-      // and ultraviolet show black.
-      const stripY = padT + ih + 40, stripH = 12
-      for (let px = 0; px < iw; px++) {
-        const T = T0 + (px / iw) * (T1 - T0)
-        ctx.fillStyle = rgb(vis ? warmHueVis(T) : warmHue(T))
-        ctx.fillRect(padL + px, stripY, 1, stripH)
-      }
-      ctx.strokeStyle = 'rgba(107,90,62,0.35)'
-      ctx.strokeRect(padL, stripY, iw, stripH)
-      // ruler marks: 12 evenly spaced gradient positions, drawn at the
-      // temperatures they currently map to — they spread out where the
-      // color range stretches (dense) and bunch up where it compresses
-      // (thin), and visibly shift as the warping updates
-      ctx.fillStyle = '#3a3125'
-      const markX = vis ? adXVis : adX
-      for (let k = 1; k < 12; k++) {
-        const xk = k / 12
-        let b = 0
-        while (b < AD_N - 2 && markX[b + 1] < xk) b++
-        const x0 = markX[b], x1 = markX[b + 1]
-        const f = x1 > x0 ? Math.min(1, Math.max(0, (xk - x0) / (x1 - x0))) : 0
-        const T = AD_T0 + (AD_T1 - AD_T0) * (b + 0.5 + f) / AD_N
-        if (T >= T0 && T <= T1) ctx.fillRect(X(T) - 0.5, stripY - 4, 1, 4)
+      // and ultraviolet show black. skipped entirely in bare mode (no
+      // warping to display).
+      if (!bare) {
+        const stripY = padT + ih + 40, stripH = 12
+        for (let px = 0; px < iw; px++) {
+          const T = T0 + (px / iw) * (T1 - T0)
+          ctx.fillStyle = rgb(vis ? warmHueVis(T) : warmHue(T))
+          ctx.fillRect(padL + px, stripY, 1, stripH)
+        }
+        ctx.strokeStyle = 'rgba(107,90,62,0.35)'
+        ctx.strokeRect(padL, stripY, iw, stripH)
+        // ruler marks: 12 evenly spaced gradient positions, drawn at the
+        // temperatures they currently map to — they spread out where the
+        // color range stretches (dense) and bunch up where it compresses
+        // (thin), and visibly shift as the warping updates
+        ctx.fillStyle = '#3a3125'
+        const markX = vis ? adXVis : adX
+        for (let k = 1; k < 12; k++) {
+          const xk = k / 12
+          let b = 0
+          while (b < AD_N - 2 && markX[b + 1] < xk) b++
+          const x0 = markX[b], x1 = markX[b + 1]
+          const f = x1 > x0 ? Math.min(1, Math.max(0, (xk - x0) / (x1 - x0))) : 0
+          const T = AD_T0 + (AD_T1 - AD_T0) * (b + 0.5 + f) / AD_N
+          if (T >= T0 && T <= T1) ctx.fillRect(X(T) - 0.5, stripY - 4, 1, 4)
+        }
       }
     }
 
@@ -1409,13 +1439,15 @@ export function TempDistPanel({ playingRef, vis = false }) {
 }
 
 // ---- the fifth graph: watch the frequencies forget ----
-export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false }) {
+export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = false }) {
   const mountRef = useRef(null)
   const readRef = useRef(null)
   const phosRef = useRef(null)
   const phosExpRef = useRef(null)
   const visRef = useRef(vis)
   visRef.current = vis
+  const mixRef = useRef(mix)
+  mixRef.current = mix
 
   useEffect(() => {
     const S = setupScene(mountRef.current)
@@ -1516,18 +1548,27 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false }) {
         // so there are no dark spots: light is still emitted there, only
         // the visible part is shown.
         const T = P[o]
-        let cr, cg, cb
-        if (visRef.current) {
+        let cr, cg, cb, br
+        if (mixRef.current) {
+          // additive mixing: the color is the sum of the visible
+          // frequencies at this temperature, weighted by Planck
+          // intensity — no warping, no stretch/compress. brightness from
+          // the same scaled temperature, for consistency.
+          const tc = mixHue(T)
+          cr = tc[0]; cg = tc[1]; cb = tc[2]
+          br = visBrightness(T * MIX_T_SCALE)
+        } else if (visRef.current) {
           if (T >= VIS_T_LO && T <= VIS_T_HI) {
             const tc = warmHueVis(T)
             heldCol[o] = tc[0]; heldCol[o + 1] = tc[1]; heldCol[o + 2] = tc[2]
           }
           cr = heldCol[o]; cg = heldCol[o + 1]; cb = heldCol[o + 2]
+          br = visBrightness(T)
         } else {
           const tc = warmHue(T)
           cr = tc[0]; cg = tc[1]; cb = tc[2]
+          br = visBrightness(T)
         }
-        const br = visBrightness(T)
         colA.setXYZ(v, (cr / 255) * br, (cg / 255) * br, (cb / 255) * br)
       }
       colA.needsUpdate = true

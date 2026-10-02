@@ -69,3 +69,15 @@ Patches colder than 1.65 eV (infrared) or hotter than 3.26 eV (ultraviolet) take
 The distribution panel still shows the full patch-temperature spectrum developing and piling up — but now its bars are colored by band: dark red rectangles for infrared, the assigned visible colors inside the band, light purple rectangles for ultraviolet. The color strip below still carries no colors outside the visible band. The ruler marks are the visible band's own warping: spreading where its colors stretch, bunching where they compress.
 
 Why this view: the first sphere shows the whole thermal story, including the dark infrared bulk. This one asks what the sun looks like if you only listen to the band we can actually see — which patches dominate the visible light, and how the visible colors share themselves out.
+
+## 12. The Sun — by adding light
+
+A third view, added 2026-10-02. The first two color the sun by warping — stretching and compressing a palette across the temperature distribution. This one does something different: it assigns color by adding the relative intensities of each visible frequency at the patch's temperature.
+
+For each patch, the visible band (380–750 nm) is sampled at 24 wavelengths. Each wavelength's spectral color is weighted by its Planck intensity at the patch's temperature, and the 24 are added. Where many frequencies shine comparably the sum goes white; where red dominates it stays red; red and orange mix to orange. No warping, no stretch/compress — the color is the spectrum, added up.
+
+The patch temperature (an energy flux in eV, typically ~2.4 eV) is scaled so the typical patch matches the 5778 K photosphere — otherwise every patch would sit above 10,000 K and the whole sphere would read blue-white. With the scaling, cool patches read orange-red, sun-like patches warm white, hot patches blue-white: the actual blackbody color sequence. The brightness uses the same scaled temperature, so it stays consistent with the hue.
+
+The distribution panel on this view is bare — just the live histogram against the design assumption, no color strip, because there is no warping to display. The landing and track panels are the same checks on this run's own experiment.
+
+Why this view: the warping views answer "how do we share colors across what the sun is doing." This one answers "what color is the light, physically" — the blackbody chromaticity, computed the honest way, by adding.
