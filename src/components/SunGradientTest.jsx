@@ -226,10 +226,13 @@ function resetSurface(P, mode, sCount) {
 // stands in for (hop/mean-free-path)² honest scatterings — the readout
 // shows that number, ~10²² down in the core. Compton thermalization
 // needs only ~m_e c²/kT ~ a few hundred of those, across centimeters,
-// so each hop the packet's frequency snaps to the local thermal peak
-// 2.8kT/h and rides it outward. Whether the four inputs stay resolved
-// is the experiment. The 5% hop is display coarse-graining, not physics,
-// and is labeled as such wherever it appears.
+// so each hop the packet is fully thermalized: its frequency is sampled
+// from the Planck distribution at the local temperature (a real
+// thermalized photon is a draw from the distribution, not the peak
+// value) and rides the local temperature outward. Whether the four
+// inputs stay resolved is the experiment. The 5% hop is display
+// coarse-graining, not physics, and is labeled as such wherever it
+// appears.
 const RHO_C = 150 // g/cm³ — standard solar model central density
 const R_CGS = 6.957e10 // cm
 const KAPPA_T = 0.34 // cm²/g — Thomson, fully-ionized solar mix, flat in ν
@@ -354,9 +357,10 @@ function freshForgetExperiment(entropy) {
 }
 // one display hop for every packet: an honest 3D random-walk step of
 // HOP_FRAC·R_☉ — no outward drift smuggled in — standing in for
-// (hop/mean-free-path)² real scatterings, with the frequency snapped to
-// the local thermal peak (Compton thermalizes in ~10² scatterings over
-// centimeters, utterly negligible next to one hop's ~10²²)
+// (hop/mean-free-path)² real scatterings, with the frequency sampled
+// from the Planck distribution at the local temperature (Compton
+// thermalizes in ~10² scatterings over centimeters, utterly negligible
+// next to one hop's ~10²²)
 function hopForget(exp) {
   const hopScene = HOP_FRAC * SURF_R0
   const hopCm = HOP_FRAC * R_CGS
@@ -404,7 +408,10 @@ function hopForget(exp) {
     }
     p.x = nx; p.y = ny; p.z = nz
     const Tn = structOf(nr / SURF_R0).T
-    p.nu = (2.8 * KB * Tn) / H
+    // thermalized by the hop's ~10²² scatterings — but a real thermalized
+    // photon is a draw from the Planck distribution at the local
+    // temperature, not the peak value, so sample it
+    p.nu = Math.max(samplePlanck(Tn, exp.rng), 1e10)
   }
 }
 
@@ -1597,9 +1604,11 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           (hop/mean-free-path)² honest scatterings, about 10²² of them
           down in the core, and the readout says so. Compton
           thermalization needs only a few hundred, across centimeters, so
-          each packet's frequency snaps to the local thermal peak, 2.8kT/h,
-          and rides it outward: ultraviolet in the deep interior,
-          cooling through the visible near the surface. The sphere is a
+          each hop fully thermalizes the packet: its frequency is sampled
+          from the Planck distribution at the local temperature — a real
+          thermalized photon is a draw from the distribution, not the peak
+          value — and rides the local temperature outward: ultraviolet in
+          the deep interior, cooling through the visible near the surface. The sphere is a
           blackbody surface: every escape deposits its photon's energy
           as heat in a small patch around its exit direction, so each
           patch's temperature is the local escaping energy flux, cooling
