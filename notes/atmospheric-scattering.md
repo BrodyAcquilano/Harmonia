@@ -18,7 +18,7 @@ Turn down the yellow and the sphere loses its yellow. Turn down everything but g
 
 ## 3. Atmospheric Scattering
 
-The second graph is the same sun, but the filter isn't yours — it's Earth's. A static smooth curve replaces the sliders: the clear-sky vertical transmission at sea level. Rayleigh scattering (the λ⁻⁴ law) dominates, cutting the blue to ~65% at 380 nm while the red passes at ~97%. Ozone's faint Chappuis band broadens the dip near 600 nm; the oxygen B-band notches 690 nm and water vapor dents 720 nm.
+The second graph is the same sun, but the filter isn't yours — it's Earth's. A static curve replaces the sliders: the actual clear-sky vertical transmission at sea level, computed at 1 nm resolution from the band physics — not a smooth interpolation of a few sampled points. Rayleigh scattering (the λ⁻⁴ law) sets the blue slope, cutting 380 nm to ~65% while 750 nm passes at ~97%. Ozone's Chappuis band breathes near 600 nm; the oxygen B-band carves a sharp notch at 690 nm; water vapor dents 720 nm. Those notches are real molecular structure, resolved because the curve is sampled finely enough to see them.
 
 The sphere yellows because the sky took the blue. That's not a metaphor — it's the same reason the sun looks yellow from the ground while being white in space. The curve underneath shows the sunlight as the ground receives it.
 
