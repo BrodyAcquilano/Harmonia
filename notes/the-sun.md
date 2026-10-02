@@ -86,7 +86,7 @@ Why this view: the warping views answer "how do we share colors across what the 
 
 A fourth view, added 2026-10-02. The honest baseline: each patch shows the blackbody color for its temperature — dim orange-red where cool, warm white where sun-like, blue-white where hot — with no warping, no photon history, no stretch or compress. The temperature at each point is the local energy flux from wave hits, cooling over time by Newton's law.
 
-I almost didn't add it — without warping, would it just be one color? No: the patches span 1.2 to 4+ eV, and with the temperature scaled so the typical 2.4 eV patch is the 5778 K photosphere, that range runs from dim orange-red through warm white to blue-white. (Unscaled, everything sits above 10,000 K and does read blue-white — the scaling is what makes it a useful thermometer.)
+I almost didn't add it — without warping, would it just be one color? No: the patches span 1.2 to 4+ eV. The temperature is scaled so hot patches (~3.5 eV) reach the 5778 K sun-surface yellow-white; cooler spots read red-orange. (Anchoring the typical 2.4 eV to 5778 K pushed the hot end into blue-white, which isn't the sun — the scaling is what makes it a useful thermometer.)
 
 The color is the 24-wavelength Planck-weighted spectral sum at the scaled temperature — the same math as the "adding light" idea, but applied to the patch's thermal state rather than to arriving photons. The distribution strip is the direct legend: the blackbody color each temperature gets, unshifted.
 
