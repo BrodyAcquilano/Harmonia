@@ -328,39 +328,47 @@ const WARM_STOPS = [
   [255, 225, 60],  // yellow
   [255, 245, 190], // whitish yellow — hot clamp
 ]
-// adaptive warm colors, peak-centered: the distribution's live peak maps
-// to orange, and orange is STRETCHED over the common temperatures (cubic
-// falloff) while the rare cold tail compresses into reds and the rare hot
-// tail into yellow-whites at the edges. infrared and ultraviolet get no
-// colors of their own.
+// the live amplitude distribution: patch temperatures binned every frame,
+// forgetting on a ~45 s timescale. starts from a broad default guess so the
+// mapping is sane from frame one — real data takes over within seconds.
 const AD_N = 96, AD_T0 = 1.0, AD_T1 = 6.0, AD_TAU = 45
 const adHist = new Float64Array(AD_N)
-const adCDF = new Float64Array(AD_N)
-// default distribution: a broad guess centered near 2.4 eV, so the
-// mapping is sane from frame one — real data takes over within seconds
 for (let i = 0; i < AD_N; i++) {
   const T = AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
   adHist[i] = 2337 * Math.exp(-(((T - 2.4) / 1.5) ** 2))
 }
-const X_ORANGE = 2 / (WARM_STOPS.length - 1) // the orange stop
-let peakT = 2.4, coldW = 0.6, hotW = 0.6 // smoothed live peak and tail widths
+// adaptive color stops: density-driven redistribution (Lloyd's relaxation).
+// the 7 warm stops sit at fixed gradient positions, but their temperatures
+// adapt to the live amplitude distribution. every few seconds, each stop
+// checks the mass in its territory and pushes toward its centroid —
+// left/right mass proportion decides how far and which way. stops
+// concentrate where the amplitude is high (stretching those colors over
+// more shades) and thin out where it's low (compressing). red keeps more
+// stops than ultraviolet because the cold tail carries more mass, and the
+// non-visible infrared is displayed as dark rather than filtered out.
+const STOP_N = 7
+const stopT = new Float64Array(STOP_N)
+for (let i = 0; i < STOP_N; i++) stopT[i] = 1.2 + (4.5 - 1.2) * i / (STOP_N - 1)
+const REDIST_EVERY = 3 // seconds between redistribution sweeps
+let redistT = 0
 function warmHue(T) {
   let x
-  if (T <= peakT) {
-    const u = Math.min(1, (peakT - T) / coldW)
-    x = X_ORANGE * (1 - u * u * u)
-  } else {
-    const u = Math.min(1, (T - peakT) / hotW)
-    x = X_ORANGE + (1 - X_ORANGE) * u * u * u
+  if (T <= stopT[0]) x = 0
+  else if (T >= stopT[STOP_N - 1]) x = 1
+  else {
+    let i = 0
+    while (i < STOP_N - 2 && T > stopT[i + 1]) i++
+    const f = (T - stopT[i]) / (stopT[i + 1] - stopT[i])
+    x = (i + f) / (STOP_N - 1)
   }
   const sx = x * (WARM_STOPS.length - 1)
-  const i = Math.min(WARM_STOPS.length - 2, Math.floor(sx))
-  const f = sx - i
-  const a = WARM_STOPS[i], b = WARM_STOPS[i + 1]
+  const si = Math.min(WARM_STOPS.length - 2, Math.floor(sx))
+  const sf = sx - si
+  const a = WARM_STOPS[si], b = WARM_STOPS[si + 1]
   return [
-    Math.round(a[0] + (b[0] - a[0]) * f),
-    Math.round(a[1] + (b[1] - a[1]) * f),
-    Math.round(a[2] + (b[2] - a[2]) * f),
+    Math.round(a[0] + (b[0] - a[0]) * sf),
+    Math.round(a[1] + (b[1] - a[1]) * sf),
+    Math.round(a[2] + (b[2] - a[2]) * sf),
   ]
 }
 // this view is decoupled from the entropy slider — its own fixed seed.
@@ -1159,6 +1167,13 @@ function TempDistPanel({ playingRef }) {
       }
       ctx.strokeStyle = 'rgba(107,90,62,0.35)'
       ctx.strokeRect(padL, stripY, iw, stripH)
+      // stop markers: where the adaptive color stops sit right now
+      ctx.fillStyle = '#3a3125'
+      for (let i = 0; i < STOP_N; i++) {
+        const T = stopT[i]
+        if (T < T0 || T > T1) continue
+        ctx.fillRect(X(T) - 0.5, stripY - 4, 1, 4)
+      }
     }
 
     let raf = 0
@@ -1238,8 +1253,7 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       // ripple lifetime from the slider, clamped above zero (0 ≈ no waves)
       const rippleTau = Math.max(1e-3, ctlRef.current.rippleTau ?? RIPPLE_TAU)
       // adaptive colors: fold the current patch temperatures into the
-      // running histogram (it forgets on AD_TAU), then rebuild the CDF
-      // the hue lookup reads
+      // running histogram (it forgets on AD_TAU)
       if (sdt > 0) {
         const hDecay = Math.exp(-sdt / AD_TAU)
         const hFloor = 0.5 * (1 - hDecay)
@@ -1248,28 +1262,28 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
           const b = Math.min(AD_N - 1, Math.max(0, Math.floor((P[v * 3] - AD_T0) / (AD_T1 - AD_T0) * AD_N)))
           adHist[b] += 1
         }
-        let tot = 0
-        for (let i = 0; i < AD_N; i++) tot += adHist[i]
-        let cum = 0
-        for (let i = 0; i < AD_N; i++) { cum += adHist[i]; adCDF[i] = cum / tot }
-        // track the live peak (smoothed mode) and tail widths for the
-        // peak-centered color mapping
-        let pk = 0, pkv = -1
-        for (let i = 2; i < AD_N - 2; i++) {
-          const s = adHist[i - 2] + adHist[i - 1] + adHist[i] + adHist[i + 1] + adHist[i + 2]
-          if (s > pkv) { pkv = s; pk = i }
-        }
-        const Tpk = AD_T0 + (AD_T1 - AD_T0) * (pk + 0.5) / AD_N
-        const tAt = (q) => {
-          for (let i = 0; i < AD_N; i++) {
-            if (adCDF[i] >= q) return AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
+      }
+      // periodic redistribution sweep: every stop checks its territory's
+      // mass and pushes toward its centroid — left/right proportion
+      // decides direction and distance, every stop gets a fair turn
+      redistT += sdt
+      if (redistT >= REDIST_EVERY && sdt > 0) {
+        redistT = 0
+        const newT = new Float64Array(STOP_N)
+        for (let i = 0; i < STOP_N; i++) {
+          if (i === 0 || i === STOP_N - 1) { newT[i] = stopT[i]; continue }
+          const lo = (stopT[i - 1] + stopT[i]) / 2
+          const hi = (stopT[i] + stopT[i + 1]) / 2
+          let m = 0, mt = 0
+          for (let b = 0; b < AD_N; b++) {
+            const Tb = AD_T0 + (AD_T1 - AD_T0) * (b + 0.5) / AD_N
+            if (Tb >= lo && Tb < hi) { m += adHist[b]; mt += adHist[b] * Tb }
           }
-          return AD_T1
+          newT[i] = m < 1e-9 ? stopT[i] : stopT[i] + 0.5 * (mt / m - stopT[i])
         }
-        const k = 1 - Math.exp(-sdt / 5)
-        peakT += (Tpk - peakT) * k
-        coldW += (Math.max(0.15, Tpk - tAt(0.1)) - coldW) * k
-        hotW += (Math.max(0.15, tAt(0.9) - Tpk) - hotW) * k
+        for (let i = 1; i < STOP_N; i++) newT[i] = Math.max(newT[i], newT[i - 1] + 0.05)
+        for (let i = STOP_N - 2; i >= 0; i--) newT[i] = Math.min(newT[i], newT[i + 1] - 0.05)
+        for (let i = 1; i < STOP_N - 1; i++) stopT[i] = newT[i]
       }
       // prune spent waves — ripples are pushed in time order
       while (exp.ripples.length && exp.t - exp.ripples[0].t0 > 4 * rippleTau) exp.ripples.shift()
@@ -1824,11 +1838,13 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           light a blackbody at its temperature produces, seen through a
           warm filter — a custom sun scale from deep red-orange through
           orange, amber and gold to a whitish-yellow hot clamp, assigned
-          adaptively around the live distribution peak: orange is stretched
-          over the common temperatures (the peak maps to orange), while the
-          rare cold tail compresses into reds and the rare hot tail into
-          yellow-whites at the edges — infrared and ultraviolet get no
-          colors of their own; the
+          by density-driven redistribution: every few seconds each color
+          stop checks the amplitude in its territory and pushes toward
+          its centroid, so stops concentrate where patches are common
+          (stretching those colors) and thin out where they're rare
+          (compressing) — red keeps more stops than ultraviolet because
+          the cold tail carries more mass, and the infrared shows as
+          dark rather than being filtered out; the
           brightness is the real Planck integral over the
           visible band: cold patches make almost no visible light and sit
           near black, hot ones blaze whitish-yellow — and
