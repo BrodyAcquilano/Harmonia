@@ -381,17 +381,17 @@ const VIS_T_HI = 3.26
 //     (hue × photon energy × gain × spatial gaussian;
 //      a central hit saturates to full color, then fades;
 //      a 3.26 eV blue photon deposits ~2× the intensity of a 1.65 eV red)
-//   per frame: RGB = BASE + (RGB-BASE) × exp(-dt/40s)  (fades toward dim
-//     peach, never to black — infrared/ultraviolet deposit nothing, so
-//     without a base the unhit patches would sit black)
+//   per frame: RGB *= exp(-dt/120s)  (slow fade on its own clock, so
+//     hits accumulate toward the peach steady state instead of dying
+//     between hits; starts dark)
 //   display: clamp(RGB, 0, 1)
 // equal photon flux across the band averages to the palette mean —
 // (255,190,155), a warm peach — not neutral white.
 const MIX_COLOR_GAIN = 1.0
-// base surface color: dim warm peach. infrared/ultraviolet don't deposit,
-// so without a base the unhit patches would sit black — the sphere shows
-// the visible that accumulates, over this faint ambient.
-const MIX_BASE = [0.08, 0.06, 0.05]
+// color fades on its own slower clock than the thermal cooling, so that
+// repeated hits accumulate toward the peach steady state instead of
+// dying back to black between hits
+const MIX_TAU = 120
 // spectral color of a photon energy (eV), 0-1 RGB. null if not visible.
 function photonRGB(eV) {
   if (eV < VIS_T_LO || eV > VIS_T_HI) return null
@@ -1502,11 +1502,8 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = fal
       heldCol[v * 3] = tc[0]; heldCol[v * 3 + 1] = tc[1]; heldCol[v * 3 + 2] = tc[2]
     }
     // mix mode: accumulated photon colors per patch (0-1 RGB), added on
-    // each visible hit, fading with the cooling toward the dim base
+    // each visible hit, fading slowly so they accumulate. starts dark.
     const accCol = new Float32Array(sCount * 3)
-    for (let v = 0; v < sCount; v++) {
-      accCol[v * 3] = MIX_BASE[0]; accCol[v * 3 + 1] = MIX_BASE[1]; accCol[v * 3 + 2] = MIX_BASE[2]
-    }
     phosRef.current = P
     phosExpRef.current = expRef.current
 
@@ -1589,14 +1586,14 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = fal
         const T = P[o]
         let cr, cg, cb, br
         if (mixRef.current) {
-          // additive photon colors: fade toward the dim base with the
-          // cooling, display the accumulated mix directly — no warping,
-          // no temperature mapping. infrared/ultraviolet deposit nothing.
+          // additive photon colors: fade slowly on their own clock so
+          // repeated hits accumulate toward peach instead of dying
+          // between hits; display the accumulated mix directly — no
+          // warping, no temperature mapping. infrared/ultraviolet
+          // deposit nothing.
           if (sdt > 0) {
-            const fade = Math.exp(-sdt / COOL_TAU)
-            accCol[o] = MIX_BASE[0] + (accCol[o] - MIX_BASE[0]) * fade
-            accCol[o + 1] = MIX_BASE[1] + (accCol[o + 1] - MIX_BASE[1]) * fade
-            accCol[o + 2] = MIX_BASE[2] + (accCol[o + 2] - MIX_BASE[2]) * fade
+            const fade = Math.exp(-sdt / MIX_TAU)
+            accCol[o] *= fade; accCol[o + 1] *= fade; accCol[o + 2] *= fade
           }
           cr = Math.min(1, accCol[o]) * 255
           cg = Math.min(1, accCol[o + 1]) * 255
