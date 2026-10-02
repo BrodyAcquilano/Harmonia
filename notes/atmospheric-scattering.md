@@ -22,6 +22,14 @@ The second graph is the same sun, but the filter isn't yours — it's Earth's. A
 
 The sphere yellows because the sky took the blue. That's not a metaphor — it's the same reason the sun looks yellow from the ground while being white in space. The curve underneath shows the sunlight as the ground receives it.
 
+## 4. False Color + UV
+
+The third graph asks: what if the ultraviolet came along? White is already the brightest thing the visible spectrum can make, so there's no room above it — the visible band has to shift down to make room for something hotter.
+
+So the visible spectrum is compressed toward the red (violet becomes blue, blue becomes green, and so on down), and the ultraviolet (300–380 nm) takes the top end as purples rising to white. That's the NASA move: assign the invisible a color and let relative differences carry the information, not the literal hues.
+
+The hottest patches — the ones with real UV in their blackbody curve — burn purple-white. The EQ filters actual wavelengths (UV shown as purple, though invisible), with the false-color assignment drawn as a second bar underneath so you can read the mapping. Filtering the UV sliders dims the hot spots directly.
+
 This is the filter I mentioned at the end of the sun note: atmospheric scattering as a frequency filter. Here it is, drawn.
 
 ## 4. Why filter at all

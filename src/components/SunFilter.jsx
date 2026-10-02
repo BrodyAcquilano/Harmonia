@@ -337,6 +337,271 @@ export default function SunFilter() {
           }
         />
       </SunSphere>
+
+      <FalseColorSection />
     </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// False Color + UV: the visible spectrum is shifted down (compressed toward
+// the red) to make room at the top, and ultraviolet is mapped to
+// purples-to-white — "hotter than white," NASA-style. the EQ filters the
+// actual wavelengths (UV shown as purple, though invisible); the sphere
+// displays the false-color assignment.
+
+const FC_POINTS = [
+  { lam: 300, label: '300' },
+  { lam: 340, label: '340' },
+  { lam: 380, label: '380' },
+  { lam: 414, label: '414' },
+  { lam: 448, label: '448' },
+  { lam: 482, label: '482' },
+  { lam: 516, label: '516' },
+  { lam: 550, label: '550' },
+  { lam: 584, label: '584' },
+  { lam: 618, label: '618' },
+  { lam: 652, label: '652' },
+  { lam: 686, label: '686' },
+  { lam: 720, label: '720' },
+  { lam: 750, label: '750' },
+]
+
+function falseColor(lamNm) {
+  if (lamNm >= 380) {
+    // visible, compressed toward the red end: 750 nm stays red,
+    // 380 nm lands on blue (not violet) — room left at the top for UV
+    const x = ((750 - lamNm) / (750 - 380)) * 0.62
+    const sx = x * (SPECTRUM_STOPS.length - 1)
+    const si = Math.min(SPECTRUM_STOPS.length - 2, Math.floor(sx))
+    const sf = sx - si
+    const a = SPECTRUM_STOPS[si], b = SPECTRUM_STOPS[si + 1]
+    return [
+      a[0] + (b[0] - a[0]) * sf,
+      a[1] + (b[1] - a[1]) * sf,
+      a[2] + (b[2] - a[2]) * sf,
+    ]
+  }
+  // ultraviolet: purple at 380 nm rising to white at 300 nm — hotter than white
+  const t = (380 - lamNm) / 80
+  return [
+    160 + (255 - 160) * t,
+    90 + (255 - 90) * t,
+    230 + (255 - 230) * t,
+  ]
+}
+
+function fcAtten(lamNm, attens) {
+  const pts = FC_POINTS
+  if (lamNm <= pts[0].lam) return attens[0]
+  if (lamNm >= pts[pts.length - 1].lam) return attens[pts.length - 1]
+  let i = 0
+  while (i < pts.length - 2 && lamNm >= pts[i + 1].lam) i++
+  const t = (lamNm - pts[i].lam) / (pts[i + 1].lam - pts[i].lam)
+  const st = t * t * (3 - 2 * t)
+  return attens[i] * (1 - st) + attens[i + 1] * st
+}
+
+function buildFalseColorLut(attens) {
+  const N = 256, lut = new Float32Array(N * 3)
+  for (let i = 0; i < N; i++) {
+    const T = (i / (N - 1)) * 8
+    const TK = Math.max(0.05, T * BB_T_SCALE) * 11604.5
+    let r = 0, g = 0, b = 0
+    for (let j = 0; j < 32; j++) {
+      const lamNm = 300 + (750 - 300) * j / 31
+      const atten = fcAtten(lamNm, attens)
+      if (atten <= 0) continue
+      const Bl = planck(lamNm * 1e-9, TK)
+      const [cr, cg, cb] = falseColor(lamNm)
+      r += Bl * cr * atten; g += Bl * cg * atten; b += Bl * cb * atten
+    }
+    const m = Math.max(r, g, b, 1e-30)
+    lut[i * 3] = r / m * 255; lut[i * 3 + 1] = g / m * 255; lut[i * 3 + 2] = b / m * 255
+  }
+  return lut
+}
+
+function FalseColorSection() {
+  const [attens, setAttens] = useState(() => FC_POINTS.map(() => 1))
+  const lut = useMemo(() => buildFalseColorLut(attens), [attens])
+  const lutRef = useRef(null)
+  lutRef.current = lut
+
+  const set = (i, v) => {
+    const next = attens.slice()
+    next[i] = v / 100
+    setAttens(next)
+  }
+  const reset = () => setAttens(attens.map(() => 1))
+
+  // actual-spectrum gradient (UV as purple, though invisible) and the
+  // false-color assignment bar below it
+  const actualStops = []
+  const falseStops = []
+  for (let j = 0; j <= 16; j++) {
+    const lam = 300 + (750 - 300) * j / 16
+    const pct = (j / 16) * 100
+    let actual
+    if (lam < 380) actual = [150, 100, 220]
+    else actual = spectralRGB(lam)
+    actualStops.push(`rgb(${actual.map(Math.round).join(',')}) ${pct}%`)
+    const fc = falseColor(lam)
+    falseStops.push(`rgb(${fc.map(Math.round).join(',')}) ${pct}%`)
+  }
+
+  return (
+    <SunSphere
+      title="False Color + UV"
+      lutRef={lutRef}
+      note={
+        <>
+          The thermometer sun in NASA colors. Ultraviolet (300–380 nm)
+          joins the spectrum, mapped to purples rising to white — hotter
+          than white — while the visible band is shifted down toward the
+          red to make room. The brightest spots burn purple-white where
+          the UV lives. The EQ below filters actual wavelengths (UV shown
+          as purple, though invisible); the sphere shows the false-color
+          assignment.
+        </>
+      }
+    >
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">Filter EQ — with UV</div>
+          <button className="graph-reset" onClick={reset}>reset</button>
+        </div>
+        <div style={{ position: 'relative', height: 200, margin: '4px 8px 0' }}>
+          {FC_POINTS.map((pt, i) => {
+            const leftPct = ((pt.lam - 300) / (750 - 300)) * 100
+            const actual = pt.lam < 380 ? [150, 100, 220] : spectralRGB(pt.lam)
+            const col = `rgb(${actual.map(Math.round).join(',')})`
+            return (
+              <div
+                key={i}
+                style={{
+                  position: 'absolute', left: `${leftPct}%`, top: 0,
+                  transform: 'translateX(-50%)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                }}
+              >
+                <input
+                  type="range" min={0} max={100} value={Math.round(attens[i] * 100)}
+                  onChange={(e) => set(i, +e.target.value)}
+                  style={{ writingMode: 'vertical-lr', direction: 'rtl', width: 22, height: 90, accentColor: col }}
+                  aria-label={`${pt.label} nm attenuation`}
+                />
+                <div style={{ fontSize: 8, color: '#715f43', marginTop: 2, fontFamily: '"IBM Plex Mono", monospace' }}>
+                  {pt.label}
+                </div>
+              </div>
+            )
+          })}
+          <div
+            style={{
+              position: 'absolute', left: 0, right: 0, bottom: 22, height: 14,
+              background: `linear-gradient(to right, ${actualStops.join(', ')})`,
+              borderRadius: 3, border: '1px solid rgba(107,90,62,0.35)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute', left: 0, right: 0, bottom: 0, height: 14,
+              background: `linear-gradient(to right, ${falseStops.join(', ')})`,
+              borderRadius: 3, border: '1px solid rgba(107,90,62,0.35)',
+            }}
+          />
+        </div>
+        <p className="graph-note">
+          Top bar: the actual spectrum you're filtering (UV as purple,
+          though invisible). Bottom bar: the false-color assignment the
+          sphere displays. Sliders move single points; the curve stays
+          smooth. Filtering UV dims the purple-white hot spots.
+        </p>
+      </div>
+      <FilterCurveFC attens={attens} />
+    </SunSphere>
+  )
+}
+
+function FilterCurveFC({ attens }) {
+  const ref = useRef(null)
+  useEffect(() => {
+    const canvas = ref.current
+    if (!canvas) return
+    const draw = () => {
+      const dpr = window.devicePixelRatio || 1
+      const w = canvas.clientWidth, h = 240
+      canvas.width = w * dpr; canvas.height = h * dpr
+      const ctx = canvas.getContext('2d')
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      ctx.clearRect(0, 0, w, h)
+      const padL = 14, padR = 14, padT = 16, padB = 30
+      const iw = w - padL - padR, ih = h - padT - padB
+      const L0 = 300, L1 = 750, TK = 5778
+      const X = (l) => padL + ((l - L0) / (L1 - L0)) * iw
+      const vals = []
+      let peak = 1e-30
+      for (let px = 0; px < iw; px++) {
+        const lamNm = L0 + (L1 - L0) * px / iw
+        const v = planck(lamNm * 1e-9, TK) * fcAtten(lamNm, attens)
+        vals.push(v)
+        if (v > peak) peak = v
+      }
+      const Y = (v) => padT + ih - (v / peak) * ih
+      for (let px = 0; px < iw; px++) {
+        const lamNm = L0 + (L1 - L0) * px / iw
+        const f = vals[px] / peak
+        const y = Y(vals[px])
+        // actual colors here (UV purple), matching the EQ
+        let rgb
+        if (lamNm < 380) rgb = [150, 100, 220]
+        else rgb = spectralRGB(lamNm)
+        ctx.fillStyle = `rgb(${Math.round(rgb[0] * f)},${Math.round(rgb[1] * f)},${Math.round(rgb[2] * f)})`
+        ctx.fillRect(padL + px, y, 1, padT + ih - y)
+      }
+      ctx.beginPath()
+      for (let px = 0; px < iw; px++) {
+        const x = padL + px, y = Y(vals[px])
+        if (px === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
+      }
+      ctx.strokeStyle = 'rgba(58,49,37,0.85)'
+      ctx.lineWidth = 1.5
+      ctx.stroke()
+      ctx.lineWidth = 1
+      ctx.fillStyle = '#3a3125'
+      for (let i = 0; i < FC_POINTS.length; i++) {
+        const lamNm = FC_POINTS[i].lam
+        const v = planck(lamNm * 1e-9, TK) * attens[i]
+        ctx.beginPath()
+        ctx.arc(X(lamNm), Y(v), 3.5, 0, Math.PI * 2)
+        ctx.fill()
+      }
+      ctx.strokeStyle = 'rgba(107,90,62,0.5)'
+      ctx.beginPath()
+      ctx.moveTo(padL, padT + ih); ctx.lineTo(padL + iw, padT + ih)
+      ctx.stroke()
+      ctx.fillStyle = '#715f43'
+      ctx.font = '10px "IBM Plex Mono", monospace'
+      ctx.textAlign = 'center'
+      ctx.fillText('300 nm', X(300), padT + ih + 16)
+      ctx.fillText('525 nm', X(525), padT + ih + 16)
+      ctx.fillText('750 nm', X(750), padT + ih + 16)
+    }
+    draw()
+    const ro = new ResizeObserver(draw)
+    ro.observe(canvas)
+    return () => ro.disconnect()
+  }, [attens])
+  return (
+    <div className="graph-box">
+      <div className="graph-title-row"><div className="graph-title">Filter curve — with UV</div></div>
+      <canvas ref={ref} style={{ display: 'block', width: '100%', height: 240 }} />
+      <p className="graph-note">
+        The baseline 5778 K blackbody from 300 to 750 nm with your filter
+        applied, in actual colors (UV as purple). Blocked bands sink into
+        smooth gaps; the sphere reads the false-color version.
+      </p>
+    </div>
   )
 }
