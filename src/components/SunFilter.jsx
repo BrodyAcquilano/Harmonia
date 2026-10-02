@@ -595,49 +595,34 @@ function fcAtten(lamNm, attens) {
   return attens[i] * (1 - st) + attens[i + 1] * st
 }
 
+// false-color: wavelength mapped by energy onto the thermal scale.
+// UV (300 nm, highest energy) -> bright yellow; red (750 nm) -> dark red.
+function falseColor(lamNm) {
+  const t = (750 - lamNm) / (750 - 300) // 1 at 300 nm, 0 at 750 nm
+  return fcScaleColor(t)
+}
+
 function buildFalseColorLut(attens) {
   const N = 256, lut = new Float32Array(N * 3)
-  // precompute UV normalization: max UV energy at hottest T
-  let uvMax = 1e-30
+  // sum the Planck-weighted false colors; UV (mapped to bright yellow)
+  // pushes the sum past white — "higher white" — then normalize once
+  let gmax = 1e-30
+  const tmp = new Float32Array(N * 3)
   for (let i = 0; i < N; i++) {
     const T = (i / (N - 1)) * 8
     const TK = Math.max(0.05, T * BB_T_SCALE) * 11604.5
-    let uv = 0
-    for (let j = 0; j < 16; j++) {
-      const lamNm = 300 + (380 - 300) * j / 15
-      uv += planck(lamNm * 1e-9, TK) * fcAtten(lamNm, attens)
-    }
-    if (uv > uvMax) uvMax = uv
-  }
-  for (let i = 0; i < N; i++) {
-    const T = (i / (N - 1)) * 8
-    const TK = Math.max(0.05, T * BB_T_SCALE) * 11604.5
-    // 1. add the true visible colors (380-750 nm), Planck-weighted, attenuated
-    let r = 0, g = 0, b = 0, visSum = 0
-    for (let j = 0; j < 24; j++) {
-      const lamNm = 380 + (750 - 380) * j / 23
+    let r = 0, g = 0, b = 0
+    for (let j = 0; j < 40; j++) {
+      const lamNm = 300 + (750 - 300) * j / 39
       const w = planck(lamNm * 1e-9, TK) * fcAtten(lamNm, attens)
-      const [cr, cg, cb] = spectralRGB(lamNm)
+      const [cr, cg, cb] = falseColor(lamNm)
       r += w * cr; g += w * cg; b += w * cb
-      visSum += w
     }
-    // normalize visible to 0-255
-    const vm = Math.max(r, g, b, 1e-30)
-    const nr = r / vm * 255, ng = g / vm * 255, nb = b / vm * 255
-    // 2. UV (300-380 nm) adds as extra white — pushes past 255 toward 350
-    let uv = 0
-    for (let j = 0; j < 16; j++) {
-      const lamNm = 300 + (380 - 300) * j / 15
-      uv += planck(lamNm * 1e-9, TK) * fcAtten(lamNm, attens)
-    }
-    const uvBoost = (uv / uvMax) * 95 // 0-95 extra
-    // 3. total "whiteness" on a 0-350 scale
-    const total = (nr + ng + nb) / 3 + uvBoost
-    const t = Math.min(1, total / 350)
-    // 4. map onto the false-color scale
-    const [fr, fg, fb] = fcScaleColor(t)
-    lut[i * 3] = fr; lut[i * 3 + 1] = fg; lut[i * 3 + 2] = fb
+    tmp[i * 3] = r; tmp[i * 3 + 1] = g; tmp[i * 3 + 2] = b
+    const m = Math.max(r, g, b)
+    if (m > gmax) gmax = m
   }
+  for (let i = 0; i < N * 3; i++) lut[i] = tmp[i] / gmax * 255
   return lut
 }
 
@@ -655,7 +640,7 @@ function FalseColorSection() {
   const reset = () => setAttens(attens.map(() => 1))
 
   // actual-spectrum gradient (UV as purple, though invisible) and the
-  // false-color scale bar below it (dark red -> bright yellow)
+  // false-color mapping bar below it: UV -> bright yellow, red -> dark red
   const actualStops = []
   const falseStops = []
   for (let j = 0; j <= 16; j++) {
@@ -665,11 +650,7 @@ function FalseColorSection() {
     if (lam < 380) actual = [150, 100, 220]
     else actual = spectralRGB(lam)
     actualStops.push(`rgb(${actual.map(Math.round).join(',')}) ${pct}%`)
-  }
-  for (let j = 0; j <= 16; j++) {
-    const t = j / 16
-    const pct = (j / 16) * 100
-    const fc = fcScaleColor(t)
+    const fc = falseColor(lam)
     falseStops.push(`rgb(${fc.map(Math.round).join(',')}) ${pct}%`)
   }
 
@@ -679,12 +660,12 @@ function FalseColorSection() {
       lutRef={lutRef}
       note={
         <>
-          The thermometer sun in thermal-camera colors. True spectral
-          colors are added up (visible 380–750 nm), then ultraviolet
-          (300–380 nm) adds as extra white — pushing the sum past 255
-          toward 350, a "higher white." The total is mapped onto a
-          dark-red to bright-yellow scale: cool patches glow dark red,
-          the hottest burn bright yellow. The EQ below filters actual
+          The thermometer sun in thermal-camera colors. Each wavelength
+          is mapped by energy onto a dark-red to bright-yellow scale —
+          UV burns bright yellow, red glows dark red — then the
+          Planck-weighted sum is done on those false colors, with
+          ultraviolet pushing the total past white ("higher white")
+          before the final normalization. The EQ below filters actual
           wavelengths (UV shown as purple, though invisible).
         </>
       }
@@ -737,10 +718,10 @@ function FalseColorSection() {
         </div>
         <p className="graph-note">
           Top bar: the actual spectrum you're filtering (UV as purple,
-          though invisible). Bottom bar: the false-color scale the sphere
-          displays — dark red (cool) to bright yellow (hot). Sliders move
-          single points; the curve stays smooth. Filtering UV dims the
-          hottest spots.
+          though invisible). Bottom bar: the false-color mapping — UV
+          maps to bright yellow, red to dark red. Sliders move single
+          points; the curve stays smooth. Filtering UV dims the hottest
+          spots.
         </p>
       </div>
       <FilterCurveFC attens={attens} />
