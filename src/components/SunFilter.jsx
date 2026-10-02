@@ -36,9 +36,11 @@ function spectralRGB(lamNm) {
   ]
 }
 
-// smooth attenuation at lamNm: cosine-interpolated between control points
+// smooth attenuation at lamNm: cosine-interpolated between control points.
+// outside the slider range (380-750 nm) there is no filter: returns 1.
 function smoothAtten(lamNm, attens) {
   const pts = POINTS
+  if (lamNm < 380 || lamNm > 750) return 1
   if (lamNm <= pts[0].lam) return attens[0]
   if (lamNm >= pts[pts.length - 1].lam) return attens[pts.length - 1]
   let i = 0
@@ -95,10 +97,15 @@ function buildAtmosLut() {
   return lut
 }
 
-// clear-sky vertical transmission at sea level, 1 nm steps, 380-750 nm.
-// Rayleigh (lambda^-4) + O3 Chappuis/Huggins + O2 B-band (690) and A-band wing
-// + H2O (720) + NO2. computed from standard band parameters, not interpolated.
 const ATMOS_HIRES = [
+  0.0365, 0.0425, 0.0497, 0.0581, 0.0679, 0.0792, 0.0920, 0.1064, 0.1222, 0.1394,
+  0.1578, 0.1772, 0.1973, 0.2178, 0.2385, 0.2589, 0.2790, 0.2983, 0.3167, 0.3341,
+  0.3503, 0.3653, 0.3792, 0.3918, 0.4033, 0.4138, 0.4233, 0.4319, 0.4398, 0.4469,
+  0.4634, 0.4674, 0.4714, 0.4754, 0.4794, 0.4834, 0.4873, 0.4913, 0.4953, 0.4993,
+  0.5033, 0.5073, 0.5112, 0.5152, 0.5192, 0.5233, 0.5273, 0.5313, 0.5353, 0.5393,
+  0.5433, 0.5473, 0.5513, 0.5553, 0.5593, 0.5632, 0.5672, 0.5711, 0.5750, 0.5789,
+  0.5827, 0.5865, 0.5903, 0.5941, 0.5978, 0.6015, 0.6051, 0.6087, 0.6123, 0.6158,
+  0.6192, 0.6227, 0.6261, 0.6294, 0.6327, 0.6359, 0.6392, 0.6423, 0.6454, 0.6485,
   0.6516, 0.6546, 0.6575, 0.6605, 0.6634, 0.6662, 0.6690, 0.6718, 0.6746, 0.6773,
   0.6800, 0.6826, 0.6852, 0.6878, 0.6904, 0.6929, 0.6954, 0.6979, 0.7004, 0.7028,
   0.7052, 0.7076, 0.7099, 0.7122, 0.7145, 0.7168, 0.7191, 0.7213, 0.7235, 0.7257,
@@ -136,14 +143,46 @@ const ATMOS_HIRES = [
   0.8833, 0.8747, 0.8652, 0.8581, 0.8558, 0.8589, 0.8672, 0.8796, 0.8946, 0.9102,
   0.9249, 0.9376, 0.9478, 0.9553, 0.9605, 0.9640, 0.9661, 0.9675, 0.9683, 0.9688,
   0.9692, 0.9695, 0.9697, 0.9700, 0.9702, 0.9704, 0.9706, 0.9709, 0.9711, 0.9713,
-  0.9715,
-]
+  0.9715, 0.9717, 0.9719, 0.9717, 0.9686, 0.9514, 0.8865, 0.7321, 0.5168, 0.3501,
+  0.2932, 0.3502, 0.5172, 0.7330, 0.8879, 0.9531, 0.9708, 0.9742, 0.9748, 0.9750,
+  0.9752, 0.9753, 0.9755, 0.9756, 0.9758, 0.9759, 0.9761, 0.9762, 0.9764, 0.9765,
+  0.9766, 0.9768, 0.9769, 0.9771, 0.9772, 0.9773, 0.9775, 0.9776, 0.9777, 0.9779,
+  0.9780, 0.9781, 0.9782, 0.9783, 0.9784, 0.9785, 0.9786, 0.9786, 0.9785, 0.9782,
+  0.9776, 0.9764, 0.9740, 0.9696, 0.9621, 0.9502, 0.9328, 0.9095, 0.8813, 0.8508,
+  0.8211, 0.7957, 0.7767, 0.7648, 0.7587, 0.7560, 0.7535, 0.7491, 0.7417, 0.7314,
+  0.7198, 0.7085, 0.6992, 0.6933, 0.6914, 0.6941, 0.7014, 0.7131, 0.7287, 0.7478,
+  0.7694, 0.7927, 0.8168, 0.8408, 0.8638, 0.8852, 0.9045, 0.9213, 0.9356, 0.9473,
+  0.9568, 0.9642, 0.9698, 0.9740, 0.9771, 0.9793, 0.9808, 0.9819, 0.9826, 0.9831,
+  0.9834, 0.9837, 0.9838, 0.9840, 0.9841, 0.9842, 0.9843, 0.9843, 0.9844, 0.9845,
+  0.9846, 0.9846, 0.9847, 0.9848, 0.9849, 0.9849, 0.9850, 0.9851, 0.9851, 0.9852,
+  0.9853, 0.9853, 0.9854, 0.9855, 0.9855, 0.9856, 0.9857, 0.9857, 0.9858, 0.9859,
+  0.9859, 0.9860, 0.9861, 0.9861, 0.9862, 0.9863, 0.9863, 0.9864, 0.9864, 0.9865,
+  0.9866, 0.9866, 0.9867, 0.9867, 0.9868, 0.9869, 0.9869, 0.9870, 0.9870, 0.9871,
+  0.9871, 0.9871, 0.9871, 0.9871, 0.9870, 0.9869, 0.9867, 0.9864, 0.9859, 0.9852,
+  0.9842, 0.9827, 0.9805, 0.9773, 0.9727, 0.9660, 0.9566, 0.9438, 0.9267, 0.9047,
+  0.8778, 0.8462, 0.8109, 0.7735, 0.7358, 0.6998, 0.6673, 0.6397, 0.6175, 0.6007,
+  0.5889, 0.5810, 0.5759, 0.5723, 0.5690, 0.5653, 0.5610, 0.5560, 0.5508, 0.5460,
+  0.5423, 0.5403, 0.5405, 0.5433, 0.5489, 0.5575, 0.5690, 0.5834, 0.6006, 0.6202,
+  0.6419, 0.6655, 0.6904, 0.7161, 0.7423, 0.7684, 0.7939, 0.8184, 0.8415, 0.8630,
+  0.8826, 0.9003, 0.9159, 0.9295, 0.9412, 0.9511, 0.9594, 0.9662, 0.9717, 0.9762,
+  0.9797, 0.9824, 0.9846, 0.9862, 0.9875, 0.9884, 0.9891, 0.9896, 0.9900, 0.9903,
+  0.9905, 0.9907, 0.9908, 0.9909, 0.9910, 0.9910, 0.9911, 0.9911, 0.9912, 0.9912,
+  0.9912, 0.9913, 0.9913, 0.9914, 0.9914, 0.9914, 0.9915, 0.9915, 0.9915, 0.9916,
+  0.9916, 0.9916, 0.9917, 0.9917, 0.9917, 0.9918, 0.9918, 0.9918, 0.9919, 0.9919,
+  0.9919, 0.9920, 0.9920, 0.9920, 0.9921, 0.9921, 0.9921, 0.9922, 0.9922, 0.9922,
+  0.9922, 0.9923, 0.9923, 0.9923, 0.9924, 0.9924, 0.9924, 0.9925, 0.9925, 0.9925,
+  0.9925, 0.9926, 0.9926, 0.9926, 0.9927, 0.9927, 0.9927, 0.9927, 0.9928, 0.9928,
+  0.9928, 0.9929, 0.9929, 0.9929, 0.9929, 0.9930, 0.9930, 0.9930, 0.9930, 0.9931,
+  0.9931,
+];
+const ATMOS_L0 = 300, ATMOS_L1 = 1050;
 function atmosTrans(lamNm) {
-  const x = Math.min(370, Math.max(0, lamNm - 380))
-  const i = Math.floor(x), f = x - i
-  const a = ATMOS_HIRES[i], b = ATMOS_HIRES[Math.min(370, i + 1)]
-  return a + (b - a) * f
+  const x = Math.min(ATMOS_L1-ATMOS_L0, Math.max(0, lamNm - ATMOS_L0));
+  const i = Math.floor(x), f = x - i;
+  const a = ATMOS_HIRES[i], b = ATMOS_HIRES[Math.min(ATMOS_HIRES.length-1, i+1)];
+  return a + (b - a) * f;
 }
+
 
 // the filtered blackbody curve: baseline 5778 K Planck distribution with
 // the smooth filter applied. area filled with spectral colors, dimmed
@@ -162,24 +201,33 @@ function FilterCurve({ attens, title, note }) {
       ctx.clearRect(0, 0, w, h)
       const padL = 14, padR = 14, padT = 16, padB = 30
       const iw = w - padL - padR, ih = h - padT - padB
-      const L0 = 380, L1 = 750, TK = 5778
+      const L0 = 300, L1 = 1050, TK = 5778
       const X = (l) => padL + ((l - L0) / (L1 - L0)) * iw
-      // curve values
+      // unattenuated peak: the curve is anchored to the full blackbody
+      let rawPeak = 1e-30
+      for (let px = 0; px < iw; px++) {
+        const lamNm = L0 + (L1 - L0) * px / iw
+        const v = planck(lamNm * 1e-9, TK)
+        if (v > rawPeak) rawPeak = v
+      }
+      // curve values with filter applied
       const vals = []
-      let peak = 1e-30
       for (let px = 0; px < iw; px++) {
         const lamNm = L0 + (L1 - L0) * px / iw
         const v = planck(lamNm * 1e-9, TK) * smoothAtten(lamNm, attens)
         vals.push(v)
-        if (v > peak) peak = v
       }
-      const Y = (v) => padT + ih - (v / peak) * ih
-      // filled area, spectral colors dimmed by relative intensity
+      const Y = (v) => padT + ih - (v / rawPeak) * ih
+      // filled area: spectral colors in the visible, dimmed markers
+      // outside it — the filter only touches 380-750 nm
       for (let px = 0; px < iw; px++) {
         const lamNm = L0 + (L1 - L0) * px / iw
-        const f = vals[px] / peak
+        const f = vals[px] / rawPeak
         const y = Y(vals[px])
-        const rgb = spectralRGB(lamNm)
+        let rgb
+        if (lamNm < 380) rgb = [120, 90, 170]
+        else if (lamNm > 750) rgb = [120, 60, 50]
+        else rgb = spectralRGB(lamNm)
         ctx.fillStyle = `rgb(${Math.round(rgb[0] * f)},${Math.round(rgb[1] * f)},${Math.round(rgb[2] * f)})`
         ctx.fillRect(padL + px, y, 1, padT + ih - y)
       }
@@ -211,9 +259,9 @@ function FilterCurve({ attens, title, note }) {
       ctx.fillStyle = '#715f43'
       ctx.font = '10px "IBM Plex Mono", monospace'
       ctx.textAlign = 'center'
-      ctx.fillText('380 nm', X(380), padT + ih + 16)
-      ctx.fillText('565 nm', X(565), padT + ih + 16)
-      ctx.fillText('750 nm', X(750), padT + ih + 16)
+      ctx.fillText('300 nm', X(300), padT + ih + 16)
+      ctx.fillText('visible', X(565), padT + ih + 16)
+      ctx.fillText('1050 nm', X(1050), padT + ih + 16)
     }
     draw()
     const ro = new ResizeObserver(draw)
@@ -246,21 +294,28 @@ function AtmosCurve() {
       ctx.clearRect(0, 0, w, h)
       const padL = 14, padR = 14, padT = 16, padB = 30
       const iw = w - padL - padR, ih = h - padT - padB
-      const L0 = 380, L1 = 750, TK = 5778
+      const L0 = 300, L1 = 1050, TK = 5778
+      let rawPeak = 1e-30
+      for (let px = 0; px < iw; px++) {
+        const lamNm = L0 + (L1 - L0) * px / iw
+        const v = planck(lamNm * 1e-9, TK)
+        if (v > rawPeak) rawPeak = v
+      }
       const vals = []
-      let peak = 1e-30
       for (let px = 0; px < iw; px++) {
         const lamNm = L0 + (L1 - L0) * px / iw
         const v = planck(lamNm * 1e-9, TK) * atmosTrans(lamNm)
         vals.push(v)
-        if (v > peak) peak = v
       }
-      const Y = (v) => padT + ih - (v / peak) * ih
+      const Y = (v) => padT + ih - (v / rawPeak) * ih
       for (let px = 0; px < iw; px++) {
         const lamNm = L0 + (L1 - L0) * px / iw
-        const f = vals[px] / peak
+        const f = vals[px] / rawPeak
         const y = Y(vals[px])
-        const rgb = spectralRGB(lamNm)
+        let rgb
+        if (lamNm < 380) rgb = [120, 90, 170]
+        else if (lamNm > 750) rgb = [120, 60, 50]
+        else rgb = spectralRGB(lamNm)
         ctx.fillStyle = `rgb(${Math.round(rgb[0] * f)},${Math.round(rgb[1] * f)},${Math.round(rgb[2] * f)})`
         ctx.fillRect(padL + px, y, 1, padT + ih - y)
       }
@@ -281,9 +336,9 @@ function AtmosCurve() {
       ctx.font = '10px "IBM Plex Mono", monospace'
       ctx.textAlign = 'center'
       const X = (l) => padL + ((l - L0) / (L1 - L0)) * iw
-      ctx.fillText('380 nm', X(380), padT + ih + 16)
-      ctx.fillText('565 nm', X(565), padT + ih + 16)
-      ctx.fillText('750 nm', X(750), padT + ih + 16)
+      ctx.fillText('300 nm', X(300), padT + ih + 16)
+      ctx.fillText('visible', X(565), padT + ih + 16)
+      ctx.fillText('1050 nm', X(1050), padT + ih + 16)
     }
     draw()
     const ro = new ResizeObserver(draw)
@@ -295,10 +350,11 @@ function AtmosCurve() {
       <div className="graph-title-row"><div className="graph-title">Atmospheric transmission curve</div></div>
       <canvas ref={ref} style={{ display: 'block', width: '100%', height: 240 }} />
       <p className="graph-note">
-        The actual clear-sky sea-level transmission at 1 nm resolution —
-        Rayleigh's λ⁻⁴ blue slope, the O₂ notch at 690 nm, the H₂O dent
-        at 720 nm. This is what the atmosphere does to sunlight before it
-        reaches you.
+        The 5778 K blackbody from 300 to 1050 nm with the actual clear-sky
+        sea-level transmission applied — Rayleigh's λ⁻⁴ blue slope, the O₂
+        notch at 690 nm, the H₂O dents at 720, 820 and 940 nm, ozone
+        swallowing the UV. This is what the atmosphere does to sunlight
+        before it reaches you.
       </p>
     </div>
   )
@@ -443,11 +499,12 @@ export default function SunFilter() {
           title="Filter curve"
           note={
             <>
-              The baseline 5778 K blackbody distribution with your filter
+              The 5778 K blackbody from 300 to 1050 nm with your filter
               applied — the dots are your EQ points, the curve stays
-              smooth between them. The area is filled with spectral
-              colors dimmed where the curve runs low; blocked bands sink
-              into gaps.
+              smooth between them. Anchored to the unfiltered peak so you
+              see how much light the filter removes. The visible band is
+              filled with spectral colors dimmed where the curve runs low;
+              blocked bands sink into gaps.
             </>
           }
         />
@@ -523,6 +580,7 @@ function falseColor(lamNm) {
 
 function fcAtten(lamNm, attens) {
   const pts = FC_POINTS
+  if (lamNm < 300 || lamNm > 750) return 1
   if (lamNm <= pts[0].lam) return attens[0]
   if (lamNm >= pts[pts.length - 1].lam) return attens[pts.length - 1]
   let i = 0
@@ -668,24 +726,29 @@ function FilterCurveFC({ attens }) {
       ctx.clearRect(0, 0, w, h)
       const padL = 14, padR = 14, padT = 16, padB = 30
       const iw = w - padL - padR, ih = h - padT - padB
-      const L0 = 300, L1 = 750, TK = 5778
+      const L0 = 300, L1 = 1050, TK = 5778
       const X = (l) => padL + ((l - L0) / (L1 - L0)) * iw
+      let rawPeak = 1e-30
+      for (let px = 0; px < iw; px++) {
+        const lamNm = L0 + (L1 - L0) * px / iw
+        const v = planck(lamNm * 1e-9, TK)
+        if (v > rawPeak) rawPeak = v
+      }
       const vals = []
-      let peak = 1e-30
       for (let px = 0; px < iw; px++) {
         const lamNm = L0 + (L1 - L0) * px / iw
         const v = planck(lamNm * 1e-9, TK) * fcAtten(lamNm, attens)
         vals.push(v)
-        if (v > peak) peak = v
       }
-      const Y = (v) => padT + ih - (v / peak) * ih
+      const Y = (v) => padT + ih - (v / rawPeak) * ih
       for (let px = 0; px < iw; px++) {
         const lamNm = L0 + (L1 - L0) * px / iw
-        const f = vals[px] / peak
+        const f = vals[px] / rawPeak
         const y = Y(vals[px])
         // actual colors here (UV purple), matching the EQ
         let rgb
         if (lamNm < 380) rgb = [150, 100, 220]
+        else if (lamNm > 750) rgb = [120, 60, 50]
         else rgb = spectralRGB(lamNm)
         ctx.fillStyle = `rgb(${Math.round(rgb[0] * f)},${Math.round(rgb[1] * f)},${Math.round(rgb[2] * f)})`
         ctx.fillRect(padL + px, y, 1, padT + ih - y)
@@ -715,8 +778,8 @@ function FilterCurveFC({ attens }) {
       ctx.font = '10px "IBM Plex Mono", monospace'
       ctx.textAlign = 'center'
       ctx.fillText('300 nm', X(300), padT + ih + 16)
-      ctx.fillText('525 nm', X(525), padT + ih + 16)
-      ctx.fillText('750 nm', X(750), padT + ih + 16)
+      ctx.fillText('visible', X(565), padT + ih + 16)
+      ctx.fillText('1050 nm', X(1050), padT + ih + 16)
     }
     draw()
     const ro = new ResizeObserver(draw)
@@ -728,9 +791,10 @@ function FilterCurveFC({ attens }) {
       <div className="graph-title-row"><div className="graph-title">Filter curve — with UV</div></div>
       <canvas ref={ref} style={{ display: 'block', width: '100%', height: 240 }} />
       <p className="graph-note">
-        The baseline 5778 K blackbody from 300 to 750 nm with your filter
-        applied, in actual colors (UV as purple). Blocked bands sink into
-        smooth gaps; the sphere reads the false-color version.
+        The 5778 K blackbody from 300 to 1050 nm with your filter applied,
+        in actual colors (UV as purple). The filter touches 300–750 nm;
+        the infrared wing shows unfiltered. Blocked bands sink into smooth
+        gaps; the sphere reads the false-color version.
       </p>
     </div>
   )
