@@ -441,6 +441,11 @@ function bbHue(T) {
     Math.round((T - BB_LUT_T0) / (BB_LUT_T1 - BB_LUT_T0) * (BB_LUT_N - 1))))
   return [bbLut[i * 3], bbLut[i * 3 + 1], bbLut[i * 3 + 2]]
 }
+// brightness reference: visible flux at the typical 2.4 eV patch (scaled),
+// so the thermometer reads full brightness there and dims/brightens
+// relatively — visBrightness at the scaled temperatures would otherwise
+// sit near zero and the sphere would read black
+const BB_BR_REF = visBrightness(2.4 * BB_T_SCALE)
 // per-temperature-bin average accumulated RGB, filled by ForgetSurface in
 // mix mode, read by TempDistPanel for the strip
 const mixBinAvg = new Float32Array(AD_N * 3)
@@ -1633,10 +1638,11 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = fal
         let cr, cg, cb, br
         if (bbRef.current) {
           // direct blackbody: the honest thermometer — color is the
-          // blackbody at this temperature, no warping, no history
+          // blackbody at this temperature, no warping, no history.
+          // brightness normalized to the typical patch so it reads.
           const tc = bbHue(T)
           cr = tc[0]; cg = tc[1]; cb = tc[2]
-          br = visBrightness(T * BB_T_SCALE)
+          br = Math.min(1, visBrightness(T * BB_T_SCALE) / BB_BR_REF)
         } else if (mixRef.current) {
           // additive photon colors: fade slowly on their own clock so
           // repeated hits accumulate toward peach instead of dying
