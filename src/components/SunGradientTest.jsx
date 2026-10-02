@@ -1060,6 +1060,115 @@ function LandingPanel({ expRef, playingRef }) {
   return <canvas ref={ref} style={{ display: 'block', width: '100%', height: 400 }} />
 }
 
+// patch-temperature distribution: what the sphere's adaptive colors are
+// assigned from. orange = the live simulated distribution (the histogram
+// the colors read); dashed = the design assumption the original fixed
+// scale was tuned against. the strip below shows the live color
+// assignment — which temperatures get which colors right now.
+function TempDistPanel({ playingRef }) {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const canvas = ref.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const rgb = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`
+
+    const draw = () => {
+      const w = canvas.clientWidth, h = canvas.clientHeight
+      canvas.width = Math.round(w * dpr)
+      canvas.height = Math.round(h * dpr)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      ctx.clearRect(0, 0, w, h)
+      const padL = 14, padR = 14, padT = 30, padB = 58
+      const iw = w - padL - padR, ih = h - padT - padB
+      const T0 = 1.0, T1 = 5.0
+      const X = (T) => padL + ((T - T0) / (T1 - T0)) * iw
+      const Y = (f) => padT + ih - Math.min(1, f) * ih
+      // visible band shading, 1.65–3.26 eV
+      ctx.fillStyle = 'rgba(255,200,80,0.10)'
+      ctx.fillRect(X(1.65), padT, X(3.26) - X(1.65), ih)
+      ctx.fillStyle = 'rgba(113,95,67,0.8)'
+      ctx.font = '10px "IBM Plex Mono", monospace'
+      ctx.textAlign = 'center'
+      ctx.fillText('visible band', (X(1.65) + X(3.26)) / 2, padT + 12)
+      // simulated: the live histogram, normalized to its peak
+      let hMax = 1e-9
+      for (let i = 0; i < AD_N; i++) hMax = Math.max(hMax, adHist[i])
+      ctx.beginPath()
+      let started = false
+      for (let i = 0; i < AD_N; i++) {
+        const T = AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
+        if (T < T0 || T > T1) continue
+        const x = X(T), y = Y(adHist[i] / hMax)
+        if (!started) { ctx.moveTo(x, y); started = true } else ctx.lineTo(x, y)
+      }
+      ctx.strokeStyle = '#c46a1a'
+      ctx.lineWidth = 2
+      ctx.stroke()
+      ctx.lineWidth = 1
+      // expected: the design assumption (gaussian, mu 2.4 eV, sigma 0.6)
+      ctx.beginPath()
+      ctx.setLineDash([5, 4])
+      for (let i = 0; i <= 120; i++) {
+        const T = T0 + (T1 - T0) * (i / 120)
+        const x = X(T), y = Y(Math.exp(-(((T - 2.4) / 0.6) ** 2)))
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
+      }
+      ctx.strokeStyle = 'rgba(113,95,67,0.9)'
+      ctx.stroke()
+      ctx.setLineDash([])
+      // axes
+      ctx.strokeStyle = 'rgba(107,90,62,0.5)'
+      ctx.beginPath()
+      ctx.moveTo(padL, padT + ih); ctx.lineTo(padL + iw, padT + ih)
+      ctx.stroke()
+      ctx.fillStyle = '#715f43'
+      ctx.font = '11px "IBM Plex Mono", monospace'
+      ctx.textAlign = 'left'
+      ctx.fillText('1 eV', padL, padT + ih + 16)
+      ctx.textAlign = 'right'
+      ctx.fillText('5 eV', padL + iw, padT + ih + 16)
+      ctx.textAlign = 'left'
+      ctx.fillText('patch temperature →', padL, padT + ih + 32)
+      // legend
+      ctx.fillStyle = '#c46a1a'
+      ctx.fillRect(padL, 10, 26, 3)
+      ctx.fillStyle = '#4a3f2c'
+      ctx.fillText('simulated (live)', padL + 32, 15)
+      ctx.strokeStyle = 'rgba(113,95,67,0.9)'
+      ctx.setLineDash([5, 4])
+      ctx.beginPath(); ctx.moveTo(padL + 190, 11); ctx.lineTo(padL + 216, 11); ctx.stroke()
+      ctx.setLineDash([])
+      ctx.fillStyle = '#4a3f2c'
+      ctx.fillText('design assumption', padL + 222, 15)
+      // live color strip: which temperatures get which colors right now
+      const stripY = padT + ih + 40, stripH = 12
+      for (let px = 0; px < iw; px++) {
+        const T = T0 + (px / iw) * (T1 - T0)
+        ctx.fillStyle = rgb(warmHue(T))
+        ctx.fillRect(padL + px, stripY, 1, stripH)
+      }
+      ctx.strokeStyle = 'rgba(107,90,62,0.35)'
+      ctx.strokeRect(padL, stripY, iw, stripH)
+    }
+
+    let raf = 0
+    const loop = () => {
+      raf = requestAnimationFrame(loop)
+      if (playingRef.current) draw()
+    }
+    draw()
+    loop()
+    const ro = new ResizeObserver(draw)
+    ro.observe(canvas)
+    return () => { cancelAnimationFrame(raf); ro.disconnect() }
+  }, [])
+
+  return <canvas ref={ref} style={{ display: 'block', width: '100%', height: 300 }} />
+}
+
 // ---- the fifth graph: watch the frequencies forget ----
 function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
   const mountRef = useRef(null)
@@ -1715,6 +1824,25 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           <Slider label="ripple lifetime" value={frRippleTau} min={0} max={40} step={0.1}
             onChange={setFrRippleTau} format={(v) => `${v.toFixed(1)} s`} />
         </div>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">Patch temperature distribution</div>
+        </div>
+        <TempDistPanel playingRef={frPlayingRef} />
+        <p className="graph-note">
+          What the sphere's colors are assigned from. Orange is the live
+          simulated patch-temperature distribution — the histogram the
+          adaptive colors read every frame; dashed is the design
+          assumption the original fixed scale was tuned against. Where
+          they differ, a fixed scale mismatches the data, which is why
+          the colors track the live one instead. The strip shows the
+          live color assignment: which temperatures get which colors
+          right now. The landing panel below is untouched — it still
+          compares the escaping light against the 5778 K blackbody,
+          the expected radiation from the sun.
+        </p>
       </div>
 
       <div className="graph-box">
