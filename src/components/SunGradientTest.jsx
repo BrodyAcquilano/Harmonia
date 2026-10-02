@@ -621,7 +621,7 @@ export function freshSunExperiment(entropy) {
     packets.push(p)
   }
   return {
-    t: 0, hopAcc: 0, packets, escapes: [0], rng, version: 0,
+    t: 0, hopAcc: 0, packets, escapes: [0, 0, 0, 0], rng, version: 0,
     bins: [{ n: 0, sumA: 0, sumNu: 0 }],
     hist: new Float64Array(HIST_N),
     histN: 0,
