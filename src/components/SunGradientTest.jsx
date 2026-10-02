@@ -316,6 +316,20 @@ function visBrightness(T) {
   const v = bbVis[i] * (1 - f) + bbVis[Math.min(BB_N, i + 1)] * f
   return Math.min(1, v / BB_REF)
 }
+// warm filter: the thermal hue is compressed onto the black→red→orange→
+// yellow range — green through violet are filtered out, so the sphere
+// reads as sun colors. the window sits so the typical patch temperature
+// lands between yellow and orange; hotter patches clamp to yellow.
+const WARM_T0 = 1.65 // eV — red edge of the visible band
+const WARM_T1 = 2.61 // eV — yellow; hotter clamps to yellow
+function warmHue(T) {
+  const x = Math.min(1, Math.max(0, (T - WARM_T0) / (WARM_T1 - WARM_T0)))
+  return rainbow(x / 3) // rainbow 0→1/3 spans red→orange→yellow
+}
+// this view is decoupled from the entropy slider — its own fixed seed.
+// (a bigger seed isn't "more random"; it just picks a different stream,
+// so the value only needs to be fixed, not large.)
+const FORGET_ENTROPY = 8888888888
 // forget ripples: each escaping photon launches a wave on the sphere.
 // the amplitude carries the photon's energy; the oscillation rate and
 // wavelength are slowed and widened so we can see them — visualization
@@ -1080,9 +1094,9 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       for (let v = 0; v < sCount; v++) {
         const o = v * 3
         if (coolF > 0) P[o] += (T_BASE - P[o]) * coolF
-        // blackbody color: hue from the spectral color of kT, brightness
-        // from the real visible-band Planck integral at T
-        const tc = visibleColor((P[o] * EV) / H)
+        // blackbody color through the warm filter: sun-range hue, and
+        // brightness from the real visible-band Planck integral at T
+        const tc = warmHue(P[o])
         const br = visBrightness(P[o])
         colA.setXYZ(v, (tc[0] / 255) * br, (tc[1] / 255) * br, (tc[2] / 255) * br)
       }
@@ -1316,7 +1330,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
   const [frSpeed, setFrSpeed] = useState(1)
   const [frRipple, setFrRipple] = useState(1)
   const frExpRef = useRef(null)
-  if (!frExpRef.current) frExpRef.current = freshForgetExperiment(entropy)
+  if (!frExpRef.current) frExpRef.current = freshForgetExperiment(FORGET_ENTROPY)
   const frCtlRef = useRef({})
   const dirtyRef = useRef(0)
   const playingRef = useRef(false)
@@ -1337,10 +1351,6 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
   }, [entropy])
   useEffect(() => {
     thExpRef.current = freshExperiment(entropy)
-    dirtyRef.current += 1
-  }, [entropy])
-  useEffect(() => {
-    frExpRef.current = freshForgetExperiment(entropy)
     dirtyRef.current += 1
   }, [entropy])
 
@@ -1603,7 +1613,9 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
         </div>
         <ForgetSurface expRef={frExpRef} ctlRef={frCtlRef} dirtyRef={dirtyRef} />
         <p className="graph-note">
-          Its own experiment, its own play and clock. Packets are born
+          Its own experiment, its own play and clock, its own fixed entropy
+          seed — decoupled from the entropy slider, which no longer
+          reseeds this view. Packets are born
           across the proton-forming shell, 0.2–0.7 R_☉, equal chance at
           each radius, each with a frequency drawn from the Planck
           distribution at its birth radius's own temperature. Each
@@ -1625,11 +1637,13 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           as heat in a small patch around its exit direction, so each
           patch's temperature is the local escaping energy flux, cooling
           by Newton's law between hits. A patch glows with the visible
-          light a blackbody at its temperature produces — the hue is the
-          spectral color of its thermal energy, the brightness the real
-          Planck integral over the visible band: cold patches make almost
-          no visible light and sit near black, hot ones blaze violet —
-          and every escape launches a wave there too, its amplitude the
+          light a blackbody at its temperature produces, seen through a
+          warm filter — the hue runs only black→red→orange→yellow, green
+          through violet filtered out, centered so the typical patch glows
+          between yellow and orange; the brightness is the real Planck
+          integral over the visible band: cold patches make almost no
+          visible light and sit near black, hot ones blaze yellow — and
+          every escape launches a wave there too, its amplitude the
           escaping photon's energy, rippling outward and dying away
           (slowed down so we can see it). The ripple slider scales the
           waves only; the colors are untouched.
