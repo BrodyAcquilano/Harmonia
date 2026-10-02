@@ -8,7 +8,9 @@ The Sun Filter tab doesn't change the sun. The fusion still fires as a Poisson p
 
 What changes is what you're allowed to see.
 
-A note on the name: "The Final Sun" — the first graph — isn't called that because it's the last variation. It's called that because it's the complete physics model: the nuclear reactor (Poisson fusion, random-walk photons) plus the blackbody surface, nothing held back. The point of this tab is that once the model is complete, there are still different ways of displaying it — and each display asks you to interpret it differently. That's what the three graphs are.
+A note on the name: "The Final Sun" — the first graph — isn't called that because it's the last variation. It's called that because it's the complete physics model for one specific story: quarks flipping from 2/3 (up) to −1/3 (down), losing mass that becomes energy, that energy becoming light that scatters outward through the random walk, and the surface radiating as a blackbody. That's the whole chain, nothing held back.
+
+But "complete" has boundaries. It doesn't take into account electromagnetism, or currents, or anything beyond that chain. It's deliberately focused: the quark flip, the mass-to-energy conversion, the scattering light, the blackbody radiation. The point of this tab is that once that model is complete, there are still different ways of displaying it — and each display asks you to interpret it differently. That's what the three graphs are.
 
 The colors on the surface are determined by temperature. When energy fluctuations heat a patch, its blackbody curve shifts — hotter means higher frequencies — and the surface is the addition of those colors, wavelength by wavelength. The filter never touches any of that. It only decides which of the added colors reach your eye, and in the false-color graph, how they're remapped for display. The animation is the same; the seeing is different.
 
