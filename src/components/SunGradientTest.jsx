@@ -328,33 +328,24 @@ const WARM_STOPS = [
   [255, 225, 60],  // yellow
   [255, 245, 190], // whitish yellow — hot clamp
 ]
-// nonlinear warm mapping: control points (T in eV, gradient position).
-// most of the gradient's room goes to the orange/yellow/red mid-range
-// where the patch temperatures actually sit (~1.8–3.3 eV); the dark-red
-// cold tail and the whitish-yellow hot tail get only a small slice each.
-// infrared and ultraviolet are off the scale entirely — out-of-range
-// temperatures clamp to the ends, no colors reserved for them.
-const WARM_MAP = [
-  [1.60, 0.00], // dark red-orange
-  [1.85, 0.10], // red-orange
-  [2.05, 0.28], // orange
-  [2.30, 0.50], // amber
-  [2.60, 0.70], // golden yellow
-  [2.95, 0.86], // yellow
-  [3.30, 1.00], // whitish yellow
-]
+// adaptive warm colors: histogram-equalized hue.
+// each patch's color is its percentile in the LIVE temperature
+// distribution — the crowded middle spreads across many colors, rare
+// hot/cold tails compress into few. the histogram forgets on a ~45 s
+// timescale, so the color assignment keeps tracking the distribution
+// as it shifts. infrared and ultraviolet get no colors of their own.
+const AD_N = 96, AD_T0 = 1.0, AD_T1 = 6.0, AD_TAU = 45
+const adHist = new Float64Array(AD_N)
+const adCDF = new Float64Array(AD_N)
+// default distribution: a broad guess centered near 2.4 eV, so the
+// mapping is sane from frame one — real data takes over within seconds
+for (let i = 0; i < AD_N; i++) {
+  const T = AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
+  adHist[i] = 2337 * Math.exp(-(((T - 2.4) / 1.5) ** 2))
+}
 function warmHue(T) {
-  let x
-  if (T <= WARM_MAP[0][0]) x = 0
-  else if (T >= WARM_MAP[WARM_MAP.length - 1][0]) x = 1
-  else {
-    x = 1
-    for (let k = 0; k < WARM_MAP.length - 1; k++) {
-      const t0 = WARM_MAP[k][0], x0 = WARM_MAP[k][1]
-      const t1 = WARM_MAP[k + 1][0], x1 = WARM_MAP[k + 1][1]
-      if (T <= t1) { x = x0 + (x1 - x0) * (T - t0) / (t1 - t0); break }
-    }
-  }
+  const bx = Math.min(AD_N - 1, Math.max(0, Math.floor((T - AD_T0) / (AD_T1 - AD_T0) * AD_N)))
+  const x = adCDF[bx]
   const sx = x * (WARM_STOPS.length - 1)
   const i = Math.min(WARM_STOPS.length - 2, Math.floor(sx))
   const f = sx - i
@@ -1130,6 +1121,22 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       const rippleGain = ctlRef.current.ripple ?? 1
       // ripple lifetime from the slider, clamped above zero (0 ≈ no waves)
       const rippleTau = Math.max(1e-3, ctlRef.current.rippleTau ?? RIPPLE_TAU)
+      // adaptive colors: fold the current patch temperatures into the
+      // running histogram (it forgets on AD_TAU), then rebuild the CDF
+      // the hue lookup reads
+      if (sdt > 0) {
+        const hDecay = Math.exp(-sdt / AD_TAU)
+        const hFloor = 0.5 * (1 - hDecay)
+        for (let i = 0; i < AD_N; i++) adHist[i] = adHist[i] * hDecay + hFloor
+        for (let v = 0; v < sCount; v++) {
+          const b = Math.min(AD_N - 1, Math.max(0, Math.floor((P[v * 3] - AD_T0) / (AD_T1 - AD_T0) * AD_N)))
+          adHist[b] += 1
+        }
+        let tot = 0
+        for (let i = 0; i < AD_N; i++) tot += adHist[i]
+        let cum = 0
+        for (let i = 0; i < AD_N; i++) { cum += adHist[i]; adCDF[i] = cum / tot }
+      }
       // prune spent waves — ripples are pushed in time order
       while (exp.ripples.length && exp.t - exp.ripples[0].t0 > 4 * rippleTau) exp.ripples.shift()
       for (let v = 0; v < sCount; v++) {
@@ -1682,12 +1689,12 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           by Newton's law between hits. A patch glows with the visible
           light a blackbody at its temperature produces, seen through a
           warm filter — a custom sun scale from deep red-orange through
-          orange, amber and gold to a whitish-yellow hot clamp, mapped
-          nonlinearly: most of the scale's room goes to the orange/yellow/
-          red temperatures where the patches actually live, with only
-          small slices for the dark-red cold tail and the whitish-yellow
-          hot tail — infrared and ultraviolet get no colors of their own;
-          the brightness is the real Planck integral over the
+          orange, amber and gold to a whitish-yellow hot clamp, assigned
+          adaptively: each patch's color is its percentile in the live
+          temperature distribution, so the crowded middle spreads across
+          many colors while the rare hot and cold tails compress into few —
+          infrared and ultraviolet get no colors of their own; the
+          brightness is the real Planck integral over the
           visible band: cold patches make almost no visible light and sit
           near black, hot ones blaze whitish-yellow — and
           every escape launches a wave there too, its amplitude the
