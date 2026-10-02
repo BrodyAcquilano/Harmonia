@@ -75,9 +75,10 @@ export function buildFilteredLut(attens) {
   return lut
 }
 
-// standard atmosphere across the visible band: Rayleigh scattering
-// slopes the blue; the green-yellow-red passes nearly untouched.
-const ATMOS_ATTENS = [0.55, 0.62, 0.70, 0.78, 0.88, 0.93, 0.95, 0.94, 0.92, 0.90, 0.89, 0.88]
+// clear-sky vertical transmission at sea level: Rayleigh scattering
+// (lambda^-4) dominates the blue slope, ozone Chappuis adds a faint
+// broad dip near 600 nm, O2 B-band notches 690 nm, H2O dents 720 nm.
+const ATMOS_ATTENS = [0.65, 0.74, 0.80, 0.85, 0.88, 0.89, 0.91, 0.92, 0.94, 0.84, 0.89, 0.97]
 
 // the filtered blackbody curve: baseline 5778 K Planck distribution with
 // the smooth filter applied. area filled with spectral colors, dimmed
