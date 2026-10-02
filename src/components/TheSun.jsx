@@ -67,6 +67,23 @@ export default function TheSun() {
   const sunMixPlayingRef = useRef(false)
   sunMixPlayingRef.current = sunMixPlaying
 
+  // fourth view: direct blackbody. same experiment shape, own run — the
+  // honest thermometer. each patch shows the blackbody color for its
+  // temperature, no warping, no photon history.
+  const [sunBbPlaying, setSunBbPlaying] = useState(false)
+  const [sunBbSpeed, setSunBbSpeed] = useState(1)
+  const [sunBbRipple, setSunBbRipple] = useState(1)
+  const [sunBbRippleTau, setSunBbRippleTau] = useState(2.5)
+  const sunBbExpRef = useRef(null)
+  if (!sunBbExpRef.current) sunBbExpRef.current = freshSunExperiment(SUN_ENTROPY)
+  const sunBbCtlRef = useRef({})
+  sunBbCtlRef.current = {
+    playing: sunBbPlaying, speed: sunBbSpeed, ripple: sunBbRipple,
+    rippleTau: sunBbRippleTau,
+  }
+  const sunBbPlayingRef = useRef(false)
+  sunBbPlayingRef.current = sunBbPlaying
+
   return (
     <>
       <div className="graph-box">
@@ -319,6 +336,74 @@ export default function TheSun() {
           <div className="graph-title">One birth, one curve — by adding light</div>
         </div>
         <ForgetTrack expRef={sunMixExpRef} playingRef={sunMixPlayingRef} single />
+        <p className="graph-note">
+          Same test, this run: the one fusion quantum at birth — 2 MeV —
+          crashing into the thermal curve on the first hop. What escapes
+          is set by the surface, not by the birth.
+        </p>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">The Sun — as a thermometer</div>
+        </div>
+        <ForgetSurface expRef={sunBbExpRef} ctlRef={sunBbCtlRef} dirtyRef={dirtyRef} bb />
+        <p className="graph-note">
+          The honest baseline: each patch shows the blackbody color for
+          its temperature — dim orange-red where cool, warm white where
+          sun-like, blue-white where hot — with no warping, no photon
+          history, no stretch or compress. The temperature is the local
+          energy flux from wave hits, cooling over time. Temperatures are
+          scaled so the typical 2.4 eV patch is the 5778 K photosphere;
+          without that every patch would sit above 10,000 K and read
+          blue-white. Compare against the other three to see what each
+          coloring method is really doing. Same experiment underneath:
+          Poisson core firing, random-walk out, heat per escape,
+          frequency-carrying ripples.
+        </p>
+        <Transport
+          playing={sunBbPlaying}
+          speed={sunBbSpeed}
+          onPlayingChange={setSunBbPlaying}
+          onSpeedChange={setSunBbSpeed}
+        />
+        <div className="transport-speed">
+          <Slider label="ripple" value={sunBbRipple} min={0} max={3} step={0.1}
+            onChange={setSunBbRipple} format={(v) => `${v.toFixed(1)}×`} />
+          <Slider label="ripple lifetime" value={sunBbRippleTau} min={0} max={40} step={0.1}
+            onChange={setSunBbRippleTau} format={(v) => `${v.toFixed(1)} s`} />
+        </div>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">Patch temperature distribution — as a thermometer</div>
+        </div>
+        <TempDistPanel playingRef={sunBbPlayingRef} bb />
+        <p className="graph-note">
+          The temperature distribution on this run. The strip below is
+          the direct legend — the blackbody color each temperature gets,
+          with no warping to shift it.
+        </p>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">Where the sunlight actually lands — as a thermometer</div>
+        </div>
+        <LandingPanel expRef={sunBbExpRef} playingRef={sunBbPlayingRef} markers={false} />
+        <p className="graph-note">
+          Same check, this run's own experiment: every escaped packet
+          builds the escaping spectrum, teal the 5778 K blackbody. One
+          input frequency in, the sun's own light out.
+        </p>
+      </div>
+
+      <div className="graph-box">
+        <div className="graph-title-row">
+          <div className="graph-title">One birth, one curve — as a thermometer</div>
+        </div>
+        <ForgetTrack expRef={sunBbExpRef} playingRef={sunBbPlayingRef} single />
         <p className="graph-note">
           Same test, this run: the one fusion quantum at birth — 2 MeV —
           crashing into the thermal curve on the first hop. What escapes

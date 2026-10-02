@@ -81,3 +81,13 @@ The exact math, per visible photon (E in eV, 1.65–3.26): its hue H is the spec
 The distribution panel keeps its color strip, but the strip is not a warping. For each temperature it shows the average of the photon colors actually accumulated on the surface patches sitting at that temperature — each part of the distribution assigned the color that's really there. The ruler marks are gone; there is nothing to stretch.
 
 Why this view: the warping views answer "how do we share colors across what the sun is doing." This one answers "what happens if the surface just keeps what hits it" — additive light, the way paint mixes, driven by the real photon stream.
+
+## 13. The Sun — as a thermometer
+
+A fourth view, added 2026-10-02. The honest baseline: each patch shows the blackbody color for its temperature — dim orange-red where cool, warm white where sun-like, blue-white where hot — with no warping, no photon history, no stretch or compress. The temperature at each point is the local energy flux from wave hits, cooling over time by Newton's law.
+
+I almost didn't add it — without warping, would it just be one color? No: the patches span 1.2 to 4+ eV, and with the temperature scaled so the typical 2.4 eV patch is the 5778 K photosphere, that range runs from dim orange-red through warm white to blue-white. (Unscaled, everything sits above 10,000 K and does read blue-white — the scaling is what makes it a useful thermometer.)
+
+The color is the 24-wavelength Planck-weighted spectral sum at the scaled temperature — the same math as the "adding light" idea, but applied to the patch's thermal state rather than to arriving photons. The distribution strip is the direct legend: the blackbody color each temperature gets, unshifted.
+
+Why this view: the other three are all display choices layered on the physics — warping, band-filtering, photon accumulation. This one strips them away. Compare any of them against the thermometer to see what the coloring method itself is contributing.

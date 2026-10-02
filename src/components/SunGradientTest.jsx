@@ -407,6 +407,40 @@ function photonRGB(eV) {
     (a[2] + (b[2] - a[2]) * sf) / 255,
   ]
 }
+// direct blackbody color (fourth view): the honest thermometer. each patch
+// shows the blackbody color for its temperature — no warping, no photon
+// history, no stretch/compress. temperature scaled so the typical 2.4 eV
+// patch is 5778 K (otherwise everything sits above 10,000 K and reads
+// blue-white). 24-wavelength Planck-weighted spectral sum, via lookup.
+const BB_T_SCALE = 5778 / (2.4 * 11604.5)
+const BB_LUT_N = 256, BB_LUT_T0 = 0, BB_LUT_T1 = 8
+const bbLut = new Float32Array(BB_LUT_N * 3)
+for (let i = 0; i < BB_LUT_N; i++) {
+  const T = BB_LUT_T0 + (BB_LUT_T1 - BB_LUT_T0) * i / (BB_LUT_N - 1)
+  const TK = Math.max(0.05, T * BB_T_SCALE) * 11604.5
+  const c1 = 3.7418e-16, c2 = 1.4388e-2
+  let r = 0, g = 0, b = 0
+  for (let j = 0; j < 24; j++) {
+    const lamNm = 380 + (750 - 380) * j / 23
+    const lamM = lamNm * 1e-9
+    const Bl = c1 / Math.pow(lamM, 5) / (Math.exp(c2 / (lamM * TK)) - 1)
+    const x = (750 - lamNm) / (750 - 380)
+    const sx = x * (SPECTRUM_STOPS.length - 1)
+    const si = Math.min(SPECTRUM_STOPS.length - 2, Math.floor(sx))
+    const sf = sx - si
+    const a = SPECTRUM_STOPS[si], q = SPECTRUM_STOPS[si + 1]
+    r += Bl * (a[0] + (q[0] - a[0]) * sf)
+    g += Bl * (a[1] + (q[1] - a[1]) * sf)
+    b += Bl * (a[2] + (q[2] - a[2]) * sf)
+  }
+  const m = Math.max(r, g, b, 1e-30)
+  bbLut[i * 3] = r / m * 255; bbLut[i * 3 + 1] = g / m * 255; bbLut[i * 3 + 2] = b / m * 255
+}
+function bbHue(T) {
+  const i = Math.min(BB_LUT_N - 1, Math.max(0,
+    Math.round((T - BB_LUT_T0) / (BB_LUT_T1 - BB_LUT_T0) * (BB_LUT_N - 1))))
+  return [bbLut[i * 3], bbLut[i * 3 + 1], bbLut[i * 3 + 2]]
+}
 // per-temperature-bin average accumulated RGB, filled by ForgetSurface in
 // mix mode, read by TempDistPanel for the strip
 const mixBinAvg = new Float32Array(AD_N * 3)
@@ -1311,7 +1345,7 @@ export function LandingPanel({ expRef, playingRef, markers = true }) {
 // the colors read); dashed = the design assumption the original fixed
 // scale was tuned against. the strip below shows the live color
 // assignment — which temperatures get which colors right now.
-export function TempDistPanel({ playingRef, vis = false, bare = false, mix = false }) {
+export function TempDistPanel({ playingRef, vis = false, bare = false, mix = false, bb = false }) {
   const ref = useRef(null)
 
   useEffect(() => {
@@ -1410,6 +1444,16 @@ export function TempDistPanel({ playingRef, vis = false, bare = false, mix = fal
         }
         ctx.strokeStyle = 'rgba(107,90,62,0.35)'
         ctx.strokeRect(padL, stripY, iw, stripH)
+      } else if (bb) {
+        // direct blackbody legend: the color each temperature gets, no warping
+        const stripY = padT + ih + 40, stripH = 12
+        for (let px = 0; px < iw; px++) {
+          const T = T0 + (px / iw) * (T1 - T0)
+          ctx.fillStyle = rgb(bbHue(T))
+          ctx.fillRect(padL + px, stripY, 1, stripH)
+        }
+        ctx.strokeStyle = 'rgba(107,90,62,0.35)'
+        ctx.strokeRect(padL, stripY, iw, stripH)
       } else if (!bare) {
         const stripY = padT + ih + 40, stripH = 12
         for (let px = 0; px < iw; px++) {
@@ -1453,7 +1497,7 @@ export function TempDistPanel({ playingRef, vis = false, bare = false, mix = fal
 }
 
 // ---- the fifth graph: watch the frequencies forget ----
-export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = false }) {
+export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = false, bb = false }) {
   const mountRef = useRef(null)
   const readRef = useRef(null)
   const phosRef = useRef(null)
@@ -1462,6 +1506,8 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = fal
   visRef.current = vis
   const mixRef = useRef(mix)
   mixRef.current = mix
+  const bbRef = useRef(bb)
+  bbRef.current = bb
 
   useEffect(() => {
     const S = setupScene(mountRef.current)
@@ -1585,7 +1631,13 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = fal
         // the visible part is shown.
         const T = P[o]
         let cr, cg, cb, br
-        if (mixRef.current) {
+        if (bbRef.current) {
+          // direct blackbody: the honest thermometer — color is the
+          // blackbody at this temperature, no warping, no history
+          const tc = bbHue(T)
+          cr = tc[0]; cg = tc[1]; cb = tc[2]
+          br = visBrightness(T * BB_T_SCALE)
+        } else if (mixRef.current) {
           // additive photon colors: fade slowly on their own clock so
           // repeated hits accumulate toward peach instead of dying
           // between hits; display the accumulated mix directly — no
