@@ -377,14 +377,15 @@ const VIS_T_HI = 3.26
 //
 // exact math, per visible photon (E in eV, 1.65-3.26):
 //   hue H = spectral RGB at λ=1240/E, from the palette (0-1)
-//   deposit per patch: ΔRGB = H × E × 0.15 × exp(-(1-d)/σ²)
+//   deposit per patch: ΔRGB = H × E × 1.0 × exp(-(1-d)/σ²)
 //     (hue × photon energy × gain × spatial gaussian;
+//      a central hit saturates to full color, then fades;
 //      a 3.26 eV blue photon deposits ~2× the intensity of a 1.65 eV red)
 //   per frame: RGB *= exp(-dt/40s)  (fades with the 40 s cooling)
 //   display: clamp(RGB, 0, 1)
 // equal photon flux across the band averages to the palette mean —
 // (255,190,155), a warm peach — not neutral white.
-const MIX_COLOR_GAIN = 0.15
+const MIX_COLOR_GAIN = 1.0
 // spectral color of a photon energy (eV), 0-1 RGB. null if not visible.
 function photonRGB(eV) {
   if (eV < VIS_T_LO || eV > VIS_T_HI) return null
