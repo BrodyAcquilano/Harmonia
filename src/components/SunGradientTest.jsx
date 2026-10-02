@@ -317,9 +317,8 @@ function visBrightness(T) {
   return Math.min(1, v / BB_REF)
 }
 // warm filter: a custom sun scale from deep red-orange to whitish-yellow.
-// more stops than the rainbow's three warm ones, spread wide across the
-// mid-range temperatures — so the oranges actually show instead of
-// everything clamping to yellow. green through violet are filtered out.
+// more stops than the rainbow's three warm ones — green through violet
+// are filtered out entirely.
 const WARM_STOPS = [
   [160, 30, 0],    // dark red-orange — cold end
   [230, 70, 0],    // red-orange
@@ -329,10 +328,33 @@ const WARM_STOPS = [
   [255, 225, 60],  // yellow
   [255, 245, 190], // whitish yellow — hot clamp
 ]
-const WARM_T0 = 1.5 // eV — below this clamps to the cold end
-const WARM_T1 = 3.4 // eV — above this clamps to whitish yellow
+// nonlinear warm mapping: control points (T in eV, gradient position).
+// most of the gradient's room goes to the orange/yellow/red mid-range
+// where the patch temperatures actually sit (~1.8–3.3 eV); the dark-red
+// cold tail and the whitish-yellow hot tail get only a small slice each.
+// infrared and ultraviolet are off the scale entirely — out-of-range
+// temperatures clamp to the ends, no colors reserved for them.
+const WARM_MAP = [
+  [1.60, 0.00], // dark red-orange
+  [1.85, 0.10], // red-orange
+  [2.05, 0.28], // orange
+  [2.30, 0.50], // amber
+  [2.60, 0.70], // golden yellow
+  [2.95, 0.86], // yellow
+  [3.30, 1.00], // whitish yellow
+]
 function warmHue(T) {
-  const x = Math.min(1, Math.max(0, (T - WARM_T0) / (WARM_T1 - WARM_T0)))
+  let x
+  if (T <= WARM_MAP[0][0]) x = 0
+  else if (T >= WARM_MAP[WARM_MAP.length - 1][0]) x = 1
+  else {
+    x = 1
+    for (let k = 0; k < WARM_MAP.length - 1; k++) {
+      const t0 = WARM_MAP[k][0], x0 = WARM_MAP[k][1]
+      const t1 = WARM_MAP[k + 1][0], x1 = WARM_MAP[k + 1][1]
+      if (T <= t1) { x = x0 + (x1 - x0) * (T - t0) / (t1 - t0); break }
+    }
+  }
   const sx = x * (WARM_STOPS.length - 1)
   const i = Math.min(WARM_STOPS.length - 2, Math.floor(sx))
   const f = sx - i
@@ -1656,9 +1678,12 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           by Newton's law between hits. A patch glows with the visible
           light a blackbody at its temperature produces, seen through a
           warm filter — a custom sun scale from deep red-orange through
-          orange, amber and gold to a whitish-yellow hot clamp, spread
-          wide enough that the mid-range temperatures show as distinct
-          oranges; the brightness is the real Planck integral over the
+          orange, amber and gold to a whitish-yellow hot clamp, mapped
+          nonlinearly: most of the scale's room goes to the orange/yellow/
+          red temperatures where the patches actually live, with only
+          small slices for the dark-red cold tail and the whitish-yellow
+          hot tail — infrared and ultraviolet get no colors of their own;
+          the brightness is the real Planck integral over the
           visible band: cold patches make almost no visible light and sit
           near black, hot ones blaze whitish-yellow — and
           every escape launches a wave there too, its amplitude the
