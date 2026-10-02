@@ -409,10 +409,11 @@ function photonRGB(eV) {
 }
 // direct blackbody color (fourth view): the honest thermometer. each patch
 // shows the blackbody color for its temperature — no warping, no photon
-// history, no stretch/compress. temperature scaled so the typical 2.4 eV
-// patch is 5778 K (otherwise everything sits above 10,000 K and reads
-// blue-white). 24-wavelength Planck-weighted spectral sum, via lookup.
-const BB_T_SCALE = 5778 / (2.4 * 11604.5)
+// history, no stretch/compress. temperature scaled so hot patches
+// (~3.5 eV) reach the 5778 K sun-surface yellow-white; cooler spots read
+// red-orange. (anchoring the typical 2.4 eV to 5778 K pushed the hot end
+// into blue-white, which isn't the sun.)
+const BB_T_SCALE = 5778 / (3.5 * 11604.5)
 const BB_LUT_N = 256, BB_LUT_T0 = 0, BB_LUT_T1 = 8
 const bbLut = new Float32Array(BB_LUT_N * 3)
 for (let i = 0; i < BB_LUT_N; i++) {

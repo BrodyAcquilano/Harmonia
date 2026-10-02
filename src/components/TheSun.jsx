@@ -350,15 +350,16 @@ export default function TheSun() {
         <ForgetSurface expRef={sunBbExpRef} ctlRef={sunBbCtlRef} dirtyRef={dirtyRef} bb />
         <p className="graph-note">
           The honest baseline: each patch shows the blackbody color for
-          its temperature — dim orange-red where cool, warm white where
-          sun-like, blue-white where hot — with no warping, no photon
-          history, no stretch or compress. The temperature is the local
-          energy flux from wave hits, cooling over time. Temperatures are
-          scaled so the typical 2.4 eV patch is the 5778 K photosphere;
-          without that every patch would sit above 10,000 K and read
-          blue-white. Compare against the other three to see what each
-          coloring method is really doing. Same experiment underneath:
-          Poisson core firing, random-walk out, heat per escape,
+          its temperature — red-orange where cool, yellow-white where
+          hot — with no warping, no photon history, no stretch or
+          compress. As more quarks fire the surface heats, and it glows
+          like the sun's surface: yellow-white hot spots over red-orange
+          cooler patches. The temperature is the local energy flux from
+          wave hits, cooling over time. Temperatures are scaled so hot
+          patches (~3.5 eV) reach the 5778 K sun-surface yellow-white.
+          Compare against the other three to see what each coloring
+          method is really doing. Same experiment underneath: Poisson
+          core firing, random-walk out, heat per escape,
           frequency-carrying ripples.
         </p>
         <Transport
