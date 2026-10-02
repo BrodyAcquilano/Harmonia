@@ -264,17 +264,15 @@ export default function TheSun() {
         <ForgetSurface expRef={sunMixExpRef} ctlRef={sunMixCtlRef} dirtyRef={dirtyRef} mix />
         <p className="graph-note">
           A third way to color the same sun: no warping, no stretch or
-          compress. Each patch's color is the sum of its visible
-          frequencies, each weighted by its Planck intensity at the
-          patch's temperature — the frequencies are added, not shifted.
-          Where many frequencies shine comparably the mix goes white;
-          where red dominates it stays red; red and orange mix to
-          orange. Cool patches read orange-red, sun-like patches warm
-          white, hot patches blue-white — the actual blackbody sequence.
-          Temperatures are scaled so the typical 2.4 eV patch matches
-          the 5778 K photosphere. Same experiment underneath: Poisson
-          core firing, random-walk out, heat per escape,
-          frequency-carrying ripples.
+          compress. Every escaping photon deposits its spectral color
+          onto the patch it exits through — added to whatever color is
+          already there at its current, partially cooled intensity. Hit
+          a spot with red, then blue before it cools, and they combine;
+          many colors piling up go white, red alone stays red. The colors
+          fade as the patch cools. The strip under the distribution
+          shows each temperature's average accumulated surface color.
+          Same experiment underneath: Poisson core firing, random-walk
+          out, heat per escape, frequency-carrying ripples.
         </p>
         <Transport
           playing={sunMixPlaying}
@@ -294,12 +292,13 @@ export default function TheSun() {
         <div className="graph-title-row">
           <div className="graph-title">Patch temperature distribution — by adding light</div>
         </div>
-        <TempDistPanel playingRef={sunMixPlayingRef} bare />
+        <TempDistPanel playingRef={sunMixPlayingRef} mix />
         <p className="graph-note">
           The temperature distribution on this run, plain: the live
-          histogram in orange against the design assumption, dashed. No
-          color strip here — there is no warping to display, colors come
-          straight from adding the spectrum.
+          histogram in orange against the design assumption, dashed. The
+          strip below shows, for each temperature, the average of the
+          photon colors actually accumulated on the surface there — no
+          warping, no stretch or compress, just what's piled up.
         </p>
       </div>
 

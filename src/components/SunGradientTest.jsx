@@ -368,51 +368,32 @@ function warmHue(T) {
 // is driven only by the energy in the visible band.
 const VIS_T_LO = 1.65
 const VIS_T_HI = 3.26
-// additive mixing: assign color by adding the relative intensities of
-// each visible frequency at the patch's temperature. sample the visible
-// band, weight each wavelength's spectral color by its Planck intensity,
-// add them. many comparable frequencies -> white; red-dominated -> red.
-// the patch temperature (energy flux, eV) is scaled so the typical
-// 2.4 eV patch matches the 5778 K photosphere — otherwise every patch
-// would sit at 10,000K+ and the whole sphere would read blue-white.
-const MIX_T_SCALE = 5778 / (2.4 * 11604.5)
-const MIX_N = 24
-const mixLam = new Float64Array(MIX_N) // nm
-const mixRGB = new Float64Array(MIX_N * 3) // spectral color per wavelength
-for (let i = 0; i < MIX_N; i++) {
-  const lamNm = 380 + (750 - 380) * i / (MIX_N - 1)
-  mixLam[i] = lamNm
-  const x = (750 - lamNm) / (750 - 380)
+// additive photon colors (third view): each escaping photon deposits its
+// spectral color onto the patch it exits through, added to whatever color
+// is already there at its current (partially cooled) intensity. colors
+// accumulate and fade — no warping, no stretch/compress. the strip under
+// the distribution shows the per-temperature average of the accumulated
+// surface colors.
+const MIX_COLOR_GAIN = 0.15
+// spectral color of a photon energy (eV), 0-1 RGB. null if not visible.
+function photonRGB(eV) {
+  if (eV < VIS_T_LO || eV > VIS_T_HI) return null
+  const lamNm = 1240 / eV
+  const x = Math.min(1, Math.max(0, (750 - lamNm) / (750 - 380)))
   const sx = x * (SPECTRUM_STOPS.length - 1)
   const si = Math.min(SPECTRUM_STOPS.length - 2, Math.floor(sx))
   const sf = sx - si
   const a = SPECTRUM_STOPS[si], b = SPECTRUM_STOPS[si + 1]
-  mixRGB[i * 3] = a[0] + (b[0] - a[0]) * sf
-  mixRGB[i * 3 + 1] = a[1] + (b[1] - a[1]) * sf
-  mixRGB[i * 3 + 2] = a[2] + (b[2] - a[2]) * sf
+  return [
+    (a[0] + (b[0] - a[0]) * sf) / 255,
+    (a[1] + (b[1] - a[1]) * sf) / 255,
+    (a[2] + (b[2] - a[2]) * sf) / 255,
+  ]
 }
-// lookup table: mixed chromaticity vs patch temperature (eV), so the
-// per-frame cost is one array read, not 24 Planck evaluations
-const MIX_LUT_N = 256, MIX_LUT_T0 = 0, MIX_LUT_T1 = 8
-const mixLut = new Float32Array(MIX_LUT_N * 3)
-for (let i = 0; i < MIX_LUT_N; i++) {
-  const T = MIX_LUT_T0 + (MIX_LUT_T1 - MIX_LUT_T0) * i / (MIX_LUT_N - 1)
-  const TK = Math.max(0.05, T * MIX_T_SCALE) * 11604.5
-  const c1 = 3.7418e-16, c2 = 1.4388e-2
-  let r = 0, g = 0, b = 0
-  for (let j = 0; j < MIX_N; j++) {
-    const lamM = mixLam[j] * 1e-9
-    const Bl = c1 / Math.pow(lamM, 5) / (Math.exp(c2 / (lamM * TK)) - 1)
-    r += Bl * mixRGB[j * 3]; g += Bl * mixRGB[j * 3 + 1]; b += Bl * mixRGB[j * 3 + 2]
-  }
-  const m = Math.max(r, g, b, 1e-30)
-  mixLut[i * 3] = r / m * 255; mixLut[i * 3 + 1] = g / m * 255; mixLut[i * 3 + 2] = b / m * 255
-}
-function mixHue(T) {
-  const i = Math.min(MIX_LUT_N - 1, Math.max(0,
-    Math.round((T - MIX_LUT_T0) / (MIX_LUT_T1 - MIX_LUT_T0) * (MIX_LUT_N - 1))))
-  return [mixLut[i * 3], mixLut[i * 3 + 1], mixLut[i * 3 + 2]]
-}
+// per-temperature-bin average accumulated RGB, filled by ForgetSurface in
+// mix mode, read by TempDistPanel for the strip
+const mixBinAvg = new Float32Array(AD_N * 3)
+const mixBinCnt = new Float32Array(AD_N)
 const adHistVis = new Float64Array(AD_N)
 const adXVis = new Float64Array(AD_N)
 for (let i = 0; i < AD_N; i++) {
@@ -1313,7 +1294,7 @@ export function LandingPanel({ expRef, playingRef, markers = true }) {
 // the colors read); dashed = the design assumption the original fixed
 // scale was tuned against. the strip below shows the live color
 // assignment — which temperatures get which colors right now.
-export function TempDistPanel({ playingRef, vis = false, bare = false }) {
+export function TempDistPanel({ playingRef, vis = false, bare = false, mix = false }) {
   const ref = useRef(null)
 
   useEffect(() => {
@@ -1393,10 +1374,26 @@ export function TempDistPanel({ playingRef, vis = false, bare = false }) {
       ctx.fillStyle = '#4a3f2c'
       ctx.fillText('design assumption', padL + 222, 15)
       // live color strip: which temperatures get which colors right now.
+      // in mix mode each temperature shows the average accumulated color
+      // of the surface patches sitting at it — no warping, no marks.
       // in visible mode only the visible band carries color — infrared
       // and ultraviolet show black. skipped entirely in bare mode (no
       // warping to display).
-      if (!bare) {
+      if (mix) {
+        const stripY = padT + ih + 40, stripH = 12
+        for (let px = 0; px < iw; px++) {
+          const T = T0 + (px / iw) * (T1 - T0)
+          const b = Math.min(AD_N - 1, Math.max(0,
+            Math.floor((T - AD_T0) / (AD_T1 - AD_T0) * AD_N)))
+          const r = Math.round(Math.min(1, mixBinAvg[b * 3]) * 255)
+          const g = Math.round(Math.min(1, mixBinAvg[b * 3 + 1]) * 255)
+          const bl = Math.round(Math.min(1, mixBinAvg[b * 3 + 2]) * 255)
+          ctx.fillStyle = `rgb(${r},${g},${bl})`
+          ctx.fillRect(padL + px, stripY, 1, stripH)
+        }
+        ctx.strokeStyle = 'rgba(107,90,62,0.35)'
+        ctx.strokeRect(padL, stripY, iw, stripH)
+      } else if (!bare) {
         const stripY = padT + ih + 40, stripH = 12
         for (let px = 0; px < iw; px++) {
           const T = T0 + (px / iw) * (T1 - T0)
@@ -1487,20 +1484,33 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = fal
       const tc = warmHueVis(Tc)
       heldCol[v * 3] = tc[0]; heldCol[v * 3 + 1] = tc[1]; heldCol[v * 3 + 2] = tc[2]
     }
+    // mix mode: accumulated photon colors per patch (0-1 RGB), added on
+    // each visible hit, fading with the cooling
+    const accCol = new Float32Array(sCount * 3)
     phosRef.current = P
     phosExpRef.current = expRef.current
 
     const paintSurface = (exp, sdt) => {
       // drain the escape splashes: every escape deposits its photon's
       // energy as heat — each patch's temperature is the local escaping
-      // energy flux
+      // energy flux. in mix mode a visible photon also deposits its
+      // spectral color, added to whatever is already on the patch.
       if (exp.splashes.length) {
         for (const sp of exp.splashes) {
           const eV = (sp.nuOut * H) / EV
+          const prgb = mixRef.current ? photonRGB(eV) : null
           for (let v = 0; v < sCount; v++) {
             const d = uDir[v * 3] * sp.dx + uDir[v * 3 + 1] * sp.dy + uDir[v * 3 + 2] * sp.dz
             if (d < 0.85) continue
-            P[v * 3] += FORGET_GAIN * eV * Math.exp(-(1 - d) / (SPLASH_SIG * SPLASH_SIG))
+            const g = Math.exp(-(1 - d) / (SPLASH_SIG * SPLASH_SIG))
+            P[v * 3] += FORGET_GAIN * eV * g
+            if (prgb) {
+              const o = v * 3
+              const cg = eV * MIX_COLOR_GAIN * g
+              accCol[o] += prgb[0] * cg
+              accCol[o + 1] += prgb[1] * cg
+              accCol[o + 2] += prgb[2] * cg
+            }
           }
         }
         exp.splashes.length = 0
@@ -1559,13 +1569,16 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = fal
         const T = P[o]
         let cr, cg, cb, br
         if (mixRef.current) {
-          // additive mixing: the color is the sum of the visible
-          // frequencies at this temperature, weighted by Planck
-          // intensity — no warping, no stretch/compress. brightness from
-          // the same scaled temperature, for consistency.
-          const tc = mixHue(T)
-          cr = tc[0]; cg = tc[1]; cb = tc[2]
-          br = visBrightness(T * MIX_T_SCALE)
+          // additive photon colors: fade with the cooling, display the
+          // accumulated mix directly — no warping, no temperature mapping
+          if (sdt > 0) {
+            const fade = Math.exp(-sdt / COOL_TAU)
+            accCol[o] *= fade; accCol[o + 1] *= fade; accCol[o + 2] *= fade
+          }
+          cr = Math.min(1, accCol[o]) * 255
+          cg = Math.min(1, accCol[o + 1]) * 255
+          cb = Math.min(1, accCol[o + 2]) * 255
+          br = 1
         } else if (visRef.current) {
           if (T >= VIS_T_LO && T <= VIS_T_HI) {
             const tc = warmHueVis(T)
@@ -1581,6 +1594,27 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = fal
         colA.setXYZ(v, (cr / 255) * br, (cg / 255) * br, (cb / 255) * br)
       }
       colA.needsUpdate = true
+      // mix mode: per-temperature-bin average accumulated color, for the
+      // strip under the distribution — each temperature assigned the
+      // average of what's actually on the surface there
+      if (mixRef.current) {
+        mixBinAvg.fill(0); mixBinCnt.fill(0)
+        for (let v = 0; v < sCount; v++) {
+          const b = Math.min(AD_N - 1, Math.max(0,
+            Math.floor((P[v * 3] - AD_T0) / (AD_T1 - AD_T0) * AD_N)))
+          mixBinAvg[b * 3] += Math.min(1, accCol[v * 3])
+          mixBinAvg[b * 3 + 1] += Math.min(1, accCol[v * 3 + 1])
+          mixBinAvg[b * 3 + 2] += Math.min(1, accCol[v * 3 + 2])
+          mixBinCnt[b] += 1
+        }
+        for (let i = 0; i < AD_N; i++) {
+          if (mixBinCnt[i] > 0) {
+            mixBinAvg[i * 3] /= mixBinCnt[i]
+            mixBinAvg[i * 3 + 1] /= mixBinCnt[i]
+            mixBinAvg[i * 3 + 2] /= mixBinCnt[i]
+          }
+        }
+      }
       // waves: every escaping photon radiates a damped ring from its exit
       // point — amplitude carries the photon's energy, the ripple slider
       // scales it all, colors untouched

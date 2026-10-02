@@ -72,12 +72,10 @@ Why this view: the first sphere shows the whole thermal story, including the dar
 
 ## 12. The Sun — by adding light
 
-A third view, added 2026-10-02. The first two color the sun by warping — stretching and compressing a palette across the temperature distribution. This one does something different: it assigns color by adding the relative intensities of each visible frequency at the patch's temperature.
+A third view, added 2026-10-02 (and corrected the same night — the first version computed blackbody chromaticities, which missed the point). The first two color the sun by warping — stretching and compressing a palette across the temperature distribution. This one does something different: every escaping photon deposits its spectral color onto the patch it exits through, added to whatever color is already there at its current, partially cooled intensity.
 
-For each patch, the visible band (380–750 nm) is sampled at 24 wavelengths. Each wavelength's spectral color is weighted by its Planck intensity at the patch's temperature, and the 24 are added. Where many frequencies shine comparably the sum goes white; where red dominates it stays red; red and orange mix to orange. No warping, no stretch/compress — the color is the spectrum, added up.
+Hit a spot with a red photon, then a blue one before the red has cooled, and the two combine on the surface. Many colors piling up go white; red alone stays red; red and orange mix to orange. The accumulated colors fade as the patch cools — no intensity reduction was needed beyond the natural cooling. No warping, no stretch/compress: the color is what's actually piled up, not a reassignment.
 
-The patch temperature (an energy flux in eV, typically ~2.4 eV) is scaled so the typical patch matches the 5778 K photosphere — otherwise every patch would sit above 10,000 K and the whole sphere would read blue-white. With the scaling, cool patches read orange-red, sun-like patches warm white, hot patches blue-white: the actual blackbody color sequence. The brightness uses the same scaled temperature, so it stays consistent with the hue.
+The distribution panel keeps its color strip, but the strip is not a warping. For each temperature it shows the average of the photon colors actually accumulated on the surface patches sitting at that temperature — each part of the distribution assigned the color that's really there. The ruler marks are gone; there is nothing to stretch.
 
-The distribution panel on this view is bare — just the live histogram against the design assumption, no color strip, because there is no warping to display. The landing and track panels are the same checks on this run's own experiment.
-
-Why this view: the warping views answer "how do we share colors across what the sun is doing." This one answers "what color is the light, physically" — the blackbody chromaticity, computed the honest way, by adding.
+Why this view: the warping views answer "how do we share colors across what the sun is doing." This one answers "what happens if the surface just keeps what hits it" — additive light, the way paint mixes, driven by the real photon stream.
