@@ -1656,6 +1656,7 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = fal
     }
     paintSurface(expRef.current, 0)
     readout(expRef.current)
+    S.renderer.render(S.scene, S.camera)
     loop()
     return () => { cancelAnimationFrame(raf); disposeScene(S) }
   }, [])
