@@ -1705,7 +1705,7 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
         <div className="transport-speed">
           <Slider label="ripple" value={frRipple} min={0} max={3} step={0.1}
             onChange={setFrRipple} format={(v) => `${v.toFixed(1)}×`} />
-          <Slider label="ripple lifetime" value={frRippleTau} min={0} max={10} step={0.1}
+          <Slider label="ripple lifetime" value={frRippleTau} min={0} max={40} step={0.1}
             onChange={setFrRippleTau} format={(v) => `${v.toFixed(1)} s`} />
         </div>
       </div>
