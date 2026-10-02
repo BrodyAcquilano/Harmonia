@@ -316,17 +316,18 @@ function visBrightness(T) {
   const v = bbVis[i] * (1 - f) + bbVis[Math.min(BB_N, i + 1)] * f
   return Math.min(1, v / BB_REF)
 }
-// warm filter: a custom sun scale from deep red-orange to whitish-yellow.
-// more stops than the rainbow's three warm ones — green through violet
-// are filtered out entirely.
-const WARM_STOPS = [
-  [160, 30, 0],    // dark red-orange — cold end
-  [230, 70, 0],    // red-orange
-  [255, 120, 0],   // orange
-  [255, 165, 0],   // amber
-  [255, 200, 0],   // golden yellow
-  [255, 225, 60],  // yellow
-  [255, 245, 190], // whitish yellow — hot clamp
+// full spectrum: dark red through orange, yellow, green, blue, purple
+// to violet. the warping decides which temperatures get which colors —
+// the palette itself spans the whole visible range.
+const SPECTRUM_STOPS = [
+  [120, 10, 0],    // dark red — cold end
+  [220, 50, 0],    // red-orange
+  [255, 130, 0],   // orange
+  [255, 220, 20],  // yellow
+  [60, 200, 70],   // green
+  [40, 120, 235],  // blue
+  [110, 60, 210],  // purple
+  [170, 80, 230],  // violet — hot end
 ]
 // adaptive warping: inverse-density mapping with a cold-stretch bias.
 // x(T) is FLAT where the amplitude is high — dense regions get wide
@@ -351,10 +352,10 @@ for (let i = 0; i < AD_N; i++) {
 function warmHue(T) {
   const bx = Math.min(AD_N - 1, Math.max(0, Math.floor((T - AD_T0) / (AD_T1 - AD_T0) * AD_N)))
   const x = adX[bx]
-  const sx = x * (WARM_STOPS.length - 1)
-  const si = Math.min(WARM_STOPS.length - 2, Math.floor(sx))
+  const sx = x * (SPECTRUM_STOPS.length - 1)
+  const si = Math.min(SPECTRUM_STOPS.length - 2, Math.floor(sx))
   const sf = sx - si
-  const a = WARM_STOPS[si], b = WARM_STOPS[si + 1]
+  const a = SPECTRUM_STOPS[si], b = SPECTRUM_STOPS[si + 1]
   return [
     Math.round(a[0] + (b[0] - a[0]) * sf),
     Math.round(a[1] + (b[1] - a[1]) * sf),
@@ -1434,7 +1435,7 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
       for (let v = 0; v < sCount; v++) {
         const o = v * 3
         if (coolF > 0) P[o] += (T_BASE - P[o]) * coolF
-        // blackbody color through the warm filter: sun-range hue, and
+        // blackbody color across the full spectrum: hue from the warping,
         // brightness from the real visible-band Planck integral at T
         const tc = warmHue(P[o])
         const br = visBrightness(P[o])
@@ -1991,14 +1992,14 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
                 as heat in a small patch around its exit direction, so each
                 patch's temperature is the local escaping energy flux, cooling
                 by Newton's law between hits. A patch glows with the visible
-                light a blackbody at its temperature produces, seen through a
-                warm filter — a custom sun scale from deep red-orange through
-                orange, amber and gold to a whitish-yellow hot clamp, assigned
+                light a blackbody at its temperature produces, across a
+                full spectrum — dark red through orange, yellow, green,
+                blue and purple to violet at the hot end — assigned
                 by inverse-density warping: the mapping is flat where the
                 amplitude is high, so dense temperature ranges get wide color
-                ranges (the sun reads mostly orange), and steep where thin
-                (narrow ranges, compressed) — red compresses less than
-                ultraviolet because the cold tail carries more mass, and the
+                ranges, and steep where thin
+                (narrow ranges, compressed), tilted so red stretches and
+                ultraviolet compresses, and the
                 infrared shows as dark rather than being filtered out; the
                 brightness is the real Planck integral over the
                 visible band: cold patches make almost no visible light and sit

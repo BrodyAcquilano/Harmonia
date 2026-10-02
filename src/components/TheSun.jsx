@@ -60,16 +60,16 @@ export default function TheSun() {
           each patch's temperature is the local escaping energy flux,
           cooling by Newton's law between hits. A patch glows with the
           visible light a blackbody at its temperature produces, seen
-          through a warm filter — a custom sun scale from deep red-orange
-          through orange, amber and gold to a whitish-yellow hot clamp,
-          assigned by inverse-density warping: the mapping is flat where
+          across a full spectrum — dark red through orange, yellow,
+          green, blue and purple to violet at the hot end — assigned
+          by inverse-density warping: the mapping is flat where
           the amplitude is high, so dense temperature ranges get wide
-          color ranges (the sun reads mostly orange), and steep where
+          color ranges, and steep where
           thin (narrow ranges, compressed), tilted so red stretches and
           ultraviolet compresses; the infrared shows as dark rather than
           being filtered out; the brightness is the real Planck integral
           over the visible band: cold patches make almost no visible light
-          and sit near black, hot ones blaze whitish-yellow — and every
+          and sit near black, hot ones blaze violet — and every
           escape launches a wave there too, carrying its photon: amplitude
           the escaping photon's energy, wavelength and frequency the
           photon's own wavelength scaled so green light makes the
