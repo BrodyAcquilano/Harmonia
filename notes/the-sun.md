@@ -105,3 +105,19 @@ Why this view: the other three are all display choices layered on the physics �
 **The Sun — as a thermometer.** The final sun, without any of the hidden layers: just the color read from blackbody radiation. There's a base temperature, surface points heat up from hits and cool back down, and at any given temperature the blackbody curve decides the color — but a temperature doesn't emit one color, it emits all of them, the visible sum under the curve. Hot patches (~3.5 eV) reach the 5778 K sun-surface yellow-white; cooler spots read red-orange.
 
 All four leave out atmospheric scattering, which acts as a filter that removes certain frequencies before light reaches an eye on the ground. What you see here is the sun as it is, not as the sky tints it — and the sun itself, for the record, is white, not yellow. "Yellow dwarf" is the atmosphere talking.
+
+## 15. Cooldowns, and why each is what it is
+
+2026-10-02. Every view has clocks, and they're not all the same clock. Here's what's set where, and the reasoning.
+
+**Thermal cooling: 35 s (all four views).** Patch temperatures relax toward the 1.2 eV base on a 35-second exponential. This is the physical cooling — how fast a heated patch forgets the hit. It was 40 s; I trimmed it a smidge at Brody's call for a slightly more dynamic surface. Everything thermal in every view runs on this.
+
+**Warping memory: 45 s (full spectrum and visible band).** The histogram that drives the color warping forgets on 45 s — a touch slower than the thermal cooling, so the color assignment stays stable while the temperatures shift underneath it, but still tracks the distribution as it evolves. The twelve ruler marks visibly drift on this timescale.
+
+**Additive fade: 80 s (by adding light only).** The accumulated photon colors fade on 80 s, much slower than the thermal 35 s. This is deliberate: at 40 s the deposits died between hits and the sphere sat black. At 80 s they pile up — the sphere builds from dark toward the peach steady state, with fresh hits flashing their colors before sinking back in. Brody's diagnosis was "they aren't given enough time to accumulate"; the 80 s is the fix. (We tried 120 s first; 80 s was the call.)
+
+**Thermometer: no color clock.** The blackbody color is instantaneous — it reads the current temperature, no memory, no fade. Only the 35 s thermal applies, through the temperature itself.
+
+**Ripples: user slider (all views).** Default 2.5 s lifetime, adjustable 0–40 s, amplitude 0–3x. These are display, not physics — how long the surface waves linger after each escape.
+
+The pattern: the physics (thermal) runs fastest, the display memories run slower, and the slowest — the 80 s additive — is the one that lets history visibly pile up.
