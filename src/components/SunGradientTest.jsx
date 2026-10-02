@@ -328,12 +328,11 @@ const WARM_STOPS = [
   [255, 225, 60],  // yellow
   [255, 245, 190], // whitish yellow — hot clamp
 ]
-// adaptive warm colors: histogram-equalized hue.
-// each patch's color is its percentile in the LIVE temperature
-// distribution — the crowded middle spreads across many colors, rare
-// hot/cold tails compress into few. the histogram forgets on a ~45 s
-// timescale, so the color assignment keeps tracking the distribution
-// as it shifts. infrared and ultraviolet get no colors of their own.
+// adaptive warm colors, peak-centered: the distribution's live peak maps
+// to orange, and orange is STRETCHED over the common temperatures (cubic
+// falloff) while the rare cold tail compresses into reds and the rare hot
+// tail into yellow-whites at the edges. infrared and ultraviolet get no
+// colors of their own.
 const AD_N = 96, AD_T0 = 1.0, AD_T1 = 6.0, AD_TAU = 45
 const adHist = new Float64Array(AD_N)
 const adCDF = new Float64Array(AD_N)
@@ -343,9 +342,17 @@ for (let i = 0; i < AD_N; i++) {
   const T = AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
   adHist[i] = 2337 * Math.exp(-(((T - 2.4) / 1.5) ** 2))
 }
+const X_ORANGE = 2 / (WARM_STOPS.length - 1) // the orange stop
+let peakT = 2.4, coldW = 0.6, hotW = 0.6 // smoothed live peak and tail widths
 function warmHue(T) {
-  const bx = Math.min(AD_N - 1, Math.max(0, Math.floor((T - AD_T0) / (AD_T1 - AD_T0) * AD_N)))
-  const x = adCDF[bx]
+  let x
+  if (T <= peakT) {
+    const u = Math.min(1, (peakT - T) / coldW)
+    x = X_ORANGE * (1 - u * u * u)
+  } else {
+    const u = Math.min(1, (T - peakT) / hotW)
+    x = X_ORANGE + (1 - X_ORANGE) * u * u * u
+  }
   const sx = x * (WARM_STOPS.length - 1)
   const i = Math.min(WARM_STOPS.length - 2, Math.floor(sx))
   const f = sx - i
@@ -1245,6 +1252,24 @@ function ForgetSurface({ expRef, ctlRef, dirtyRef }) {
         for (let i = 0; i < AD_N; i++) tot += adHist[i]
         let cum = 0
         for (let i = 0; i < AD_N; i++) { cum += adHist[i]; adCDF[i] = cum / tot }
+        // track the live peak (smoothed mode) and tail widths for the
+        // peak-centered color mapping
+        let pk = 0, pkv = -1
+        for (let i = 2; i < AD_N - 2; i++) {
+          const s = adHist[i - 2] + adHist[i - 1] + adHist[i] + adHist[i + 1] + adHist[i + 2]
+          if (s > pkv) { pkv = s; pk = i }
+        }
+        const Tpk = AD_T0 + (AD_T1 - AD_T0) * (pk + 0.5) / AD_N
+        const tAt = (q) => {
+          for (let i = 0; i < AD_N; i++) {
+            if (adCDF[i] >= q) return AD_T0 + (AD_T1 - AD_T0) * (i + 0.5) / AD_N
+          }
+          return AD_T1
+        }
+        const k = 1 - Math.exp(-sdt / 5)
+        peakT += (Tpk - peakT) * k
+        coldW += (Math.max(0.15, Tpk - tAt(0.1)) - coldW) * k
+        hotW += (Math.max(0.15, tAt(0.9) - Tpk) - hotW) * k
       }
       // prune spent waves — ripples are pushed in time order
       while (exp.ripples.length && exp.t - exp.ripples[0].t0 > 4 * rippleTau) exp.ripples.shift()
@@ -1799,10 +1824,11 @@ export default function SunGradientTest({ entropy = 60000, waveAmp = 0.2, decay 
           light a blackbody at its temperature produces, seen through a
           warm filter — a custom sun scale from deep red-orange through
           orange, amber and gold to a whitish-yellow hot clamp, assigned
-          adaptively: each patch's color is its percentile in the live
-          temperature distribution, so the crowded middle spreads across
-          many colors while the rare hot and cold tails compress into few —
-          infrared and ultraviolet get no colors of their own; the
+          adaptively around the live distribution peak: orange is stretched
+          over the common temperatures (the peak maps to orange), while the
+          rare cold tail compresses into reds and the rare hot tail into
+          yellow-whites at the edges — infrared and ultraviolet get no
+          colors of their own; the
           brightness is the real Planck integral over the
           visible band: cold patches make almost no visible light and sit
           near black, hot ones blaze whitish-yellow — and
