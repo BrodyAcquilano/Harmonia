@@ -91,3 +91,17 @@ I almost didn't add it — without warping, would it just be one color? No: the 
 The color is the 24-wavelength Planck-weighted spectral sum at the scaled temperature — the same math as the "adding light" idea, but applied to the patch's thermal state rather than to arriving photons. The distribution strip is the direct legend: the blackbody color each temperature gets, unshifted.
 
 Why this view: the other three are all display choices layered on the physics — warping, band-filtering, photon accumulation. This one strips them away. Compare any of them against the thermometer to see what the coloring method itself is contributing.
+
+## 14. The four suns, together
+
+2026-10-02. The Sun tab now holds four views of the same physics — same Poisson core firing, same random walk, same heat per escape — differing only in how surface color is assigned. They're worth naming together, because each one strips away a different layer of display choice.
+
+**The Sun (full spectrum).** Shows which waves are hitting the surface most recently. The frequencies are spread across the palette by inverse-density warping, so the one with the highest amplitude gets the greater representation — if the majority of the light hitting the surface is that color, it dominates the view. Red stretches wide and calm over the dense cool bulk; the hot thin tail compresses into violet.
+
+**The Sun — on the visible band.** Does the same, but the surface ignores infrared and ultraviolet: only visible colors are assigned, 1.65–3.26 eV. A patch outside the band keeps whatever its last visible color was, dimming as it cools — no black spots, no holes. The warping listens only to the visible band's energy.
+
+**The Sun — by adding light.** Stops spreading color assignments over a range of frequencies, and stops showing the predominant color for an area under the curve. Instead it integrates: every visible photon deposits its spectral color onto the patch, added to what's already there, fading on an 80-second clock. They combine toward a mostly warm-peach sphere with colored patches where fresh hits land — red alone stays red, many together go peach-white.
+
+**The Sun — as a thermometer.** The final sun, without any of the hidden layers: just the color read from blackbody radiation. There's a base temperature, surface points heat up from hits and cool back down, and at any given temperature the blackbody curve decides the color — but a temperature doesn't emit one color, it emits all of them, the visible sum under the curve. Hot patches (~3.5 eV) reach the 5778 K sun-surface yellow-white; cooler spots read red-orange.
+
+All four leave out atmospheric scattering, which acts as a filter that removes certain frequencies before light reaches an eye on the ground. What you see here is the sun as it is, not as the sky tints it — and the sun itself, for the record, is white, not yellow. "Yellow dwarf" is the atmosphere talking.
