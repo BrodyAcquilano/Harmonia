@@ -376,7 +376,7 @@ const FORGET_ENTROPY = 8888888888
 const RIPPLE_K = 18    // angular wavenumber — ring wavelength ~0.35 rad
 const RIPPLE_W = 6     // visual oscillation rate, radians per sim-second
 const RIPPLE_SIG = 0.5 // angular decay of the wave, radians
-const RIPPLE_TAU = 2.5 // wave lifetime, sim-seconds
+const RIPPLE_TAU = 1.5 // wave lifetime, sim-seconds — higher decay, short-lived ripples
 const RIPPLE_G = 0.02  // fractional radius per eV of wave amplitude, at slider 1
 function spawnForgetPacket(rng, band, t) {
   // born across the proton-forming shell, 0.2–0.7 R_☉ — equal chance at
