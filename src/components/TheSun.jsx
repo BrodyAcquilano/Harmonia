@@ -175,9 +175,10 @@ export default function TheSun() {
           their amplitudes and relative abundance there. That visible
           energy becomes the dominant energy source for the color a patch
           gets. Patches colder than the band (infrared) or hotter
-          (ultraviolet) are discarded from the sphere entirely — not
-          painted black — so instead of dark spots piling up you see
-          only the visible parts. Everything else
+          (ultraviolet) take no new color — they keep whatever the last
+          visible color that hit them was, dimming naturally as they
+          cool. So there are no dark spots: light is still emitted
+          there, only the visible part is shown. Everything else
           is the same experiment: core fusion firing, Poisson births,
           random-walk out, heat deposited per escape. Only visible
           photons launch ripples here. The distribution panel below

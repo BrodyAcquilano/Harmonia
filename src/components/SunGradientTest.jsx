@@ -1437,28 +1437,24 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false }) {
     }
     sphGeo.setAttribute('color',
       new THREE.BufferAttribute(new Float32Array(sCount * 3).fill(1), 3))
-    // per-vertex visibility for the visible-band view: 1 = visible band,
-    // 0 = infrared/ultraviolet (discarded in the shader, not painted black)
-    sphGeo.setAttribute('visAlpha', new THREE.BufferAttribute(new Float32Array(sCount).fill(1), 1))
     sphGeo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 8)
     const sphMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, metalness: 0.05 })
-    if (vis) {
-      // visible-band view: discard infrared/ultraviolet fragments entirely
-      // — the sphere shows only the visible parts, no dark spots piling up
-      sphMat.onBeforeCompile = (shader) => {
-        shader.vertexShader = shader.vertexShader
-          .replace('#include <common>', '#include <common>\nattribute float visAlpha;\nvarying float vVisAlpha;')
-          .replace('#include <color_vertex>', '#include <color_vertex>\nvVisAlpha = visAlpha;')
-        shader.fragmentShader = shader.fragmentShader
-          .replace('#include <common>', '#include <common>\nvarying float vVisAlpha;')
-          .replace('#include <dithering_fragment>', 'if (vVisAlpha < 0.5) discard;\n#include <dithering_fragment>')
-      }
-    }
     const sph = new THREE.Mesh(sphGeo, sphMat)
     sph.frustumCulled = false
     S.scene.add(sph)
     const P = new Float32Array(sCount * 3)
     resetSurface(P, 'thermal', sCount)
+    // visible-band view: each patch holds its last visible color. when its
+    // temperature drifts into infrared or ultraviolet no new color is
+    // assigned — it keeps whatever the last visible color that hit it was,
+    // dimming naturally as it cools. initialized to the nearest visible
+    // color so no patch starts black.
+    const heldCol = new Float32Array(sCount * 3)
+    for (let v = 0; v < sCount; v++) {
+      const Tc = Math.min(VIS_T_HI, Math.max(VIS_T_LO, P[v * 3]))
+      const tc = warmHueVis(Tc)
+      heldCol[v * 3] = tc[0]; heldCol[v * 3 + 1] = tc[1]; heldCol[v * 3 + 2] = tc[2]
+    }
     phosRef.current = P
     phosExpRef.current = expRef.current
 
@@ -1478,7 +1474,6 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false }) {
         exp.splashes.length = 0
       }
       const colA = sphGeo.attributes.color
-      const visA = sphGeo.attributes.visAlpha
       const posA = sphGeo.attributes.position
       const coolF = sdt > 0 ? (1 - Math.exp(-sdt / COOL_TAU)) : 0
       const rippleGain = ctlRef.current.ripple ?? 1
@@ -1514,19 +1509,28 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false }) {
       for (let v = 0; v < sCount; v++) {
         const o = v * 3
         if (coolF > 0) P[o] += (T_BASE - P[o]) * coolF
-        // blackbody color across the full spectrum: hue from the warping,
-        // brightness from the real visible-band Planck integral at T.
-        // in the visible-band view, infrared/ultraviolet patches are
-        // flagged invisible (discarded by the shader) instead of black.
-        const isVis = visRef.current
+        // blackbody color: hue from the warping, brightness from the real
+        // visible-band Planck integral at T. in the visible-band view a
+        // patch only takes a new color while its temperature is in the
+        // band — outside it keeps its last visible color and just cools,
+        // so there are no dark spots: light is still emitted there, only
+        // the visible part is shown.
         const T = P[o]
-        const tc = isVis ? warmHueVis(T) : warmHue(T)
+        let cr, cg, cb
+        if (visRef.current) {
+          if (T >= VIS_T_LO && T <= VIS_T_HI) {
+            const tc = warmHueVis(T)
+            heldCol[o] = tc[0]; heldCol[o + 1] = tc[1]; heldCol[o + 2] = tc[2]
+          }
+          cr = heldCol[o]; cg = heldCol[o + 1]; cb = heldCol[o + 2]
+        } else {
+          const tc = warmHue(T)
+          cr = tc[0]; cg = tc[1]; cb = tc[2]
+        }
         const br = visBrightness(T)
-        colA.setXYZ(v, (tc[0] / 255) * br, (tc[1] / 255) * br, (tc[2] / 255) * br)
-        if (isVis) visA.setX(v, (T >= VIS_T_LO && T <= VIS_T_HI) ? 1 : 0)
+        colA.setXYZ(v, (cr / 255) * br, (cg / 255) * br, (cb / 255) * br)
       }
       colA.needsUpdate = true
-      if (visRef.current) visA.needsUpdate = true
       // waves: every escaping photon radiates a damped ring from its exit
       // point — amplitude carries the photon's energy, the ripple slider
       // scales it all, colors untouched
