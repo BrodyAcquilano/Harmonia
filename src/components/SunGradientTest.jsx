@@ -1527,6 +1527,15 @@ export function ForgetSurface({ expRef, ctlRef, dirtyRef, vis = false, mix = fal
             adHistVis[b] += 1
           }
           rebuildWarping(adHistVis, adXVis)
+          // the distribution itself is the full patch spectrum, like the
+          // other views — only the color assignment differs, so the full
+          // histogram is folded here too
+          for (let i = 0; i < AD_N; i++) adHist[i] = adHist[i] * hDecay + hFloor
+          for (let v = 0; v < sCount; v++) {
+            const b = Math.min(AD_N - 1, Math.max(0, Math.floor((P[v * 3] - AD_T0) / (AD_T1 - AD_T0) * AD_N)))
+            adHist[b] += 1
+          }
+          rebuildWarping(adHist, adX)
         } else {
           for (let i = 0; i < AD_N; i++) adHist[i] = adHist[i] * hDecay + hFloor
           for (let v = 0; v < sCount; v++) {
